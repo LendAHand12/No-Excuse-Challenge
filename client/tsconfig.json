@@ -22,5 +22,9 @@
   "include": ["src", "src/lib.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }],
   "resolveJsonModule": true,
-  "esModuleInterop": true
+  "esModuleInterop": true,
+  "baseUrl": ".",
+  "paths": {
+    "@/*": ["src/*"]
+  }
 }

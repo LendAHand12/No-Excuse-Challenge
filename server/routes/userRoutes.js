@@ -1,0 +1,114 @@
+import express from "express";
+import {
+  getUserProfile,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  changeStatusUser,
+  getTree,
+  getListChildOfUser,
+  getTreeOfUser,
+  getChildsOfUserForTree,
+  getAllUsersWithKeyword,
+  changeSystem,
+  getChildrenList,
+  getAllDeletedUsers,
+  getAllUsersForExport,
+  mailForChangeWallet,
+  changeWallet,
+  adminUpdateUser,
+  adminDeleteUser,
+  onAcceptIncreaseTier,
+  adminCreateUser,
+  getListNextUserWithTier,
+  getUsersWithTier,
+  changeNextUserTier,
+  getLastUserInTier,
+  removeLastUserInTier,
+  createAdmin,
+  getListAdmin,
+  updateAdmin,
+  deleteAdmin,
+  getAdminById,
+} from "../controllers/userControllers.js";
+import {
+  protectRoute,
+  isAdmin,
+  isSuperAdmin,
+} from "../middleware/authMiddleware.js";
+import uploadCloud from "../middleware/uploadCloud.js";
+
+const router = express.Router();
+
+router.route("/").get(protectRoute, isAdmin, getAllUsers);
+router
+  .route("/getAllDeletedUsers")
+  .get(protectRoute, isAdmin, getAllDeletedUsers);
+router.route("/profile").get(protectRoute, getUserProfile);
+router
+  .route("/changeWallet")
+  .get(protectRoute, mailForChangeWallet)
+  .post(protectRoute, changeWallet);
+router.route("/status").put(protectRoute, isAdmin, changeStatusUser);
+router.route("/tree").get(protectRoute, getTree);
+router.route("/tree/:id").get(protectRoute, isAdmin, getTreeOfUser);
+router.route("/treeNode").post(protectRoute, getChildsOfUserForTree);
+router.route("/changeSystem").post(protectRoute, isAdmin, changeSystem);
+router
+  .route("/getAllUsersForExport")
+  .post(protectRoute, isAdmin, getAllUsersForExport);
+
+router
+  .route("/getAllUsersWithKeyword")
+  .post(protectRoute, isAdmin, getAllUsersWithKeyword);
+router.route("/listChild").get(protectRoute, getListChildOfUser);
+
+router
+  .route("/admin")
+  .get(protectRoute, isSuperAdmin, getListAdmin)
+  .post(protectRoute, isSuperAdmin, createAdmin);
+
+router
+  .route("/admin/:id")
+  .get(protectRoute, isSuperAdmin, getAdminById)
+  .put(protectRoute, isSuperAdmin, updateAdmin)
+  .delete(protectRoute, isSuperAdmin, deleteAdmin);
+
+router
+  .route("/:id")
+  .delete(protectRoute, isAdmin, adminDeleteUser)
+  .get(protectRoute, isAdmin, getUserById)
+  .put(
+    protectRoute,
+    uploadCloud.fields([
+      { name: "imgFront", maxCount: 1 },
+      { name: "imgBack", maxCount: 1 },
+    ]),
+    updateUser
+  );
+
+router.route("/update/:id").post(protectRoute, isAdmin, adminUpdateUser);
+
+router.route("/tier/increase").post(protectRoute, onAcceptIncreaseTier);
+
+router.route("/create").post(protectRoute, isAdmin, adminCreateUser);
+
+router
+  .route("/listNextUserTier")
+  .post(protectRoute, isAdmin, getListNextUserWithTier);
+
+router.route("/getUsersWithTier").post(protectRoute, isAdmin, getUsersWithTier);
+
+router
+  .route("/changeNextUserTier")
+  .post(protectRoute, isAdmin, changeNextUserTier);
+
+router
+  .route("/getLastUserInTier")
+  .post(protectRoute, isAdmin, getLastUserInTier);
+
+router
+  .route("/removeLastUserInTier")
+  .post(protectRoute, isAdmin, removeLastUserInTier);
+
+export default router;

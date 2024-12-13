@@ -11,13 +11,13 @@ import PageTitle from './components/PageTitle';
 // import Tables from './pages/Tables';
 // import Alerts from './pages/UiElements/Alerts';
 // import Buttons from './pages/UiElements/Buttons';
-import DefaultLayout from './layout/DefaultLayout';
 import HomePage from './pages/Homepage';
 import Mechanism from './pages/Mechanism';
 import PolicyPage from './pages/Policy';
 import ContactPage from './pages/Contact';
-import { PublicRoute } from './helpers/router';
+import { PrivateRoute, PublicRoute } from './helpers/router';
 import SignInPage from './pages/SignIn';
+import Profile from './pages/Profile';
 
 function App() {
   const { pathname } = useLocation();
@@ -27,57 +27,48 @@ function App() {
   }, [pathname]);
 
   return (
-    <DefaultLayout>
-      <Routes>
-        <Route element={<PublicRoute />}>
-          <Route path="/" element={<Navigate to="/home" replace />} />
-          <Route
-            path="/home"
-            element={
-              <>
-                <PageTitle title="Homepage | DreamChain" />
-                <HomePage />
-              </>
-            }
-          />
-          <Route
-            path="/mechanism"
-            element={
-              <>
-                <PageTitle title="Mechanism | DreamChain" />
-                <Mechanism />
-              </>
-            }
-          />
-          <Route
-            path="/policy"
-            element={
-              <>
-                <PageTitle title="Policy | DreamChain" />
-                <PolicyPage />
-              </>
-            }
-          />
-          <Route
-            path="/contact"
-            element={
-              <>
-                <PageTitle title="Contact | DreamChain" />
-                <ContactPage />
-              </>
-            }
-          />
-          <Route path="/signin" element={<SignInPage />} />
-        </Route>
-        {/* <Route
-          path="/calendar"
+    <Routes>
+      <Route element={<PublicRoute />}>
+        <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route
+          path="/home"
           element={
             <>
-              <PageTitle title="Calendar | DreamChain" />
-              <Calendar />
+              <PageTitle title="Homepage | DreamChain" />
+              <HomePage />
             </>
           }
         />
+        <Route
+          path="/mechanism"
+          element={
+            <>
+              <PageTitle title="Mechanism | DreamChain" />
+              <Mechanism />
+            </>
+          }
+        />
+        <Route
+          path="/policy"
+          element={
+            <>
+              <PageTitle title="Policy | DreamChain" />
+              <PolicyPage />
+            </>
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <>
+              <PageTitle title="Contact | DreamChain" />
+              <ContactPage />
+            </>
+          }
+        />
+        <Route path="/signin" element={<SignInPage />} />
+      </Route>
+      <Route element={<PrivateRoute />}>
         <Route
           path="/profile"
           element={
@@ -87,6 +78,17 @@ function App() {
             </>
           }
         />
+      </Route>
+      {/* <Route
+          path="/calendar"
+          element={
+            <>
+              <PageTitle title="Calendar | DreamChain" />
+              <Calendar />
+            </>
+          }
+        />
+        
         <Route
           path="/forms/form-elements"
           element={
@@ -159,8 +161,7 @@ function App() {
             </>
           }
         /> */}
-      </Routes>
-    </DefaultLayout>
+    </Routes>
   );
 }
 
