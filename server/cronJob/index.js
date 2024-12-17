@@ -55,8 +55,8 @@ export const checkAPackage = asyncHandler(async () => {
     const diffDays = currentDay.diff(u.createdAt, "days");
 
     if (diffDays >= 1 && u.countPay < 13) {
-      u.status = "LOCKED";
-      u.lockedTime = new Date();
+      // u.status = "LOCKED";
+      // u.lockedTime = new Date();
     }
 
     if (diffDays > 30) {
@@ -72,8 +72,8 @@ export const checkAPackage = asyncHandler(async () => {
       const listRefId = await Tree.find({ refId: u._id });
       if (listRefId.length < 3) {
         u.errLahCode = "OVER60";
-        u.status = "LOCKED";
-        u.lockedTime = new Date();
+        // u.status = "LOCKED";
+        // u.lockedTime = new Date();
       } else {
         u.errLahCode = "";
       }
@@ -131,10 +131,10 @@ export const checkBPackage = asyncHandler(async () => {
       }
     }
 
-    if (diffDays >= 1 && u.countPay < 7) {
-      u.status = "LOCKED";
-      u.lockedTime = new Date();
-    }
+    // if (diffDays >= 1 && u.countPay < 7) {
+    //   u.status = "LOCKED";
+    //   u.lockedTime = new Date();
+    // }
 
     if (diffDays > 30) {
       const weekFine = Math.floor((diffDays - 30) / 7) * 2;
@@ -152,8 +152,8 @@ export const checkBPackage = asyncHandler(async () => {
       const listRefId = await Tree.find({ refId: u._id });
       if (listRefId.length < 3) {
         u.errLahCode = "OVER60";
-        u.status = "LOCKED";
-        u.lockedTime = new Date();
+        // u.status = "LOCKED";
+        // u.lockedTime = new Date();
       } else {
         u.errLahCode = "";
       }
@@ -186,7 +186,6 @@ export const checkCPackage = asyncHandler(async () => {
         //     });
         //     parent.children = [...newChilds];
         //     await parent.save();
-
         //     const userDelete = await DeleteUser.create({
         //       userId: u.userId,
         //       oldId: u._id,
@@ -197,13 +196,12 @@ export const checkCPackage = asyncHandler(async () => {
         //       parentId: u.parentId,
         //       refId: u.refId,
         //     });
-
         //     await User.deleteOne({ _id: u._id });
         //     await Tree.deleteOne({ userId: u._id });
         //   }
         // } else {
-        u.status = "LOCKED";
-        u.lockedTime = new Date();
+        // u.status = "LOCKED";
+        // u.lockedTime = new Date();
         // }
       }
       await u.save();
@@ -222,16 +220,21 @@ export const checkCPackage = asyncHandler(async () => {
 export const countChildToData = asyncHandler(async () => {
   const listUser = await User.find({
     $and: [{ isAdmin: false }],
-  }).select("tier countChild");
+  }).select("tier countChild userId");
 
   for (let u of listUser) {
-    const newCountChild = [...u.countChild];
-    for (let i = 1; i <= u.tier; i++) {
-      const countChild = await getCountAllChildren(u._id, i);
-      newCountChild[i - 1] = countChild;
+    console.log({ name: u.userId });
+    try {
+      const newCountChild = [...u.countChild];
+      for (let i = 1; i <= u.tier; i++) {
+        const countChild = await getCountAllChildren(u._id, i);
+        newCountChild[i - 1] = countChild;
+      }
+      u.countChild = newCountChild;
+      await u.save();
+    } catch (error) {
+      console.log({ error });
     }
-    u.countChild = newCountChild;
-    await u.save();
   }
 
   console.log("updated count Child");

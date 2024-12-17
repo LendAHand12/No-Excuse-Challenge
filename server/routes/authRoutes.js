@@ -12,6 +12,7 @@ import {
   getLinkVerify,
   updateData,
   getNewPass,
+  registerSerepay,
 } from "../controllers/authControllers.js";
 
 const router = express.Router();
@@ -28,5 +29,6 @@ router.route("/forgotPassword").post(mailForPasswordReset);
 router.route("/resetPassword").put(resetUserPassword);
 router.route("/refresh").post(getAccessToken);
 router.route("/getLinkVerify").post(getLinkVerify);
+router.route("/registerSerepay").post(registerSerepay);
 
 export default router;

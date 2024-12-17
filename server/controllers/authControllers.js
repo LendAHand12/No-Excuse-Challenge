@@ -9,10 +9,13 @@ import bcrypt from "bcryptjs";
 import Tree from "../models/treeModel.js";
 import { getActivePackages } from "./packageControllers.js";
 import Permission from "../models/permissionModel.js";
+import { checkSerepayWallet } from "../utils/methods.js";
+import axios from "axios";
 
 const checkLinkRef = asyncHandler(async (req, res) => {
   const { ref, receiveId } = req.body;
   let message = "invalidUrl";
+
   try {
     const userReceive = await User.findOne({
       _id: receiveId,
@@ -29,7 +32,7 @@ const checkLinkRef = asyncHandler(async (req, res) => {
         userId: userReceive._id,
         tier: 1,
       });
-      if (treeUserReceive && treeUserReceive.children.length < 5) {
+      if (treeUserReceive && treeUserReceive.children.length < 3) {
         message = "validUrl";
         res.status(200).json({
           message,
@@ -52,7 +55,7 @@ const checkLinkRef = asyncHandler(async (req, res) => {
 });
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { userId, walletAddress, email, password, ref, receiveId, phone, idCode } = req.body;
+  const { userId, email, password, ref, receiveId, phone, idCode } = req.body;
 
   const userExistsUserId = await User.findOne({
     userId: { $regex: userId, $options: "i" },
@@ -65,9 +68,6 @@ const registerUser = asyncHandler(async (req, res) => {
   const userExistsPhone = await User.findOne({
     $and: [{ phone: { $ne: "" } }, { phone }],
     status: { $ne: "DELETED" },
-  });
-  const userExistsWalletAddress = await User.findOne({
-    walletAddress1: walletAddress,
   });
   const userExistsIdCode = await User.findOne({
     $and: [{ idCode: { $ne: "" } }, { idCode }],
@@ -90,15 +90,17 @@ const registerUser = asyncHandler(async (req, res) => {
     let message = "duplicateInfoIdCode";
     res.status(400);
     throw new Error(message);
-  } else if (userExistsWalletAddress) {
-    let message = "Dupplicate wallet address";
-    res.status(400);
-    throw new Error(message);
   } else {
     const treeReceiveUser = await Tree.findOne({ userId: receiveId, tier: 1 });
 
-    if (treeReceiveUser.children.length < 5) {
+    if (treeReceiveUser.children.length < 3) {
       const avatar = generateGravatar(email);
+
+      const wallet = await registerSerepayFnc(
+        userId,
+        email.toLowerCase(),
+        password
+      );
 
       const user = await User.create({
         userId,
@@ -106,12 +108,12 @@ const registerUser = asyncHandler(async (req, res) => {
         phone,
         password,
         avatar,
-        walletAddress: [walletAddress],
-        walletAddress1: walletAddress,
-        walletAddress2: walletAddress,
-        walletAddress3: walletAddress,
-        walletAddress4: walletAddress,
-        walletAddress5: walletAddress,
+        walletAddress: [wallet],
+        walletAddress1: wallet,
+        walletAddress2: wallet,
+        walletAddress3: wallet,
+        walletAddress4: wallet,
+        walletAddress5: wallet,
         idCode,
         role: "user",
       });
@@ -220,7 +222,9 @@ const authUser = asyncHandler(async (req, res) => {
     const listRefIdOfUser = await Tree.find({ refId: user._id, tier: 1 });
     if (listRefIdOfUser && listRefIdOfUser.length > 0) {
       for (let refId of listRefIdOfUser) {
-        const refedUser = await User.findById(refId.userId).select("userId email");
+        const refedUser = await User.findById(refId.userId).select(
+          "userId email"
+        );
         listDirectUser.push(refedUser);
       }
     }
@@ -264,6 +268,7 @@ const authUser = asyncHandler(async (req, res) => {
         closeLah: user.closeLah,
         tierDate: user.tierDate,
         role: user.role,
+        isSerepayWallet: await checkSerepayWallet(user.walletAddress1),
         permissions: permissions ? permissions.pagePermissions : [],
       },
       accessToken,
@@ -278,7 +283,10 @@ const resetUserPassword = asyncHandler(async (req, res) => {
   try {
     // update the user password if the jwt is verified successfully
     const { token, password } = req.body;
-    const decodedToken = jwt.verify(token, process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET);
+    const decodedToken = jwt.verify(
+      token,
+      process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET
+    );
     const user = await User.findById(decodedToken.id);
 
     if (user && password) {
@@ -302,8 +310,10 @@ const confirmUser = asyncHandler(async (req, res) => {
   try {
     // set the user to a confirmed status, once the corresponding JWT is verified correctly
     const emailToken = req.params.token;
-    console.log({ emailToken });
-    const decodedToken = jwt.verify(emailToken, process.env.JWT_EMAIL_TOKEN_SECRET);
+    const decodedToken = jwt.verify(
+      emailToken,
+      process.env.JWT_EMAIL_TOKEN_SECRET
+    );
     const user = await User.findById(decodedToken.id).select("-password");
     user.isConfirmed = true;
     await user.save();
@@ -329,21 +339,29 @@ const getAccessToken = asyncHandler(async (req, res) => {
   }
 
   // If the refresh token is valid, create a new accessToken and return it.
-  jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, (err, user) => {
-    if (!err) {
-      const accessToken = generateToken(user.id, "access");
-      return res.json({ accessToken });
-    } else {
-      return res.status(400).json({
-        message: "Invalid refresh token",
-      });
+  jwt.verify(
+    refreshToken,
+    process.env.JWT_REFRESH_TOKEN_SECRET,
+    (err, user) => {
+      if (!err) {
+        const accessToken = generateToken(user.id, "access");
+        return res.json({ accessToken });
+      } else {
+        return res.status(400).json({
+          message: "Invalid refresh token",
+        });
+      }
     }
-  });
+  );
 });
 
 const checkSendMail = asyncHandler(async (req, res) => {
   const { mail } = req.body;
-  const mailInfo = await sendMail("6480c10538aa7ded76b631c1", mail, "email verification");
+  const mailInfo = await sendMail(
+    "6480c10538aa7ded76b631c1",
+    mail,
+    "email verification"
+  );
   res.json({
     mailInfo,
   });
@@ -380,6 +398,43 @@ const getNewPass = asyncHandler(async (req, res) => {
   res.json(bcrypt.hashSync("abcd1234", 12));
 });
 
+const registerSerepayFnc = async (userName, email, password) => {
+  return axios
+    .post(`${process.env.SEREPAY_HOST}/api/user/signup`, {
+      userName,
+      email,
+      password,
+    })
+    .then(async (response) => {
+      const token = response.data.data;
+      return axios
+        .post(
+          `${process.env.SEREPAY_HOST}/api/blockico/createWalletBEP20`,
+          {
+            symbol: "USDT.BEP20",
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+        .then(async (response) => {
+          return response.data.data.address;
+        })
+        .catch((error) => {
+          throw new Error(error.response.data.message);
+        });
+    })
+    .catch((error) => {
+      throw new Error(error.response.data.message);
+    });
+};
+
+const registerSerepay = asyncHandler(async (req, res) => {
+  const { userName, email, password } = req.body;
+  const wallet = await registerSerepayFnc(userName, email, password);
+  console.log({ wallet });
+});
+
 export {
   checkSendMail,
   checkLinkRef,
@@ -393,4 +448,5 @@ export {
   getLinkVerify,
   updateData,
   getNewPass,
+  registerSerepay,
 };

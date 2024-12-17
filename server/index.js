@@ -49,7 +49,10 @@ import {
   countIndexTree,
   changeWalletAddress,
 } from "./common.js";
-import { findHighestIndexOfLevel, findNextUserByIndex } from "./utils/methods.js";
+import {
+  findHighestIndexOfLevel,
+  findNextUserByIndex,
+} from "./utils/methods.js";
 
 const app = express();
 
@@ -72,7 +75,7 @@ connectDB();
 app.use(express.json({ limit: "50mb", extended: true }));
 app.use(express.urlencoded({ extended: false, limit: "2gb" }));
 app.use(cors()); // to avoid CORS errors
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(express.static("public"));
 
 // use cookie sessions
@@ -162,9 +165,9 @@ const cron8 = new CronJob("30 23 * * *", async () => {
 // cron2.start();
 // cron3.start();
 // cron4.start();
-// cron5.start();
-// cron6.start();
-// cron7.start();
+cron5.start();
+cron6.start();
+cron7.start();
 // cron8.start();
 
 const PORT = process.env.PORT || 5000;

@@ -214,7 +214,7 @@ const getUserById = asyncHandler(async (req, res) => {
 });
 
 const updateUser = asyncHandler(async (req, res) => {
-  const { phone, imgFront, imgBack, idCode, buyPackage } = req.body;
+  const { phone, idCode, buyPackage } = req.body;
   const user = await User.findOne({ _id: req.params.id }).select("-password");
   const userHavePhone = await User.find({
     $and: [{ phone }, { email: { $ne: user.email } }, { isAdmin: false }],
@@ -241,14 +241,16 @@ const updateUser = asyncHandler(async (req, res) => {
         res.status(400).json({ error: "Package has been disabled" });
       }
     }
-    if (imgFront && imgBack && imgFront !== "" && imgBack !== "") {
-      if (
-        imgFront.includes("https://res.cloudinary.com/dhqggkmto") &&
-        imgFront.includes("https://res.cloudinary.com/dhqggkmto")
-      )
-        user.status = "PENDING";
-      user.imgFront = imgFront || user.imgFront;
-      user.imgBack = imgBack || user.imgBack;
+    if (
+      req.files &&
+      req.files.imgFront &&
+      req.files.imgBack &&
+      req.files.imgFront[0] &&
+      req.files?.imgBack[0]
+    ) {
+      user.status = "PENDING";
+      user.imgFront = req.files.imgFront[0].filename || user.imgFront;
+      user.imgBack = req.files.imgBack[0].filename || user.imgBack;
     }
     const updatedUser = await user.save();
     if (updatedUser) {
@@ -1068,6 +1070,51 @@ const changeWallet = asyncHandler(async (req, res) => {
     const user = await User.findById(decodedToken.id);
 
     if (user) {
+      const existWallet1 = await User.findOne({
+        userId: { $ne: user.userId },
+        walletAddress1: newWallet1,
+      });
+      if (existWallet1) {
+        res.status(400);
+        throw new Error("Unable to update wallet");
+      }
+
+      const existWallet2 = await User.findOne({
+        userId: { $ne: user.userId },
+        walletAddress2: newWallet2,
+      });
+      if (existWallet2) {
+        res.status(400);
+        throw new Error("Unable to update wallet");
+      }
+
+      const existWallet3 = await User.findOne({
+        userId: { $ne: user.userId },
+        walletAddress3: newWallet3,
+      });
+      if (existWallet3) {
+        res.status(400);
+        throw new Error("Unable to update wallet");
+      }
+
+      const existWallet4 = await User.findOne({
+        userId: { $ne: user.userId },
+        walletAddress4: newWallet4,
+      });
+      if (existWallet4) {
+        res.status(400);
+        throw new Error("Unable to update wallet");
+      }
+
+      const existWallet5 = await User.findOne({
+        userId: { $ne: user.userId },
+        walletAddress5: newWallet5,
+      });
+      if (existWallet5) {
+        res.status(400);
+        throw new Error("Unable to update wallet");
+      }
+
       if (newWallet1) {
         user.walletAddress1 = newWallet1;
       }
@@ -1090,7 +1137,7 @@ const changeWallet = asyncHandler(async (req, res) => {
           message: "Your wallet address updated",
         });
       } else {
-        res.status(401);
+        res.status(400);
         throw new Error("Unable to update wallet");
       }
     } else {

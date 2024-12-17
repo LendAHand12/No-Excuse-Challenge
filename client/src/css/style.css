@@ -35,6 +35,15 @@
 
 /* third-party libraries CSS */
 
+input::placeholder {
+  color: #696b77;
+}
+
+input::-ms-input-placeholder {
+  /* Edge 12 -18 */
+  color: #696b77;
+}
+
 .tableCheckbox:checked ~ div span {
   @apply opacity-100;
 }

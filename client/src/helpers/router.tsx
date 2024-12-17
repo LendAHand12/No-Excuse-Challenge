@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 
 interface AuthState {
   accessToken: string | null;
-  user: Record<string, any> | null;
+  userInfo: Record<string, any> | null;
 }
 
 interface RootState {
@@ -13,14 +13,22 @@ interface RootState {
 export const PrivateRoute = () => {
   const { accessToken } = useSelector((state: RootState) => state.auth);
 
-  return accessToken ? <Outlet /> : <Navigate to="/" />;
+  return accessToken ? <Outlet /> : <Navigate to="/profile" />;
 };
 
 export const PublicRoute = () => {
-  const { accessToken, user } = useSelector((state: RootState) => state.auth);
+  const { accessToken, userInfo } = useSelector(
+    (state: RootState) => state.auth,
+  );
 
-  if (accessToken && user) {
-    return <Navigate to="/dashboard" />;
+  console.log({ accessToken, userInfo });
+
+  if (accessToken && userInfo) {
+    if (userInfo && userInfo.role !== 'user') {
+      return <Navigate to="/admin/dashboard" />;
+    } else if (userInfo && userInfo.role === 'user') {
+      return <Navigate to="/user/profile" />;
+    }
   }
 
   return <Outlet />;

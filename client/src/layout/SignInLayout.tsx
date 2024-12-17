@@ -4,7 +4,7 @@ import Logo from '../images/logo/logo.svg';
 import { useTranslation } from 'react-i18next';
 import COVER4 from '../images/cover/cover-4.png';
 
-const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
+const SignInLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const sidebar = useRef<any>(null);
   const { i18n } = useTranslation();
@@ -105,4 +105,4 @@ const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   );
 };
 
-export default DefaultLayout;
+export default SignInLayout;

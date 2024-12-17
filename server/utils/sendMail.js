@@ -17,45 +17,37 @@ const sendMail = async (id, email, option) => {
     const mailOptions = {
       from: process.env.EMAIL, // sender address
       to: email,
-      subject: "LEND A HAND",
-      html: `<div style="font-size: 18px">
-					<h2>XIN CHÀO QUÝ KHÁCH !</h2>
-					-Tài khoản LEND A HAND (THE POWER OF UNITED ) của quý khách đang chờ được kích hoạt.
-          <br></br>
-          -Để kích hoạt tài khoản quý khách vui lòng nhấp vào link bên dưới để kích hoạt tài khoản.
-          <br></br>
-          LINK KÍCH HOẠT: <a href="${url}">Link</a>
-					<br>
-          -Sau khi kích hoạt tài khoản thành công quý khách đăng nhập tài khoản của mình trên website: <a href="https://lah12.com">https://lah12.com</a> vừa mới đăng ký để  KYC.
-          <br></br>
-          -Để KYC quý khách vui lòng upload CCCD 2 mặt và cập nhật, khi trên tài khoản hiện thị trạng thái CHỜ XÁC THỰC là đã KYC thành công. Sau đó bạn chờ để cty Duyệt, khi tài khoản ở trạng thái ĐÃ XÁC THỰC thì bạn có thể bắt đầu thanh toán. <br></br>
-          -ĐỂ LẤY LINK GIỚI THIỆU QUÝ KHÁCH VUI LÒNG LÀM THEO HƯỚNG DẪN BÊN DƯỚI:
-          <br></br>
-          -LINK GIỚI THIỆU:
-          <br></br>
-          Bạn có thể lấy link giới thiệu bằng cách đăng nhập tài khoản vào thư mục GIỚI THIỆU / chọn cấp dưới ( KHÔNG CHỌN), rồi COPY để lấy link giới thiệu của mình.
-          <br></br>
-          <br></br>
-          <br></br>
-          <b>Best Regards & Thanks!</b>
-          <br></br>
-          <br></br>
-          <b>Van Truong (Mr.)</b>
-          <br></br>
-          <br></br>
-          IT CHIEF OF SECURITY OFFICER | AMERITECJSC
-          <br></br>
-          29 VO VAN TAN, Ward VO THI SAU, District 3 | Ho Chi Minh City, Vietnam
-          <br></br>
-          T: (+84-28) 2250.8166
-          <br></br>
-          Email: support@lah12.com
-          <br></br>
-          <br></br>
-          Website: <a href="https://lah12.com">www.lah12.com</a>
-				</div>
-				
-			`,
+      subject: "DreamChain",
+      html: `
+        <div>
+            <h2 style="text-align: center">
+            Welcome to DreamChain!
+            </h2> 
+            <br>
+            Thank you for becoming a valued member of our community.
+            <br></br>
+            <b>Subject</b>: Activate Your DreamChain Account
+            <br><br>
+            Dear Member,
+            <br><br>
+            •	Your DreamChain account is pending activation.
+            <br>
+            •	To activate your account, please click the link below:
+            Activation Link: <a href="${url}">Link</a>
+            <br>
+            •	After successfully activating your account, you are now able log in to your account on the website dc.ameritecps.com to start your journey.
+            <br><br>
+            <b>Withdraw Assets</b> 
+            <br><br>
+            •	KYC must be completed before withdraw any assets.
+            <br>
+            •	Please upload both sides of your National ID, Driver License or Passport and update the required information. When your account status shows “Pending Verification,” it means the KYC process has been completed successfully. 
+            <br>
+            •	Please wait for the company to approve your identity. 
+            <br>
+            •	Once your account status changes to “Verified,” you can begin making transactions.
+            </div>
+          `,
       cc: process.env.CC_MAIL,
     };
 
@@ -78,15 +70,23 @@ const sendMail = async (id, email, option) => {
     const mailOptions = {
       from: process.env.EMAIL, // sender address
       to: email,
-      subject: "Reset Password for Lend A Hand", // Subject line
-      html: `<div>
-					<h2>Reset Password for your Lend A Hand account</h2>
-					<br/>
-					Forgot your password? No worries! Just click this link to 
-					<a href="${url}">reset your password</a>. 
-					<br>
-					Note that this link is valid for only the next 10 minutes. 
-				</div>
+      subject: "Reset Password for DreamChain", // Subject line
+      html: `
+        <div>
+          <h2 style="text-align: center">
+          Welcome to DreamChain!
+          </h2> 
+          <br>
+          Thank you for becoming a valued member of our community.
+          <br></br>
+          <b>Subject</b>:Reset Your DreamChain Password
+          <br><br>
+          Forgot your password? No worries! Simply click the link below to reset it:
+          <br>
+          Password Reset Link : <a href="${url}">Link</a>. 
+          <br><br>
+          <i>Note: This link is valid for only 10 minutes.</i>
+        </div>
 				
 			`,
       cc: process.env.CC_MAIL,
@@ -105,7 +105,7 @@ const sendMail = async (id, email, option) => {
     const mailOptions = {
       from: process.env.EMAIL, // sender address
       to: email,
-      subject: "Please payment for Lend A Hand", // Subject line
+      subject: "Please payment for DreamChain", // Subject line
       html: `<div>
 					<h2>Please pay before being penalized</h2>
 				</div>
@@ -130,15 +130,24 @@ const sendMail = async (id, email, option) => {
     const mailOptions = {
       from: process.env.EMAIL, // sender address
       to: email,
-      subject: "Change your wallet address for Lend A Hand", // Subject line
-      html: `<div>
-					<h2>Change your wallet address for your Lend A Hand account</h2>
-					<br/>
-					Change your wallet? No worries! Just click this link to 
-					<a href="${url}">change your wallet</a>. 
-					<br>
-					Note that this link is valid for only the next 10 minutes. 
-				</div>
+      subject: "Change your wallet address for DreamChain", // Subject line
+      html: `
+        <div>
+          <h2 style="text-align: center">
+          Welcome to DreamChain!
+          </h2> 
+          <br>
+          Thank you for becoming a valued member of our community.
+          <br></br>
+          <b>Subject</b>: Update Your Wallet Address
+          <br><br>
+          Want to change your wallet? No worries! Simply click the link below to update your wallet address:
+          <br>
+          Update Wallet Link : <a href="${url}">Link</a>
+          <br>
+          <br>
+          <i>Note: This link is valid for only 10 minutes.</i>
+        </div>
 				
 			`,
       cc: process.env.CC_MAIL,

@@ -17,7 +17,14 @@ import PolicyPage from './pages/Policy';
 import ContactPage from './pages/Contact';
 import { PrivateRoute, PublicRoute } from './helpers/router';
 import SignInPage from './pages/SignIn';
-import Profile from './pages/Profile';
+import Profile from './pages/User/Profile';
+import DashboardPage from './pages/Admin/Dashboard';
+import SignUpPage from './pages/SignUp';
+import ConfirmPage from './pages/ConfirmPage';
+import Payment from './pages/User/Payment';
+import ReferralPage from './pages/User/Referral';
+import Transactions from './pages/User/Transactions';
+import NotFoundPage from './pages/NotFound';
 
 function App() {
   const { pathname } = useLocation();
@@ -30,6 +37,15 @@ function App() {
     <Routes>
       <Route element={<PublicRoute />}>
         <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route
+          path="/home"
+          element={
+            <>
+              <PageTitle title="Homepage | DreamChain" />
+              <HomePage />
+            </>
+          }
+        />
         <Route
           path="/home"
           element={
@@ -67,10 +83,23 @@ function App() {
           }
         />
         <Route path="/signin" element={<SignInPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/confirm" element={<ConfirmPage />} />
       </Route>
       <Route element={<PrivateRoute />}>
         <Route
-          path="/profile"
+          path="/admin/dashboard"
+          element={
+            <>
+              <PageTitle title="Dashboard | DreamChain" />
+              <DashboardPage />
+            </>
+          }
+        />
+      </Route>
+      <Route element={<PrivateRoute />}>
+        <Route
+          path="/user/profile"
           element={
             <>
               <PageTitle title="Profile | DreamChain" />
@@ -78,7 +107,35 @@ function App() {
             </>
           }
         />
+        <Route
+          path="/user/payment"
+          element={
+            <>
+              <PageTitle title="Payment | DreamChain" />
+              <Payment />
+            </>
+          }
+        />
+        <Route
+          path="/user/referral"
+          element={
+            <>
+              <PageTitle title="Referral | DreamChain" />
+              <ReferralPage />
+            </>
+          }
+        />
+        <Route
+          path="/user/transactions"
+          element={
+            <>
+              <PageTitle title="Transactions | DreamChain" />
+              <Transactions />
+            </>
+          }
+        />
       </Route>
+      <Route path="*" element={<NotFoundPage />}></Route>
       {/* <Route
           path="/calendar"
           element={

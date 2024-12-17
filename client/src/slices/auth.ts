@@ -7,6 +7,7 @@ if (initialUserLocalStorage) {
   if (initialUser.accessToken) {
     Object.assign(defaultInitialState, {
       accessToken: initialUser.accessToken,
+      userInfo: initialUser.userInfo,
     });
   }
 }
@@ -18,6 +19,18 @@ const auth = createSlice({
       Object.assign(state, action.payload);
       localStorage.setItem('user', JSON.stringify(action.payload));
     },
+    REFRESH_TOKEN: (state, action) => {
+      let newAuth = JSON.parse(localStorage.getItem('user'));
+      newAuth.accessToken = action.payload;
+      localStorage.setItem('user', JSON.stringify(newAuth));
+      Object.assign(state, { ...state, accessToken: action.payload });
+    },
+    UPDATE_USER_INFO: (state, action) => {
+      let newAuth = JSON.parse(localStorage.getItem('user'));
+      newAuth.userInfo = action.payload;
+      localStorage.setItem('user', JSON.stringify(newAuth));
+      Object.assign(state, { ...state, userInfo: action.payload });
+    },
     LOGOUT: (state) => {
       Object.assign(state, {});
       localStorage.removeItem('user');
@@ -27,5 +40,5 @@ const auth = createSlice({
 });
 
 const { reducer, actions } = auth;
-export const { LOGIN, LOGOUT } = actions;
+export const { LOGIN, LOGOUT, UPDATE_USER_INFO } = actions;
 export default reducer;

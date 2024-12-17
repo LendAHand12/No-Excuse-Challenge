@@ -1,44 +1,47 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ClickOutside from '../ClickOutside';
-import UserOne from '../../images/user/user-01.png';
+import { useDispatch, useSelector } from 'react-redux';
+import { useDisconnect } from 'wagmi';
+import { LOGOUT } from '../../slices/auth';
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { userInfo } = useSelector((state) => state.auth);
+  const { disconnect } = useDisconnect();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    disconnect();
+    dispatch(LOGOUT());
+    navigate('/signin');
+  };
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <Link
         onClick={() => setDropdownOpen(!dropdownOpen)}
-        className="flex items-center gap-4"
+        className="flex items-center text-sm gap-2 bg-black rounded-3xl p-2 text-white pr-4"
         to="#"
       >
-        <span className="hidden text-right lg:block">
-          <span className="block text-sm font-medium text-black dark:text-white">
-            Thomas Anree
-          </span>
-          <span className="block text-xs">UX Designer</span>
+        <span className="h-8 w-8 flex justify-center items-center rounded-full bg-dreamchain">
+          <svg
+            fill="#000000"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            id="user"
+            data-name="Flat Color"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              id="primary"
+              d="M21,20a2,2,0,0,1-2,2H5a2,2,0,0,1-2-2,6,6,0,0,1,6-6h6A6,6,0,0,1,21,20Zm-9-8A5,5,0,1,0,7,7,5,5,0,0,0,12,12Z"
+            ></path>
+          </svg>
         </span>
-
-        <span className="h-12 w-12 rounded-full">
-          <img src={UserOne} alt="User" />
-        </span>
-
-        <svg
-          className="hidden fill-current sm:block"
-          width="12"
-          height="8"
-          viewBox="0 0 12 8"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M0.410765 0.910734C0.736202 0.585297 1.26384 0.585297 1.58928 0.910734L6.00002 5.32148L10.4108 0.910734C10.7362 0.585297 11.2638 0.585297 11.5893 0.910734C11.9147 1.23617 11.9147 1.76381 11.5893 2.08924L6.58928 7.08924C6.26384 7.41468 5.7362 7.41468 5.41077 7.08924L0.410765 2.08924C0.0853277 1.76381 0.0853277 1.23617 0.410765 0.910734Z"
-            fill=""
-          />
-        </svg>
+        {userInfo?.userId}
       </Link>
 
       {/* <!-- Dropdown Start --> */}
@@ -119,7 +122,10 @@ const DropdownUser = () => {
               </Link>
             </li>
           </ul>
-          <button className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+          >
             <svg
               className="fill-current"
               width="22"

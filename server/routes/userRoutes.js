@@ -36,7 +36,7 @@ import {
   isAdmin,
   isSuperAdmin,
 } from "../middleware/authMiddleware.js";
-import uploadCloud from "../middleware/uploadCloud.js";
+import uploadCCCD from "../middleware/uploadCCCD.js";
 
 const router = express.Router();
 
@@ -80,7 +80,7 @@ router
   .get(protectRoute, isAdmin, getUserById)
   .put(
     protectRoute,
-    uploadCloud.fields([
+    uploadCCCD.fields([
       { name: "imgFront", maxCount: 1 },
       { name: "imgBack", maxCount: 1 },
     ]),
