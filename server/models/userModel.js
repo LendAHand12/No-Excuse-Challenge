@@ -190,6 +190,15 @@ const userSchema = mongoose.Schema(
       type: Array,
       default: [],
     },
+    totalHewe: {
+      type: Number,
+    },
+    hewePerDay: {
+      type: Number,
+    },
+    avalableHewe: {
+      type: Number,
+    },
     role: {
       type: String,
       // enum: ["USER", "ADMIN", "ADMIN1", "ADMIN2"],

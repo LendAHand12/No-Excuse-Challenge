@@ -49,10 +49,7 @@ import {
   countIndexTree,
   changeWalletAddress,
 } from "./common.js";
-import {
-  findHighestIndexOfLevel,
-  findNextUserByIndex,
-} from "./utils/methods.js";
+import { findHighestIndexOfLevel, findNextUserByIndex } from "./utils/methods.js";
 
 const app = express();
 
@@ -165,9 +162,9 @@ const cron8 = new CronJob("30 23 * * *", async () => {
 // cron2.start();
 // cron3.start();
 // cron4.start();
-cron5.start();
-cron6.start();
-cron7.start();
+// cron5.start();
+// cron6.start();
+// cron7.start();
 // cron8.start();
 
 const PORT = process.env.PORT || 5000;

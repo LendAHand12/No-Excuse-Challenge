@@ -25,6 +25,7 @@ import Payment from './pages/User/Payment';
 import ReferralPage from './pages/User/Referral';
 import Transactions from './pages/User/Transactions';
 import NotFoundPage from './pages/NotFound';
+import ServicePage from './pages/Service';
 
 function App() {
   const { pathname } = useLocation();
@@ -47,11 +48,11 @@ function App() {
           }
         />
         <Route
-          path="/home"
+          path="/services"
           element={
             <>
-              <PageTitle title="Homepage | DreamChain" />
-              <HomePage />
+              <PageTitle title="Services | DreamChain" />
+              <ServicePage />
             </>
           }
         />

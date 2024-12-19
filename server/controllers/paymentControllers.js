@@ -14,6 +14,7 @@ import {
 import { checkCanIncreaseNextTier } from "./userControllers.js";
 import Wallet from "../models/walletModel.js";
 import Tree from "../models/treeModel.js";
+import { getPriceHewe } from "../utils/getPriceHewe.js";
 
 const getPaymentInfo = asyncHandler(async (req, res) => {
   const { user } = req;
@@ -393,98 +394,6 @@ const findAncestors = async (userId, limit, tier) => {
   return ancestors;
 };
 
-const generatePackageTrans = async (
-  user,
-  refUser,
-  directCommissionWallet,
-  continueWithBuyPackageB
-) => {
-  const listPendingDirect = await Transaction.find({
-    $or: [
-      {
-        $and: [
-          {
-            userId: user._id,
-            tier: user.tier,
-            type: "PACKAGE",
-            status: "SUCCESS",
-          },
-        ],
-      },
-      {
-        $and: [
-          {
-            userId: user._id,
-            tier: user.tier,
-            type: "DIRECT",
-            status: "SUCCESS",
-          },
-        ],
-      },
-      {
-        $and: [
-          {
-            userId: user._id,
-            tier: user.tier,
-            type: "DIRECTHOLD",
-            status: "SUCCESS",
-          },
-        ],
-      },
-    ],
-  });
-
-  const startIndexPackageTrans = listPendingDirect.length;
-
-  if (user.buyPackage === "A" || user.tier >= 2) {
-    for (let i = user.countPay === 0 ? 1 : startIndexPackageTrans; i <= 12; i++) {
-      await Transaction.create({
-        userId: user.id,
-        amount: 0,
-        userCountPay: i,
-        address_ref: refUser.walletAddress[0],
-        address_from: user.walletAddress[0],
-        address_to: directCommissionWallet,
-        tier: user.tier,
-        buyPackage: user.buyPackage,
-        hash: "",
-        type: "PACKAGE",
-        status: "PENDING",
-      });
-    }
-  }
-  if (user.tier === 1 && user.buyPackage === "B") {
-    let count = 6;
-    if (user.countPay >= 7 && continueWithBuyPackageB) {
-      count = 12;
-    }
-    for (
-      let i =
-        user.countPay === 0
-          ? 1
-          : user.countPay === 7
-          ? startIndexPackageTrans + 1
-          : startIndexPackageTrans;
-      i <= count;
-      i++
-    ) {
-      await Transaction.create({
-        userId: user.id,
-        amount: 0,
-        userCountPay: i,
-        address_ref: refUser.walletAddress[0],
-        address_from: user.walletAddress[0],
-        address_to: directCommissionWallet,
-        tier: user.tier,
-        buyPackage: user.buyPackage,
-        hash: "",
-        type: "PACKAGE",
-        status: "PENDING",
-      });
-    }
-  }
-};
-
 const addPayment = asyncHandler(async (req, res) => {
   const { id, hash, type, transIds } = req.body;
   const transaction = await Transaction.findById(id);
@@ -528,12 +437,12 @@ const onDonePayment = asyncHandler(async (req, res) => {
         { status: "SUCCESS" }
       );
 
-      // if (user.countPay === 0 && user.tier === 1) {
-      //   const links = await getActiveLink(user.email, user.userId, user.phone);
-      //   if (links.length === 1) {
-      //     await sendActiveLink(user.email, links[0]);
-      //   }
-      // }
+      if (user.countPay === 0 && user.tier === 1) {
+        const links = await getActiveLink(user.email, user.userId, user.phone);
+        if (links.length === 1) {
+          await sendActiveLink(user.email, links[0]);
+        }
+      }
 
       if (user.countPay === 12 && user.buyPackage === "B") {
         if (user.continueWithBuyPackageB === true) {
@@ -544,23 +453,21 @@ const onDonePayment = asyncHandler(async (req, res) => {
         }
       }
 
-      user.countPay =
-        transIds.length === 15
-          ? 13
-          : transIds.length === 9
-          ? 7
-          : transIds.length === 7
-          ? 13
-          : user.countPay + 1;
-
-      if (user.countPay === 13 && user.buyPackage === "B") {
-        if (user.continueWithBuyPackageB === true) {
-          user.buyPackage = "A";
-          await Tree.findOneAndUpdate({ userId: user._id }, { buyPackage: "A" });
-        } else {
-          user.buyPackage = "C";
-        }
-      }
+      let responseHewe = await getPriceHewe();
+      const hewePrice = responseHewe.data.ticker.latest;
+      const totalHewe = Math.round(100 / hewePrice);
+      const hewePerDay = Math.round(totalHewe / 540);
+      // user.countPay =
+      //   transIds.length === 15
+      //     ? 13
+      //     : transIds.length === 9
+      //     ? 7
+      //     : transIds.length === 7
+      //     ? 13
+      //     : user.countPay + 1;
+      user.totalHewe = totalHewe;
+      user.hewePerDay = hewePerDay;
+      user.countPay = 14;
     }
 
     const updatedUser = await user.save();
@@ -572,52 +479,6 @@ const onDonePayment = asyncHandler(async (req, res) => {
     throw new Error("No transaction found");
   }
 });
-
-// const onDonePayment = async (user, transIds) => {
-//   const transIdsList = Object.values(transIds);
-//   if (transIdsList.length > 0) {
-//     for (let transId of transIdsList) {
-//       try {
-//         await Transaction.findOne({
-//           $and: [
-//             { userId: user._id },
-//             { userCountPay: user.countPay },
-//             { _id: transId },
-//             { status: "SUCCESS" },
-//           ],
-//         });
-//       } catch (err) {
-//         throw new Error("No transaction found");
-//       }
-//     }
-
-//     if (user.countPay === 0 && user.tier === 1) {
-//       const links = await getActiveLink(user.email, user.userId, user.phone);
-//       if (links.length === 1) {
-//         await sendActiveLink(user.email, links[0]);
-//       }
-//     }
-
-//     if (user.countPay === 12 && user.buyPackage === "B") {
-//       if (user.continueWithBuyPackageB === true) {
-//         user.buyPackage = "A";
-//         await Tree.findOneAndUpdate({ userId: user._id }, { buyPackage: "A" });
-//       } else {
-//         user.buyPackage = "C";
-//       }
-//     }
-
-//     user.countPay = user.countPay + 1;
-
-//     const updatedUser = await user.save();
-
-//     if (updatedUser) {
-//       return;
-//     }
-//   } else {
-//     throw new Error("No transaction found");
-//   }
-// };
 
 const getAllPayments = asyncHandler(async (req, res) => {
   const { pageNumber, keyword, status, tier } = req.query;
