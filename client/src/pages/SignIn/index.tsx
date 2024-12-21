@@ -22,7 +22,6 @@ const SignInPage: React.FC = () => {
   const navigate = useNavigate();
 
   const onSubmit = async (data) => {
-    console.log({ data });
     const { code, password } = data;
     setLoading(true);
     await Auth.login({ code, password })
@@ -122,7 +121,7 @@ const SignInPage: React.FC = () => {
               <div className="flex gap-2">
                 <input type="checkbox" id="remember" />
                 <label htmlFor="remember" className="text-black font-medium">
-                  Remeber me
+                  Remember me
                 </label>
               </div>
               <Link
