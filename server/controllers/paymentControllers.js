@@ -18,7 +18,6 @@ import { getPriceHewe } from "../utils/getPriceHewe.js";
 
 const getPaymentInfo = asyncHandler(async (req, res) => {
   const { user } = req;
-  const { continueWithBuyPackageB } = req.query;
 
   if (user) {
     let walletUser = user[`walletAddress${user.tier}`];
@@ -234,7 +233,6 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
       let countPayUser = user.countPay;
       let indexFor = 1;
       for (let p of ancestors) {
-        // console.log({ name: p.userName, isFirst: p.isFirst });
         let referralCommissionWallet, haveParentNotPayEnough;
         const receiveUser = await User.findById(p.userId);
         if (p.isFirst) {
@@ -444,14 +442,14 @@ const onDonePayment = asyncHandler(async (req, res) => {
         }
       }
 
-      if (user.countPay === 12 && user.buyPackage === "B") {
-        if (user.continueWithBuyPackageB === true) {
-          user.buyPackage = "A";
-          await Tree.findOneAndUpdate({ userId: user._id }, { buyPackage: "A" });
-        } else {
-          user.buyPackage = "C";
-        }
-      }
+      // if (user.countPay === 12 && user.buyPackage === "B") {
+      //   if (user.continueWithBuyPackageB === true) {
+      //     user.buyPackage = "A";
+      //     await Tree.findOneAndUpdate({ userId: user._id }, { buyPackage: "A" });
+      //   } else {
+      //     user.buyPackage = "C";
+      //   }
+      // }
 
       let responseHewe = await getPriceHewe();
       const hewePrice = responseHewe.data.ticker.latest;
@@ -467,7 +465,8 @@ const onDonePayment = asyncHandler(async (req, res) => {
       //     : user.countPay + 1;
       user.totalHewe = totalHewe;
       user.hewePerDay = hewePerDay;
-      user.countPay = 14;
+      user.countPay = 13;
+      user.status = "APPROVED";
     }
 
     const updatedUser = await user.save();

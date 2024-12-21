@@ -183,7 +183,7 @@
   "the next pay count": "The next distribution",
   "isRegistered": "Completed Registration",
 
-  "full3child": "The account has enough 5 branches",
+  "full5child": "The account has enough 5 branches",
   "confirm password": "Confirm password",
   "wallet address": "Wallet address",
   "user name": "User name",
@@ -256,8 +256,8 @@
   "choosePaymentMethod": "Select payment package",
   "skip": "Skip",
   "buyPackage": "Package",
-  "buyPackageA": "(LAH 12 times)",
-  "buyPackageB": "(LAH 6 times)",
+  "buyPackageA": "Package A",
+  "buyPackageB": "Package B",
 
   "continueWithPackageB": "Continue with package B",
   "contineWithPackageC": "Continue with package C",

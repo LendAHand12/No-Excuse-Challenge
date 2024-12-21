@@ -6,6 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import queryString from 'query-string';
 
 import Auth from '@/api/Auth';
+import SignInLayout from '../../layout/SignInLayout';
 
 const ConfirmPage = () => {
   const { t } = useTranslation();
@@ -33,7 +34,7 @@ const ConfirmPage = () => {
   }, [token]);
 
   return (
-    <>
+    <SignInLayout>
       <ToastContainer />
       <div className="min-h-screen bg-white text-gray-900 flex justify-center items-center">
         {loading ? (
@@ -41,25 +42,38 @@ const ConfirmPage = () => {
         ) : (
           <div className="flex flex-col items-center gap-10">
             <svg
-              viewBox="64 64 896 896"
-              focusable="false"
-              data-icon="check-circle"
-              className="w-20 h-20 text-primary"
-              fill="currentColor"
-              aria-hidden="true"
+              width="78"
+              height="78"
+              viewBox="0 0 78 78"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm193.5 301.7l-210.6 292a31.8 31.8 0 01-51.7 0L318.5 484.9c-3.8-5.3 0-12.7 6.5-12.7h46.9c10.2 0 19.9 4.9 25.9 13.3l71.2 98.8 157.2-218c6-8.3 15.6-13.3 25.9-13.3H699c6.5 0 10.3 7.4 6.5 12.7z"></path>
+              <path
+                d="M39 71.5C43.2688 71.5053 47.4965 70.667 51.4402 69.0334C55.384 67.3998 58.9661 65.003 61.9808 61.9808C65.003 58.9661 67.3998 55.384 69.0334 51.4402C70.667 47.4965 71.5053 43.2688 71.5 39C71.5053 34.7313 70.667 30.5036 69.0334 26.5598C67.3998 22.616 65.003 19.0339 61.9808 16.0193C58.9661 12.997 55.384 10.6003 51.4402 8.96664C47.4965 7.33302 43.2688 6.49476 39 6.50002C34.7313 6.49476 30.5036 7.33302 26.5598 8.96664C22.616 10.6003 19.0339 12.997 16.0193 16.0193C12.997 19.0339 10.6003 22.616 8.96664 26.5598C7.33302 30.5036 6.49476 34.7313 6.50002 39C6.49476 43.2688 7.33302 47.4965 8.96664 51.4402C10.6003 55.384 12.997 58.9661 16.0193 61.9808C19.0339 65.003 22.616 67.3998 26.5598 69.0334C30.5036 70.667 34.7313 71.5053 39 71.5Z"
+                fill="#02071B"
+              />
+              <path
+                d="M26 39L35.75 48.75L55.25 29.25"
+                stroke="#36BA02"
+                stroke-width="6.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
-            <p className="">
+
+            <p className="text-2xl font-bold">
               {t('Congratulations, you have successfully authenticated')}
             </p>
-            <Link to="/signin" className="text-primary hover:underline">
+            <Link
+              to="/signin"
+              className="border border-black max-w-xl w-full text-center rounded-3xl py-2"
+            >
               {t('login')}
             </Link>
           </div>
         )}
       </div>
-    </>
+    </SignInLayout>
   );
 };
 

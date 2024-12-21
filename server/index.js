@@ -23,6 +23,7 @@ import permissionRoutes from "./routes/permissionRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
 import postsRoutes from "./routes/postsRoutes.js";
 import pageSettingRoutes from "./routes/pageSettingRoutes.js";
+// import claimRoutes from "./routes/claimRoutes.js";
 
 import {
   countChildToData,
@@ -96,6 +97,7 @@ app.use("/api/permissions", permissionRoutes);
 app.use("/api/email", emailRoutes);
 app.use("/api/posts", postsRoutes);
 app.use("/api/page-settings", pageSettingRoutes);
+// app.use("/api/claim", claimRoutes);
 
 app.use(notFound);
 

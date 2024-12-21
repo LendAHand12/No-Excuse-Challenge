@@ -96,7 +96,7 @@ const SignUpPage = () => {
     <>
       <ToastContainer />
       <SignInLayout>
-        <div className="min-h-screen bg-white flex items-center">
+        <div className="min-h-screen bg-white flex items-center justify-center">
           {!checkingRefUrl && (
             <div className="text-gray-900 flex justify-center bg-white">
               <div className="max-w-screen-xl m-0 sm:m-10 flex justify-center flex-1">
@@ -166,7 +166,7 @@ const SignUpPage = () => {
                           </div>
                         </div>
                         {/* Wallet address */}
-                        <input
+                        {/* <input
                           className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
                           type="text"
                           placeholder={`${t('Wallet address')} : Oxbx7...`}
@@ -183,7 +183,7 @@ const SignUpPage = () => {
                         />
                         <p className="text-red-500 mt-1 text-sm">
                           {errors.walletAddress?.message}
-                        </p>
+                        </p> */}
                         {/* Password */}
                         <div className="relative mt-5">
                           <input
@@ -293,7 +293,7 @@ const SignUpPage = () => {
                         </div>
                         <button
                           type="submit"
-                          className="w-full font-semibold rounded-3xl border py-4 mt-10 border-black text-black hover:bg-black hover:text-white duration-100 ease-linear"
+                          className="w-full flex justify-center font-semibold rounded-3xl border py-4 mt-10 border-black text-black duration-100 ease-linear"
                         >
                           {loading && <Loading />}
                           {t('confirm')}

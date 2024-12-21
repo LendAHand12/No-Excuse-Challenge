@@ -1,13 +1,15 @@
-import API from "./API";
-import { URL_API_USER } from "./URL";
+import API from './API';
+import { URL_API_USER } from './URL';
 
 const User = {
   update: (userId, body) => {
-    return API.put(`${URL_API_USER}/${userId}`, body);
+    return API.put(`${URL_API_USER}/${userId}`, body, {
+      customContentType: 'multipart/form-data',
+    });
   },
   getAllUsers: (pageNumber, keyword, statusSearch) => {
     return API.get(
-      `${URL_API_USER}/?pageNumber=${pageNumber}&keyword=${keyword}&status=${statusSearch}`
+      `${URL_API_USER}/?pageNumber=${pageNumber}&keyword=${keyword}&status=${statusSearch}`,
     );
   },
   getUserById: (id) => {
@@ -45,7 +47,7 @@ const User = {
   },
   getAllDeletedUsers: (pageNumber, keyword) => {
     return API.get(
-      `${URL_API_USER}/getAllDeletedUsers/?pageNumber=${pageNumber}&keyword=${keyword}`
+      `${URL_API_USER}/getAllDeletedUsers/?pageNumber=${pageNumber}&keyword=${keyword}`,
     );
   },
   getAllUsersForExport: (body) => {

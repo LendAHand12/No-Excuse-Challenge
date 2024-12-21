@@ -32,14 +32,14 @@ const checkLinkRef = asyncHandler(async (req, res) => {
         userId: userReceive._id,
         tier: 1,
       });
-      if (treeUserReceive && treeUserReceive.children.length < 3) {
+      if (treeUserReceive && treeUserReceive.children.length < 5) {
         message = "validUrl";
         res.status(200).json({
           message,
         });
       } else {
         res.status(400).json({
-          error: "full3child",
+          error: "full5child",
         });
       }
     } else {
@@ -93,14 +93,10 @@ const registerUser = asyncHandler(async (req, res) => {
   } else {
     const treeReceiveUser = await Tree.findOne({ userId: receiveId, tier: 1 });
 
-    if (treeReceiveUser.children.length < 3) {
+    if (treeReceiveUser.children.length < 5) {
       const avatar = generateGravatar(email);
 
-      const wallet = await registerSerepayFnc(
-        userId,
-        email.toLowerCase(),
-        password
-      );
+      const wallet = await registerSerepayFnc(userId, email.toLowerCase(), password);
 
       const user = await User.create({
         userId,
@@ -222,9 +218,7 @@ const authUser = asyncHandler(async (req, res) => {
     const listRefIdOfUser = await Tree.find({ refId: user._id, tier: 1 });
     if (listRefIdOfUser && listRefIdOfUser.length > 0) {
       for (let refId of listRefIdOfUser) {
-        const refedUser = await User.findById(refId.userId).select(
-          "userId email"
-        );
+        const refedUser = await User.findById(refId.userId).select("userId email");
         listDirectUser.push(refedUser);
       }
     }
@@ -268,8 +262,13 @@ const authUser = asyncHandler(async (req, res) => {
         closeLah: user.closeLah,
         tierDate: user.tierDate,
         role: user.role,
-        isSerepayWallet: await checkSerepayWallet(user.walletAddress1),
+        // isSerepayWallet: await checkSerepayWallet(user.walletAddress1),
+        isSerepayWallet: true,
         permissions: permissions ? permissions.pagePermissions : [],
+        totalHewe: user.totalHewe,
+        hewePerDay: user.hewePerDay,
+        avalableHewe: user.avalableHewe,
+        claimedHewe: user.claimedHewe,
       },
       accessToken,
       refreshToken,
@@ -283,10 +282,7 @@ const resetUserPassword = asyncHandler(async (req, res) => {
   try {
     // update the user password if the jwt is verified successfully
     const { token, password } = req.body;
-    const decodedToken = jwt.verify(
-      token,
-      process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET
-    );
+    const decodedToken = jwt.verify(token, process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET);
     const user = await User.findById(decodedToken.id);
 
     if (user && password) {
@@ -310,10 +306,7 @@ const confirmUser = asyncHandler(async (req, res) => {
   try {
     // set the user to a confirmed status, once the corresponding JWT is verified correctly
     const emailToken = req.params.token;
-    const decodedToken = jwt.verify(
-      emailToken,
-      process.env.JWT_EMAIL_TOKEN_SECRET
-    );
+    const decodedToken = jwt.verify(emailToken, process.env.JWT_EMAIL_TOKEN_SECRET);
     const user = await User.findById(decodedToken.id).select("-password");
     user.isConfirmed = true;
     await user.save();
@@ -339,29 +332,21 @@ const getAccessToken = asyncHandler(async (req, res) => {
   }
 
   // If the refresh token is valid, create a new accessToken and return it.
-  jwt.verify(
-    refreshToken,
-    process.env.JWT_REFRESH_TOKEN_SECRET,
-    (err, user) => {
-      if (!err) {
-        const accessToken = generateToken(user.id, "access");
-        return res.json({ accessToken });
-      } else {
-        return res.status(400).json({
-          message: "Invalid refresh token",
-        });
-      }
+  jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, (err, user) => {
+    if (!err) {
+      const accessToken = generateToken(user.id, "access");
+      return res.json({ accessToken });
+    } else {
+      return res.status(400).json({
+        message: "Invalid refresh token",
+      });
     }
-  );
+  });
 });
 
 const checkSendMail = asyncHandler(async (req, res) => {
   const { mail } = req.body;
-  const mailInfo = await sendMail(
-    "6480c10538aa7ded76b631c1",
-    mail,
-    "email verification"
-  );
+  const mailInfo = await sendMail("6480c10538aa7ded76b631c1", mail, "email verification");
   res.json({
     mailInfo,
   });

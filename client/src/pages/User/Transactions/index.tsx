@@ -98,10 +98,9 @@ const Transactions = () => {
                   <td className="px-6 py-4">{ele.amount} USDT</td>
                   <td className="px-6 py-4">
                     <div
-                      className={`max-w-fit text-white rounded-sm py-1 px-2 text-sm ${
-                        transStatus.find((item) => item.status === ele.type)
-                          .color
-                      } mr-2`}
+                      className={`max-w-fit text-white rounded-sm py-1 px-2 text-sm ${transStatus.find(
+                        (item) => item.status === ele.type,
+                      )?.color} mr-2`}
                     >
                       {t(ele.type)}
                     </div>
