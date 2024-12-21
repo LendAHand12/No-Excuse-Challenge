@@ -14,7 +14,7 @@ const ReferralPage = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const [childId, setChildId] = useState('');
   const [listChild, setListChild] = useState([]);
-  const defaultRef = `${import.meta.env.VITE_URL}/register?ref=${userInfo.id}`;
+  const defaultRef = `${import.meta.env.VITE_URL}/signup?ref=${userInfo.id}`;
   const [link, setLink] = useState(defaultRef);
 
   useEffect(() => {
