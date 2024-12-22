@@ -28,6 +28,7 @@ import NotFoundPage from './pages/NotFound';
 import ServicePage from './pages/Service';
 import SettingWallets from './pages/Admin/SettingWallets';
 import AdminTransactionsPage from './pages/Admin/Transactions';
+import SystemPage from './pages/User/System';
 
 function App() {
   const { pathname } = useLocation();
@@ -134,6 +135,15 @@ function App() {
             <>
               <PageTitle title="Payment | DreamChain" />
               <Payment />
+            </>
+          }
+        />
+        <Route
+          path="/user/system"
+          element={
+            <>
+              <PageTitle title="System | DreamChain" />
+              <SystemPage />
             </>
           }
         />
