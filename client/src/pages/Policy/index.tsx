@@ -21,7 +21,8 @@ const PolicyPage: React.FC = () => {
             <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
               <li className="ml-6">
                 Membership in DreamChain is entirely voluntary. Members are free
-                to join, contribute, and engage at their own discretion.
+                to join without coercion, contribute, and engage at their own
+                discretion.
               </li>
               <li className="ml-6">
                 Contributions, whether financial, intellectual, or through time

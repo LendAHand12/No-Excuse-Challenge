@@ -47,15 +47,13 @@ const SignUpPage = () => {
         return;
       }
       setLoading(true);
-      const { userId, email, password, ref, receiveId, walletAddress, idCode } =
-        data;
+      const { userId, email, password, ref, receiveId, idCode } = data;
       await Auth.register({
         userId: userId.trim(),
         email: email.trim(),
         password,
         ref,
         receiveId,
-        walletAddress: walletAddress.trim(),
         phone: phone.trim(),
         idCode: idCode.trim(),
       })

@@ -21,8 +21,6 @@ export const PublicRoute = () => {
     (state: RootState) => state.auth,
   );
 
-  console.log({ accessToken, userInfo });
-
   if (accessToken && userInfo) {
     if (userInfo && userInfo.role !== 'user') {
       return <Navigate to="/admin/dashboard" />;

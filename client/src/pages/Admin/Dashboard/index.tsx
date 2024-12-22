@@ -3,7 +3,7 @@ import DefaultLayout from '../../../layout/DefaultLayout';
 const DashboardPage = () => {
   return (
     <DefaultLayout>
-      <div>DashboardPage</div>;
+      <div className="p-24">Dashboard</div>
     </DefaultLayout>
   );
 };

@@ -4,8 +4,6 @@ const walletSchema = mongoose.Schema(
   {
     type: {
       type: String,
-      enum: ["REGISTER", "ADMIN", "HOLD1", "HOLD2", "HOLD3", "HOLD4", "HOLD5"],
-      default: "ADMIN",
       required: true,
       unique: true,
     },

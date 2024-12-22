@@ -114,64 +114,64 @@ const PaymentPage = () => {
   };
 
   const handleSubmitOTPSerepay = useCallback(() => {
-    // setLoadingGetOtp(true);
-    // axios
-    //   .post(
-    //     `${
-    //       import.meta.env.VITE_HOST_SEREPAY
-    //     }/api/payment/sendCodeWalletTransferArray`,
-    //     {
-    //       wallet: userInfo.walletAddress1,
-    //       arrayWallet: paymentsList,
-    //     },
-    //   )
-    //   .then(() => {
-    setLoadingGetOtp(false);
-    openModal();
-    // })
-    // .catch((error) => {
-    //   let message =
-    //     error.response && error.response.data.message
-    //       ? error.response.data.message
-    //       : error.message;
-    //   toast.error(t(message));
-    //   setLoadingGetOtp(false);
-    // });
+    setLoadingGetOtp(true);
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_HOST_SEREPAY
+        }/api/payment/sendCodeWalletTransferArray`,
+        {
+          wallet: userInfo.walletAddress1,
+          arrayWallet: paymentsList,
+        },
+      )
+      .then(() => {
+        setLoadingGetOtp(false);
+        openModal();
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message;
+        toast.error(t(message));
+        setLoadingGetOtp(false);
+      });
   }, [paymentsList]);
 
   const handlePaySerepay = useCallback(
     async (values) => {
-      // const { otp } = values;
-      // setLoadingPayment(true);
-      // axios
-      //   .post(
-      //     `${
-      //       import.meta.env.VITE_HOST_SEREPAY
-      //     }/api/payment/confirmWalletTransferArray`,
-      //     {
-      //       code: otp,
-      //       wallet: userInfo[`walletAddress${userInfo.tier}`],
-      //       arrayWallet: paymentsList,
-      //     },
-      //   )
-      //   .then(async (response) => {
-      //     const { message, status } = response.data;
-      //     if (status) {
-      await donePayment();
-      closeModal();
-      toast.success(t(message));
-      window.location.reload(false);
-      //   }
-      //   setLoadingPayment(false);
-      // })
-      // .catch((error) => {
-      //   let message =
-      //     error.response && error.response.data.message
-      //       ? error.response.data.message
-      //       : error.message;
-      //   toast.error(t(message));
-      //   setLoadingPayment(false);
-      // });
+      const { otp } = values;
+      setLoadingPayment(true);
+      axios
+        .post(
+          `${
+            import.meta.env.VITE_HOST_SEREPAY
+          }/api/payment/confirmWalletTransferArray`,
+          {
+            code: otp,
+            wallet: userInfo[`walletAddress${userInfo.tier}`],
+            arrayWallet: paymentsList,
+          },
+        )
+        .then(async (response) => {
+          const { message, status } = response.data;
+          if (status) {
+            await donePayment();
+            closeModal();
+            toast.success(t(message));
+            window.location.reload();
+          }
+          setLoadingPayment(false);
+        })
+        .catch((error) => {
+          let message =
+            error.response && error.response.data.message
+              ? error.response.data.message
+              : error.message;
+          toast.error(t(message));
+          setLoadingPayment(false);
+        });
     },
     [paymentsList],
   );

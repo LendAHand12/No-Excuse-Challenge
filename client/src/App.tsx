@@ -26,6 +26,8 @@ import ReferralPage from './pages/User/Referral';
 import Transactions from './pages/User/Transactions';
 import NotFoundPage from './pages/NotFound';
 import ServicePage from './pages/Service';
+import SettingWallets from './pages/Admin/SettingWallets';
+import AdminTransactionsPage from './pages/Admin/Transactions';
 
 function App() {
   const { pathname } = useLocation();
@@ -94,6 +96,24 @@ function App() {
             <>
               <PageTitle title="Dashboard | DreamChain" />
               <DashboardPage />
+            </>
+          }
+        />
+        <Route
+          path="/admin/transactions"
+          element={
+            <>
+              <PageTitle title="Transactions | DreamChain" />
+              <AdminTransactionsPage />
+            </>
+          }
+        />
+        <Route
+          path="/admin/wallets"
+          element={
+            <>
+              <PageTitle title="Setting Wallets | DreamChain" />
+              <SettingWallets />
             </>
           }
         />

@@ -13,7 +13,6 @@ const ConfirmPage = () => {
   const location = useLocation();
   const parsed = queryString.parse(location.search);
   let { token } = parsed;
-  console.log({ token });
   if (!token) {
     toast.error(t('invalidUrl'));
   }

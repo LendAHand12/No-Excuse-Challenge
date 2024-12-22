@@ -49,7 +49,6 @@ const WalletUser = () => {
               >
                 <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
                   {connectors.map((connector) => {
-                    console.log({ connector });
                     return (
                       <button
                         key={connector.uid}
