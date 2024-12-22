@@ -277,11 +277,11 @@ const Profile = () => {
               <p>ID/DL/Passport number</p>
               <p>{idCode}</p>
             </div>
-            {/* <div className="grid grid-cols-2 bg-[#E5E9EE] py-2 px-4 rounded-lg">
-              <p>Wallet address Tier 1</p>
+            <div className="grid grid-cols-2 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+              <p>Wallet address</p>
               <p>{shortenWalletAddress(walletAddress1, 14)}</p>
             </div>
-            <div className="grid grid-cols-2 py-2 px-4">
+            {/* <div className="grid grid-cols-2 py-2 px-4">
               <p>Wallet address Tier 2</p>
               <p>{shortenWalletAddress(walletAddress2, 14)}</p>
             </div>
