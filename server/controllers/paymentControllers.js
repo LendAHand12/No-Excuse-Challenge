@@ -235,7 +235,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
       for (let p of ancestors) {
         let referralCommissionWallet, haveParentNotPayEnough;
         const receiveUser = await User.findById(p ? p.userId : "6494e9101e2f152a593b66f2");
-        if (p.isFirst) {
+        if (p ? p.isFirst : false) {
           referralCommissionWallet = receiveUser[`walletAddress${user.tier}`];
           const isSerepayWallet = await checkSerepayWallet(
             receiveUser[`walletAddress${user.tier}`]
