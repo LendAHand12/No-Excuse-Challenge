@@ -36,12 +36,12 @@
 /* third-party libraries CSS */
 
 input::placeholder {
-  color: #696b77;
+  color: #ccc;
 }
 
 input::-ms-input-placeholder {
   /* Edge 12 -18 */
-  color: #696b77;
+  color: #ccc;
 }
 
 .tableCheckbox:checked ~ div span {

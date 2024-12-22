@@ -233,6 +233,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
       let countPayUser = user.countPay;
       let indexFor = 1;
       for (let p of ancestors) {
+        console.log({ ancestors });
         let referralCommissionWallet, haveParentNotPayEnough;
         const receiveUser = await User.findById(p.userId);
         if (p.isFirst) {
@@ -353,7 +354,7 @@ const getAdminWallets = async () => {
 const findAncestors = async (userId, limit, tier) => {
   let ancestors = [];
   let currentUserId = userId;
-  let currentParent;
+  var currentParent;
 
   const tree = await Tree.findOne({ userId, tier });
   const refTree = await Tree.findOne({ userId: tree.refId, tier });

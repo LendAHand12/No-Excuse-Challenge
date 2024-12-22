@@ -210,12 +210,12 @@ const Profile = () => {
               <p>Member since</p>
               <p> {new Date(createdAt).toLocaleDateString('vi')}</p>
             </div>
-            <div className="flex justify-between py-2 px-4">
+            {/* <div className="flex justify-between py-2 px-4">
               <p>Completed tier 1</p>
               <p>{tier1Time}</p>
-            </div>
+            </div> */}
           </div>
-          <div className="bg-[#FAFBFC] p-4 rounded-2xl">
+          {/* <div className="bg-[#FAFBFC] p-4 rounded-2xl">
             <div className="flex justify-between py-2 px-4">
               <p>Completed tier 2</p>
               <p>{tier2Time}</p>
@@ -232,7 +232,7 @@ const Profile = () => {
               <p>Completed tier 5</p>
               <p>{tier5Time}</p>
             </div>
-          </div>
+          </div> */}
         </div>
         <div className="flex justify-end">
           <button className="flex gap-2 font-semibold hover:bg-gray-100 py-2 px-4 rounded-lg">
@@ -277,7 +277,7 @@ const Profile = () => {
               <p>ID/DL/Passport number</p>
               <p>{idCode}</p>
             </div>
-            <div className="grid grid-cols-2 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+            {/* <div className="grid grid-cols-2 bg-[#E5E9EE] py-2 px-4 rounded-lg">
               <p>Wallet address Tier 1</p>
               <p>{shortenWalletAddress(walletAddress1, 14)}</p>
             </div>
@@ -296,7 +296,7 @@ const Profile = () => {
             <div className="grid grid-cols-2 bg-[#E5E9EE] py-2 px-4 rounded-lg">
               <p>Wallet address Tier 5</p>
               <p>{shortenWalletAddress(walletAddress5, 14)}</p>
-            </div>
+            </div> */}
             <div className="grid grid-cols-2 py-2 px-4">
               <p>Completed Registration</p>
               <p>Finished</p>

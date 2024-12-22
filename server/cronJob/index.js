@@ -1,7 +1,6 @@
 import asyncHandler from "express-async-handler";
 import moment from "moment";
 
-import DeleteUser from "../models/deleteUserModel.js";
 import User from "../models/userModel.js";
 import sendMail from "../utils/sendMail.js";
 import { sendMailUpdateLayerForAdmin } from "../utils/sendMailCustom.js";
@@ -12,12 +11,7 @@ import Transaction from "../models/transactionModel.js";
 
 export const deleteUser24hUnPay = asyncHandler(async () => {
   const listUser = await User.find({
-    $and: [
-      { tier: 1 },
-      { countPay: 0 },
-      { isAdmin: false },
-      { status: { $ne: "DELETED" } },
-    ],
+    $and: [{ tier: 1 }, { countPay: 0 }, { isAdmin: false }, { status: { $ne: "DELETED" } }],
   });
   const currentDay = moment();
   for (let u of listUser) {
@@ -321,9 +315,7 @@ export const checkBlockChildren = asyncHandler(async () => {
       });
 
     if (listRefChild.length >= 3) {
-      const listLockedChild = listRefChild.filter(
-        (ele) => ele.userId.status === "LOCKED"
-      );
+      const listLockedChild = listRefChild.filter((ele) => ele.userId.status === "LOCKED");
       const countChildLocked = listRefChild.length - listLockedChild.length;
       if (countChildLocked < 2) {
         if (user.lockedTime === null) {
@@ -332,10 +324,7 @@ export const checkBlockChildren = asyncHandler(async () => {
         }
         if (countChildLocked === 1) {
           const closedChild = getUserClosestToNow(listLockedChild);
-          const diffDays = currentDay.diff(
-            closedChild.userId.lockedTime,
-            "days"
-          );
+          const diffDays = currentDay.diff(closedChild.userId.lockedTime, "days");
           if (diffDays >= 30) {
             user.lockedTime = new Date();
             user.status = "LOCKED";
@@ -344,10 +333,7 @@ export const checkBlockChildren = asyncHandler(async () => {
         }
         if (countChildLocked === 0) {
           const closedChild = getUserClosestToNow(listLockedChild);
-          const diffDays = currentDay.diff(
-            closedChild.userId.lockedTime,
-            "days"
-          );
+          const diffDays = currentDay.diff(closedChild.userId.lockedTime, "days");
           if (diffDays >= 45) {
             user.lockedTime = new Date();
             user.status = "LOCKED";

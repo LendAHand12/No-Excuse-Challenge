@@ -84,7 +84,7 @@ const ChoosePackagePage = () => {
               Package A
             </button>
           </div>
-          <div className="border-2 shadow-lg rounded-2xl w-full max-w-[350px]">
+          {/* <div className="border-2 shadow-lg rounded-2xl w-full max-w-[350px]">
             <div className="bg-black rounded-2xl pt-1 pb-4 px-4 space-y-2">
               <div className="flex justify-end">
                 <div className="bg-[#F4E096] text-sm text-black rounded-xl p-2">
@@ -106,7 +106,7 @@ const ChoosePackagePage = () => {
             >
               Package B
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </DefaultLayout>

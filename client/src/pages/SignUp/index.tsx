@@ -47,10 +47,12 @@ const SignUpPage = () => {
         return;
       }
       setLoading(true);
-      const { userId, email, password, ref, receiveId, idCode } = data;
+      const { userId, email, password, ref, receiveId, idCode, walletAddress } =
+        data;
       await Auth.register({
         userId: userId.trim(),
         email: email.trim(),
+        walletAddress: walletAddress.trim(),
         password,
         ref,
         receiveId,
@@ -138,7 +140,7 @@ const SignUpPage = () => {
                         <div className="grid grid-cols-2 gap-5">
                           <div>
                             <PhoneInput
-                              defaultCountry="VN"
+                              defaultCountry="US"
                               placeholder={t('Phone')}
                               value={phone}
                               onChange={setPhone}
@@ -152,7 +154,7 @@ const SignUpPage = () => {
                             <input
                               className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
                               type="text"
-                              placeholder={`${t('CCCD')}`}
+                              placeholder={`${t('id code')}`}
                               {...register('idCode', {
                                 required: t('ID code is required'),
                               })}
@@ -164,7 +166,7 @@ const SignUpPage = () => {
                           </div>
                         </div>
                         {/* Wallet address */}
-                        {/* <input
+                        <input
                           className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
                           type="text"
                           placeholder={`${t('Wallet address')} : Oxbx7...`}
@@ -181,7 +183,7 @@ const SignUpPage = () => {
                         />
                         <p className="text-red-500 mt-1 text-sm">
                           {errors.walletAddress?.message}
-                        </p> */}
+                        </p>
                         {/* Password */}
                         <div className="relative mt-5">
                           <input
