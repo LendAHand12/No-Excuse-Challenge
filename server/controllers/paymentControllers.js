@@ -22,310 +22,291 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
   if (user) {
     let walletUser = user[`walletAddress${user.tier}`];
     if (user.countPay === 13) {
-      const canIncreaseTier = await checkCanIncreaseNextTier(user);
-      if (!canIncreaseTier) {
-        res.status(404);
-        throw new Error("You are not eligible for next step payment");
-      }
-    }
-
-    const wallets = await Wallet.find();
-
-    const registerWallet = wallets.find((ele) => ele.type === "REGISTER");
-    const pigWallet = wallets.find((ele) => ele.type === "PIG");
-    const companyWallet = wallets.find((ele) => ele.type === "COMPANY");
-    const holdWallet = await getAdminWallets();
-
-    const payments = [];
-    const paymentIds = [];
-
-    if (user.fine > 0) {
-      const transactionFine = await Transaction.create({
-        userId: user.id,
-        amount: user.fine,
-        userCountPay: user.countPay,
-        address_ref: registerWallet.address,
-        address_from: walletUser,
-        address_to: registerWallet.address,
-        tier: user.tier,
-        buyPackage: user.buyPackage,
-        hash: "",
-        type: "FINE",
-        status: "PENDING",
-      });
-
-      payments.push({
-        address: registerWallet.address,
-        amount: user.fine,
-      });
-
-      paymentIds.push({
-        type: "FINE",
-        id: transactionFine._id,
-        amount: user.fine,
-        to: registerWallet.address,
+      // const canIncreaseTier = await checkCanIncreaseNextTier(user);
+      // if (!canIncreaseTier) {
+      //   res.status(404);
+      //   throw new Error("You are not eligible for next step payment");
+      // }
+      res.status(200).json({
+        message: "Payment completed!",
       });
     } else {
-      const refUser = await getRefParentUser(user.id, user.tier);
-
-      let haveRefNotPayEnough = false;
-      let registerFee = 5 * user.tier;
-      let pigFee = 5 * user.tier;
-      let companyFee = 25 * user.tier;
-      let directCommissionWallet = "";
-      let directCommissionFee = 15 * user.tier;
-      let referralCommissionFee = 5 * user.tier;
-
-      // delete pending trans
-      await Transaction.deleteMany({
-        $and: [
-          {
-            status: "PENDING",
-          },
-          { userId: user.id },
-        ],
-      });
-
-      // giao dich dang ky
-      payments.push({
-        address: registerWallet.address,
-        amount: registerFee,
-      });
-      const transactionRegister = await Transaction.create({
-        userId: user.id,
-        amount: registerFee,
-        userCountPay: user.countPay,
-        address_ref: registerWallet.address,
-        address_from: walletUser,
-        address_to: registerWallet.address,
-        tier: user.tier,
-        buyPackage: user.buyPackage,
-        hash: "",
-        type: "REGISTER",
-        status: "PENDING",
-      });
-      paymentIds.push({
-        type: "REGISTER",
-        id: transactionRegister._id,
-        amount: registerFee,
-        to: registerWallet.address,
-      });
-
-      // giao dich con heo
-      payments.push({
-        address: pigWallet.address,
-        amount: pigFee,
-      });
-      const transactionPig = await Transaction.create({
-        userId: user.id,
-        amount: pigFee,
-        userCountPay: user.countPay,
-        address_ref: pigWallet.address,
-        address_from: walletUser,
-        address_to: pigWallet.address,
-        tier: user.tier,
-        buyPackage: user.buyPackage,
-        hash: "",
-        type: "PIG",
-        status: "PENDING",
-      });
-      paymentIds.push({
-        type: "PIG",
-        id: transactionPig._id,
-        amount: pigFee,
-        to: pigWallet.address,
-      });
-
-      // giao dich hewe cho cong ty
-      payments.push({
-        address: companyWallet.address,
-        amount: companyFee,
-      });
-      const transactionCompany = await Transaction.create({
-        userId: user.id,
-        amount: companyFee,
-        userCountPay: user.countPay,
-        address_ref: companyWallet.address,
-        address_from: walletUser,
-        address_to: companyWallet.address,
-        tier: user.tier,
-        buyPackage: user.buyPackage,
-        hash: "",
-        type: "COMPANY",
-        status: "PENDING",
-      });
-      paymentIds.push({
-        type: "COMPANY",
-        id: transactionCompany._id,
-        amount: companyFee,
-        to: companyWallet.address,
-      });
-
-      // giao dich hoa hong truc tiep
-      if (refUser.closeLah) {
-        directCommissionWallet = holdWallet[user.tier];
-        haveRefNotPayEnough = true;
-      } else if (refUser.openLah || refUser.adminChangeTier || refUser.createBy === "ADMIN") {
-        directCommissionWallet = refUser[`walletAddress${user.tier}`];
+      const wallets = await Wallet.find();
+      const registerWallet = wallets.find((ele) => ele.type === "REGISTER");
+      const pigWallet = wallets.find((ele) => ele.type === "PIG");
+      const companyWallet = wallets.find((ele) => ele.type === "COMPANY");
+      const holdWallet = await getAdminWallets();
+      const payments = [];
+      const paymentIds = [];
+      if (user.fine > 0) {
+        const transactionFine = await Transaction.create({
+          userId: user.id,
+          amount: user.fine,
+          userCountPay: user.countPay,
+          address_ref: registerWallet.address,
+          address_from: walletUser,
+          address_to: registerWallet.address,
+          tier: user.tier,
+          buyPackage: user.buyPackage,
+          hash: "",
+          type: "FINE",
+          status: "PENDING",
+        });
+        payments.push({
+          address: registerWallet.address,
+          amount: user.fine,
+        });
+        paymentIds.push({
+          type: "FINE",
+          id: transactionFine._id,
+          amount: user.fine,
+          to: registerWallet.address,
+        });
       } else {
-        if (
-          refUser.status === "LOCKED" ||
-          refUser.tier < user.tier ||
-          (refUser.tier === user.tier && refUser.countPay < 13)
-        ) {
+        const refUser = await getRefParentUser(user.id, user.tier);
+        let haveRefNotPayEnough = false;
+        let registerFee = 5 * user.tier;
+        let pigFee = 5 * user.tier;
+        let companyFee = 25 * user.tier;
+        let directCommissionWallet = "";
+        let directCommissionFee = 15 * user.tier;
+        let referralCommissionFee = 5 * user.tier;
+        // delete pending trans
+        await Transaction.deleteMany({
+          $and: [
+            {
+              status: "PENDING",
+            },
+            { userId: user.id },
+          ],
+        });
+        // giao dich dang ky
+        payments.push({
+          address: registerWallet.address,
+          amount: registerFee,
+        });
+        const transactionRegister = await Transaction.create({
+          userId: user.id,
+          amount: registerFee,
+          userCountPay: user.countPay,
+          address_ref: registerWallet.address,
+          address_from: walletUser,
+          address_to: registerWallet.address,
+          tier: user.tier,
+          buyPackage: user.buyPackage,
+          hash: "",
+          type: "REGISTER",
+          status: "PENDING",
+        });
+        paymentIds.push({
+          type: "REGISTER",
+          id: transactionRegister._id,
+          amount: registerFee,
+          to: registerWallet.address,
+        });
+        // giao dich con heo
+        payments.push({
+          address: pigWallet.address,
+          amount: pigFee,
+        });
+        const transactionPig = await Transaction.create({
+          userId: user.id,
+          amount: pigFee,
+          userCountPay: user.countPay,
+          address_ref: pigWallet.address,
+          address_from: walletUser,
+          address_to: pigWallet.address,
+          tier: user.tier,
+          buyPackage: user.buyPackage,
+          hash: "",
+          type: "PIG",
+          status: "PENDING",
+        });
+        paymentIds.push({
+          type: "PIG",
+          id: transactionPig._id,
+          amount: pigFee,
+          to: pigWallet.address,
+        });
+        // giao dich hewe cho cong ty
+        payments.push({
+          address: companyWallet.address,
+          amount: companyFee,
+        });
+        const transactionCompany = await Transaction.create({
+          userId: user.id,
+          amount: companyFee,
+          userCountPay: user.countPay,
+          address_ref: companyWallet.address,
+          address_from: walletUser,
+          address_to: companyWallet.address,
+          tier: user.tier,
+          buyPackage: user.buyPackage,
+          hash: "",
+          type: "COMPANY",
+          status: "PENDING",
+        });
+        paymentIds.push({
+          type: "COMPANY",
+          id: transactionCompany._id,
+          amount: companyFee,
+          to: companyWallet.address,
+        });
+        // giao dich hoa hong truc tiep
+        if (refUser.closeLah) {
           directCommissionWallet = holdWallet[user.tier];
           haveRefNotPayEnough = true;
-        } else {
+        } else if (refUser.openLah || refUser.adminChangeTier || refUser.createBy === "ADMIN") {
           directCommissionWallet = refUser[`walletAddress${user.tier}`];
-        }
-      }
-
-      if (directCommissionWallet === refUser[`walletAddress${user.tier}`]) {
-        const isSerepayWallet = await checkSerepayWallet(directCommissionWallet);
-        if (!isSerepayWallet) {
-          directCommissionWallet = holdWallet[user.tier];
-          haveRefNotPayEnough = true;
-        }
-      }
-
-      const transactionDirect = await Transaction.create({
-        userId: user.id,
-        amount: directCommissionFee,
-        userCountPay: user.countPay,
-        address_ref: refUser[`walletAddress${user.tier}`]
-          ? refUser[`walletAddress${user.tier}`]
-          : refUser[`walletAddress1`],
-        address_from: walletUser,
-        address_to: directCommissionWallet,
-        tier: user.tier,
-        buyPackage: user.buyPackage,
-        hash: "",
-        type: haveRefNotPayEnough ? "DIRECTHOLD" : "DIRECT",
-        status: "PENDING",
-        refBuyPackage: refUser.buyPackage,
-      });
-      paymentIds.push({
-        type: "DIRECT",
-        id: transactionDirect._id,
-        amount: directCommissionFee,
-        to: directCommissionWallet,
-      });
-      payments.push({
-        address: directCommissionWallet,
-        amount: directCommissionFee,
-      });
-
-      // await generatePackageTrans(
-      //   user,
-      //   refUser,
-      //   directCommissionWallet,
-      //   user.continueWithBuyPackageB
-      // );
-
-      const ancestorsData = await findAncestors(user.id, 10, user.tier);
-      let ancestors = ancestorsData.map((data, index) => {
-        if (index === 0) {
-          data.isFirst = true;
-        }
-        return data;
-      });
-
-      let countPayUser = user.countPay;
-      let indexFor = 1;
-      for (let p of ancestors) {
-        let referralCommissionWallet, haveParentNotPayEnough;
-        const receiveUser = await User.findById(p ? p.userId : "6494e9101e2f152a593b66f2");
-        if (p ? p.isFirst : false) {
-          referralCommissionWallet = receiveUser[`walletAddress${user.tier}`];
-          const isSerepayWallet = await checkSerepayWallet(
-            receiveUser[`walletAddress${user.tier}`]
-          );
-          if (!isSerepayWallet) {
-            referralCommissionWallet = holdWallet[user.tier];
-          }
         } else {
-          if (receiveUser.closeLah) {
-            referralCommissionWallet = holdWallet[user.tier];
-            haveParentNotPayEnough = true;
-          } else if (
-            receiveUser.openLah ||
-            receiveUser.adminChangeTier ||
-            receiveUser.createBy === "ADMIN"
+          if (
+            refUser.status === "LOCKED" ||
+            refUser.tier < user.tier ||
+            (refUser.tier === user.tier && refUser.countPay < 13)
           ) {
-            referralCommissionWallet = receiveUser[`walletAddress${user.tier}`];
+            directCommissionWallet = holdWallet[user.tier];
+            haveRefNotPayEnough = true;
           } else {
-            if (
-              receiveUser.status === "LOCKED" ||
-              (receiveUser.errLahCode !== "" && indexFor > 6) ||
-              receiveUser.tier < user.tier ||
-              (receiveUser.tier === user.tier && receiveUser.countPay < user.countPay + 1)
-            ) {
-              referralCommissionWallet = holdWallet[user.tier];
-              haveParentNotPayEnough = true;
-            } else {
-              referralCommissionWallet = receiveUser[`walletAddress${user.tier}`];
-            }
+            directCommissionWallet = refUser[`walletAddress${user.tier}`];
           }
-
-          if (receiveUser.hold !== "no" && receiveUser.holdLevel !== "no") {
-            if (
-              receiveUser.hold.toString() === user.tier.toString() &&
-              parseInt(receiveUser.holdLevel) <= parseInt(user.countPay)
-            ) {
-              haveParentNotPayEnough = true;
-            }
-          } else if (user.tier >= 2 && user.countPay >= 3 && receiveUser.countChild[0] >= 300) {
-            const checkRatioCountChild = await checkRatioCountChildOfUser(receiveUser._id);
-            if (!checkRatioCountChild) haveParentNotPayEnough = true;
+        }
+        if (directCommissionWallet === refUser[`walletAddress${user.tier}`]) {
+          const isSerepayWallet = await checkSerepayWallet(directCommissionWallet);
+          if (!isSerepayWallet) {
+            directCommissionWallet = holdWallet[user.tier];
+            haveRefNotPayEnough = true;
           }
-
-          if (haveParentNotPayEnough) {
-            referralCommissionWallet = holdWallet[user.tier];
+        }
+        const transactionDirect = await Transaction.create({
+          userId: user.id,
+          amount: directCommissionFee,
+          userCountPay: user.countPay,
+          address_ref: refUser[`walletAddress${user.tier}`]
+            ? refUser[`walletAddress${user.tier}`]
+            : refUser[`walletAddress1`],
+          address_from: walletUser,
+          address_to: directCommissionWallet,
+          tier: user.tier,
+          buyPackage: user.buyPackage,
+          hash: "",
+          type: haveRefNotPayEnough ? "DIRECTHOLD" : "DIRECT",
+          status: "PENDING",
+          refBuyPackage: refUser.buyPackage,
+        });
+        paymentIds.push({
+          type: "DIRECT",
+          id: transactionDirect._id,
+          amount: directCommissionFee,
+          to: directCommissionWallet,
+        });
+        payments.push({
+          address: directCommissionWallet,
+          amount: directCommissionFee,
+        });
+        // await generatePackageTrans(
+        //   user,
+        //   refUser,
+        //   directCommissionWallet,
+        //   user.continueWithBuyPackageB
+        // );
+        const ancestorsData = await findAncestors(user.id, 10, user.tier);
+        let ancestors = ancestorsData.map((data, index) => {
+          if (index === 0) {
+            data.isFirst = true;
           }
-
-          if (referralCommissionWallet === receiveUser[`walletAddress${user.tier}`]) {
+          return data;
+        });
+        let countPayUser = user.countPay;
+        let indexFor = 1;
+        for (let p of ancestors) {
+          let referralCommissionWallet, haveParentNotPayEnough;
+          const receiveUser = await User.findById(p ? p.userId : "6494e9101e2f152a593b66f2");
+          if (p ? p.isFirst : false) {
+            referralCommissionWallet = receiveUser[`walletAddress${user.tier}`];
             const isSerepayWallet = await checkSerepayWallet(
               receiveUser[`walletAddress${user.tier}`]
             );
             if (!isSerepayWallet) {
               referralCommissionWallet = holdWallet[user.tier];
             }
+          } else {
+            if (receiveUser.closeLah) {
+              referralCommissionWallet = holdWallet[user.tier];
+              haveParentNotPayEnough = true;
+            } else if (
+              receiveUser.openLah ||
+              receiveUser.adminChangeTier ||
+              receiveUser.createBy === "ADMIN"
+            ) {
+              referralCommissionWallet = receiveUser[`walletAddress${user.tier}`];
+            } else {
+              if (
+                receiveUser.status === "LOCKED" ||
+                (receiveUser.errLahCode !== "" && indexFor > 6) ||
+                receiveUser.tier < user.tier ||
+                (receiveUser.tier === user.tier && receiveUser.countPay < user.countPay + 1)
+              ) {
+                referralCommissionWallet = holdWallet[user.tier];
+                haveParentNotPayEnough = true;
+              } else {
+                referralCommissionWallet = receiveUser[`walletAddress${user.tier}`];
+              }
+            }
+            if (receiveUser.hold !== "no" && receiveUser.holdLevel !== "no") {
+              if (
+                receiveUser.hold.toString() === user.tier.toString() &&
+                parseInt(receiveUser.holdLevel) <= parseInt(user.countPay)
+              ) {
+                haveParentNotPayEnough = true;
+              }
+            } else if (user.tier >= 2 && user.countPay >= 3 && receiveUser.countChild[0] >= 300) {
+              const checkRatioCountChild = await checkRatioCountChildOfUser(receiveUser._id);
+              if (!checkRatioCountChild) haveParentNotPayEnough = true;
+            }
+            if (haveParentNotPayEnough) {
+              referralCommissionWallet = holdWallet[user.tier];
+            }
+            if (referralCommissionWallet === receiveUser[`walletAddress${user.tier}`]) {
+              const isSerepayWallet = await checkSerepayWallet(
+                receiveUser[`walletAddress${user.tier}`]
+              );
+              if (!isSerepayWallet) {
+                referralCommissionWallet = holdWallet[user.tier];
+              }
+            }
           }
+          payments.push({
+            address: referralCommissionWallet,
+            amount: referralCommissionFee,
+          });
+          const transactionReferral = await Transaction.create({
+            userId: user.id,
+            amount: referralCommissionFee,
+            userCountPay: countPayUser,
+            address_ref: receiveUser[`walletAddress${user.tier}`],
+            address_from: user.walletAddress[0],
+            address_to: referralCommissionWallet,
+            tier: user.tier,
+            buyPackage: user.buyPackage,
+            hash: "",
+            type: haveParentNotPayEnough ? "REFERRALHOLD" : "REFERRAL",
+            status: "PENDING",
+          });
+          paymentIds.push({
+            type: "REFERRAL",
+            id: transactionReferral._id,
+            amount: referralCommissionFee,
+            to: referralCommissionWallet,
+          });
+          countPayUser = countPayUser + 1;
+          indexFor++;
         }
-
-        payments.push({
-          address: referralCommissionWallet,
-          amount: referralCommissionFee,
-        });
-
-        const transactionReferral = await Transaction.create({
-          userId: user.id,
-          amount: referralCommissionFee,
-          userCountPay: countPayUser,
-          address_ref: receiveUser[`walletAddress${user.tier}`],
-          address_from: user.walletAddress[0],
-          address_to: referralCommissionWallet,
-          tier: user.tier,
-          buyPackage: user.buyPackage,
-          hash: "",
-          type: haveParentNotPayEnough ? "REFERRALHOLD" : "REFERRAL",
-          status: "PENDING",
-        });
-        paymentIds.push({
-          type: "REFERRAL",
-          id: transactionReferral._id,
-          amount: referralCommissionFee,
-          to: referralCommissionWallet,
-        });
-        countPayUser = countPayUser + 1;
-        indexFor++;
       }
+      res.json({
+        payments,
+        paymentIds,
+      });
     }
-
-    res.json({
-      payments,
-      paymentIds,
-    });
   } else {
     res.status(404);
     throw new Error("User does not exist");
@@ -466,7 +447,6 @@ const onDonePayment = asyncHandler(async (req, res) => {
       user.totalHewe = totalHewe;
       user.hewePerDay = hewePerDay;
       user.countPay = 13;
-      user.status = "APPROVED";
     }
 
     const updatedUser = await user.save();

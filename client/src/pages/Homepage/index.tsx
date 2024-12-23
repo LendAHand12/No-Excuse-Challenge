@@ -8,9 +8,9 @@ const HomePage: React.FC = () => {
       <div className="w-full mt-10 lg:mt-0">
         <div className="flex">
           <div className="py-14 2xl:pl-16 px-10">
-            <p className="text-[#676A76]">About us</p>
+            <p className="text-[#] font-bold">About us</p>
             <h1 className="text-black text-6xl font-medium mt-3 mb-6">
-              Dreamchain
+              DreamChain
             </h1>
             <p className="text-[#02071B] text-lg">
               Welcome to DreamChain: Where Dreams Connect DreamChain is more
@@ -85,8 +85,8 @@ const HomePage: React.FC = () => {
               achievements.
             </p>
             <p className="text-[#02071B] text-lg font-semibold mt-10">
-              "The future belongs to those who believe in the beauty of their
-              dreams." – Eleanor Roosevelt
+              "Talent wins games, but teamwork and intelligence win
+              championships." – Michael Jordan
             </p>
           </div>
           <div className="py-10 pb-20 2xl:pl-16 px-10">

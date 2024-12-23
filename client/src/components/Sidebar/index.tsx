@@ -327,7 +327,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, routes }: SidebarProps) => {
                 }}
               </SidebarLinkGroup> */}
               {/* <!-- Menu Item Forms --> */}
-              {!userInfo && (
+              {/* {!userInfo && (
                 <li className="w-full py-3 px-6 lg:pr-16">
                   <Link
                     to="/signin"
@@ -336,7 +336,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, routes }: SidebarProps) => {
                     Sign in
                   </Link>
                 </li>
-              )}
+              )} */}
             </ul>
           </div>
         </nav>

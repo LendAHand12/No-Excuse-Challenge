@@ -55,7 +55,7 @@ const checkLinkRef = asyncHandler(async (req, res) => {
 });
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { userId, email, password, ref, receiveId, phone, idCode } = req.body;
+  const { userId, email, password, ref, receiveId, phone, idCode, walletAddress } = req.body;
 
   const userExistsUserId = await User.findOne({
     userId: { $regex: userId, $options: "i" },
@@ -104,7 +104,7 @@ const registerUser = asyncHandler(async (req, res) => {
         phone,
         password,
         avatar,
-        walletAddress: [wallet],
+        walletAddress,
         walletAddress1: wallet,
         walletAddress2: wallet,
         walletAddress3: wallet,
@@ -238,6 +238,7 @@ const authUser = asyncHandler(async (req, res) => {
         isAdmin: user.isAdmin,
         isConfirmed: user.isConfirmed,
         avatar: user.avatar,
+        walletAddress: user.walletAddress,
         walletAddress1: user.walletAddress1,
         walletAddress2: user.walletAddress2,
         walletAddress3: user.walletAddress3,
@@ -267,8 +268,10 @@ const authUser = asyncHandler(async (req, res) => {
         permissions: permissions ? permissions.pagePermissions : [],
         totalHewe: user.totalHewe,
         hewePerDay: user.hewePerDay,
-        avalableHewe: user.avalableHewe,
+        availableHewe: user.availableHewe,
+        availableUsdt: user.availableUsdt,
         claimedHewe: user.claimedHewe,
+        claimedUsdt: user.claimedUsdt,
       },
       accessToken,
       refreshToken,

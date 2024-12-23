@@ -7,7 +7,8 @@ import { UPDATE_USER_INFO } from '@/slices/auth';
 import { useForm } from 'react-hook-form';
 import UploadFile from './UploadInfo';
 import User from '@/api/User';
-import { useCallback, useState } from 'react';
+import Claim from '@/api/Claim';
+import { useCallback, useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 
 const Profile = () => {
@@ -42,13 +43,16 @@ const Profile = () => {
     isSerepayWallet,
     totalHewe,
     hewePerDay,
-    avalableHewe,
+    availableHewe,
     claimedHewe,
+    walletAddress,
   } = userInfo;
   const [imgFront, setImgFront] = useState('');
   const [imgBack, setImgBack] = useState('');
   const [phoneNumber, setPhoneNumber] = useState(phone);
   const [errorPhone, setErrPhone] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [refresh, setRefresh] = useState(false);
 
   const {
     register,
@@ -90,6 +94,7 @@ const Profile = () => {
             setLoading(false);
             toast.success(t(response.data.message));
             dispatch(UPDATE_USER_INFO(response.data.data));
+            setIsEdit(false);
           })
           .catch((error) => {
             let message =
@@ -104,10 +109,41 @@ const Profile = () => {
     [imgFront, imgBack, phoneNumber],
   );
 
+  const claimHewe = async () => {
+    await Claim.hewe()
+      .then((response) => {
+        toast.success(t(response.data.message));
+        setRefresh(!refresh);
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.error
+            ? error.response.data.error
+            : error.message;
+        toast.error(t(message));
+      });
+  };
+
+  useEffect(() => {
+    (async () => {
+      await User.getUserInfo()
+        .then((response) => {
+          dispatch(UPDATE_USER_INFO(response.data));
+        })
+        .catch((error) => {
+          let message =
+            error.response && error.response.data.message
+              ? error.response.data.message
+              : error.message;
+          toast.error(t(message));
+        });
+    })();
+  }, [refresh]);
+
   return (
     <DefaultLayout>
       <ToastContainer />
-      <div className="px-10 lg:px-24 py-24 space-y-6 lg:space-y-8">
+      <div className="px-2 lg:px-24 py-24 space-y-6 lg:space-y-8">
         {status === 'UNVERIFY' && (
           <div
             className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-5"
@@ -135,36 +171,13 @@ const Profile = () => {
           </div>
         )}
 
-        {!isSerepayWallet && (
-          <div
-            className="relative px-4 py-3 mb-5 text-red-700 bg-red-100 border border-red-400 rounded"
-            role="alert"
-          >
-            <span className="block sm:inline">
-              {t('isNotSerepayWalletAlert')}{' '}
-              <span className="underline">
-                <a
-                  download
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  href={`${
-                    import.meta.env.VITE_API_URL
-                  }/documents/SEREPAY_DOCUMENT.pdf`}
-                >
-                  {t('download')}
-                </a>
-              </span>
-            </span>
-          </div>
-        )}
-
         <div className="bg-[#FAFBFC] p-4 rounded-2xl flex lg:flex-row flex-col lg:items-center lg:justify-between gap-8">
           <div className="flex gap-4 items-center justify-between lg:justify-center">
             <p className="font-medium">Available HEWE</p>
             <input
               className="bg-black rounded-xl text-dreamchain p-2"
               readOnly
-              value={avalableHewe}
+              value={availableHewe}
             />
           </div>
           <div className="flex gap-4 items-center justify-between lg:justify-center">
@@ -177,9 +190,10 @@ const Profile = () => {
           </div>
           <button
             className={`border border-black rounded-2xl px-12 py-2 ${
-              avalableHewe === 0 ? 'opacity-30' : ''
+              availableHewe === 0 || status !== 'APPROVED' ? 'opacity-30' : ''
             }`}
-            disabled={avalableHewe === 0}
+            disabled={availableHewe === 0 || status !== 'APPROVED'}
+            onClick={claimHewe}
           >
             Claim
           </button>
@@ -234,94 +248,104 @@ const Profile = () => {
             </div>
           </div> */}
         </div>
-        <div className="flex justify-end">
-          <button className="flex gap-2 font-semibold hover:bg-gray-100 py-2 px-4 rounded-lg">
-            Update{' '}
-            <svg
-              width="18"
-              height="21"
-              viewBox="0 0 18 21"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+        {!isEdit && (
+          <div className="flex justify-end">
+            <button
+              onClick={() => setIsEdit(true)}
+              className="flex gap-2 font-semibold hover:bg-gray-100 py-2 px-4 rounded-lg"
             >
-              <path
-                d="M15.675 1.63718C15.3938 1.35583 15.0599 1.13267 14.6924 0.980441C14.325 0.828213 13.9311 0.749907 13.5333 0.75C13.1355 0.750093 12.7417 0.828583 12.3743 0.980982C12.0068 1.13338 11.6731 1.3567 11.392 1.63818L1.885 11.1582C1.31853 11.7259 1.00028 12.4951 1 13.2972V16.5002C1 16.9142 1.336 17.2502 1.75 17.2502H4.973C5.776 17.2502 6.546 16.9302 7.113 16.3632L16.613 6.85718C17.1797 6.28915 17.4979 5.51954 17.4979 4.71718C17.4979 3.91481 17.1797 3.1452 16.613 2.57718L15.675 1.63718ZM0.75 18.7502C0.551088 18.7502 0.360322 18.8292 0.21967 18.9698C0.0790175 19.1105 0 19.3013 0 19.5002C0 19.6991 0.0790175 19.8899 0.21967 20.0305C0.360322 20.1712 0.551088 20.2502 0.75 20.2502H16.75C16.9489 20.2502 17.1397 20.1712 17.2803 20.0305C17.421 19.8899 17.5 19.6991 17.5 19.5002C17.5 19.3013 17.421 19.1105 17.2803 18.9698C17.1397 18.8292 16.9489 18.7502 16.75 18.7502H0.75Z"
-                fill="#02071B"
-              />
-            </svg>
-          </button>
-        </div>
+              Update{' '}
+              <svg
+                width="18"
+                height="21"
+                viewBox="0 0 18 21"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15.675 1.63718C15.3938 1.35583 15.0599 1.13267 14.6924 0.980441C14.325 0.828213 13.9311 0.749907 13.5333 0.75C13.1355 0.750093 12.7417 0.828583 12.3743 0.980982C12.0068 1.13338 11.6731 1.3567 11.392 1.63818L1.885 11.1582C1.31853 11.7259 1.00028 12.4951 1 13.2972V16.5002C1 16.9142 1.336 17.2502 1.75 17.2502H4.973C5.776 17.2502 6.546 16.9302 7.113 16.3632L16.613 6.85718C17.1797 6.28915 17.4979 5.51954 17.4979 4.71718C17.4979 3.91481 17.1797 3.1452 16.613 2.57718L15.675 1.63718ZM0.75 18.7502C0.551088 18.7502 0.360322 18.8292 0.21967 18.9698C0.0790175 19.1105 0 19.3013 0 19.5002C0 19.6991 0.0790175 19.8899 0.21967 20.0305C0.360322 20.1712 0.551088 20.2502 0.75 20.2502H16.75C16.9489 20.2502 17.1397 20.1712 17.2803 20.0305C17.421 19.8899 17.5 19.6991 17.5 19.5002C17.5 19.3013 17.421 19.1105 17.2803 18.9698C17.1397 18.8292 16.9489 18.7502 16.75 18.7502H0.75Z"
+                  fill="#02071B"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
+
         <form
           onSubmit={handleSubmit(onSubmit)}
           encType="multipart/form-data"
           className="grid gap-10 font-semibold"
         >
           <div className="bg-[#FAFBFC] p-4 rounded-2xl ">
-            <div className="grid grid-cols-2 items-center py-2 px-4">
-              <p>Referral code</p>
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+              <p>Referral code : </p>
               <p>{id}</p>
             </div>
-            <div className="grid grid-cols-2 bg-[#E5E9EE] py-2 px-4 rounded-lg">
-              <p>Name</p>
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+              <p>Name :</p>
               <p>{userId}</p>
             </div>
-            <div className="grid grid-cols-2 py-2 px-4">
-              <p>Email</p>
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+              <p>Email :</p>
               <p>{email}</p>
             </div>
-            <div className="grid grid-cols-2 bg-[#E5E9EE] py-2 px-4 rounded-lg">
-              <p>Phone number</p>
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+              <p>Phone number :</p>
               <p>{phone}</p>
             </div>
-            <div className="grid grid-cols-2 py-2 px-4">
-              <p>ID/DL/Passport number</p>
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+              <p>ID/DL/Passport number :</p>
               <p>{idCode}</p>
             </div>
-            <div className="grid grid-cols-2 bg-[#E5E9EE] py-2 px-4 rounded-lg">
-              <p>Wallet address</p>
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+              <p>Serepay wallet :</p>
               <p>{shortenWalletAddress(walletAddress1, 14)}</p>
             </div>
-            {/* <div className="grid grid-cols-2 py-2 px-4">
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4 rounded-lg">
+              <p>Personal wallet :</p>
+              <p>{shortenWalletAddress(walletAddress, 14)}</p>
+            </div>
+            {/* <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
               <p>Wallet address Tier 2</p>
               <p>{shortenWalletAddress(walletAddress2, 14)}</p>
             </div>
-            <div className="grid grid-cols-2 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
               <p>Wallet address Tier 3</p>
               <p>{shortenWalletAddress(walletAddress3, 14)}</p>
             </div>
-            <div className="grid grid-cols-2 py-2 px-4">
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
               <p>Wallet address Tier 4</p>
               <p>{shortenWalletAddress(walletAddress4, 14)}</p>
             </div>
-            <div className="grid grid-cols-2 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
               <p>Wallet address Tier 5</p>
               <p>{shortenWalletAddress(walletAddress5, 14)}</p>
             </div> */}
-            <div className="grid grid-cols-2 py-2 px-4">
-              <p>Completed Registration</p>
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+              <p>Completed Registration :</p>
               <p>Finished</p>
             </div>
-            <div className="grid grid-cols-2 bg-[#E5E9EE] py-2 px-4 rounded-lg">
-              <p>Number of contribution</p>
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0  py-2 px-4 rounded-lg">
+              <p>Number of contribution :</p>
               <p>{listDirectUser.length}</p>
             </div>
-            <div className="grid grid-cols-2 py-2 px-4">
-              <p>Tier</p>
+            {/* <div className="grid grid-cols-2 bg-[#E5E9EE] py-2 px-4">
+              <p>Tier :</p>
               <p>{tier}</p>
-            </div>
-            <div className="grid grid-cols-2 bg-[#E5E9EE] py-2 px-4 rounded-lg">
-              <p>Package</p>
+            </div> */}
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+              <p>Package :</p>
               <p>{buyPackage}</p>
             </div>
-            <div className="grid grid-cols-2 py-2 px-4">
-              <p>Fine</p>
-              <p>{fine}</p>
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0  py-2 px-4">
+              <p>Fine :</p>
+              <p>{fine} USDT</p>
             </div>
             {status === 'UNVERIFY' ? (
               <>
-                <div className="flex justify-center">
-                  <div className="grid grid-cols-2 py-2 px-4">
-                    <p> {t('idCardFront')}</p>
+                <div className="w-full flex justify-center">
+                  <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+                    <p> {t('idCardFront')} :</p>
                     <div className="flex flex-col items-center justify-center w-full">
                       <UploadFile
                         register={register}
@@ -336,8 +360,8 @@ const Profile = () => {
                   </div>
                 </div>
                 <div className="flex justify-center">
-                  <div className="grid grid-cols-2 py-2 px-4">
-                    <p> {t('idCardBack')}</p>
+                  <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+                    <p> {t('idCardBack')} :</p>
                     <div className="flex items-center justify-center w-full">
                       <UploadFile
                         register={register}
@@ -387,14 +411,16 @@ const Profile = () => {
               </>
             )}
           </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex items-center justify-center w-full px-8 py-3 my-6 font-medium border border-black transition duration-300 ease-in-out transform rounded-full shadow-lg hover:underline gradient focus:outline-none focus:shadow-outline hover:scale-105"
-          >
-            {loading && <Loading />}
-            {t('update')}
-          </button>
+          {isEdit && (
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex items-center justify-center w-full px-8 py-3 my-6 font-medium border border-black transition duration-300 ease-in-out transform rounded-full shadow-lg hover:underline gradient focus:outline-none focus:shadow-outline hover:scale-105"
+            >
+              {loading && <Loading />}
+              {t('update')}
+            </button>
+          )}
         </form>
       </div>
     </DefaultLayout>

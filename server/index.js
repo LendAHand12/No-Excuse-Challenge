@@ -23,7 +23,7 @@ import permissionRoutes from "./routes/permissionRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
 import postsRoutes from "./routes/postsRoutes.js";
 import pageSettingRoutes from "./routes/pageSettingRoutes.js";
-// import claimRoutes from "./routes/claimRoutes.js";
+import claimRoutes from "./routes/claimRoutes.js";
 
 import {
   countChildToData,
@@ -34,6 +34,7 @@ import {
   deleteUser24hUnPay,
   resetTransTierUnPay,
   checkBlockChildren,
+  distributionHewe,
 } from "./cronJob/index.js";
 import {
   transferUserToTree,
@@ -97,12 +98,19 @@ app.use("/api/permissions", permissionRoutes);
 app.use("/api/email", emailRoutes);
 app.use("/api/posts", postsRoutes);
 app.use("/api/page-settings", pageSettingRoutes);
-// app.use("/api/claim", claimRoutes);
+app.use("/api/claim", claimRoutes);
 
 app.use(notFound);
 
 // configure a custome error handler middleware
 app.use(errorHandler);
+
+const cron0 = new CronJob("00 17 * * *", async () => {
+  // 0h
+  console.log("Dis hewe to user start");
+  await distributionHewe();
+  console.log("Dis hewe user done");
+});
 
 const cron1 = new CronJob("00 18 * * *", async () => {
   // 1h
@@ -160,6 +168,7 @@ const cron8 = new CronJob("30 23 * * *", async () => {
   console.log("Check block children done");
 });
 
+// cron0.start();
 // cron1.start();
 // cron2.start();
 // cron3.start();

@@ -8,7 +8,7 @@ const userSchema = mongoose.Schema(
       required: true,
     },
     walletAddress: {
-      type: Array,
+      type: String,
     },
     walletAddress1: {
       type: String,
@@ -198,7 +198,19 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
-    avalableHewe: {
+    availableHewe: {
+      type: Number,
+      default: 0,
+    },
+    availableUsdt: {
+      type: Number,
+      default: 0,
+    },
+    claimedUsdt: {
+      type: Number,
+      default: 0,
+    },
+    claimedHewe: {
       type: Number,
       default: 0,
     },

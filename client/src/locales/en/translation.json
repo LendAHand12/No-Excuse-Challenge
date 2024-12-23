@@ -24,7 +24,7 @@
   "paymentTitle": "Secure payment information",
   "registerFee": "Registration Fee",
   "weeks": "Number of weeks",
-  "verifyAccountAlert": "Please provide a picture of your personal information to verify your account",
+  "verifyAccountAlert": "Attention: To withdraw your assets, please ensure you complete the KYC ( Know Your Customer ) diligence process. ",
   "forgotPassword": "Forgot password",
   "rememberMe": "Remember me",
   "password": "Password",
@@ -69,7 +69,7 @@
   "notEnoughBalance": "Not enough balance",
 
   "commissionFee": "Commission",
-  "lahFuns": "LAH Fund",
+  "lahFuns": "DC Constrinbution",
   "pleasePay": "Please pay",
   "donePayment": "Complete payment",
   "Password is required": "Password is required",
@@ -82,7 +82,7 @@
   "Congratulations, you have successfully authenticated": "Congratulations, you have successfully authenticated",
   "REGISTER": "New Registration",
   "DIRECT": "Direct Commission",
-  "REFERRAL": "LAH Fund",
+  "REFERRAL": "DC Constrinbution  ",
   "linkVerify": "Link mail",
 
   "referral": "Referral",
@@ -93,7 +93,7 @@
   "Your passwords do no match": "Passwords do not match",
   "Please enter the correct wallet format": "Please enter the correct wallet format",
 
-  "REFERRALHOLD": "LAH Fund",
+  "REFERRALHOLD": "DC Constrinbution",
   "DIRECTHOLD": "Direct Commission",
 
   "SUCCESS": "Success",

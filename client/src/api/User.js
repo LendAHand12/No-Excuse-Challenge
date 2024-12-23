@@ -15,6 +15,9 @@ const User = {
   getUserById: (id) => {
     return API.get(`${URL_API_USER}/${id}`);
   },
+  getUserInfo: () => {
+    return API.get(`${URL_API_USER}/info`);
+  },
   deleteUserById: (id) => {
     return API.delete(`${URL_API_USER}/${id}`);
   },

@@ -344,3 +344,20 @@ export const checkBlockChildren = asyncHandler(async () => {
     }
   }
 });
+
+export const distributionHewe = asyncHandler(async () => {
+  const listUser = await User.find({
+    $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }],
+  }).select("userId totalHewe availableHewe hewePerDay claimedHewe");
+
+  for (let u of listUser) {
+    try {
+      if (u.totalHewe > u.claimedHewe) {
+        u.availableHewe = u.availableHewe + u.hewePerDay;
+      }
+      await u.save();
+    } catch (error) {
+      console.log({ error });
+    }
+  }
+});
