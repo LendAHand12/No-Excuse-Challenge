@@ -9,12 +9,12 @@ const claimHewe = asyncHandler(async (req, res) => {
     if (user.status !== "APPROVED") {
       throw new Error("Please verify your account");
     }
-    // const response = await axios.post("https://serepay.net/api/payment/claimHewe", {
-    //   amountClaim: user.availableHewe,
-    //   address: user.walletAddress,
-    // });
-    // console.log({ response: response });
-    // console.log({ responseData: response.data });
+    const response = await axios.post("https://serepay.net/api/payment/claimHewe", {
+      amountClaim: user.availableHewe,
+      address: user.walletAddress,
+    });
+    console.log({ response: response });
+    console.log({ responseData: response.data });
 
     user.claimedHewe = user.claimedHewe + user.availableHewe;
     user.availableHewe = 0;
