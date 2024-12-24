@@ -1,5 +1,5 @@
 {
-  "name": "tailadmin-react-free",
+  "name": "dreamchain",
   "private": true,
   "version": "1.3.8",
   "type": "module",
@@ -9,9 +9,7 @@
     "preview": "vite preview"
   },
   "author": {
-    "name": "TailAdmin",
-    "email": "hello@tailadmin.com",
-    "url": "https://tailadmin.com"
+    "name": "DreamChain"
   },
   "dependencies": {
     "@metamask/detect-provider": "^2.0.0",

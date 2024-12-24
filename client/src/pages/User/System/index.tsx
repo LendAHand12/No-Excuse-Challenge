@@ -31,9 +31,7 @@ const SystemPage = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [treeData, setTreeData] = useState({});
-  const [treeArr, setTreeArr] = useState([]);
   const [showType, setShowType] = useState(false);
-  const [appleWidth, setAppleWidth] = useState(20);
   const [treeDataView, setTreeDataView] = useState([]);
   const [clickedKeys, setClickedKeys] = useState([]);
   const [loadingItem, setLoadingItem] = useState('');
@@ -45,7 +43,7 @@ const SystemPage = () => {
       return (
         <div
           onClick={onClick}
-          className={`cursor-pointer p-3 rotate-180 text-white text-sm rounded-md inline-block`}
+          className={`cursor-pointer p-3 text-white text-sm rounded-md inline-block`}
           style={{
             backgroundColor: isGray
               ? '#8c8c8c'
@@ -242,7 +240,7 @@ const SystemPage = () => {
               </div>
             )}
             {showType ? (
-              <div className="w-full overflow-auto rotate-180">
+              <div className="w-full overflow-auto">
                 <Tree
                   lineWidth={'10px'}
                   lineColor={'brown'}

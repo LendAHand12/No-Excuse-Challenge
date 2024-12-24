@@ -137,6 +137,26 @@ const SignInPage: React.FC = () => {
             >
               Confirm
             </button>
+            <Link
+              to="/"
+              className="text-black font-medium hover:underline flex gap-2"
+            >
+              <svg
+                fill="#000000"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                id="left"
+                data-name="Flat Color"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  id="primary"
+                  d="M21,11H5.41l5.3-5.29A1,1,0,1,0,9.29,4.29l-7,7a1,1,0,0,0,0,1.42l7,7a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42L5.41,13H21a1,1,0,0,0,0-2Z"
+                ></path>
+              </svg>
+              Back to Homepage
+            </Link>
           </form>
           <div className="lg:hidden w-full bg-black text-dreamchain text-center py-2">
             © 2024, made with by <span className="font-bold">DreamChain.</span>

@@ -15,9 +15,9 @@ const resources: Resources = {
   en: {
     translation: translationEN,
   },
-  vi: {
-    translation: translationVI,
-  },
+  // vi: {
+  //   translation: translationVI,
+  // },
 };
 
 const options: DetectorOptions = {

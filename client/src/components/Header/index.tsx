@@ -23,7 +23,7 @@ const Header = (props: {
         <div className="flex items-center gap-4">
           <div className="hidden lg:flex items-center border gap-2 bg-white rounded-3xl px-4 py-2 font-medium">
             <DropdownLanguage />
-            <span>|</span>
+            {/* <span>|</span>
             <span>
               <svg
                 width="20"
@@ -37,7 +37,7 @@ const Header = (props: {
                   fill="#02071B"
                 />
               </svg>
-            </span>
+            </span> */}
           </div>
 
           {!userInfo && (
@@ -65,7 +65,7 @@ const Header = (props: {
           </ul> */}
           {userInfo && (
             <>
-              <WalletUser />
+              {/* <WalletUser /> */}
               <DropdownUser />
             </>
           )}
