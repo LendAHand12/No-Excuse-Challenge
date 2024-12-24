@@ -5,7 +5,6 @@ import { useSelector } from 'react-redux';
 import Payment from '@/api/Payment';
 import Loading from '@/components/Loading';
 import { ToastContainer, toast } from 'react-toastify';
-import User from '@/api/User';
 import axios from 'axios';
 import { shortenWalletAddress } from '@/utils';
 import { useForm } from 'react-hook-form';
@@ -19,17 +18,12 @@ const PaymentPage = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const [total, setTotal] = useState(0);
   const [loadingPaymentInfo, setLoadingPaymentInfo] = useState(true);
-  const [loadingCheckIncrease, setLoadingCheckIncrease] = useState(false);
-  const [showCanIncrease, setShowCanIncrease] = useState(null);
-  const [loadingAcceptIncrease, setLoadingAcceptIncrease] = useState(null);
   const [paymentsList, setPaymentsList] = useState([]);
   const [paymentIdsList, setPaymentIdsList] = useState([]);
   const [loadingGetOtp, setLoadingGetOtp] = useState(false);
   const [loadingPayment, setLoadingPayment] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
-  const [showPaymentList, setShowPaymentList] = useState(
-    userInfo.buyPackage === 'B' && userInfo.countPay === 7 ? false : true,
-  );
+  const [showPayment, setShowPayment] = useState(false);
 
   const {
     register,
@@ -44,6 +38,7 @@ const PaymentPage = () => {
         const { payments, paymentIds, message } = response.data;
         if (message) {
           toast.success(message);
+          setShowPayment(false);
         } else {
           const totalPayment = paymentIds.reduce(
             (accumulator, currentValue) => accumulator + currentValue.amount,
@@ -52,6 +47,7 @@ const PaymentPage = () => {
           setTotal(totalPayment);
           setPaymentIdsList(paymentIds);
           setPaymentsList(payments);
+          setShowPayment(true);
         }
 
         setLoadingPaymentInfo(false);
@@ -328,14 +324,15 @@ const PaymentPage = () => {
                   </div>
                 </div>
               </Modal>
-              <div className="w-full max-w-203 mx-auto rounded-lg bg-white p-10 text-gray-700 mt-4">
-                <div className="mb-10">
-                  <h1 className="text-center font-bold text-4xl">
-                    {t('paymentTitle')}
-                  </h1>
-                </div>
-                {showPaymentList && (
-                  <>
+              {showPayment && (
+                <>
+                  <div className="w-full max-w-203 mx-auto rounded-lg bg-white p-10 text-gray-700 mt-4">
+                    <div className="mb-10">
+                      <h1 className="text-center font-bold text-4xl">
+                        {t('paymentTitle')}
+                      </h1>
+                    </div>
+
                     <div className="flex justify-between">
                       {userInfo.buyPackage === 'A' && (
                         <div className="mb-3">
@@ -433,9 +430,9 @@ const PaymentPage = () => {
                       {loadingGetOtp && <Loading />}
                       {t('payment')}
                     </button>
-                  </>
-                )}
-              </div>
+                  </div>
+                </>
+              )}
             </>
           )
         }
