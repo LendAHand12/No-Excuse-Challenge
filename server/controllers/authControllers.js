@@ -19,12 +19,12 @@ const checkLinkRef = asyncHandler(async (req, res) => {
   try {
     const userReceive = await User.findOne({
       _id: receiveId,
-      status: { $in: ["APPROVED", "LOCKED"] },
+      // status: { $in: ["APPROVED", "LOCKED"] },
     });
 
     const userRef = await User.findOne({
       _id: ref,
-      status: { $in: ["APPROVED", "LOCKED"] },
+      // status: { $in: ["APPROVED", "LOCKED"] },
     });
 
     if (userReceive && userRef) {
@@ -97,12 +97,9 @@ const registerUser = asyncHandler(async (req, res) => {
       const avatar = generateGravatar(email);
 
       const token = await registerSerepayFnc(userId, email.toLowerCase(), password);
-      console.log({ token });
       const heweWallet = await createSerepayHeweWallet(token); // hewe wallet
-      console.log({ heweWallet });
 
       const wallet = await createSerepayUsdtWallet(token); // usdt wallet
-      console.log({ wallet });
 
       const user = await User.create({
         userId,
