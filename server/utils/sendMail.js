@@ -35,7 +35,7 @@ const sendMail = async (id, email, option) => {
             •	To activate your account, please click the link below:
             Activation Link: <a href="${url}">Link</a>
             <br>
-            •	After successfully activating your account, you are now able log in to your account on the website dc.ameritecps.com to start your journey.
+            •	After successfully activating your account, you are now able log in to your account on the website dreamchain.live to start your journey.
             <br><br>
             <b>Withdraw Assets</b> 
             <br><br>

@@ -1,7 +1,39 @@
 import React from 'react';
 import DefaultLayout from '../../layout/DefaultLayout';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import Email from '../../api/Email';
+import { toast } from 'react-toastify';
+import Loading from '../../components/Loading';
 
 const ContactPage: React.FC = () => {
+  const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = async (values) => {
+    await Email.createEmail(values)
+      .then((response) => {
+        setLoading(false);
+        toast.success(t(response.data.message));
+        reset();
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.error
+            ? error.response.data.error
+            : error.message;
+        toast.error(t(message));
+        setLoading(false);
+      });
+  };
+
   return (
     <DefaultLayout>
       <div className="w-full mt-16 lg:mt-10 p-10 lg:p-16 text-black text-lg space-y-24">
@@ -82,41 +114,69 @@ const ContactPage: React.FC = () => {
             </p>
           </div>
           <div className="max-w-180">
-            <form action="#">
+            <form onSubmit={handleSubmit(onSubmit)}>
               <div className="mb-4.5">
                 <input
                   type="text"
                   placeholder="Full name"
+                  {...register('userName', {
+                    required: t('fullname is required'),
+                  })}
                   className="w-full rounded-xl border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-dreamchain active:border-dreamchain disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                 />
+                <p className="text-red-500 text-sm">
+                  {errors.userName?.message}
+                </p>
               </div>
               <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                 <div className="w-full xl:w-1/2">
                   <input
                     type="text"
                     placeholder="Phone number"
+                    {...register('phone', {
+                      required: t('phone is required'),
+                    })}
                     className="w-full rounded-xl border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-dreamchain active:border-dreamchain disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
+                  <p className="text-red-500 text-sm">
+                    {errors.phone?.message}
+                  </p>
                 </div>
 
                 <div className="w-full xl:w-1/2">
                   <input
                     type="text"
                     placeholder="Your email"
+                    {...register('email', {
+                      required: t('email is required'),
+                    })}
                     className="w-full rounded-xl border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-dreamchain active:border-dreamchain disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
+                  <p className="text-red-500 text-sm">
+                    {errors.email?.message}
+                  </p>
                 </div>
               </div>
               <div className="mb-6">
                 <textarea
                   rows={6}
                   placeholder="Type your message"
+                  {...register('message', {
+                    required: t('message is required'),
+                  })}
                   className="w-full rounded-xl border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-dreamchain active:border-dreamchain disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                 ></textarea>
+                <p className="text-red-500 text-sm">
+                  {errors.message?.message}
+                </p>
               </div>
 
-              <button className="flex w-36 text-[16px] justify-center rounded-xl border-black bg-black p-3 font-medium text-dreamchain hover:bg-opacity-90">
+              <button
+                type="submit"
+                className="flex w-36 text-[16px] justify-center rounded-xl border-black bg-black p-3 font-medium text-dreamchain hover:bg-opacity-90"
+              >
                 Advise Me
+                {loading && <Loading />}
               </button>
             </form>
           </div>

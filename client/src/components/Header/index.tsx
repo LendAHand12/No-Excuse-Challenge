@@ -42,15 +42,15 @@ const Header = (props: {
 
           {!userInfo && (
             <div className="font-medium hidden lg:flex text-black">
-              <Link
+              {/* <Link
                 to="/signup"
                 className="border rounded-3xl px-4 py-2 pr-10 bg-white"
               >
                 Sign Up
-              </Link>
+              </Link> */}
               <Link
                 to="/signin"
-                className="border rounded-3xl border-black -ml-8 px-4 py-2 text-white bg-black"
+                className="border rounded-3xl border-black px-4 py-2 text-white bg-black"
               >
                 Login
               </Link>
