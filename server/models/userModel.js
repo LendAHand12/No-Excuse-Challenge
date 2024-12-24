@@ -214,6 +214,9 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
+    heweWallet: {
+      type: String,
+    },
     role: {
       type: String,
       // enum: ["USER", "ADMIN", "ADMIN1", "ADMIN2"],

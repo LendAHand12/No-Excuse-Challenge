@@ -96,7 +96,13 @@ const registerUser = asyncHandler(async (req, res) => {
     if (treeReceiveUser.children.length < 5) {
       const avatar = generateGravatar(email);
 
-      const wallet = await registerSerepayFnc(userId, email.toLowerCase(), password);
+      const token = await registerSerepayFnc(userId, email.toLowerCase(), password);
+      console.log({ token });
+      const heweWallet = await createSerepayHeweWallet(token); // hewe wallet
+      console.log({ heweWallet });
+
+      const wallet = await createSerepayUsdtWallet(token); // usdt wallet
+      console.log({ wallet });
 
       const user = await User.create({
         userId,
@@ -105,6 +111,7 @@ const registerUser = asyncHandler(async (req, res) => {
         password,
         avatar,
         walletAddress,
+        heweWallet,
         walletAddress1: wallet,
         walletAddress2: wallet,
         walletAddress3: wallet,
@@ -272,6 +279,7 @@ const authUser = asyncHandler(async (req, res) => {
         availableUsdt: user.availableUsdt,
         claimedHewe: user.claimedHewe,
         claimedUsdt: user.claimedUsdt,
+        heweWallet: user.heweWallet,
       },
       accessToken,
       refreshToken,
@@ -394,23 +402,45 @@ const registerSerepayFnc = async (userName, email, password) => {
       password,
     })
     .then(async (response) => {
-      const token = response.data.data;
-      return axios
-        .post(
-          `${process.env.SEREPAY_HOST}/api/blockico/createWalletBEP20`,
-          {
-            symbol: "USDT.BEP20",
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        )
-        .then(async (response) => {
-          return response.data.data.address;
-        })
-        .catch((error) => {
-          throw new Error(error.response.data.message);
-        });
+      return response.data.data;
+    })
+    .catch((error) => {
+      throw new Error(error.response.data.message);
+    });
+};
+
+const createSerepayUsdtWallet = async (token) => {
+  return axios
+    .post(
+      `${process.env.SEREPAY_HOST}/api/blockico/createWalletBEP20`,
+      {
+        symbol: "USDT.BEP20",
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    )
+    .then(async (response) => {
+      return response.data.data.address;
+    })
+    .catch((error) => {
+      throw new Error(error.response.data.message);
+    });
+};
+
+const createSerepayHeweWallet = async (token) => {
+  return axios
+    .post(
+      `${process.env.SEREPAY_HOST}/api/blockico/createWalletBEP20`,
+      {
+        symbol: "HEWE",
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    )
+    .then(async (response) => {
+      return response.data.data.address;
     })
     .catch((error) => {
       throw new Error(error.response.data.message);

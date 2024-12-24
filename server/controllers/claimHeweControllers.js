@@ -11,10 +11,8 @@ const claimHewe = asyncHandler(async (req, res) => {
     }
     const response = await axios.post("https://serepay.net/api/payment/claimHewe", {
       amountClaim: user.availableHewe,
-      address: user.walletAddress,
+      address: user.heweWallet,
     });
-    console.log({ response: response });
-    console.log({ responseData: response.data });
 
     user.claimedHewe = user.claimedHewe + user.availableHewe;
     user.availableHewe = 0;

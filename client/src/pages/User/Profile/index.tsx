@@ -46,6 +46,7 @@ const Profile = () => {
     availableHewe,
     claimedHewe,
     walletAddress,
+    heweWallet,
   } = userInfo;
   const [imgFront, setImgFront] = useState('');
   const [imgBack, setImgBack] = useState('');
@@ -298,8 +299,12 @@ const Profile = () => {
               <p>{idCode}</p>
             </div>
             <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
-              <p>Serepay wallet :</p>
+              <p>Serepay wallet (USDT) :</p>
               <p>{shortenWalletAddress(walletAddress1, 14)}</p>
+            </div>
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+              <p>Serepay wallet (HEWE) :</p>
+              <p>{shortenWalletAddress(heweWallet, 14)}</p>
             </div>
             <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4 rounded-lg">
               <p>Personal wallet :</p>

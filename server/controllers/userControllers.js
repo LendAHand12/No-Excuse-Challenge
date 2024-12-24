@@ -203,6 +203,7 @@ const getUserById = asyncHandler(async (req, res) => {
       availableUsdt: user.availableUsdt,
       claimedHewe: user.claimedHewe,
       claimedUsdt: user.claimedUsdt,
+      heweWallet: user.heweWallet,
     });
   } else {
     res.status(404);
@@ -309,6 +310,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       availableUsdt: user.availableUsdt,
       claimedHewe: user.claimedHewe,
       claimedUsdt: user.claimedUsdt,
+      heweWallet: user.heweWallet,
     });
   } else {
     res.status(404);
@@ -401,6 +403,7 @@ const updateUser = asyncHandler(async (req, res) => {
           availableUsdt: updatedUser.availableUsdt,
           claimedHewe: updatedUser.claimedHewe,
           claimedUsdt: updatedUser.claimedUsdt,
+          heweWallet: updatedUser.heweWallet,
         },
       });
     }
@@ -696,7 +699,7 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
               ? "Chưa hoàn thành"
               : child.countPay === 1
               ? "Hoàn thành"
-              : child.countPay - 1
+              : child.countPay - 4
             // child.countPay <= 1 ? 0 : child.countPay - 1
           })`,
           isGray:
