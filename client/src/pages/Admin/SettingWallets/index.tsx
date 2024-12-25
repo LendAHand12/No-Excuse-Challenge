@@ -98,6 +98,27 @@ const SettingWalletsPage = () => {
                   </div>
                   <div className="w-full flex flex-col mb-4">
                     <span className="font-semibold">
+                      {t('walletAddress')} Admin :
+                    </span>
+                    <input
+                      className="w-full px-6 py-3 rounded-lg text-white bg-black border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 mt-2"
+                      type="text"
+                      placeholder={`Oxbx7...`}
+                      {...register('ADMIN', {
+                        required: t('Wallet address is required'),
+                        pattern: {
+                          value: /^0x[a-fA-F0-9]{40}$/g,
+                          message: t('Please enter the correct wallet format'),
+                        },
+                      })}
+                      disabled={submiting}
+                    />
+                    <p className="text-red-500 text-sm">
+                      {errors.ADMIN?.message}
+                    </p>
+                  </div>
+                  <div className="w-full flex flex-col mb-4">
+                    <span className="font-semibold">
                       {t('walletAddress')} HEWE :
                     </span>
                     <input

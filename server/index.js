@@ -105,63 +105,63 @@ app.use(notFound);
 // configure a custome error handler middleware
 app.use(errorHandler);
 
-const cron0 = new CronJob("00 17 * * *", async () => {
+const cron0 = new CronJob("00 00 * * *", async () => {
   // 0h
   console.log("Dis hewe to user start");
   await distributionHewe();
   console.log("Dis hewe user done");
 });
 
-const cron1 = new CronJob("00 18 * * *", async () => {
+const cron1 = new CronJob("00 01 * * *", async () => {
   // 1h
   console.log("Delete user start");
   await deleteUser24hUnPay();
   console.log("Delete user done");
 });
 
-const cron2 = new CronJob("30 19 * * *", async () => {
+const cron2 = new CronJob("30 01 * * *", async () => {
   // 1h30
   console.log("Check A Package start");
   await checkAPackage();
   console.log("Check A Package done");
 });
 
-const cron3 = new CronJob("00 19 * * *", async () => {
+const cron3 = new CronJob("00 02 * * *", async () => {
   // 2h
   console.log("Check B Package start");
   await checkBPackage();
   console.log("Check B Package done");
 });
 
-const cron4 = new CronJob("00 20 * * *", async () => {
+const cron4 = new CronJob("00 03 * * *", async () => {
   // 3h
   console.log("Check C Package start");
   await checkCPackage();
   console.log("Check C Package done");
 });
 
-const cron5 = new CronJob("00 21 * * *", async () => {
+const cron5 = new CronJob("00 04 * * *", async () => {
   // 4h
   console.log("Count child start");
   await countChildToData();
   console.log("Count child done");
 });
 
-const cron6 = new CronJob("00 22 * * *", async () => {
+const cron6 = new CronJob("00 05 * * *", async () => {
   // 5h
   console.log("Refresh layer start");
   await countLayerToData();
   console.log("Refresh layer done");
 });
 
-const cron7 = new CronJob("00 23 * * *", async () => {
+const cron7 = new CronJob("00 06 * * *", async () => {
   // 6h
   console.log("Reset trans unpay tier start");
   await resetTransTierUnPay();
   console.log("Reset trans unpay tier done");
 });
 
-const cron8 = new CronJob("30 23 * * *", async () => {
+const cron8 = new CronJob("30 06 * * *", async () => {
   // 6h
   console.log("Check block children start");
   await checkBlockChildren();

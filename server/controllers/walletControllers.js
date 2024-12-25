@@ -21,7 +21,7 @@ const updateWallet = asyncHandler(async (req, res) => {
     await walletData.save();
     if (w.type === "ADMIN") {
       const admin = await User.findById("6494e9101e2f152a593b66f2");
-      admin.walletAddress = [w.address, ...admin.walletAddress];
+      admin.walletAddress = w.address;
       await admin.save();
     }
   }
