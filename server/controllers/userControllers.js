@@ -694,11 +694,11 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
           key: child._id,
           label: `${child.userId} (${child.countChild[currentTier - 1]} - ${
             child.tier > 1 && child.countPay === 0
-              ? "Hoàn thành"
+              ? "Completed"
               : child.tier === 1 && child.countPay === 0
-              ? "Chưa hoàn thành"
+              ? "Not completed"
               : child.countPay === 1
-              ? "Hoàn thành"
+              ? "Completed"
               : child.countPay - 4
             // child.countPay <= 1 ? 0 : child.countPay - 1
           })`,

@@ -210,7 +210,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, routes }: SidebarProps) => {
                     to={route.link}
                     className={`group relative flex items-center rounded-s-2xl gap-8 py-3 pl-6 font-medium text-[#676A76] duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
                       pathname.includes(route.link) &&
-                      'bg-graydark dark:bg-meta-4 text-dreamchain'
+                      'bg-graydark text-dreamchain'
                     }`}
                   >
                     {route.icon}

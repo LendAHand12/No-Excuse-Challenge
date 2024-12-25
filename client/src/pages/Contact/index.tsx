@@ -62,7 +62,7 @@ const ContactPage: React.FC = () => {
                 </svg>
                 <div className="space-y-2">
                   <p className="font-bold">Phone</p>
-                  <p>+8481276381</p>
+                  <p>+1(844)446-9477</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -81,11 +81,11 @@ const ContactPage: React.FC = () => {
 
                 <div className="space-y-2">
                   <p className="font-bold">Email</p>
-                  <p>Lorem ipsum@ gmail.com</p>
+                  <p>support@dreamchain.live</p>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <svg
                 width="50"
                 height="50"
@@ -102,16 +102,16 @@ const ContactPage: React.FC = () => {
                 <p className="font-bold">Adress</p>
                 <p>Lorem ipsum dolor</p>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
         <div className="space-y-10">
           <div>
             <h3 className="lg:text-3xl text-2xl font-bold">Contact Direct</h3>
-            <p className="text-[16px]">
+            {/* <p className="text-[16px]">
               Donec amet est quisque etiam sollicitudin pharetra tortor
               phasellus enim.
-            </p>
+            </p> */}
           </div>
           <div className="max-w-180">
             <form onSubmit={handleSubmit(onSubmit)}>

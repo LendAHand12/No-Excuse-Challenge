@@ -328,11 +328,11 @@ const Profile = () => {
             </div> */}
             <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
               <p>Completed Registration :</p>
-              <p>Finished</p>
+              <p>{countPay === 13 ? 'Unfinished' : 'Finished'}</p>
             </div>
             <div className="grid lg:grid-cols-2 gap-2 lg:gap-0  py-2 px-4 rounded-lg">
               <p>Number of contribution :</p>
-              <p>{listDirectUser.length}</p>
+              <p>{countPay === 13 ? 10 : 0}</p>
             </div>
             {/* <div className="grid grid-cols-2 bg-[#E5E9EE] py-2 px-4">
               <p>Tier :</p>
