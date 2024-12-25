@@ -284,7 +284,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
             amount: referralCommissionFee,
             userCountPay: countPayUser,
             address_ref: receiveUser[`walletAddress${user.tier}`],
-            address_from: user.walletAddress[0],
+            address_from: user.walletAddress1,
             address_to: referralCommissionWallet,
             tier: user.tier,
             buyPackage: user.buyPackage,
