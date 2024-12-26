@@ -33,7 +33,7 @@ const sendMail = async (id, email, option) => {
             •	Your DreamChain account is pending activation.
             <br>
             •	To activate your account, please click the link below:
-            Activation Link: <a href="${url}">[Active Now]</a>
+            Activation Link: <a href="${url}">[Activate now]</a>
             <br>
             •	After successfully activating your account, you are now able log in to your account on the website <a href="https://dreamchain.live">https://dreamchain.live</a> to start your journey.
             <br><br>

@@ -33,7 +33,7 @@
   "contact": "Contact",
   "validUrl": "Valid path",
   "duplicateInfo": "There is a duplicate information. Please check again",
-  "registerSuccessful": "Registration is successful. Please check your Email",
+  "registerSuccessful": "Please confirm your email by opening it and clicking on 'Activate Now.'",
   "userAlreadyConfirmed": "User is confirmed",
   "Recovery mail sent.Please check your mail": "Recovery mail sent. Please check your mail",
   "Login information is incorrect": "Login information is incorrect",
@@ -373,5 +373,7 @@
   "The wallet address does not exist in the Serepay system": "The wallet address does not exist in the Serepay system",
 
   "congratPackageB": "Congratulations, you have successfully paid for package B",
-  "upgradeAPackage": "Upgrade to package A"
+  "upgradeAPackage": "Upgrade to package A",
+  "COMPANY": "Buy HEWE",
+  "PIG": "DreamPool"
 }
