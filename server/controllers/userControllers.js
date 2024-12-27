@@ -692,16 +692,8 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
 
         tree.nodes.push({
           key: child._id,
-          label: `${child.userId} (${child.countChild[currentTier - 1]} - ${
-            child.tier > 1 && child.countPay === 0
-              ? "Completed"
-              : child.tier === 1 && child.countPay === 0
-              ? "Not completed"
-              : child.countPay === 1
-              ? "Completed"
-              : child.countPay - 4
-            // child.countPay <= 1 ? 0 : child.countPay - 1
-          })`,
+          label: `${child.userId}`,
+          totalChild: child.countChild,
           isGray:
             child.status === "LOCKED"
               ? currentTier === 1 || userRequest.isAdmin

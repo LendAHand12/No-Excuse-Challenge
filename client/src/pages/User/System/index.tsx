@@ -39,7 +39,7 @@ const SystemPage = () => {
   const [currentTier, setCurrentTier] = useState(1);
 
   const StyledNode = useCallback(
-    ({ children, onClick, layer, isRed, isYellow, isGray }) => {
+    ({ children, onClick, layer, isRed, isYellow, isGray, totalChild }) => {
       return (
         <div
           onClick={onClick}
@@ -58,7 +58,8 @@ const SystemPage = () => {
         >
           <div className="flex flex-col items-center">
             <span>{children}</span>
-            <svg
+            <span>{totalChild}</span>
+            {/* <svg
               className="w-10 h-auto text-red-500"
               viewBox="0 0 24 24"
               fill="none"
@@ -85,7 +86,7 @@ const SystemPage = () => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
-            </svg>
+            </svg> */}
           </div>
         </div>
       );
@@ -103,6 +104,7 @@ const SystemPage = () => {
             isRed={node.isRed}
             isGray={node.isGray}
             isYellow={node.isYellow}
+            totalChild={node.totalChild}
           >
             {node.label}
           </StyledNode>
