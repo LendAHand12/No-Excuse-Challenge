@@ -29,6 +29,8 @@ import ServicePage from './pages/Service';
 import SettingWallets from './pages/Admin/SettingWallets';
 import AdminTransactionsPage from './pages/Admin/Transactions';
 import SystemPage from './pages/User/System';
+import TermsPage from './pages/Terms';
+import GuidePage from './pages/Guide';
 
 function App() {
   const { pathname } = useLocation();
@@ -83,6 +85,24 @@ function App() {
             <>
               <PageTitle title="Contact | DreamChain" />
               <ContactPage />
+            </>
+          }
+        />
+        <Route
+          path="/terms"
+          element={
+            <>
+              <PageTitle title="Terms & Conditions | DreamChain" />
+              <TermsPage />
+            </>
+          }
+        />
+        <Route
+          path="/guide"
+          element={
+            <>
+              <PageTitle title="Guide | DreamChain" />
+              <GuidePage />
             </>
           }
         />

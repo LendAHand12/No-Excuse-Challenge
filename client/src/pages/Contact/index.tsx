@@ -122,7 +122,7 @@ const ContactPage: React.FC = () => {
                   {...register('userName', {
                     required: t('fullname is required'),
                   })}
-                  className="w-full rounded-xl border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-dreamchain active:border-dreamchain disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  className="w-full rounded-xl placeholder:text-gray-500 border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-dreamchain active:border-dreamchain disabled:cursor-default disabled:bg-whiter"
                 />
                 <p className="text-red-500 text-sm">
                   {errors.userName?.message}
@@ -136,7 +136,7 @@ const ContactPage: React.FC = () => {
                     {...register('phone', {
                       required: t('phone is required'),
                     })}
-                    className="w-full rounded-xl border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-dreamchain active:border-dreamchain disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className="w-full rounded-xl placeholder:text-gray-500 border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-dreamchain active:border-dreamchain disabled:cursor-default disabled:bg-whiter"
                   />
                   <p className="text-red-500 text-sm">
                     {errors.phone?.message}
@@ -150,7 +150,7 @@ const ContactPage: React.FC = () => {
                     {...register('email', {
                       required: t('email is required'),
                     })}
-                    className="w-full rounded-xl border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-dreamchain active:border-dreamchain disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className="w-full rounded-xl placeholder:text-gray-500 border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-dreamchain active:border-dreamchain disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
                   <p className="text-red-500 text-sm">
                     {errors.email?.message}
@@ -164,7 +164,7 @@ const ContactPage: React.FC = () => {
                   {...register('message', {
                     required: t('message is required'),
                   })}
-                  className="w-full rounded-xl border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-dreamchain active:border-dreamchain disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  className="w-full rounded-xl placeholder:text-gray-500 border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-dreamchain active:border-dreamchain disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                 ></textarea>
                 <p className="text-red-500 text-sm">
                   {errors.message?.message}

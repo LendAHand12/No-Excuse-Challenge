@@ -82,7 +82,7 @@
   "Congratulations, you have successfully authenticated": "Congratulations, you have successfully authenticated",
   "REGISTER": "New Registration",
   "DIRECT": "Direct Commission",
-  "REFERRAL": "DC Constrinbution  ",
+  "REFERRAL": "DC Contribution  ",
   "linkVerify": "Link mail",
 
   "referral": "Referral",
@@ -93,7 +93,7 @@
   "Your passwords do no match": "Passwords do not match",
   "Please enter the correct wallet format": "Please enter the correct wallet format",
 
-  "REFERRALHOLD": "DC Constrinbution",
+  "REFERRALHOLD": "DC Contribution",
   "DIRECTHOLD": "Direct Commission",
 
   "SUCCESS": "Success",
