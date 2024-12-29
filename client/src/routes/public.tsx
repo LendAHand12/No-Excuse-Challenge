@@ -86,7 +86,7 @@ const routes = [
     ),
   },
   {
-    title: 'Guide',
+    title: 'Member’s Guidelines',
     link: '/guide',
     icon: (
       <svg
