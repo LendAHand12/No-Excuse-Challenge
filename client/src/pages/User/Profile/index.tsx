@@ -207,7 +207,7 @@ const Profile = () => {
             <div className="flex justify-between items-center py-2 px-4">
               <p>Status</p>
               <div
-                className={`px-6 py-4 ${
+                className={`p-2 text-sm ${
                   status === 'UNVERIFY'
                     ? 'bg-red-600'
                     : status === 'PENDING'
@@ -238,7 +238,7 @@ const Profile = () => {
               <p>Ranking</p>
               {ranking !== 0 && (
                 <div
-                  className={`px-6 py-4 bg-green-600 text-white rounded-[50px]`}
+                  className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
                 >
                   {USER_RANKINGS.find((ele) => ele.value === ranking).label}
                 </div>
@@ -248,7 +248,7 @@ const Profile = () => {
             <div className="flex items-center justify-between bg-[#E5E9EE] py-2 px-4 rounded-lg">
               <p>Total Earning</p>
               <div
-                className={`px-6 py-4 bg-green-600 text-white rounded-[50px]`}
+                className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
               >
                 {totalEarning} USD
               </div>
