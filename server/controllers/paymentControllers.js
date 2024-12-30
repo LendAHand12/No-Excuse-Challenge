@@ -447,6 +447,7 @@ const onDonePayment = asyncHandler(async (req, res) => {
       user.totalHewe = totalHewe;
       user.hewePerDay = hewePerDay;
       user.countPay = 13;
+      user.ranking = 1;
     }
 
     const updatedUser = await user.save();
