@@ -110,12 +110,7 @@ const userSchema = mongoose.Schema(
     },
     buyPackage: {
       type: String,
-      enum: ["A", "B", "C", ""],
       default: "",
-    },
-    continueWithBuyPackageB: {
-      type: Boolean,
-      default: true,
     },
     errLahCode: {
       type: String,

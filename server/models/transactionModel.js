@@ -13,14 +13,10 @@ const transactionSchema = mongoose.Schema(
       type: Number,
       default: 1,
     },
-    address_ref: {
+    user_ref: {
       type: String,
     },
-    address_from: {
-      type: String,
-      required: true,
-    },
-    address_to: {
+    user_to: {
       type: String,
       required: true,
     },
