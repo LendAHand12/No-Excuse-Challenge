@@ -32,6 +32,8 @@ import SystemPage from './pages/User/System';
 import TermsPage from './pages/Terms';
 import GuidePage from './pages/Guide';
 import DreamPoolPage from './pages/User/DreamPool';
+import AdminUserPages from './pages/Admin/Users';
+import AdminSystemPage from './pages/Admin/System';
 
 function App() {
   const { pathname } = useLocation();
@@ -102,7 +104,7 @@ function App() {
           path="/guide"
           element={
             <>
-              <PageTitle title="Guide | DreamChain" />
+              <PageTitle title="Member’s Guidelines | DreamChain" />
               <GuidePage />
             </>
           }
@@ -136,6 +138,24 @@ function App() {
             <>
               <PageTitle title="Setting Wallets | DreamChain" />
               <SettingWallets />
+            </>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <>
+              <PageTitle title="Users | DreamChain" />
+              <AdminUserPages />
+            </>
+          }
+        />
+        <Route
+          path="/admin/system/:id"
+          element={
+            <>
+              <PageTitle title="System | DreamChain" />
+              <AdminSystemPage />
             </>
           }
         />
