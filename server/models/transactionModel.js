@@ -13,10 +13,17 @@ const transactionSchema = mongoose.Schema(
       type: Number,
       default: 1,
     },
-    user_ref: {
+    userId_ref: {
       type: String,
     },
-    user_to: {
+    userId_to: {
+      type: String,
+      required: true,
+    },
+    username_ref: {
+      type: String,
+    },
+    username_to: {
       type: String,
       required: true,
     },
@@ -43,12 +50,12 @@ const transactionSchema = mongoose.Schema(
     buyPackage: {
       type: String,
       enum: ["A", "B", "C", ""],
-      default: "C",
+      default: "A",
     },
     refBuyPackage: {
       type: String,
       enum: ["", "A", "B", "C"],
-      default: "",
+      default: "A",
     },
     refundAmount: {
       type: Number,

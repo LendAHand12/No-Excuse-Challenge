@@ -10,27 +10,6 @@ const userSchema = mongoose.Schema(
     walletAddress: {
       type: String,
     },
-    walletAddress1: {
-      type: String,
-      unique: true,
-      required: true,
-    },
-    walletAddress2: {
-      type: String,
-      unique: true,
-    },
-    walletAddress3: {
-      type: String,
-      unique: true,
-    },
-    walletAddress4: {
-      type: String,
-      unique: true,
-    },
-    walletAddress5: {
-      type: String,
-      unique: true,
-    },
     email: {
       type: String,
       required: true,
@@ -43,12 +22,6 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 1,
     },
-    parentId: {
-      type: mongoose.Schema.Types.ObjectId,
-    },
-    refId: {
-      type: mongoose.Schema.Types.ObjectId,
-    },
     isAdmin: {
       type: Boolean,
       required: true,
@@ -58,10 +31,6 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       required: true,
       default: false,
-    },
-    avatar: {
-      type: String,
-      required: true,
     },
     status: {
       type: String,
