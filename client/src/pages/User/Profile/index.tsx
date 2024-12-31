@@ -235,7 +235,7 @@ const Profile = () => {
           </div>
           <div className="bg-[#FAFBFC] p-4 rounded-2xl ">
             <div className="flex justify-between items-center py-2 px-4">
-              <p>Ranking</p>
+              <p>Rank</p>
               {ranking !== 0 && (
                 <div
                   className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
@@ -246,7 +246,7 @@ const Profile = () => {
             </div>
 
             <div className="flex items-center justify-between bg-[#E5E9EE] py-2 px-4 rounded-lg">
-              <p>Total Earning</p>
+              <p>Total Earned</p>
               <div
                 className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
               >
