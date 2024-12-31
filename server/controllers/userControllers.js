@@ -311,6 +311,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
       claimedHewe: user.claimedHewe,
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
+      ranking: user.ranking,
+      totalEarning: user.availableUsdt + user.claimedUsdt,
     });
   } else {
     res.status(404);
@@ -1973,6 +1975,14 @@ const getAdminById = asyncHandler(async (req, res) => {
   }
 });
 
+const getDreamPool = asyncHandler(async (req, res) => {
+  const count = await Transaction.countDocuments({ type: "PIG", status: "SUCCESS" });
+
+  res.json({
+    dreampool: count * 5 - process.env.PIG,
+  });
+});
+
 export {
   getUserProfile,
   getAllUsers,
@@ -2008,4 +2018,5 @@ export {
   deleteAdmin,
   getAdminById,
   getUserInfo,
+  getDreamPool,
 };

@@ -10,6 +10,7 @@ import User from '@/api/User';
 import Claim from '@/api/Claim';
 import { useCallback, useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
+import USER_RANKINGS from '@/constants/userRankings';
 
 const Profile = () => {
   const { t } = useTranslation();
@@ -47,6 +48,8 @@ const Profile = () => {
     claimedHewe,
     walletAddress,
     heweWallet,
+    ranking,
+    totalEarning,
   } = userInfo;
   const [imgFront, setImgFront] = useState('');
   const [imgBack, setImgBack] = useState('');
@@ -204,7 +207,7 @@ const Profile = () => {
             <div className="flex justify-between items-center py-2 px-4">
               <p>Status</p>
               <div
-                className={`px-6 py-4 ${
+                className={`p-2 text-sm ${
                   status === 'UNVERIFY'
                     ? 'bg-red-600'
                     : status === 'PENDING'
@@ -224,6 +227,31 @@ const Profile = () => {
             <div className="flex justify-between bg-[#E5E9EE] py-2 px-4 rounded-lg">
               <p>Member since</p>
               <p> {new Date(createdAt).toLocaleDateString('vi')}</p>
+            </div>
+            {/* <div className="flex justify-between py-2 px-4">
+              <p>Completed tier 1</p>
+              <p>{tier1Time}</p>
+            </div> */}
+          </div>
+          <div className="bg-[#FAFBFC] p-4 rounded-2xl ">
+            <div className="flex justify-between items-center py-2 px-4">
+              <p>Rank</p>
+              {ranking !== 0 && (
+                <div
+                  className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
+                >
+                  {USER_RANKINGS.find((ele) => ele.value === ranking).label}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between bg-[#E5E9EE] py-2 px-4 rounded-lg">
+              <p>Total Earned</p>
+              <div
+                className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
+              >
+                {totalEarning} USD
+              </div>
             </div>
             {/* <div className="flex justify-between py-2 px-4">
               <p>Completed tier 1</p>

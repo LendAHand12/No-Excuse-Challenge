@@ -24,6 +24,7 @@ import emailRoutes from "./routes/emailRoutes.js";
 import postsRoutes from "./routes/postsRoutes.js";
 import pageSettingRoutes from "./routes/pageSettingRoutes.js";
 import claimRoutes from "./routes/claimRoutes.js";
+import dreampoolRoutes from "./routes/dreampoolRoutes.js";
 
 import {
   countChildToData,
@@ -99,6 +100,7 @@ app.use("/api/email", emailRoutes);
 app.use("/api/posts", postsRoutes);
 app.use("/api/page-settings", pageSettingRoutes);
 app.use("/api/claim", claimRoutes);
+app.use("/api/dreampool", dreampoolRoutes);
 
 app.use(notFound);
 
@@ -173,7 +175,7 @@ const cron8 = new CronJob("30 06 * * *", async () => {
 // cron2.start();
 // cron3.start();
 // cron4.start();
-// cron5.start();
+cron5.start();
 // cron6.start();
 // cron7.start();
 // cron8.start();

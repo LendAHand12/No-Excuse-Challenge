@@ -212,6 +212,10 @@ const userSchema = mongoose.Schema(
     heweWallet: {
       type: String,
     },
+    ranking: {
+      type: Number,
+      default: 0,
+    },
     role: {
       type: String,
       // enum: ["USER", "ADMIN", "ADMIN1", "ADMIN2"],

@@ -277,6 +277,8 @@ const authUser = asyncHandler(async (req, res) => {
         claimedHewe: user.claimedHewe,
         claimedUsdt: user.claimedUsdt,
         heweWallet: user.heweWallet,
+        ranking: user.ranking,
+        totalEarning: user.availableUsdt + user.claimedUsdt,
       },
       accessToken,
       refreshToken,

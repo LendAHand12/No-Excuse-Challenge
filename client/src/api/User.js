@@ -1,5 +1,5 @@
 import API from './API';
-import { URL_API_USER } from './URL';
+import { URL_API_USER, URL_API_DREAMPOOL } from './URL';
 
 const User = {
   update: (userId, body) => {
@@ -89,6 +89,9 @@ const User = {
   },
   removeLastUserInTier: (body) => {
     return API.post(`${URL_API_USER}/removeLastUserInTier`, body);
+  },
+  getDreamPool: () => {
+    return API.get(`${URL_API_DREAMPOOL}`);
   },
 };
 
