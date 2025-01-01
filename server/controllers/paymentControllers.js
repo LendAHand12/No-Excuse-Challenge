@@ -20,7 +20,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
   const { user } = req;
 
   if (user) {
-    let walletUser = user[`walletAddress${user.tier}`];
+    let walletUser = user.walletAddress;
     if (user.countPay === 13) {
       // const canIncreaseTier = await checkCanIncreaseNextTier(user);
       // if (!canIncreaseTier) {
@@ -32,10 +32,11 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
       });
     } else {
       const wallets = await Wallet.find();
-      const registerWallet = wallets.find((ele) => ele.type === "REGISTER");
-      const pigWallet = wallets.find((ele) => ele.type === "PIG");
-      const companyWallet = wallets.find((ele) => ele.type === "COMPANY");
-      const holdWallet = await getAdminWallets();
+      const admin = await User.findOne({ email: "admin2@gmail.com" });
+      const adminWallet = wallets.find((ele) => ele.type === "ADMIN");
+      // const pigWallet = wallets.find((ele) => ele.type === "PIG");
+      // const companyWallet = wallets.find((ele) => ele.type === "COMPANY");
+      // const holdWallet = await getAdminWallets();
       const payments = [];
       const paymentIds = [];
       if (user.fine > 0) {
@@ -43,9 +44,8 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           userId: user.id,
           amount: user.fine,
           userCountPay: user.countPay,
-          address_ref: registerWallet.address,
-          address_from: walletUser,
-          address_to: registerWallet.address,
+          userId_to: admin._id,
+          username_to: "Admin",
           tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
@@ -53,14 +53,14 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           status: "PENDING",
         });
         payments.push({
-          address: registerWallet.address,
+          userName: "Admin",
           amount: user.fine,
         });
         paymentIds.push({
           type: "FINE",
           id: transactionFine._id,
           amount: user.fine,
-          to: registerWallet.address,
+          to: "Admin",
         });
       } else {
         const refUser = await getRefParentUser(user.id, user.tier);
@@ -68,7 +68,6 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         let registerFee = 5 * user.tier;
         let pigFee = 5 * user.tier;
         let companyFee = 25 * user.tier;
-        let directCommissionWallet = "";
         let directCommissionFee = 15 * user.tier;
         let referralCommissionFee = 5 * user.tier;
         // delete pending trans
@@ -82,16 +81,15 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         });
         // giao dich dang ky
         payments.push({
-          address: registerWallet.address,
+          userName: "Admin",
           amount: registerFee,
         });
         const transactionRegister = await Transaction.create({
           userId: user.id,
           amount: registerFee,
           userCountPay: user.countPay,
-          address_ref: registerWallet.address,
-          address_from: walletUser,
-          address_to: registerWallet.address,
+          userId_to: admin._id,
+          username_to: "Admin",
           tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
@@ -102,20 +100,19 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           type: "REGISTER",
           id: transactionRegister._id,
           amount: registerFee,
-          to: registerWallet.address,
+          to: "Admin",
         });
         // giao dich con heo
         payments.push({
-          address: pigWallet.address,
+          userName: "",
           amount: pigFee,
         });
         const transactionPig = await Transaction.create({
           userId: user.id,
           amount: pigFee,
           userCountPay: user.countPay,
-          address_ref: pigWallet.address,
-          address_from: walletUser,
-          address_to: pigWallet.address,
+          userId_to: admin._id,
+          username_to: "",
           tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
@@ -126,20 +123,19 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           type: "PIG",
           id: transactionPig._id,
           amount: pigFee,
-          to: pigWallet.address,
+          to: "",
         });
         // giao dich hewe cho cong ty
         payments.push({
-          address: companyWallet.address,
+          userName: "Purchased HEWE",
           amount: companyFee,
         });
         const transactionCompany = await Transaction.create({
           userId: user.id,
           amount: companyFee,
           userCountPay: user.countPay,
-          address_ref: companyWallet.address,
-          address_from: walletUser,
-          address_to: companyWallet.address,
+          userId_to: admin._id,
+          username_to: "Purchased HEWE",
           tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
@@ -150,42 +146,30 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           type: "COMPANY",
           id: transactionCompany._id,
           amount: companyFee,
-          to: companyWallet.address,
+          to: "Purchased HEWE",
         });
         // giao dich hoa hong truc tiep
         if (refUser.closeLah) {
-          directCommissionWallet = holdWallet[user.tier];
           haveRefNotPayEnough = true;
         } else if (refUser.openLah || refUser.adminChangeTier || refUser.createBy === "ADMIN") {
-          directCommissionWallet = refUser[`walletAddress${user.tier}`];
+          haveRefNotPayEnough = false;
         } else {
           if (
             refUser.status === "LOCKED" ||
             refUser.tier < user.tier ||
             (refUser.tier === user.tier && refUser.countPay < 13)
           ) {
-            directCommissionWallet = holdWallet[user.tier];
             haveRefNotPayEnough = true;
           } else {
-            directCommissionWallet = refUser[`walletAddress${user.tier}`];
-          }
-        }
-        if (directCommissionWallet === refUser[`walletAddress${user.tier}`]) {
-          const isSerepayWallet = await checkSerepayWallet(directCommissionWallet);
-          if (!isSerepayWallet) {
-            directCommissionWallet = holdWallet[user.tier];
-            haveRefNotPayEnough = true;
+            haveRefNotPayEnough = false;
           }
         }
         const transactionDirect = await Transaction.create({
           userId: user.id,
           amount: directCommissionFee,
           userCountPay: user.countPay,
-          address_ref: refUser[`walletAddress${user.tier}`]
-            ? refUser[`walletAddress${user.tier}`]
-            : refUser[`walletAddress1`],
-          address_from: walletUser,
-          address_to: directCommissionWallet,
+          userId_to: refUser._id,
+          username_to: refUser.userId,
           tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
@@ -197,10 +181,10 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           type: "DIRECT",
           id: transactionDirect._id,
           amount: directCommissionFee,
-          to: directCommissionWallet,
+          to: refUser.userId,
         });
         payments.push({
-          address: directCommissionWallet,
+          userName: refUser.userId,
           amount: directCommissionFee,
         });
         // await generatePackageTrans(
@@ -219,73 +203,49 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         let countPayUser = user.countPay;
         let indexFor = 1;
         for (let p of ancestors) {
-          let referralCommissionWallet, haveParentNotPayEnough;
-          const receiveUser = await User.findById(p ? p.userId : "6494e9101e2f152a593b66f2");
-          if (p ? p.isFirst : false) {
-            referralCommissionWallet = receiveUser[`walletAddress${user.tier}`];
-            const isSerepayWallet = await checkSerepayWallet(
-              receiveUser[`walletAddress${user.tier}`]
-            );
-            if (!isSerepayWallet) {
-              referralCommissionWallet = holdWallet[user.tier];
-            }
+          let haveParentNotPayEnough;
+          const receiveUser = await User.findById(p ? p.userId : admin._id);
+          if (receiveUser.closeLah) {
+            haveParentNotPayEnough = true;
+          } else if (
+            receiveUser.openLah ||
+            receiveUser.adminChangeTier ||
+            receiveUser.createBy === "ADMIN"
+          ) {
+            haveParentNotPayEnough = false;
           } else {
-            if (receiveUser.closeLah) {
-              referralCommissionWallet = holdWallet[user.tier];
-              haveParentNotPayEnough = true;
-            } else if (
-              receiveUser.openLah ||
-              receiveUser.adminChangeTier ||
-              receiveUser.createBy === "ADMIN"
+            if (
+              receiveUser.status === "LOCKED" ||
+              (receiveUser.errLahCode !== "" && indexFor > 6) ||
+              receiveUser.tier < user.tier ||
+              (receiveUser.tier === user.tier && receiveUser.countPay < user.countPay + 1)
             ) {
-              referralCommissionWallet = receiveUser[`walletAddress${user.tier}`];
+              haveParentNotPayEnough = true;
             } else {
-              if (
-                receiveUser.status === "LOCKED" ||
-                (receiveUser.errLahCode !== "" && indexFor > 6) ||
-                receiveUser.tier < user.tier ||
-                (receiveUser.tier === user.tier && receiveUser.countPay < user.countPay + 1)
-              ) {
-                referralCommissionWallet = holdWallet[user.tier];
-                haveParentNotPayEnough = true;
-              } else {
-                referralCommissionWallet = receiveUser[`walletAddress${user.tier}`];
-              }
-            }
-            if (receiveUser.hold !== "no" && receiveUser.holdLevel !== "no") {
-              if (
-                receiveUser.hold.toString() === user.tier.toString() &&
-                parseInt(receiveUser.holdLevel) <= parseInt(user.countPay)
-              ) {
-                haveParentNotPayEnough = true;
-              }
-            } else if (user.tier >= 2 && user.countPay >= 3 && receiveUser.countChild[0] >= 300) {
-              const checkRatioCountChild = await checkRatioCountChildOfUser(receiveUser._id);
-              if (!checkRatioCountChild) haveParentNotPayEnough = true;
-            }
-            if (haveParentNotPayEnough) {
-              referralCommissionWallet = holdWallet[user.tier];
-            }
-            if (referralCommissionWallet === receiveUser[`walletAddress${user.tier}`]) {
-              const isSerepayWallet = await checkSerepayWallet(
-                receiveUser[`walletAddress${user.tier}`]
-              );
-              if (!isSerepayWallet) {
-                referralCommissionWallet = holdWallet[user.tier];
-              }
+              haveParentNotPayEnough = false;
             }
           }
+          if (receiveUser.hold !== "no" && receiveUser.holdLevel !== "no") {
+            if (
+              receiveUser.hold.toString() === user.tier.toString() &&
+              parseInt(receiveUser.holdLevel) <= parseInt(user.countPay)
+            ) {
+              haveParentNotPayEnough = true;
+            }
+          } else if (user.tier >= 2 && user.countPay >= 3 && receiveUser.countChild[0] >= 300) {
+            const checkRatioCountChild = await checkRatioCountChildOfUser(receiveUser._id);
+            if (!checkRatioCountChild) haveParentNotPayEnough = true;
+          }
           payments.push({
-            address: referralCommissionWallet,
+            userName: receiveUser.userId,
             amount: referralCommissionFee,
           });
           const transactionReferral = await Transaction.create({
             userId: user.id,
             amount: referralCommissionFee,
             userCountPay: countPayUser,
-            address_ref: receiveUser[`walletAddress${user.tier}`],
-            address_from: user.walletAddress1,
-            address_to: referralCommissionWallet,
+            userId_to: receiveUser._id,
+            username_to: receiveUser.userId,
             tier: user.tier,
             buyPackage: user.buyPackage,
             hash: "",
@@ -296,7 +256,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
             type: "REFERRAL",
             id: transactionReferral._id,
             amount: referralCommissionFee,
-            to: referralCommissionWallet,
+            to: receiveUser.userId,
           });
           countPayUser = countPayUser + 1;
           indexFor++;

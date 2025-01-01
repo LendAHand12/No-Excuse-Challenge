@@ -224,6 +224,7 @@
   "duplicateInfoEmail": "Duplicate Email",
   "duplicateInfoUserId": "Duplicate user name",
   "duplicateInfoIdCode": "Duplicate ID/DL/Passport number",
+  "duplicateWalletAddress": "Duplicate Wallet Address",
 
   "termTitle": "Lend A Hand Program - Terms and Conditions",
   "termDate": "Effective Date: July 01, 2023",

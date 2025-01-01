@@ -10,6 +10,7 @@ import { shortenWalletAddress } from '@/utils';
 import { useForm } from 'react-hook-form';
 import Modal from 'react-modal';
 import DefaultLayout from '../../../layout/DefaultLayout';
+import { transfer } from '../../../utils/smartContract';
 
 Modal.setAppElement('#root');
 
@@ -75,56 +76,99 @@ const PaymentPage = () => {
     setShowOtpModal(false);
   };
 
-  const handleSubmitOTPSerepay = useCallback(() => {
-    setLoadingGetOtp(true);
-    axios
-      .post(
-        `${
-          import.meta.env.VITE_HOST_SEREPAY
-        }/api/payment/sendCodeWalletTransferArray`,
-        {
-          wallet: userInfo.walletAddress1,
-          arrayWallet: paymentsList,
-        },
-      )
-      .then(() => {
-        setLoadingGetOtp(false);
-        openModal();
-      })
-      .catch((error) => {
-        let message =
-          error.response && error.response.data.message
-            ? error.response.data.message
-            : error.message;
-        toast.error(t(message));
-        setLoadingGetOtp(false);
-      });
+  // const handleSubmitOTPSerepay = useCallback(() => {
+  //   setLoadingGetOtp(true);
+  //   axios
+  //     .post(
+  //       `${
+  //         import.meta.env.VITE_HOST_SEREPAY
+  //       }/api/payment/sendCodeWalletTransferArray`,
+  //       {
+  //         wallet: userInfo.walletAddress1,
+  //         arrayWallet: paymentsList,
+  //       },
+  //     )
+  //     .then(() => {
+  //       setLoadingGetOtp(false);
+  //       openModal();
+  //     })
+  //     .catch((error) => {
+  //       let message =
+  //         error.response && error.response.data.message
+  //           ? error.response.data.message
+  //           : error.message;
+  //       toast.error(t(message));
+  //       setLoadingGetOtp(false);
+  //     });
+  // }, [paymentsList]);
+
+  // const handlePaySerepay = useCallback(
+  //   async (values) => {
+  //     const { otp } = values;
+  //     setLoadingPayment(true);
+  //     axios
+  //       .post(
+  //         `${
+  //           import.meta.env.VITE_HOST_SEREPAY
+  //         }/api/payment/confirmWalletTransferArray`,
+  //         {
+  //           code: otp,
+  //           wallet: userInfo[`walletAddress${userInfo.tier}`],
+  //           arrayWallet: paymentsList,
+  //         },
+  //       )
+  //       .then(async (response) => {
+  //         const { message, status } = response.data;
+  //         if (status) {
+  //           await donePayment();
+  //           closeModal();
+  //           toast.success(t(message));
+  //           window.location.reload();
+  //         }
+  //         setLoadingPayment(false);
+  //       })
+  //       .catch((error) => {
+  //         let message =
+  //           error.response && error.response.data.message
+  //             ? error.response.data.message
+  //             : error.message;
+  //         toast.error(t(message));
+  //         setLoadingPayment(false);
+  //       });
+  //   },
+  //   [paymentsList],
+  // );
+
+  const paymentMetamask = useCallback(async () => {
+    setLoadingPayment(true);
+    try {
+      const referralTransaction = await transfer(
+        import.meta.env.VITE_MAIN_WALLET_ADDRESS,
+        106,
+      );
+      if (referralTransaction) {
+        const { transactionHash } = referralTransaction;
+        await donePayment(transactionHash);
+        window.location.reload();
+      } else {
+        setLoadingPayment(false);
+        throw new Error(t('payment error'));
+      }
+    } catch (error) {
+      toast.error(t(error.message));
+      setLoadingPayment(false);
+    }
   }, [paymentsList]);
 
-  const handlePaySerepay = useCallback(
-    async (values) => {
-      const { otp } = values;
-      setLoadingPayment(true);
-      axios
-        .post(
-          `${
-            import.meta.env.VITE_HOST_SEREPAY
-          }/api/payment/confirmWalletTransferArray`,
-          {
-            code: otp,
-            wallet: userInfo[`walletAddress${userInfo.tier}`],
-            arrayWallet: paymentsList,
-          },
-        )
-        .then(async (response) => {
-          const { message, status } = response.data;
-          if (status) {
-            await donePayment();
-            closeModal();
-            toast.success(t(message));
-            window.location.reload();
-          }
-          setLoadingPayment(false);
+  const donePayment = useCallback(
+    async (transactionHash) => {
+      await Payment.onDonePayment({
+        transIds: paymentIdsList,
+        transactionHash,
+      })
+        .then((response) => {
+          toast.success(t(response.data.message));
+          window.location.reload();
         })
         .catch((error) => {
           let message =
@@ -132,28 +176,10 @@ const PaymentPage = () => {
               ? error.response.data.message
               : error.message;
           toast.error(t(message));
-          setLoadingPayment(false);
         });
     },
-    [paymentsList],
+    [paymentIdsList],
   );
-
-  const donePayment = useCallback(async () => {
-    await Payment.onDonePayment({
-      transIds: paymentIdsList,
-    })
-      .then((response) => {
-        toast.success(t(response.data.message));
-        window.location.reload();
-      })
-      .catch((error) => {
-        let message =
-          error.response && error.response.data.message
-            ? error.response.data.message
-            : error.message;
-        toast.error(t(message));
-      });
-  }, [paymentIdsList]);
 
   return (
     <DefaultLayout>
@@ -207,7 +233,7 @@ const PaymentPage = () => {
             </div>
           ) : (
             <>
-              <Modal
+              {/* <Modal
                 isOpen={showOtpModal}
                 onRequestClose={closeModal}
                 style={{
@@ -286,7 +312,7 @@ const PaymentPage = () => {
                     </form>
                   </div>
                 </div>
-              </Modal>
+              </Modal> */}
               {showPayment && (
                 <>
                   <div className="w-full max-w-203 mx-auto rounded-lg bg-white p-10 text-gray-700 mt-4">
@@ -297,14 +323,12 @@ const PaymentPage = () => {
                     </div>
 
                     <div className="flex justify-between">
-                      {userInfo.buyPackage === 'A' && (
-                        <div className="mb-3">
-                          <p className="text-lg mb-2 ml-1">
-                            <span className="font-bold">{t('buyPackage')}</span>{' '}
-                            : {userInfo.buyPackage}
-                          </p>
-                        </div>
-                      )}
+                      <div className="mb-3">
+                        <p className="text-lg mb-2 ml-1">
+                          <span className="font-bold">{t('buyPackage')}</span> :
+                          A
+                        </p>
+                      </div>
                       <div className="mb-3">
                         <p className="text-lg mb-2 ml-1">
                           <span className="font-bold">Total</span> : {total}{' '}
@@ -313,7 +337,7 @@ const PaymentPage = () => {
                       </div>
                     </div>
                     {!loadingPaymentInfo &&
-                      paymentIdsList.map((payment) => (
+                      paymentIdsList.map((payment, i) => (
                         <div
                           key={payment.id}
                           className={`flex items-center p-4 mb-4 text-sm rounded-lg ${
@@ -360,37 +384,26 @@ const PaymentPage = () => {
                               </span>
                               <span>{payment.amount} USDT</span>
                             </div>
-                            <div className="">
-                              <span className="mr-2 text-black">
-                                <span className="font-medium mr-2">From</span>
-                                <span className="">
-                                  {shortenWalletAddress(
-                                    userInfo[`walletAddress${userInfo.tier}`]
-                                      ? userInfo[
-                                          `walletAddress${userInfo.tier}`
-                                        ]
-                                      : userInfo.walletAddress1,
-                                    10,
-                                  )}
+                            {i > 2 && (
+                              <div className="">
+                                <span className="mx-2 text-black">
+                                  <span className="font-medium mr-2">
+                                    To :{' '}
+                                  </span>
+                                  <span className="">{payment.to}</span>
                                 </span>
-                              </span>
-                              <span className="mx-2 text-black">
-                                <span className="font-medium mr-2">To</span>
-                                <span className="">
-                                  {shortenWalletAddress(payment.to, 10)}
-                                </span>
-                              </span>
-                            </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
                     <button
                       type="submit"
-                      onClick={handleSubmitOTPSerepay}
-                      disabled={loadingGetOtp}
+                      onClick={paymentMetamask}
+                      disabled={loadingPayment}
                       className="w-2xl mx-auto flex justify-center border border-black items-center hover:underline  font-medium rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
                     >
-                      {loadingGetOtp && <Loading />}
+                      {loadingPayment && <Loading />}
                       {t('payment')}
                     </button>
                   </div>
@@ -413,7 +426,7 @@ const PaymentPage = () => {
                       <path
                         d="M26 39L35.75 48.75L55.25 29.25"
                         stroke="#36BA02"
-                        stroke-width="6.5"
+                        strokeWidth="6.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
                       />

@@ -1,7 +1,7 @@
-import detectEthereumProvider from "@metamask/detect-provider";
-import { toast } from "react-toastify";
-import Web3 from "web3";
-import ContractToken from "@/abis/BEP20USDT.json";
+import detectEthereumProvider from '@metamask/detect-provider';
+import { toast } from 'react-toastify';
+import Web3 from 'web3';
+import ContractToken from '@/abis/BEP20USDT.json';
 
 export const loadWeb3 = async () => {
   let web3;
@@ -11,14 +11,14 @@ export const loadWeb3 = async () => {
     const netId = await web3.eth.getChainId();
     if (parseInt(netId) !== 56) {
       toast.error(
-        "Your Wallet network is not supported yet, please select BSC"
+        'Your Wallet network is not supported yet, please select BSC',
       );
       return false;
     }
   } else {
     // no ethereum provider
-    console.log("no ethereum wallet detected");
-    toast.error("Please install or enable MetaMask.", { delay: 1000 });
+    console.log('no ethereum wallet detected');
+    toast.error('Please install or enable MetaMask.', { delay: 1000 });
     return false;
   }
   return web3;
@@ -58,11 +58,11 @@ export const getBalance = async (account) => {
   const web3 = await loadWeb3();
   const token = await getToken(
     ContractToken,
-    import.meta.env.VITE_TOKEN_ADDRESS
+    import.meta.env.VITE_TOKEN_ADDRESS,
   );
 
   const balance = await token.methods.balanceOf(account).call();
-  return web3.utils.fromWei(balance, "ether");
+  return web3.utils.fromWei(balance, 'ether');
 };
 
 const isValidAddress = async (address) => {
@@ -77,15 +77,15 @@ export const transfer = async (address, amount) => {
   const validAddress = await isValidAddress(address);
 
   if (!validAddress) {
-    throw new Error("Invalid receiving wallet address!");
+    throw new Error('Invalid receiving wallet address!');
   } else {
     const token = await getToken(
       ContractToken,
-      import.meta.env.VITE_TOKEN_ADDRESS
+      import.meta.env.VITE_TOKEN_ADDRESS,
     );
 
     return token.methods
-      .transfer(address, web3.utils.toWei(amount.toString(), "ether"))
+      .transfer(address, web3.utils.toWei(amount.toString(), 'ether'))
       .send({ from: account })
       .then((transactionHash) => {
         return transactionHash;
@@ -93,9 +93,9 @@ export const transfer = async (address, amount) => {
       .catch((error) => {
         if (
           error.message ===
-          "Returned error: MetaMask Tx Signature: User denied transaction signature."
+          'Returned error: MetaMask Tx Signature: User denied transaction signature.'
         ) {
-          toast.error("You have refused to pay");
+          toast.error('You have refused to pay');
         } else {
           toast.error(error.message);
         }

@@ -73,6 +73,10 @@ const registerUser = asyncHandler(async (req, res) => {
     $and: [{ idCode: { $ne: "" } }, { idCode }],
     status: { $ne: "DELETED" },
   });
+  const userExistsWalletAddress = await User.findOne({
+    walletAddress,
+    status: { $ne: "DELETED" },
+  });
 
   if (userExistsUserId) {
     let message = "duplicateInfoUserId";
@@ -90,30 +94,25 @@ const registerUser = asyncHandler(async (req, res) => {
     let message = "duplicateInfoIdCode";
     res.status(400);
     throw new Error(message);
+  } else if (userExistsWalletAddress) {
+    let message = "duplicateWalletAddress";
+    res.status(400);
+    throw new Error(message);
   } else {
     const treeReceiveUser = await Tree.findOne({ userId: receiveId, tier: 1 });
 
     if (treeReceiveUser.children.length < 5) {
-      const avatar = generateGravatar(email);
+      // const token = await registerSerepayFnc(userId, email.toLowerCase(), password);
+      // const heweWallet = await createSerepayHeweWallet(token); // hewe wallet
 
-      const token = await registerSerepayFnc(userId, email.toLowerCase(), password);
-      const heweWallet = await createSerepayHeweWallet(token); // hewe wallet
-
-      const wallet = await createSerepayUsdtWallet(token); // usdt wallet
+      // const wallet = await createSerepayUsdtWallet(token); // usdt wallet
 
       const user = await User.create({
         userId,
         email: email.toLowerCase(),
         phone,
         password,
-        avatar,
         walletAddress,
-        heweWallet,
-        walletAddress1: wallet,
-        walletAddress2: wallet,
-        walletAddress3: wallet,
-        walletAddress4: wallet,
-        walletAddress5: wallet,
         idCode,
         role: "user",
       });

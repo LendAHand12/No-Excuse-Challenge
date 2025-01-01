@@ -13,19 +13,12 @@ const transactionSchema = mongoose.Schema(
       type: Number,
       default: 1,
     },
-    userId_ref: {
-      type: String,
-    },
     userId_to: {
       type: String,
       required: true,
     },
-    username_ref: {
-      type: String,
-    },
     username_to: {
       type: String,
-      required: true,
     },
     amount: {
       type: Number,
