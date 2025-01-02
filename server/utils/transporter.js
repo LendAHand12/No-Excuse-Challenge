@@ -15,11 +15,6 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   },
 
-  // service: 'gmail',
-  // auth: {
-  //   user: 'support@dreamchain.live', 
-  //   pass: 'lcxv nwms hykf evqx',  
-  // },
 });
 
 export default transporter;
