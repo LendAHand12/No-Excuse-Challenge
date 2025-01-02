@@ -7,19 +7,19 @@ const transporter = nodemailer.createTransport({
   // port: 587,
   // secure: false,
 
-  // host: process.env.EMAIL_HOST,
-  // port: process.env.EMAIL_PORT,
-  // secure: process.env.EMAIL_SECURE,
-  // auth: {
-  //   user: process.env.EMAIL,
-  //   pass: process.env.EMAIL_PASS,
-  // },
-
-  service: 'gmail',
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
+  secure: process.env.EMAIL_SECURE,
   auth: {
-    user: 'support@dreamchain.live', 
-    pass: 'lcxv nwms hykf evqx',  
+    user: process.env.EMAIL,
+    pass: process.env.EMAIL_PASS,
   },
+
+  // service: 'gmail',
+  // auth: {
+  //   user: 'support@dreamchain.live', 
+  //   pass: 'lcxv nwms hykf evqx',  
+  // },
 });
 
 export default transporter;
