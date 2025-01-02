@@ -5,8 +5,6 @@ import { useSelector } from 'react-redux';
 import Payment from '@/api/Payment';
 import Loading from '@/components/Loading';
 import { ToastContainer, toast } from 'react-toastify';
-import axios from 'axios';
-import { shortenWalletAddress } from '@/utils';
 import { useForm } from 'react-hook-form';
 import Modal from 'react-modal';
 import DefaultLayout from '../../../layout/DefaultLayout';
@@ -144,7 +142,7 @@ const PaymentPage = () => {
     try {
       const referralTransaction = await transfer(
         import.meta.env.VITE_MAIN_WALLET_ADDRESS,
-        106,
+        10,
       );
       if (referralTransaction) {
         const { transactionHash } = referralTransaction;
