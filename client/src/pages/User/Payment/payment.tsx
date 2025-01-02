@@ -413,9 +413,9 @@ const PaymentPage = () => {
                       <path
                         d="M26 39L35.75 48.75L55.25 29.25"
                         stroke="#36BA02"
-                        stroke-width="6.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="6.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       />
                     </svg>
 
