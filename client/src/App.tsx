@@ -34,6 +34,7 @@ import GuidePage from './pages/Guide';
 import DreamPoolPage from './pages/User/DreamPool';
 import AdminUserPages from './pages/Admin/Users';
 import AdminSystemPage from './pages/Admin/System';
+import GetVerifyLinkPage from './pages/Admin/GetVerifyLink';
 
 function App() {
   const { pathname } = useLocation();
@@ -156,6 +157,15 @@ function App() {
             <>
               <PageTitle title="System | DreamChain" />
               <AdminSystemPage />
+            </>
+          }
+        />
+        <Route
+          path="/admin/linkVerify"
+          element={
+            <>
+              <PageTitle title="Link verify | DreamChain" />
+              <GetVerifyLinkPage />
             </>
           }
         />
