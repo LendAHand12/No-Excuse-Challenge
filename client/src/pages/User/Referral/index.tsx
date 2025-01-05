@@ -30,11 +30,7 @@ const ReferralPage = () => {
       setLoading(true);
       await User.getListChild()
         .then((response) => {
-          const newData = response.data.map((ele) => ({
-            value: ele.id,
-            label: ele.userId,
-          }));
-          setListChild([...newData]);
+          setListChild([...response.data]);
           setLoading(false);
         })
         .catch((error) => {
@@ -78,7 +74,7 @@ const ReferralPage = () => {
                     setChildId(e.target.value);
                   }}
                   value={childId}
-                  className="form-select w-full px-3 py-2 mb-1 border border-black rounded-md focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
+                  className="form-select w-full px-3 py-2 mb-1 border text-black border-black rounded-md focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
                 >
                   <option value="">{t('No choose')}</option>
                   {listChild.length > 0 &&

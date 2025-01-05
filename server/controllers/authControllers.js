@@ -365,7 +365,6 @@ const getLinkVerify = asyncHandler(async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
   if (user.isConfirmed) {
-    res.status(400);
     throw new Error("User confirmed");
   }
   if (user) {
@@ -375,7 +374,6 @@ const getLinkVerify = asyncHandler(async (req, res) => {
       url,
     });
   } else {
-    res.status(400);
     throw new Error("User not found");
   }
 });
