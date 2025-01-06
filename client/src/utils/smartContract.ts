@@ -4,59 +4,43 @@ import Web3 from 'web3';
 import ContractToken from '@/abis/BEP20USDT.json';
 
 export const loadWeb3 = async () => {
-  let web3;
   const provider = await detectEthereumProvider();
-  if (provider) {
-    web3 = new Web3(provider);
-    const netId = await web3.eth.getChainId();
-    if (parseInt(netId) !== 56) {
-      toast.error(
-        'Your Wallet network is not supported yet, please select BSC',
-      );
-      return false;
-    }
-  } else {
-    // no ethereum provider
-    console.log('no ethereum wallet detected');
-    toast.error('Please install or enable MetaMask.', { delay: 1000 });
-    return false;
+  if (!provider) {
+    toast.error('Please install or enable MetaMask.');
+    return null;
   }
+
+  const web3 = new Web3(provider);
+  const chainId = await web3.eth.getChainId();
+
+  if (chainId !== 56) {
+    toast.error('Your Wallet network is not supported. Please select BSC.');
+    return null;
+  }
+
   return web3;
 };
 
 export const getContract = async (abiOfContract, addressOfContract) => {
   const web3 = await loadWeb3();
-  if (!web3) {
-    return false;
-  }
-  const tokenContract = new web3.eth.Contract(abiOfContract, addressOfContract);
-  return tokenContract;
+  if (!web3) return null;
+
+  return new web3.eth.Contract(abiOfContract, addressOfContract);
 };
 
 export const getAccount = async () => {
   const web3 = await loadWeb3();
-  if (!web3) {
-    return false;
-  }
-  const accounts = await web3.eth.getAccounts();
-  if (accounts.length) {
-    return accounts[0];
-  }
-  return;
-};
+  if (!web3) return null;
 
-export const getToken = async (abiOfToken, addressOfToken) => {
-  const web3 = await loadWeb3();
-  if (!web3) {
-    return false;
-  }
-  const tokenContract = new web3.eth.Contract(abiOfToken, addressOfToken);
-  return tokenContract;
+  const accounts = await web3.eth.getAccounts();
+  return accounts.length ? accounts[0] : null;
 };
 
 export const getBalance = async (account) => {
   const web3 = await loadWeb3();
-  const token = await getToken(
+  if (!web3) return null;
+
+  const token = new web3.eth.Contract(
     ContractToken,
     import.meta.env.VITE_TOKEN_ADDRESS,
   );
@@ -65,14 +49,8 @@ export const getBalance = async (account) => {
   return web3.utils.fromWei(balance, 'ether');
 };
 
-const isValidAddress = async (address) => {
-  const web3 = await loadWeb3();
-  return web3.utils.isAddress(address);
-};
-
 export const transfer = async (address, amount) => {
   try {
-    // Load Web3
     const provider = await detectEthereumProvider();
     if (!provider) {
       throw new Error(
@@ -82,7 +60,6 @@ export const transfer = async (address, amount) => {
 
     const web3 = new Web3(provider);
 
-    // Check network
     const chainId = await web3.eth.getChainId();
     if (chainId !== 56) {
       await provider.request({
@@ -92,39 +69,30 @@ export const transfer = async (address, amount) => {
       toast.success('Switched to Binance Smart Chain.');
     }
 
-    // Validate address
     if (!web3.utils.isAddress(address)) {
       throw new Error('Invalid receiving wallet address.');
     }
 
-    // Get sender account
     const accounts = await web3.eth.getAccounts();
     if (!accounts.length) {
       throw new Error('No accounts detected. Please connect your wallet.');
     }
-    const senderAccount = accounts[0];
 
-    // Load token contract
+    const senderAccount = accounts[0];
     const token = new web3.eth.Contract(
       ContractToken,
       import.meta.env.VITE_TOKEN_ADDRESS,
     );
 
-    // Estimate gas
     const amountInWei = web3.utils.toWei(amount.toString(), 'ether');
-    // const gasLimit = await token.methods
-    //   .transfer(address, amountInWei)
-    //   .estimateGas({ from: senderAccount });
-    // const gasPrice = await web3.eth.getGasPrice();
-    console.log({ amountInWei });
+    const gasPrice = await web3.eth.getGasPrice(); // Legacy gas price for BSC
 
-    // Perform the transaction
     const transactionHash = await token.methods
       .transfer(address, amountInWei)
       .send({
         from: senderAccount,
-        // gas: gasLimit,
-        // gasPrice,
+        gas: 21000, // Set appropriate gas limit based on token
+        gasPrice, // Legacy gas price
       });
 
     toast.success('Transfer successful!');
@@ -132,7 +100,6 @@ export const transfer = async (address, amount) => {
 
     return transactionHash;
   } catch (error) {
-    // Handle known errors
     if (
       error.message.includes('MetaMask Tx Signature: User denied transaction')
     ) {
@@ -140,7 +107,6 @@ export const transfer = async (address, amount) => {
     } else {
       toast.error(error.message || 'An error occurred during the transfer.');
     }
-
     console.error('Error details:', error);
     throw error;
   }
