@@ -1,12 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
 import Payment from '@/api/Payment';
 import Loading from '@/components/Loading';
 import { ToastContainer, toast } from 'react-toastify';
-import axios from 'axios';
-import { shortenWalletAddress } from '@/utils';
 import { useForm } from 'react-hook-form';
 import Modal from 'react-modal';
 import DefaultLayout from '../../../layout/DefaultLayout';
@@ -16,7 +13,6 @@ Modal.setAppElement('#root');
 
 const PaymentPage = () => {
   const { t } = useTranslation();
-  const { userInfo } = useSelector((state) => state.auth);
   const [total, setTotal] = useState(0);
   const [loadingPaymentInfo, setLoadingPaymentInfo] = useState(true);
   const [paymentsList, setPaymentsList] = useState([]);
@@ -142,18 +138,18 @@ const PaymentPage = () => {
   const paymentMetamask = useCallback(async () => {
     setLoadingPayment(true);
     try {
-      const referralTransaction = await transfer(
-        import.meta.env.VITE_MAIN_WALLET_ADDRESS,
-        106,
-      );
-      if (referralTransaction) {
-        const { transactionHash } = referralTransaction;
-        await donePayment(transactionHash);
-        window.location.reload();
-      } else {
-        setLoadingPayment(false);
-        throw new Error(t('payment error'));
-      }
+      // const referralTransaction = await transfer(
+      //   import.meta.env.VITE_MAIN_WALLET_ADDRESS,
+      //   106,
+      // );
+      // if (referralTransaction) {
+      //   const { transactionHash } = referralTransaction;
+      await donePayment('transactionHash');
+      window.location.reload();
+      // } else {
+      //   setLoadingPayment(false);
+      //   throw new Error(t('payment error'));
+      // }
     } catch (error) {
       toast.error(t(error.message));
       setLoadingPayment(false);

@@ -3,7 +3,6 @@ import { shortenWalletAddress } from '../../utils';
 import { useState } from 'react';
 import ClickOutside from '../ClickOutside';
 import { Link } from 'react-router-dom';
-import { metaMask } from 'wagmi/connectors';
 
 const WalletUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);

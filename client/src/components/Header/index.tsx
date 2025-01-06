@@ -65,7 +65,7 @@ const Header = (props: {
           </ul> */}
           {userInfo && (
             <>
-              {/* <WalletUser /> */}
+              <WalletUser />
               <DropdownUser />
             </>
           )}

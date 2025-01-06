@@ -43,9 +43,8 @@ const Profile = () => {
     tier5Time,
     isSerepayWallet,
     totalHewe,
-    hewePerDay,
     availableHewe,
-    claimedHewe,
+    availableUsdt,
     walletAddress,
     heweWallet,
     ranking,
@@ -57,6 +56,8 @@ const Profile = () => {
   const [errorPhone, setErrPhone] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [refresh, setRefresh] = useState(false);
+  const [loadingClaimHewe, setLoadingClaimHewe] = useState(false);
+  const [loadingClaimUsdt, setLoadingClaimUsdt] = useState(false);
 
   const {
     register,
@@ -114,9 +115,11 @@ const Profile = () => {
   );
 
   const claimHewe = async () => {
+    setLoadingClaimHewe(true);
     await Claim.hewe()
       .then((response) => {
         toast.success(t(response.data.message));
+        setLoadingClaimHewe(false);
         setRefresh(!refresh);
       })
       .catch((error) => {
@@ -125,6 +128,25 @@ const Profile = () => {
             ? error.response.data.error
             : error.message;
         toast.error(t(message));
+        setLoadingClaimHewe(false);
+      });
+  };
+
+  const claimUsdt = async () => {
+    setLoadingClaimUsdt(true);
+    await Claim.usdt()
+      .then((response) => {
+        toast.success(t(response.data.message));
+        setLoadingClaimUsdt(false);
+        setRefresh(!refresh);
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.error
+            ? error.response.data.error
+            : error.message;
+        toast.error(t(message));
+        setLoadingClaimUsdt(false);
       });
   };
 
@@ -193,12 +215,33 @@ const Profile = () => {
             />
           </div>
           <button
-            className={`border border-black rounded-2xl px-12 py-2 ${
+            className={`border border-black rounded-2xl px-12 py-2 flex ${
               availableHewe === 0 || status !== 'APPROVED' ? 'opacity-30' : ''
             }`}
             disabled={availableHewe === 0 || status !== 'APPROVED'}
             onClick={claimHewe}
           >
+            {loadingClaimHewe && <Loading />}
+            Claim
+          </button>
+        </div>
+        <div className="bg-[#FAFBFC] p-4 rounded-2xl flex xl:flex-row flex-col items-start xl:items-center gap-8">
+          <div className="flex gap-4 items-center justify-between lg:justify-center">
+            <p className="font-medium">Available USDT</p>
+            <input
+              className="bg-black rounded-xl text-dreamchain p-2"
+              readOnly
+              value={availableUsdt}
+            />
+          </div>
+          <button
+            className={`border border-black rounded-2xl px-12 py-2 flex ${
+              availableUsdt === 0 || status !== 'APPROVED' ? 'opacity-30' : ''
+            }`}
+            disabled={availableUsdt === 0 || status !== 'APPROVED'}
+            onClick={claimUsdt}
+          >
+            {loadingClaimUsdt && <Loading />}
             Claim
           </button>
         </div>
@@ -326,16 +369,16 @@ const Profile = () => {
               <p>ID/DL/Passport number :</p>
               <p>{idCode}</p>
             </div>
-            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+            {/* <div className="grid lg:grid-cols-2 gap-2 lg:gap-0  py-2 px-4 rounded-lg">
               <p>Serepay wallet (USDT) :</p>
               <p>{shortenWalletAddress(walletAddress1, 14)}</p>
-            </div>
-            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+            </div> */}
+            {/* <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
               <p>Serepay wallet (HEWE) :</p>
               <p>{shortenWalletAddress(heweWallet, 14)}</p>
-            </div>
-            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4 rounded-lg">
-              <p>Personal wallet :</p>
+            </div> */}
+            <div className="grid lg:grid-cols-2 gap-2 bg-[#E5E9EE] lg:gap-0 items-center py-2 px-4 rounded-lg">
+              <p>Wallet Address :</p>
               <p>{shortenWalletAddress(walletAddress, 14)}</p>
             </div>
             {/* <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
@@ -354,11 +397,11 @@ const Profile = () => {
               <p>Wallet address Tier 5</p>
               <p>{shortenWalletAddress(walletAddress5, 14)}</p>
             </div> */}
-            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0  py-2 px-4 rounded-lg">
               <p>Completed Registration :</p>
               <p>{countPay === 13 ? 'Finished' : 'Unfinished'}</p>
             </div>
-            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0  py-2 px-4 rounded-lg">
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE]  py-2 px-4 rounded-lg">
               <p>Number of contribution :</p>
               <p>{countPay === 13 ? 10 : 0}</p>
             </div>
@@ -366,11 +409,11 @@ const Profile = () => {
               <p>Tier :</p>
               <p>{tier}</p>
             </div> */}
-            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
               <p>Package :</p>
               <p>{buyPackage}</p>
             </div>
-            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0  py-2 px-4">
+            <div className="grid lg:grid-cols-2 bg-[#E5E9EE] gap-2 lg:gap-0  py-2 px-4">
               <p>Fine :</p>
               <p>{fine} USDT</p>
             </div>

@@ -71,34 +71,77 @@ const isValidAddress = async (address) => {
 };
 
 export const transfer = async (address, amount) => {
-  const account = await getAccount();
-  const web3 = await loadWeb3();
+  try {
+    // Load Web3
+    const provider = await detectEthereumProvider();
+    if (!provider) {
+      throw new Error(
+        'Ethereum provider not detected. Please install MetaMask.',
+      );
+    }
 
-  const validAddress = await isValidAddress(address);
+    const web3 = new Web3(provider);
 
-  if (!validAddress) {
-    throw new Error('Invalid receiving wallet address!');
-  } else {
-    const token = await getToken(
+    // Check network
+    const chainId = await web3.eth.getChainId();
+    if (chainId !== 56) {
+      await provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: Web3.utils.toHex(56) }],
+      });
+      toast.success('Switched to Binance Smart Chain.');
+    }
+
+    // Validate address
+    if (!web3.utils.isAddress(address)) {
+      throw new Error('Invalid receiving wallet address.');
+    }
+
+    // Get sender account
+    const accounts = await web3.eth.getAccounts();
+    if (!accounts.length) {
+      throw new Error('No accounts detected. Please connect your wallet.');
+    }
+    const senderAccount = accounts[0];
+
+    // Load token contract
+    const token = new web3.eth.Contract(
       ContractToken,
       import.meta.env.VITE_TOKEN_ADDRESS,
     );
 
-    return token.methods
-      .transfer(address, web3.utils.toWei(amount.toString(), 'ether'))
-      .send({ from: account })
-      .then((transactionHash) => {
-        return transactionHash;
-      })
-      .catch((error) => {
-        if (
-          error.message ===
-          'Returned error: MetaMask Tx Signature: User denied transaction signature.'
-        ) {
-          toast.error('You have refused to pay');
-        } else {
-          toast.error(error.message);
-        }
+    // Estimate gas
+    const amountInWei = web3.utils.toWei(amount.toString(), 'ether');
+    // const gasLimit = await token.methods
+    //   .transfer(address, amountInWei)
+    //   .estimateGas({ from: senderAccount });
+    // const gasPrice = await web3.eth.getGasPrice();
+    console.log({ amountInWei });
+
+    // Perform the transaction
+    const transactionHash = await token.methods
+      .transfer(address, amountInWei)
+      .send({
+        from: senderAccount,
+        // gas: gasLimit,
+        // gasPrice,
       });
+
+    toast.success('Transfer successful!');
+    console.log('Transaction Hash:', transactionHash);
+
+    return transactionHash;
+  } catch (error) {
+    // Handle known errors
+    if (
+      error.message.includes('MetaMask Tx Signature: User denied transaction')
+    ) {
+      toast.error('Transaction was cancelled.');
+    } else {
+      toast.error(error.message || 'An error occurred during the transfer.');
+    }
+
+    console.error('Error details:', error);
+    throw error;
   }
 };

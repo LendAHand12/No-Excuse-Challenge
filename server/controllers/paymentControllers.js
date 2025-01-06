@@ -31,6 +31,16 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         message: "Payment completed!",
       });
     } else {
+      // delete pending trans
+      await Transaction.deleteMany({
+        $and: [
+          {
+            status: "PENDING",
+          },
+          { userId: user.id },
+        ],
+      });
+
       const wallets = await Wallet.find();
       const admin = await User.findOne({ email: "admin2@gmail.com" });
       const adminWallet = wallets.find((ele) => ele.type === "ADMIN");
@@ -70,15 +80,6 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         let companyFee = 25 * user.tier;
         let directCommissionFee = 15 * user.tier;
         let referralCommissionFee = 5 * user.tier;
-        // delete pending trans
-        await Transaction.deleteMany({
-          $and: [
-            {
-              status: "PENDING",
-            },
-            { userId: user.id },
-          ],
-        });
         // giao dich dang ky
         payments.push({
           userName: "Admin",
@@ -360,21 +361,23 @@ const onDonePayment = asyncHandler(async (req, res) => {
   const { user } = req;
   const { transIds } = req.body;
   const transIdsList = Object.values(transIds);
+  console.log({ transIdsList });
   if (transIdsList.length > 0) {
     if (transIdsList.length === 1 && transIdsList[0].type === "FINE") {
       user.fine = 0;
     } else {
       for (let transId of transIdsList) {
-        await Transaction.findOneAndUpdate(
+        const trans = await Transaction.findOneAndUpdate(
           { _id: transId.id, userId: user.id, tier: user.tier },
           { status: "SUCCESS" }
         );
-      }
 
-      await Transaction.updateMany(
-        { userId: user.id, type: "PACKAGE", tier: user.tier },
-        { status: "SUCCESS" }
-      );
+        if (!trans.type.includes("HOLD")) {
+          const userReceive = await User.findOne({ _id: trans.userId_to });
+          userReceive.availableUsdt = userReceive.availableUsdt + trans.amount;
+          await userReceive.save();
+        }
+      }
 
       if (user.countPay === 0 && user.tier === 1) {
         const links = await getActiveLink(user.email, user.userId, user.phone);
@@ -383,27 +386,11 @@ const onDonePayment = asyncHandler(async (req, res) => {
         }
       }
 
-      // if (user.countPay === 12 && user.buyPackage === "B") {
-      //   if (user.continueWithBuyPackageB === true) {
-      //     user.buyPackage = "A";
-      //     await Tree.findOneAndUpdate({ userId: user._id }, { buyPackage: "A" });
-      //   } else {
-      //     user.buyPackage = "C";
-      //   }
-      // }
-
       let responseHewe = await getPriceHewe();
       const hewePrice = responseHewe.data.ticker.latest;
       const totalHewe = Math.round(100 / hewePrice);
       const hewePerDay = Math.round(totalHewe / 540);
-      // user.countPay =
-      //   transIds.length === 15
-      //     ? 13
-      //     : transIds.length === 9
-      //     ? 7
-      //     : transIds.length === 7
-      //     ? 13
-      //     : user.countPay + 1;
+
       user.totalHewe = totalHewe;
       user.hewePerDay = hewePerDay;
       user.countPay = 13;
@@ -456,8 +443,8 @@ const getAllPayments = asyncHandler(async (req, res) => {
       {
         $or: [
           { userId: { $regex: keyword, $options: "i" } }, // Tìm theo userId
-          { address_from: { $regex: keyword, $options: "i" } }, // Tìm theo địa chỉ ví
-          { address_to: { $regex: keyword, $options: "i" } }, // Tìm theo địa chỉ ví
+          { username_to: { $regex: keyword, $options: "i" } },
+          { userId_to: { $regex: keyword, $options: "i" } },
         ],
       },
       { ...searchType },
@@ -489,16 +476,7 @@ const getAllPayments = asyncHandler(async (req, res) => {
         createdAt: pay.createdAt,
       });
     } else if (status === "DIRECT" || status === "REFERRAL") {
-      const userRef = await User.findOne({
-        $or: [
-          { walletAddress: { $in: [pay.address_ref] } },
-          { walletAddress1: pay.address_ref },
-          { walletAddress2: pay.address_ref },
-          { walletAddress3: pay.address_ref },
-          { walletAddress4: pay.address_ref },
-          { walletAddress5: pay.address_ref },
-        ],
-      });
+      const userRef = await User.findById(pay.userId_to);
       result.push({
         _id: pay._id,
         address_from: pay.address_from,
@@ -514,16 +492,7 @@ const getAllPayments = asyncHandler(async (req, res) => {
         createdAt: pay.createdAt,
       });
     } else if (status === "HOLD") {
-      const userRef = await User.findOne({
-        $or: [
-          { walletAddress: { $in: [pay.address_ref] } },
-          { walletAddress1: pay.address_ref },
-          { walletAddress2: pay.address_ref },
-          { walletAddress3: pay.address_ref },
-          { walletAddress4: pay.address_ref },
-          { walletAddress5: pay.address_ref },
-        ],
-      });
+      const userRef = await User.findById(pay.userId_to);
       result.push({
         _id: pay._id,
         address_from: pay.address_from,

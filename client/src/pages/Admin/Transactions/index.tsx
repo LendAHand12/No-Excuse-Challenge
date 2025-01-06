@@ -222,9 +222,6 @@ const AdminTransactionsPage = () => {
                 <th scope="col" className="px-6 py-3">
                   {t('tier')}
                 </th>
-                {/* <th scope="col" className="px-6 py-3">
-                Hash
-              </th> */}
                 <th scope="col" className="px-6 py-3">
                   {t('amount')}
                 </th>

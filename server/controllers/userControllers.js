@@ -406,6 +406,8 @@ const updateUser = asyncHandler(async (req, res) => {
           claimedHewe: updatedUser.claimedHewe,
           claimedUsdt: updatedUser.claimedUsdt,
           heweWallet: updatedUser.heweWallet,
+          ranking: user.ranking,
+          totalEarning: user.availableUsdt + user.claimedUsdt,
         },
       });
     }

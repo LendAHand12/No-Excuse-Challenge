@@ -3,7 +3,6 @@ import User from "../models/userModel.js";
 import Token from "../models/tokenModel.js";
 import generateToken from "../utils/generateToken.js";
 import sendMail from "../utils/sendMail.js";
-import generateGravatar from "../utils/generateGravatar.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import Tree from "../models/treeModel.js";

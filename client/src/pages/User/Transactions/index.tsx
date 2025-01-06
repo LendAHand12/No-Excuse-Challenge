@@ -4,7 +4,6 @@ import Payment from '@/api/Payment';
 import Loading from '@/components/Loading';
 import NoContent from '@/components/NoContent';
 import transStatus from '@/constants/transStatus';
-import { shortenWalletAddress } from '@/utils';
 import { useTranslation } from 'react-i18next';
 import { ToastContainer, toast } from 'react-toastify';
 import DefaultLayout from '../../../layout/DefaultLayout';
@@ -53,14 +52,11 @@ const Transactions = () => {
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
               <th scope="col" className="px-6 py-3">
-                From
-              </th>
-              <th scope="col" className="px-6 py-3">
                 To
               </th>
-              <th scope="col" className="px-6 py-3">
+              {/* <th scope="col" className="px-6 py-3">
                 Hash
-              </th>
+              </th> */}
               <th scope="col" className="px-6 py-3">
                 Amount
               </th>
@@ -80,13 +76,8 @@ const Transactions = () => {
                   className="bg-white border-b hover:bg-gray-50"
                   key={ele._id}
                 >
-                  <td className="px-6 py-4">
-                    {shortenWalletAddress(ele.address_from)}
-                  </td>
-                  <td className="px-6 py-4">
-                    {shortenWalletAddress(ele.address_to)}
-                  </td>
-                  <td className="px-6 py-4 text-blue-600">
+                  <td className="px-6 py-4">{ele.username_to}</td>
+                  {/* <td className="px-6 py-4 text-blue-600">
                     <a
                       href={`https://bscscan.com/tx/${ele.hash}`}
                       target="_blank"
@@ -94,7 +85,7 @@ const Transactions = () => {
                     >
                       {shortenWalletAddress(ele.hash)}
                     </a>
-                  </td>
+                  </td> */}
                   <td className="px-6 py-4">{ele.amount} USDT</td>
                   <td className="px-6 py-4">
                     <div
