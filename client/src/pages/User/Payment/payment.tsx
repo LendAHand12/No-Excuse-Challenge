@@ -43,7 +43,7 @@ const PaymentPage = () => {
             (accumulator, currentValue) => accumulator + currentValue.amount,
             0,
           );
-          setTotal(totalPayment);
+          setTotal(totalPayment + 0.2);
           setPaymentIdsList(paymentIds);
           setPaymentsList(payments);
           setShowPayment(true);
@@ -140,7 +140,7 @@ const PaymentPage = () => {
     try {
       const referralTransaction = await transfer(
         import.meta.env.VITE_MAIN_WALLET_ADDRESS,
-        106,
+        100.2,
       );
       if (referralTransaction) {
         const { transactionHash } = referralTransaction;
@@ -164,7 +164,6 @@ const PaymentPage = () => {
       })
         .then((response) => {
           toast.success(t(response.data.message));
-          window.location.reload();
         })
         .catch((error) => {
           let message =

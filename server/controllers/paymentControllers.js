@@ -386,8 +386,9 @@ const onDonePayment = asyncHandler(async (req, res) => {
         }
       }
 
-      let responseHewe = await getPriceHewe();
-      const hewePrice = responseHewe.data.ticker.latest;
+      // let responseHewe = await getPriceHewe();
+      // const hewePrice = responseHewe.data.ticker.latest;
+      const hewePrice = 0.00091;
       const totalHewe = Math.round(100 / hewePrice);
       const hewePerDay = Math.round(totalHewe / 540);
 
@@ -408,7 +409,7 @@ const onDonePayment = asyncHandler(async (req, res) => {
 });
 
 const getAllPayments = asyncHandler(async (req, res) => {
-  const { pageNumber, keyword, status, tier } = req.query;
+  let { pageNumber, keyword, status, tier } = req.query;
   const page = Number(pageNumber) || 1;
   let searchType = {};
   if (status === "DIRECT" || status === "REFERRAL" || status === "REGISTER" || status === "FINE") {
@@ -425,11 +426,11 @@ const getAllPayments = asyncHandler(async (req, res) => {
       {
         $or: [
           { userId: { $regex: keyword, $options: "i" } }, // Tìm theo userIds
-          { address_from: { $regex: keyword, $options: "i" } }, // Tìm theo địa chỉ ví
-          { address_to: { $regex: keyword, $options: "i" } }, // Tìm theo địa chỉ ví
+          { userId_to: { $regex: keyword, $options: "i" } }, // Tìm theo địa chỉ ví
+          { username_to: { $regex: keyword, $options: "i" } }, // Tìm theo địa chỉ ví
         ],
       },
-      { ...searchType },
+      status !== "ALL" ? { ...searchType } : {},
       { tier },
       {
         status: "SUCCESS",
@@ -447,7 +448,7 @@ const getAllPayments = asyncHandler(async (req, res) => {
           { userId_to: { $regex: keyword, $options: "i" } },
         ],
       },
-      { ...searchType },
+      status !== "ALL" ? { ...searchType } : {},
       { tier },
       {
         status: "SUCCESS",
@@ -475,7 +476,7 @@ const getAllPayments = asyncHandler(async (req, res) => {
         type: pay.type,
         createdAt: pay.createdAt,
       });
-    } else if (status === "DIRECT" || status === "REFERRAL") {
+    } else if (status === "DIRECT" || status === "REFERRAL" || status === "ALL") {
       const userRef = await User.findById(pay.userId_to);
       result.push({
         _id: pay._id,

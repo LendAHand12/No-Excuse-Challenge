@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import { ToastContainer, toast } from 'react-toastify';
 import { useLocation, useNavigate } from 'react-router-dom';
 // import { shortenWalletAddress } from "@/utils";
-import { PaginationControl } from 'react-bootstrap-pagination-control';
 import DefaultLayout from '../../../layout/DefaultLayout';
 
 const AdminTransactionsPage = () => {
@@ -45,8 +44,8 @@ const AdminTransactionsPage = () => {
         })
         .catch((error) => {
           let message =
-            error.response && error.response.data.error
-              ? error.response.data.error
+            error.response && error.response.data.message
+              ? error.response.data.message
               : error.message;
           toast.error(t(message));
           setLoading(false);
@@ -127,7 +126,7 @@ const AdminTransactionsPage = () => {
     <DefaultLayout>
       <ToastContainer />
       <div className="py-24 px-10">
-        <div className="flex items-center gap-4">
+        {/* <div className="flex items-center gap-4">
           {[...Array(5)].map((item, i) => (
             <button
               key={i}
@@ -139,7 +138,7 @@ const AdminTransactionsPage = () => {
               {t('tier')} {i + 1}
             </button>
           ))}
-        </div>
+        </div> */}
         <div className="relative overflow-x-auto p-10">
           <div className="flex items-center justify-between pb-4 bg-white">
             <div>
@@ -148,8 +147,17 @@ const AdminTransactionsPage = () => {
                 onChange={onChangeStatus}
                 defaultValue={objectFilter.status}
               >
+                <option value="ALL" key="ALL">
+                  All
+                </option>
                 <option value="REGISTER" key="REGISTER">
-                  {t('REGISTER')}{' '}
+                  Membership
+                </option>
+                <option value="COMPANY" key="COMPANY">
+                  Hewe
+                </option>
+                <option value="PIG" key="PIG">
+                  DreamPool
                 </option>
                 <option value="DIRECT" key="DIRECT">
                   {t('DIRECT')}{' '}

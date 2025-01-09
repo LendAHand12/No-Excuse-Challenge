@@ -70,7 +70,7 @@ const ChoosePackagePage = () => {
               </div>
               <div className="flex gap-4 text-dreamchain">
                 <p>USDT</p>
-                <p>1000</p>
+                <p>100.2</p>
               </div>
               <div className="flex gap-4 text-dreamchain">
                 <p>Level</p>
