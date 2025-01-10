@@ -35,6 +35,7 @@ import DreamPoolPage from './pages/User/DreamPool';
 import AdminUserPages from './pages/Admin/Users';
 import AdminSystemPage from './pages/Admin/System';
 import GetVerifyLinkPage from './pages/Admin/GetVerifyLink';
+import AdminTransactionDetail from './pages/Admin/TransactionDetail';
 
 function App() {
   const { pathname } = useLocation();
@@ -130,6 +131,15 @@ function App() {
             <>
               <PageTitle title="Transactions | DreamChain" />
               <AdminTransactionsPage />
+            </>
+          }
+        />
+        <Route
+          path="/admin/transactions/:id"
+          element={
+            <>
+              <PageTitle title="Transaction Detail | DreamChain" />
+              <AdminTransactionDetail />
             </>
           }
         />

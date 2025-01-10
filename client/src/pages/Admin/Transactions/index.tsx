@@ -17,7 +17,7 @@ const AdminTransactionsPage = () => {
   const searchParams = new URLSearchParams(location.search);
   const key = searchParams.get('keyword') || '';
   const page = searchParams.get('page') || 1;
-  const status = searchParams.get('status') || 'HOLD';
+  const status = searchParams.get('status') || 'ALL';
   const paramsTier = searchParams.get('tier') || 1;
   const [totalPage, setTotalPage] = useState(0);
   const [keyword, setKeyword] = useState(key);

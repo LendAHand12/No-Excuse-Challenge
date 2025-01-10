@@ -105,6 +105,7 @@
   "checkCanRefund": "Check return conditions",
   "changeToRefunded": "Convert to refunded",
   "refund": "Process refund",
+  "REFERRALHOLDt": "Contribution HOLD",
 
   "HOLD": "HOLD",
   "times": "Times",

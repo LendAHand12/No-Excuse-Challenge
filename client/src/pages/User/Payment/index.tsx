@@ -4,9 +4,9 @@ import PaymentPage from './payment';
 
 const Payment = () => {
   const { userInfo } = useSelector((state) => state.auth);
-  let { status, countPay, buyPackage } = userInfo;
+  let { countPay, buyPackage } = userInfo;
 
-  if (countPay === 0 && status === 'APPROVED' && buyPackage === '') {
+  if (countPay === 0 && buyPackage === '') {
     return <ChoosePackagePage />;
   } else {
     return <PaymentPage />;

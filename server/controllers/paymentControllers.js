@@ -359,9 +359,9 @@ const addPayment = asyncHandler(async (req, res) => {
 
 const onDonePayment = asyncHandler(async (req, res) => {
   const { user } = req;
-  const { transIds } = req.body;
+  const { transIds, transactionHash } = req.body;
   const transIdsList = Object.values(transIds);
-  console.log({ transIdsList });
+
   if (transIdsList.length > 0) {
     if (transIdsList.length === 1 && transIdsList[0].type === "FINE") {
       user.fine = 0;
@@ -369,7 +369,7 @@ const onDonePayment = asyncHandler(async (req, res) => {
       for (let transId of transIdsList) {
         const trans = await Transaction.findOneAndUpdate(
           { _id: transId.id, userId: user.id, tier: user.tier },
-          { status: "SUCCESS" }
+          { status: "SUCCESS", hash: transactionHash }
         );
 
         if (!trans.type.includes("HOLD")) {
@@ -560,20 +560,11 @@ const getPaymentDetail = asyncHandler(async (req, res) => {
         createdAt: trans.createdAt,
       });
     } else if (trans.type === "DIRECT" || trans.type === "REFERRAL") {
-      const userRef = await User.findOne({
-        $or: [
-          { walletAddress: { $in: [trans.address_ref] } },
-          { walletAddress1: trans.address_ref },
-          { walletAddress2: trans.address_ref },
-          { walletAddress3: trans.address_ref },
-          { walletAddress4: trans.address_ref },
-          { walletAddress5: trans.address_ref },
-        ],
-      });
+      const userRef = await User.findById(trans.userId_to);
       res.json({
         _id: trans._id,
-        address_from: trans.address_from,
-        address_to: trans.address_ref,
+        address_from: user.walletAddress,
+        address_to: userRef.walletAddress,
         hash: trans.hash,
         amount: trans.amount,
         userId: user.userId,
@@ -586,16 +577,7 @@ const getPaymentDetail = asyncHandler(async (req, res) => {
         createdAt: trans.createdAt,
       });
     } else if (trans.type === "DIRECTHOLD" || trans.type === "REFERRALHOLD") {
-      const userRef = await User.findOne({
-        $or: [
-          { walletAddress: { $in: [trans.address_ref] } },
-          { walletAddress1: trans.address_ref },
-          { walletAddress2: trans.address_ref },
-          { walletAddress3: trans.address_ref },
-          { walletAddress4: trans.address_ref },
-          { walletAddress5: trans.address_ref },
-        ],
-      });
+      const userRef = await User.findById(trans.userId_to);
       res.json({
         _id: trans._id,
         address_from: trans.address_from,

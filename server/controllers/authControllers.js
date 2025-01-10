@@ -113,6 +113,7 @@ const registerUser = asyncHandler(async (req, res) => {
         password,
         walletAddress,
         idCode,
+        buyPackage: "A",
         role: "user",
       });
 
