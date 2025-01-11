@@ -347,7 +347,7 @@ export const checkBlockChildren = asyncHandler(async () => {
 
 export const distributionHewe = asyncHandler(async () => {
   const listUser = await User.find({
-    $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }],
+    $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }, { countPay: 13 }],
   }).select("userId totalHewe availableHewe hewePerDay claimedHewe");
 
   for (let u of listUser) {

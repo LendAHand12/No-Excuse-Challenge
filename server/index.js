@@ -170,7 +170,7 @@ const cron8 = new CronJob("30 06 * * *", async () => {
   console.log("Check block children done");
 });
 
-// cron0.start();
+cron0.start();
 // cron1.start();
 // cron2.start();
 // cron3.start();

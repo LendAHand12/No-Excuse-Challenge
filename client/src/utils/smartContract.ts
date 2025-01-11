@@ -39,10 +39,11 @@ export const getAccount = async () => {
     return false;
   }
   const accounts = await web3.eth.getAccounts();
-  if (accounts.length) {
+  if (accounts.length > 0) {
     return accounts[0];
+  } else {
+    throw new Error('Please connect metamask wallet');
   }
-  return;
 };
 
 export const getToken = async (abiOfToken, addressOfToken) => {
