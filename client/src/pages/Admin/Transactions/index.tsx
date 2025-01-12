@@ -272,14 +272,22 @@ const AdminTransactionsPage = () => {
                       objectFilter.searchStatus !== 'FINE' && (
                         <>
                           <td className="px-6 py-4">
-                            <div className="">
-                              <div className="text-base font-semibold">
-                                {ele.userReceiveId}
+                            {ele.type === 'REGISTER' ? (
+                              'Registration Fee'
+                            ) : ele.type === 'PIG' ? (
+                              'DreamPool'
+                            ) : ele.type === 'COMPANY' ? (
+                              'Purchase HEWE'
+                            ) : (
+                              <div className="">
+                                <div className="text-base font-semibold">
+                                  {ele.userReceiveId}
+                                </div>
+                                <div className="font-normal text-gray-500">
+                                  {ele.userReceiveEmail}
+                                </div>
                               </div>
-                              <div className="font-normal text-gray-500">
-                                {ele.userReceiveEmail}
-                              </div>
-                            </div>
+                            )}
                           </td>
                           <td className="px-6 py-4">
                             {ele.userCountPay} {t('times')}

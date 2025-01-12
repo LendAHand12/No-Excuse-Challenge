@@ -55,7 +55,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           amount: user.fine,
           userCountPay: user.countPay,
           userId_to: admin._id,
-          username_to: "Admin",
+          username_to: "Fine Fee",
           tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
@@ -63,7 +63,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           status: "PENDING",
         });
         payments.push({
-          userName: "Admin",
+          userName: "Fine Fee",
           amount: user.fine,
         });
         paymentIds.push({
@@ -82,7 +82,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         let referralCommissionFee = 5 * user.tier;
         // giao dich dang ky
         payments.push({
-          userName: "Admin",
+          userName: "Registration Fee",
           amount: registerFee,
         });
         const transactionRegister = await Transaction.create({
@@ -90,7 +90,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           amount: registerFee,
           userCountPay: user.countPay,
           userId_to: admin._id,
-          username_to: "Admin",
+          username_to: "Registration Fee",
           tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
@@ -101,11 +101,11 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           type: "REGISTER",
           id: transactionRegister._id,
           amount: registerFee,
-          to: "Admin",
+          to: "Registration Fee",
         });
         // giao dich con heo
         payments.push({
-          userName: "",
+          userName: "DreamPool",
           amount: pigFee,
         });
         const transactionPig = await Transaction.create({
@@ -113,7 +113,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           amount: pigFee,
           userCountPay: user.countPay,
           userId_to: admin._id,
-          username_to: "",
+          username_to: "DreamPool",
           tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
@@ -124,7 +124,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           type: "PIG",
           id: transactionPig._id,
           amount: pigFee,
-          to: "",
+          to: "DreamPool",
         });
         // giao dich hewe cho cong ty
         payments.push({

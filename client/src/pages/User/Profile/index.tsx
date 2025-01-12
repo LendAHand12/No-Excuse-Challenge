@@ -47,6 +47,7 @@ const Profile = () => {
     availableUsdt,
     walletAddress,
     heweWallet,
+    claimedHewe,
     ranking,
     totalEarning,
   } = userInfo;
@@ -211,7 +212,7 @@ const Profile = () => {
             <input
               className="bg-black rounded-xl text-dreamchain p-2"
               readOnly
-              value={totalHewe}
+              value={totalHewe - claimedHewe}
             />
           </div>
           <button
@@ -222,7 +223,7 @@ const Profile = () => {
             onClick={claimHewe}
           >
             {loadingClaimHewe && <Loading />}
-            Claim
+            WITHDRAW HEWE
           </button>
         </div>
         <div className="bg-[#FAFBFC] p-4 rounded-2xl flex xl:flex-row flex-col items-start xl:items-center gap-8">
@@ -242,7 +243,7 @@ const Profile = () => {
             onClick={claimUsdt}
           >
             {loadingClaimUsdt && <Loading />}
-            Claim
+            WITHDRAW USDT
           </button>
         </div>
         <div className="grid lg:grid-cols-2 gap-10 font-semibold">

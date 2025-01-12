@@ -48,15 +48,17 @@ const claimUsdt = asyncHandler(async (req, res) => {
       throw new Error("Please verify your account");
     }
 
-    // const receipt = await sendUsdt({
-    //   amount: user.availableUsdt,
-    //   receiverAddress: user.walletAddress,
-    // });
+    const receipt = await sendUsdt({
+      amount: user.availableUsdt,
+      receiverAddress: user.walletAddress,
+    });
+
+    console.log({ receipt });
 
     const claimed = await Claim.create({
       userId: user.id,
       amount: user.availableUsdt,
-      hash: "hash",
+      hash: receipt.blockHash,
       coin: "USDT",
     });
 
@@ -68,7 +70,8 @@ const claimUsdt = asyncHandler(async (req, res) => {
       message: "claim USDT successful",
     });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.log({ err: err.message.split(",")[0] });
+    res.status(400).json({ error: err.message ? err.message.split(",")[0] : "Internal Error" });
   }
 });
 

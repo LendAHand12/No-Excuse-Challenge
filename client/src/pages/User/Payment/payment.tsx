@@ -321,7 +321,7 @@ const PaymentPage = () => {
                       <div className="mb-3">
                         <p className="text-lg mb-2 ml-1">
                           <span className="font-bold">{t('buyPackage')}</span> :
-                          A
+                          DreamChain
                         </p>
                       </div>
                       <div className="mb-3">
@@ -379,16 +379,12 @@ const PaymentPage = () => {
                               </span>
                               <span>{payment.amount} USDT</span>
                             </div>
-                            {i > 2 && (
-                              <div className="">
-                                <span className="mx-2 text-black">
-                                  <span className="font-medium mr-2">
-                                    To :{' '}
-                                  </span>
-                                  <span className="">{payment.to}</span>
-                                </span>
-                              </div>
-                            )}
+                            <div className="">
+                              <span className="mx-2 text-black">
+                                <span className="font-medium mr-2">To : </span>
+                                <span className="">{payment.to}</span>
+                              </span>
+                            </div>
                           </div>
                         </div>
                       ))}
