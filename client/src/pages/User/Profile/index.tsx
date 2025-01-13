@@ -198,25 +198,25 @@ const Profile = () => {
           </div>
         )}
 
-        <div className="bg-[#FAFBFC] p-4 rounded-2xl flex xl:flex-row flex-col items-start xl:items-center xl:justify-between gap-8">
-          <div className="flex gap-4 items-center justify-between lg:justify-center">
+        <div className="bg-[#FAFBFC] p-4 rounded-2xl flex xl:flex-row flex-col items-start 2xl:items-center xl:justify-between gap-8">
+          <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
             <p className="font-medium">Available HEWE</p>
             <input
-              className="bg-black rounded-xl text-dreamchain p-2"
+              className="bg-black rounded-xl text-dreamchain p-2 flex-1"
               readOnly
               value={availableHewe}
             />
           </div>
-          <div className="flex gap-4 items-center justify-between lg:justify-center">
+          <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
             <p className="font-medium">Reward HEWE</p>
             <input
-              className="bg-black rounded-xl text-dreamchain p-2"
+              className="bg-black rounded-xl text-dreamchain p-2 flex-1"
               readOnly
               value={totalHewe - claimedHewe}
             />
           </div>
           <button
-            className={`border border-black rounded-2xl px-12 py-2 flex ${
+            className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
               availableHewe === 0 || status !== 'APPROVED' ? 'opacity-30' : ''
             }`}
             disabled={availableHewe === 0 || status !== 'APPROVED'}
@@ -227,16 +227,16 @@ const Profile = () => {
           </button>
         </div>
         <div className="bg-[#FAFBFC] p-4 rounded-2xl flex xl:flex-row flex-col items-start xl:items-center gap-8">
-          <div className="flex gap-4 items-center justify-between lg:justify-center">
+          <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
             <p className="font-medium">Available USDT</p>
             <input
-              className="bg-black rounded-xl text-dreamchain p-2"
+              className="bg-black rounded-xl text-dreamchain p-2 flex-1"
               readOnly
               value={availableUsdt}
             />
           </div>
           <button
-            className={`border border-black rounded-2xl px-12 py-2 flex ${
+            className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
               availableUsdt === 0 || status !== 'APPROVED' ? 'opacity-30' : ''
             }`}
             disabled={availableUsdt === 0 || status !== 'APPROVED'}

@@ -193,3 +193,74 @@ export const sendMailContactWithAdmin = async (mailInfo) => {
   // send a promise since nodemailer is async
   if (mailSent) return Promise.resolve(1);
 };
+
+export const sendMailReceiveCommission = async (mailInfo) => {
+  const { senderName, email } = mailInfo;
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: email,
+    subject: "Direct Commission from DreamChain",
+    html: `
+    <div>
+    Congratulations! You have received <b>$15</b> commission from user <b>${senderName}</b>.
+    <br></br>
+    Thank you for participating in our DreamChain referral program. 
+    <br></br>
+    DreamChain believes you will continue to make significant contributions to the DreamChain community as we work together toward even greater success.
+    <br></br>
+    ________________________________________
+    <br></br>
+    <b>
+    The DreamChain Team
+    </b>
+    </div>
+
+			`,
+  };
+
+  const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(info);
+    }
+  });
+
+  // send a promise since nodemailer is async
+  if (mailSent) return Promise.resolve(1);
+};
+
+export const sendMailRefDc = async (mailInfo) => {
+  const { senderName, email } = mailInfo;
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: email,
+    subject: "DreamChain Fund",
+    html: `
+      Congratulations! You have received <b>$5</b> DreamChain Contribution Fund from user <b>${senderName}</b>.
+      <br></br>
+      Thank you for participating in our DreamChain referral program. 
+      <br></br>
+      DreamChain believes you will continue to make significant contributions to the DreamChain community as we work together toward even greater success.
+      <br></br>
+      ________________________________________
+      <br></br>
+      <b>
+      The DreamChain Team
+      </b>
+			`,
+  };
+
+  const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(info);
+    }
+  });
+
+  // send a promise since nodemailer is async
+  if (mailSent) return Promise.resolve(1);
+};

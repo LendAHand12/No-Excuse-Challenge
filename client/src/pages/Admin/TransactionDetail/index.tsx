@@ -84,53 +84,14 @@ const AdminTransactionDetail = () => {
       });
   }, [transId]);
 
-  const handRefund = useCallback(
-    async (type) => {
-      const account = await getAccount();
-      if (account) {
-        type === 'A' ? setLoadingRefund(true) : setLoadingUntilRefund(true);
-        try {
-          const refundTrans = await transfer(
-            trans.address_to,
-            refundAmount > 0 ? refundAmount : trans.amount,
-          );
-          const { transactionHash } = refundTrans;
-          await adminDoneRefund(
-            transId,
-            transactionHash,
-            trans.type,
-            account,
-            trans.address_to,
-          );
-        } catch (error) {
-          setLoadingRefund(false);
-          setLoadingUntilRefund(false);
-        }
-      } else {
-        toast.error(t('Please login your registered wallet'));
-      }
-    },
-    [trans, refundAmount],
-  );
-
-  const adminDoneRefund = async (
-    transId,
-    transHash,
-    transType,
-    fromWallet,
-    receiveWallet,
-  ) => {
+  const handRefund = useCallback(async () => {
+    setLoadingRefund(true);
     await Payment.onAdminDoneRefund({
       transId,
-      transHash,
-      transType,
-      fromWallet,
-      receiveWallet,
     })
       .then((response) => {
         toast.success(response.data.message);
         setLoadingRefund(false);
-        setLoadingUntilRefund(false);
         setRefunding(false);
         setRefresh(!refresh);
       })
@@ -141,9 +102,8 @@ const AdminTransactionDetail = () => {
             : error.message;
         toast.error(t(message));
         setLoadingRefund(true);
-        setLoadingUntilRefund(false);
       });
-  };
+  }, [trans]);
 
   return (
     <DefaultLayout>
@@ -180,9 +140,9 @@ const AdminTransactionDetail = () => {
                           } py-1 px-2 rounded text-white text-sm`}
                         >
                           {trans.type === 'DIRECTHOLD'
-                            ? t('DIRECTHOLDt')
+                            ? t('DIRECTHOLD')
                             : trans.type === 'REFERRALHOLD'
-                            ? t('REFERRALHOLDt')
+                            ? t('REFERRALHOLD')
                             : t(trans.type)}
                         </span>
                       </span>
@@ -293,7 +253,7 @@ const AdminTransactionDetail = () => {
                     </ul>
                   </div>
 
-                  {!trans.isHoldRefund && trans.type.includes('HOLD') && (
+                  {/* {!trans.isHoldRefund && trans.type.includes('HOLD') && (
                     <button
                       onClick={changeToRefunded}
                       className="w-xl flex justify-center items-center hover:underline bg-black text-dreamchain font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
@@ -301,17 +261,23 @@ const AdminTransactionDetail = () => {
                       {loadingChangeToRefunded && <Loading />}
                       {t('changeToRefunded')}
                     </button>
-                  )}
+                  )} */}
                   {!trans.isHoldRefund &&
                     trans.type.includes('HOLD') &&
-                    checkRefundMess !== '' && <p>{checkRefundMess}</p>}
+                    checkRefundMess !== '' && (
+                      <div className="pt-6">
+                        <p className="bg-red-200 p-2 text-red-500 rounded-md">
+                          {checkRefundMess}
+                        </p>
+                      </div>
+                    )}
                   {!trans.isHoldRefund &&
                     trans.type.includes('HOLD') &&
                     trans.userReceiveId !== 'Unknow' &&
                     trans.userReceiveEmail !== 'Unknow' && (
                       <button
                         onClick={checkCanRefund}
-                        className="w-xl bg-yellow-500 text-white flex justify-center items-center hover:underline border font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                        className="w-xl bg-yellow-500 text-white flex justify-center items-center hover:underline border font-bold rounded-lg my-6 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
                       >
                         {loadingCheckCanRefund && <Loading />}
                         {t('checkCanRefund')}
@@ -319,14 +285,14 @@ const AdminTransactionDetail = () => {
                     )}
                   {refunding && (
                     <button
-                      onClick={() => handRefund('A')}
-                      className="w-xl flex bg-green-600 text-white justify-center items-center hover:underline border font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                      onClick={handRefund}
+                      className="w-xl flex bg-green-600 text-white justify-center items-center hover:underline border font-bold rounded-lg my-6 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
                     >
                       {loadingRefund && <Loading />}
                       {t('refund')}
                     </button>
                   )}
-                  {
+                  {/* {
                     <button
                       onClick={() => handRefund('B')}
                       className="w-xl bg-red-600 text-white flex justify-center items-center hover:underline border font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
@@ -334,7 +300,7 @@ const AdminTransactionDetail = () => {
                       {loadingUntilRefund && <Loading />}
                       {t('untilRefunds')}
                     </button>
-                  }
+                  } */}
                 </div>
               </div>
             </div>

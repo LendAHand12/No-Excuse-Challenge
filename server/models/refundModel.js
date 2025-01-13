@@ -6,19 +6,17 @@ const refundSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    address_from: {
+    userId_from: {
       type: String,
+      required: true,
     },
-    address_to: {
+    userId_to: {
       type: String,
       required: true,
     },
     type: {
       type: String,
       required: true,
-    },
-    hash: {
-      type: String,
     },
   },
   { timestamps: true }

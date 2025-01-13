@@ -102,7 +102,7 @@
   "transType": "Transaction type",
   "createTime": "Create Time",
   "refundStatus": "Refund Status",
-  "checkCanRefund": "Check return conditions",
+  "checkCanRefund": "Check refund conditions",
   "changeToRefunded": "Convert to refunded",
   "refund": "Process refund",
   "REFERRALHOLDt": "Contribution HOLD",

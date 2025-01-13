@@ -4,7 +4,11 @@ import Transaction from "../models/transactionModel.js";
 import { getParentWithCountPay, getLevelOfRefUser } from "../utils/getParentWithCountPay.js";
 import Refund from "../models/refundModel.js";
 import { getActiveLink } from "../utils/getLinksActive.js";
-import { sendActiveLink } from "../utils/sendMailCustom.js";
+import {
+  sendActiveLink,
+  sendMailReceiveCommission,
+  sendMailRefDc,
+} from "../utils/sendMailCustom.js";
 import {
   checkRatioCountChildOfUser,
   getParentUser,
@@ -373,9 +377,18 @@ const onDonePayment = asyncHandler(async (req, res) => {
         );
 
         if (!trans.type.includes("HOLD")) {
-          const userReceive = await User.findOne({ _id: trans.userId_to });
+          let userReceive = await User.findOne({ _id: trans.userId_to });
           userReceive.availableUsdt = userReceive.availableUsdt + trans.amount;
           await userReceive.save();
+        }
+
+        if (trans.type === "DIRECT" || trans.type === "REFERRAL") {
+          let userReceive = await User.findOne({ _id: trans.userId_to });
+          if (trans.type === "REFERRAL") {
+            await sendMailRefDc({ senderName: user.userId, email: userReceive.email });
+          } else {
+            await sendMailReceiveCommission({ senderName: user.userId, email: userReceive.email });
+          }
         }
       }
 
@@ -386,9 +399,8 @@ const onDonePayment = asyncHandler(async (req, res) => {
         }
       }
 
-      // let responseHewe = await getPriceHewe();
-      // const hewePrice = responseHewe.data.ticker.latest;
-      const hewePrice = 0.00091;
+      let responseHewe = await getPriceHewe();
+      const hewePrice = responseHewe.data.ticker.latest;
       const totalHewe = Math.round(100 / hewePrice);
       const hewePerDay = Math.round(totalHewe / 540);
 
@@ -580,14 +592,14 @@ const getPaymentDetail = asyncHandler(async (req, res) => {
       const userRef = await User.findById(trans.userId_to);
       res.json({
         _id: trans._id,
-        address_from: trans.address_from,
-        address_to: trans.address_ref,
+        address_from: user.walletAddress,
+        address_to: userRef.walletAddress,
         hash: trans.hash,
         amount: trans.amount,
         userId: user.userId,
         email: user.email,
-        userReceiveId: userRef ? userRef.userId : "Unknow",
-        userReceiveEmail: userRef ? userRef.email : "Unknow",
+        userReceiveId: userRef.userId,
+        userReceiveEmail: userRef.email,
         type: trans.type,
         status: trans.status,
         userCountPay: trans.userCountPay,
@@ -605,12 +617,9 @@ const checkCanRefundPayment = asyncHandler(async (req, res) => {
   const { id } = req.body;
   const trans = await Transaction.findById(id);
   if (trans) {
-    const { userCountPay, address_ref } = trans;
-    const userReceive = await User.findOne({
-      walletAddress: { $in: [address_ref] },
-    });
-    console.log({ userReceive });
-    const isSerepayWallet = await checkSerepayWallet(userReceive.walletAddress);
+    const { userCountPay, userId_to } = trans;
+    const userReceive = await User.findById(userId_to);
+    // const isSerepayWallet = await checkSerepayWallet(userReceive.walletAddress);
     if (userReceive) {
       if (userReceive.status === "LOCKED") {
         res.status(404);
@@ -618,9 +627,11 @@ const checkCanRefundPayment = asyncHandler(async (req, res) => {
       } else if (userReceive.closeLah) {
         res.status(404);
         throw new Error(`User is being blocked from trading`);
-      } else if (!isSerepayWallet) {
-        throw new Error(`The wallet received is not a Serepay wallet`);
-      } else if (userReceive.countPay - 1 < userCountPay) {
+      }
+      //  else if (!isSerepayWallet) {
+      //   throw new Error(`The wallet received is not a Serepay wallet`);
+      // }
+      else if (userReceive.countPay - 1 < userCountPay) {
         res.status(404);
         throw new Error(
           userReceive.countPay === 0
@@ -726,7 +737,7 @@ const changeToRefunded = asyncHandler(async (req, res) => {
 });
 
 const onAdminDoneRefund = asyncHandler(async (req, res) => {
-  const { transId, transHash, transType, fromWallet, receiveWallet } = req.body;
+  const { transId } = req.body;
   const trans = await Transaction.findById(transId);
   if (trans) {
     trans.isHoldRefund = true;
@@ -734,11 +745,21 @@ const onAdminDoneRefund = asyncHandler(async (req, res) => {
 
     const refund = await Refund.create({
       transId: transId,
-      hash: transHash,
-      address_from: fromWallet,
-      address_to: receiveWallet,
-      type: transType,
+      userId_from: trans.userId,
+      userId_to: trans.userId_to,
+      type: trans.type,
     });
+
+    const user = await User.findById(trans.userId);
+    const receiveUser = await User.findById(trans.userId_to);
+    receiveUser.availableUsdt = receiveUser.availableUsdt + trans.amount;
+    await receiveUser.save();
+
+    if (trans.type === "REFERRAL") {
+      await sendMailRefDc({ senderName: user.userId, email: receiveUser.email });
+    } else {
+      await sendMailReceiveCommission({ senderName: user.userId, email: receiveUser.email });
+    }
 
     res.json({
       message: "Refund successful",
