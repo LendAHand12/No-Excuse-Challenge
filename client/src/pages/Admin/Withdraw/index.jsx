@@ -1,58 +1,47 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import userStatus from '@/constants/userStatus';
+import withdrawStatus from '@/constants/withdrawStatus';
 import { useTranslation } from 'react-i18next';
-import User from '@/api/User';
 import { ToastContainer, toast } from 'react-toastify';
 import NoContent from '@/components/NoContent';
 import Loading from '@/components/Loading';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import DefaultLayout from '@/layout/DefaultLayout';
 import Modal from 'react-modal';
+import Admin from '@/api/Admin';
 import { shortenWalletAddress } from '@/utils';
+import { transfer } from '@/utils/smartContract';
 
-const AdminUserPages = () => {
+const AdminWithdrawPages = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const key = searchParams.get('keyword') || '';
   const page = searchParams.get('page') || 1;
   const status = searchParams.get('status') || 'all';
   const [totalPage, setTotalPage] = useState(0);
-  const [keyword, setKeyword] = useState(key);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   const [refresh, setRefresh] = useState(false);
-  const { userInfo } = useSelector((state) => state.auth);
   const [objectFilter, setObjectFilter] = useState({
     pageNumber: page,
-    keyword: key,
     status,
   });
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [currentDeleteId, setCurrentDeleteId] = useState('');
-
-  const openModal = () => {
-    setShowDeleteModal(true);
-  };
-
-  const closeModal = () => {
-    setShowDeleteModal(false);
-  };
+  const [showModal, setShowModal] = useState(false);
+  const [currentApproveRequest, setCurrentApproveRequest] = useState(null);
+  const [loadingPayment, setLoadingPayment] = useState(false);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const { pageNumber, keyword, status } = objectFilter;
-      await User.getAllUsers(pageNumber, keyword, status)
+      const { pageNumber, status } = objectFilter;
+      await Admin.getAllWithdraws(objectFilter)
         .then((response) => {
-          const { users, pages } = response.data;
-          setData(users);
+          const { withdraws, pages } = response.data;
+          setData(withdraws);
           setTotalPage(pages);
           setLoading(false);
-          pushParamsToUrl(pageNumber, keyword, status);
+          pushParamsToUrl(pageNumber, status);
         })
         .catch((error) => {
           let message =
@@ -65,6 +54,34 @@ const AdminUserPages = () => {
     })();
   }, [objectFilter, refresh]);
 
+  const openModal = () => {
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
+  const pushParamsToUrl = (pageNumber, searchStatus) => {
+    const searchParams = new URLSearchParams();
+    if (pageNumber) {
+      searchParams.set('page', pageNumber);
+    }
+    if (searchStatus) {
+      searchParams.set('status', searchStatus);
+    }
+    const queryString = searchParams.toString();
+    const url = queryString
+      ? `/admin/withdraw?${queryString}`
+      : '/admin/withdraw';
+    navigate(url);
+  };
+
+  const handleChangePage = useCallback(
+    (page) => setObjectFilter({ ...objectFilter, pageNumber: page }),
+    [objectFilter],
+  );
+
   const onChangeStatus = useCallback(
     (e) =>
       setObjectFilter({
@@ -75,85 +92,57 @@ const AdminUserPages = () => {
     [objectFilter],
   );
 
-  const onSearch = (e) => {
-    setKeyword(e.target.value);
+  const handleApprove = async (request) => {
+    setShowModal(true);
+    setCurrentApproveRequest(request);
   };
 
-  const pushParamsToUrl = (pageNumber, searchKey, searchStatus) => {
-    const searchParams = new URLSearchParams();
-    if (searchKey) {
-      searchParams.set('keyword', searchKey);
+  const paymentMetamask = useCallback(async () => {
+    setLoadingPayment(true);
+    try {
+      const referralTransaction = await transfer(
+        currentApproveRequest.userId.walletAddress,
+        currentApproveRequest.amount - 1,
+      );
+      if (referralTransaction) {
+        const { transactionHash } = referralTransaction;
+        await donePayment(transactionHash);
+        window.location.reload();
+      } else {
+        setLoadingPayment(false);
+        throw new Error(t('payment error'));
+      }
+    } catch (error) {
+      toast.error(t(error.message));
+      setLoadingPayment(false);
     }
-    if (pageNumber) {
-      searchParams.set('page', pageNumber);
-    }
-    if (searchStatus) {
-      searchParams.set('status', searchStatus);
-    }
-    const queryString = searchParams.toString();
-    const url = queryString ? `/admin/users?${queryString}` : '/admin/users';
-    navigate(url);
-  };
+  }, [currentApproveRequest]);
 
-  const handleApprove = async (id) => {
-    await User.changeStatus({ id, status: 'APPROVED' })
-      .then((response) => {
-        const { message } = response.data;
-        setRefresh(!refresh);
-        toast.success(t(message));
+  const donePayment = useCallback(
+    async (hash) => {
+      await Admin.updateWithdraw({
+        hash,
+        id: currentApproveRequest._id,
       })
-      .catch((error) => {
-        let message =
-          error.response && error.response.data.error
-            ? error.response.data.error
-            : error.message;
-        toast.error(t(message));
-      });
-  };
-
-  const handleDetail = (id) => {
-    navigate(`/admin/users/${id}`);
-  };
-
-  const handleTree = (id) => {
-    navigate(`/admin/system/${id}`);
-  };
-
-  const handleChangePage = useCallback(
-    (page) => setObjectFilter({ ...objectFilter, pageNumber: page }),
-    [objectFilter],
+        .then((response) => {
+          toast.success(t(response.data.message));
+        })
+        .catch((error) => {
+          let message =
+            error.response && error.response.data.message
+              ? error.response.data.message
+              : error.message;
+          toast.error(t(message));
+        });
+    },
+    [currentApproveRequest],
   );
-
-  const handleSearch = useCallback(() => {
-    setObjectFilter({ ...objectFilter, keyword, pageNumber: 1 });
-  }, [keyword, objectFilter]);
-
-  const handleDelete = async (userId) => {
-    setCurrentDeleteId(userId);
-    setShowDeleteModal(true);
-  };
-
-  const handleDeleteUser = useCallback(async () => {
-    await User.deleteUserById(currentDeleteId)
-      .then((response) => {
-        toast.success(t(response.data.message));
-        setShowDeleteModal(false);
-      })
-      .catch((error) => {
-        let message =
-          error.response && error.response.data.error
-            ? error.response.data.error
-            : error.message;
-        toast.error(t(message));
-        setLoading(false);
-      });
-  }, [currentDeleteId]);
 
   return (
     <DefaultLayout>
       <ToastContainer />
       <Modal
-        isOpen={showDeleteModal}
+        isOpen={showModal}
         onRequestClose={closeModal}
         style={{
           content: {
@@ -189,20 +178,24 @@ const AdminUserPages = () => {
                 <span className="sr-only">Close modal</span>
               </button>
               <svg
-                className="text-gray-400 dark:text-gray-500 w-11 h-11 mb-3.5 mx-auto"
-                aria-hidden="true"
-                fill="currentColor"
                 viewBox="0 0 20 20"
+                fill="none"
                 xmlns="http://www.w3.org/2000/svg"
+                className="text-gray-400 w-11 h-11 mb-3.5 mx-auto"
               >
                 <path
                   fillRule="evenodd"
-                  d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
                   clipRule="evenodd"
-                ></path>
+                  d="M1.68542 6.65868C0.758716 6.96758 0.779177 8.28543 1.71502 8.56541L9.20844 10.8072L11.6551 18.5165C11.948 19.4394 13.2507 19.4488 13.5569 18.5302L18.8602 2.62029C19.1208 1.83853 18.3771 1.09479 17.5953 1.35538L1.68542 6.65868ZM5.31842 7.55586L16.3304 3.8852L12.6316 14.9817L10.9548 9.69826C10.8547 9.38295 10.6052 9.13754 10.2883 9.04272L5.31842 7.55586Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M17.7674 1.43951L18.8105 2.51742L9.98262 11.0605L8.93948 9.98265L17.7674 1.43951Z"
+                  fill="currentColor"
+                />
               </svg>
-              <p className="mb-4 text-gray-500 dark:text-gray-300">
-                Are you sure you want to delete this user?
+              <p className="mb-4 text-gray-500 ">
+                Are you sure you want to approve this request?
               </p>
               <div className="flex justify-center items-center space-x-4">
                 <button
@@ -212,9 +205,10 @@ const AdminUserPages = () => {
                   No, cancel
                 </button>
                 <button
-                  onClick={handleDeleteUser}
-                  className="py-2 px-3 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900"
+                  onClick={paymentMetamask}
+                  className="flex items-center py-2 px-3 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900"
                 >
+                  {loadingPayment && <Loading />}
                   Yes, I'm sure
                 </button>
               </div>
@@ -232,9 +226,9 @@ const AdminUserPages = () => {
               disabled={loading}
             >
               <option value="all">All</option>
-              {userStatus.map((status) => (
+              {withdrawStatus.map((status) => (
                 <option value={status.status} key={status.status}>
-                  {t(status.status)}
+                  {status.status}
                 </option>
               ))}
             </select>
@@ -258,22 +252,6 @@ const AdminUserPages = () => {
                 ></path>
               </svg>
             </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                onChange={onSearch}
-                className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50"
-                placeholder={t('search with user name or email')}
-                defaultValue={objectFilter.keyword}
-              />
-              <button
-                onClick={handleSearch}
-                disabled={loading}
-                className="h-8 flex text-xs justify-center items-center hover:underline bg-black text-dreamchain font-bold rounded-full py-1 px-4 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
-              >
-                {t('search')}
-              </button>
-            </div>
           </div>
         </div>
         <table className="w-full text-sm text-left text-gray-500">
@@ -282,11 +260,15 @@ const AdminUserPages = () => {
               <th scope="col" className="px-6 py-3">
                 Username
               </th>
-              <th scope="col" className="px-6 py-3">
-                Email
-              </th>
+
               <th scope="col" className="px-6 py-3">
                 Wallet Address
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Amount
+              </th>
+              <th scope="col" className="px-6 py-3">
+                {t('time')}
               </th>
               <th scope="col" className="px-6 py-3">
                 {t('status')}
@@ -310,130 +292,61 @@ const AdminUserPages = () => {
                   >
                     <div className="">
                       <div className="text-base font-semibold">
-                        {ele.userId}
+                        {ele.userId.userId}
                       </div>
-                      <div className="font-normal text-gray-500">{ele._id}</div>
+                      <div className="font-normal text-gray-500">
+                        {ele.userId.email}
+                      </div>
                     </div>
                   </th>
-                  <td className="px-6 py-4">{ele.email}</td>
                   <td className="px-6 py-4">
-                    {shortenWalletAddress(ele.walletAddress, 12)}
+                    {shortenWalletAddress(ele.userId.walletAddress, 12)}
+                  </td>
+                  <td className="px-6 py-4">
+                    <b>{ele.amount}</b> USDT
+                  </td>
+                  <td className="px-6 py-4">
+                    {new Date(ele.createdAt).toLocaleString('vi')}
                   </td>
                   <td className="px-6 py-4">
                     <div
                       className={`max-w-fit text-white rounded-sm py-1 px-2 text-sm ${
-                        userStatus.find((item) => item.status === ele.status)
-                          .color
+                        withdrawStatus.find(
+                          (item) => item.status === ele.status,
+                        ).color
                       } mr-2`}
                     >
-                      {t(ele.status)}
+                      {ele.status}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-6">
                       {ele.status === 'PENDING' && (
                         <button
-                          onClick={() => handleApprove(ele._id)}
-                          className="font-medium text-gray-500 hover:text-dreamchain"
+                          onClick={() => handleApprove(ele)}
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-green-700 text-white"
                         >
                           <svg
                             fill="currentColor"
-                            viewBox="0 0 24 24"
-                            id="check"
-                            data-name="Flat Line"
+                            height="24"
+                            width="24"
+                            version="1.1"
+                            id="Icons"
                             xmlns="http://www.w3.org/2000/svg"
-                            className="w-6 h-auto"
+                            viewBox="0 0 32 32"
                           >
-                            <polyline
-                              id="primary"
-                              points="5 12 10 17 19 8"
-                              style={{
-                                fill: 'none',
-                                stroke: 'currentColor',
-                                strokeLinecap: 'round',
-                                strokeLinejoin: 'round',
-                                strokeWidth: 2,
-                              }}
-                            ></polyline>
+                            <path
+                              d="M24.5,11c-0.7-0.1-1.4,0-2,0.4c-0.4-0.7-1.2-1.2-2-1.4c-0.7-0.1-1.4,0-2,0.4c-0.4-0.7-1.2-1.2-2-1.4C16,9,15.5,9,15,9.2V5.1
+	c0-1.5-1.1-2.8-2.5-3.1c-0.9-0.1-1.8,0.1-2.4,0.7C9.4,3.3,9,4.1,9,5v5.3C8.4,10.1,7.8,10,7.1,10c-0.6,0.1-1.3,0.3-1.8,0.7
+	C5.1,10.9,5,11.2,5,11.5v7.7C5,24.9,9.5,29.7,15,30c0.2,0,0.3,0,0.5,0c0.1,0,0.3,0,0.4,0C22,29.8,27,24.5,27,18.1v-4
+	C27,12.6,25.9,11.3,24.5,11z M25,18.1c0,5.3-4.1,9.7-9.2,9.9c-0.3,0-0.5,0-0.8,0C10.6,27.8,7,23.8,7,19.2v-7.1C7.1,12,7.2,12,7.3,12
+	c0.4,0,0.8,0.1,1.2,0.4C8.8,12.7,9,13.1,9,13.5V19c0,0.6,0.4,1,1,1s1-0.4,1-1v-5.5V12V5c0-0.3,0.1-0.6,0.4-0.8C11.6,4,11.9,4,12.2,4
+	C12.6,4.1,13,4.6,13,5.1V12v2c0,0.6,0.4,1,1,1s1-0.4,1-1v-2c0-0.3,0.1-0.6,0.4-0.8c0.2-0.2,0.5-0.3,0.8-0.2c0.5,0.1,0.8,0.6,0.8,1.1
+	V13v1c0,0.6,0.4,1,1,1s1-0.4,1-1v-1c0-0.3,0.1-0.6,0.4-0.8c0.2-0.2,0.5-0.3,0.8-0.2c0.5,0.1,0.8,0.6,0.8,1.1V14v1c0,0.6,0.4,1,1,1
+	s1-0.4,1-1v-1c0-0.3,0.1-0.6,0.4-0.8c0.2-0.2,0.5-0.3,0.8-0.2c0,0,0,0,0,0c0.5,0.1,0.8,0.6,0.8,1.1V18.1z"
+                            />
                           </svg>
-                        </button>
-                      )}
-
-                      <button
-                        onClick={() => handleDetail(ele._id)}
-                        className="font-medium text-gray-500 hover:text-dreamchain"
-                      >
-                        <svg
-                          fill="currentColor"
-                          className="w-6 h-auto"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path d="M21.92,11.6C19.9,6.91,16.1,4,12,4S4.1,6.91,2.08,11.6a1,1,0,0,0,0,.8C4.1,17.09,7.9,20,12,20s7.9-2.91,9.92-7.6A1,1,0,0,0,21.92,11.6ZM12,18c-3.17,0-6.17-2.29-7.9-6C5.83,8.29,8.83,6,12,6s6.17,2.29,7.9,6C18.17,15.71,15.17,18,12,18ZM12,8a4,4,0,1,0,4,4A4,4,0,0,0,12,8Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,14Z" />
-                        </svg>
-                      </button>
-
-                      <button
-                        onClick={() => handleTree(ele._id)}
-                        className="font-medium text-gray-500 hover:text-dreamchain"
-                      >
-                        <svg
-                          className="w-6 h-auto"
-                          viewBox="0 0 48 48"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <rect
-                            width="48"
-                            height="48"
-                            fill="white"
-                            fillOpacity="0.01"
-                          />
-                          <path
-                            d="M13.0448 14C13.5501 8.3935 18.262 4 24 4C29.738 4 34.4499 8.3935 34.9552 14H35C39.9706 14 44 18.0294 44 23C44 27.9706 39.9706 32 35 32H13C8.02944 32 4 27.9706 4 23C4 18.0294 8.02944 14 13 14H13.0448Z"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M24 28L29 23"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M24 25L18 19"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M24 44V18"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
-
-                      {ele.countPay === 0 && ele.status !== 'DELETED' && (
-                        <button
-                          onClick={() => handleDelete(ele._id)}
-                          className="font-medium text-gray-500 hover:text-dreamchain"
-                        >
-                          <svg
-                            fill="currentColor"
-                            className="w-6 h-auto"
-                            viewBox="-3 -2 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                            preserveAspectRatio="xMinYMin"
-                          >
-                            <path d="M6 2V1a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1h4a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-.133l-.68 10.2a3 3 0 0 1-2.993 2.8H5.826a3 3 0 0 1-2.993-2.796L2.137 7H2a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4zm10 2H2v1h14V4zM4.141 7l.687 10.068a1 1 0 0 0 .998.932h6.368a1 1 0 0 0 .998-.934L13.862 7h-9.72zM7 8a1 1 0 0 1 1 1v7a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1zm4 0a1 1 0 0 1 1 1v7a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1z" />
-                          </svg>
+                          Approve
                         </button>
                       )}
                     </div>
@@ -454,10 +367,10 @@ const AdminUserPages = () => {
             aria-label="Table navigation"
           >
             <span className="text-sm font-normal text-gray-500">
-              Showing{' '}
+              Showing
               <span className="font-semibold text-gray-900">
                 {objectFilter.pageNumber}
-              </span>{' '}
+              </span>
               of{' '}
               <span className="font-semibold text-gray-900">{totalPage}</span>{' '}
               page
@@ -521,4 +434,4 @@ const AdminUserPages = () => {
   );
 };
 
-export default AdminUserPages;
+export default AdminWithdrawPages;

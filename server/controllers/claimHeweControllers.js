@@ -3,6 +3,7 @@ import axios from "axios";
 import Claim from "../models/claimModel.js";
 import sendHewe from "../services/sendHewe.js";
 import sendUsdt from "../services/sendUsdt.js";
+import Withdraw from "../models/withdrawModel.js";
 
 const claimHewe = asyncHandler(async (req, res) => {
   const user = req.user;
@@ -16,25 +17,29 @@ const claimHewe = asyncHandler(async (req, res) => {
     //   address: user.heweWallet,
     // });
 
-    const receipt = await sendHewe({
-      amount: user.availableHewe,
-      receiverAddress: user.walletAddress,
-    });
+    if (user.availableHewe > 0) {
+      const receipt = await sendHewe({
+        amount: user.availableHewe,
+        receiverAddress: user.walletAddress,
+      });
 
-    const claimed = await Claim.create({
-      userId: user.id,
-      amount: user.availableHewe,
-      hash: receipt.blockHash,
-      coin: "HEWE",
-    });
+      const claimed = await Claim.create({
+        userId: user.id,
+        amount: user.availableHewe,
+        hash: receipt.blockHash,
+        coin: "HEWE",
+      });
 
-    user.claimedHewe = user.claimedHewe + user.availableHewe;
-    user.availableHewe = 0;
-    await user.save();
+      user.claimedHewe = user.claimedHewe + user.availableHewe;
+      user.availableHewe = 0;
+      await user.save();
 
-    res.status(200).json({
-      message: "claim HEWE successful",
-    });
+      res.status(200).json({
+        message: "claim HEWE successful",
+      });
+    } else {
+      throw new Error("Insufficient balance in account");
+    }
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -48,29 +53,46 @@ const claimUsdt = asyncHandler(async (req, res) => {
       throw new Error("Please verify your account");
     }
 
-    const receipt = await sendUsdt({
-      amount: user.availableUsdt,
-      receiverAddress: user.walletAddress,
-    });
+    if (user.availableUsdt > 0) {
+      if (user.availableUsdt < 100) {
+        // const receipt = await sendUsdt({
+        //   amount: user.availableUsdt,
+        //   receiverAddress: user.walletAddress,
+        // });
 
-    console.log({ receipt });
+        const claimed = await Claim.create({
+          userId: user.id,
+          amount: user.availableUsdt,
+          // hash: receipt.blockHash,
+          hash: "receipt.blockHash",
+          coin: "USDT",
+        });
 
-    const claimed = await Claim.create({
-      userId: user.id,
-      amount: user.availableUsdt,
-      hash: receipt.blockHash,
-      coin: "USDT",
-    });
+        user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
+        user.availableUsdt = 0;
+        await user.save();
 
-    user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
-    user.availableUsdt = 0;
-    await user.save();
+        res.status(200).json({
+          message: "claim USDT successful",
+        });
+      } else {
+        const withdraw = await Withdraw.create({
+          userId: user.id,
+          amount: user.availableUsdt,
+        });
 
-    res.status(200).json({
-      message: "claim USDT successful",
-    });
+        user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
+        user.availableUsdt = 0;
+        await user.save();
+
+        res.status(200).json({
+          message: "Withdrawal request has been sent to Admin. Please wait!",
+        });
+      }
+    } else {
+      throw new Error("Insufficient balance in account");
+    }
   } catch (err) {
-    console.log({ err: err.message.split(",")[0] });
     res.status(400).json({ error: err.message ? err.message.split(",")[0] : "Internal Error" });
   }
 });

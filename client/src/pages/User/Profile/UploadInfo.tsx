@@ -5,7 +5,7 @@ const UploadFile = ({ watch, register, required, name }) => {
   const [filePreview] = useFilePreview(file);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full">
+    <div className="flex flex-col items-center justify-center w-full bg-white">
       <label className="flex flex-col w-full h-40 border-4 border-blue-200 border-dashed hover:bg-gray-100 hover:border-gray-300">
         {filePreview ? (
           <img

@@ -109,6 +109,33 @@ const routes = [
       </svg>
     ),
   },
+  {
+    title: 'Withdraw request',
+    link: '/admin/withdraw',
+    icon: (
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 16 16"
+        version="1.1"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path fill="currentColor" d="M8 0l2 3h-1v2h-2v-2h-1l2-3z"></path>
+        <path
+          fill="currentColor"
+          d="M15 7v8h-14v-8h14zM16 6h-16v10h16v-10z"
+        ></path>
+        <path
+          fill="currentColor"
+          d="M8 8c1.657 0 3 1.343 3 3s-1.343 3-3 3h5v-1h1v-4h-1v-1h-5z"
+        ></path>
+        <path
+          fill="currentColor"
+          d="M5 11c0-1.657 1.343-3 3-3h-5v1h-1v4h1v1h5c-1.657 0-3-1.343-3-3z"
+        ></path>
+      </svg>
+    ),
+  },
   // {
   //   path: "/users",
   //   title: "users",

@@ -24,6 +24,7 @@ import generateGravatar from "../utils/generateGravatar.js";
 import { areArraysEqual } from "../cronJob/index.js";
 import { sendMailUserCanInceaseTierToAdmin } from "../utils/sendMailCustom.js";
 import Permission from "../models/permissionModel.js";
+import Withdraw from "../models/withdrawModel.js";
 
 dotenv.config();
 
@@ -249,6 +250,12 @@ const getUserInfo = asyncHandler(async (req, res) => {
       status: "APPROVED",
     }).select("oldUserName oldEmail updatedAt");
 
+    const withdraws = await Withdraw.find({
+      userId: user._id,
+      status: "PENDING",
+    });
+    const totalWithdraws = withdraws.reduce((sum, withdraw) => sum + withdraw.amount, 0);
+
     const tree = await Tree.findOne({ userId: user._id, tier: 1 });
 
     let refUser;
@@ -313,6 +320,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       heweWallet: user.heweWallet,
       ranking: user.ranking,
       totalEarning: user.availableUsdt + user.claimedUsdt,
+      withdrawPending: totalWithdraws,
     });
   } else {
     res.status(404);

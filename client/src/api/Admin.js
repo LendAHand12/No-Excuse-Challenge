@@ -1,5 +1,5 @@
 import API from './API';
-import { URL_API_USER } from './URL';
+import { URL_API_USER, URL_API_WITHDRAW } from './URL';
 
 const Admin = {
   createAdmin: (body) => {
@@ -24,6 +24,16 @@ const Admin = {
   },
   getProfileAdmin: (id) => {
     return API.get(`${URL_API_USER}/admin/${id}`);
+  },
+  getAllWithdraws: ({ status, pageNumber }) => {
+    return API.get(
+      `${URL_API_WITHDRAW}/?pageNumber=${pageNumber}&status=${status}`,
+    );
+  },
+  updateWithdraw: ({ id, hash }) => {
+    return API.put(`${URL_API_WITHDRAW}/${id}`, {
+      hash,
+    });
   },
 };
 

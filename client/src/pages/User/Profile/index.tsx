@@ -50,6 +50,7 @@ const Profile = () => {
     claimedHewe,
     ranking,
     totalEarning,
+    withdrawPending,
   } = userInfo;
   const [imgFront, setImgFront] = useState('');
   const [imgBack, setImgBack] = useState('');
@@ -212,7 +213,7 @@ const Profile = () => {
             <input
               className="bg-black rounded-xl text-dreamchain p-2 flex-1"
               readOnly
-              value={totalHewe - claimedHewe}
+              value={totalHewe - claimedHewe - availableHewe}
             />
           </div>
           <button
@@ -233,6 +234,14 @@ const Profile = () => {
               className="bg-black rounded-xl text-dreamchain p-2 flex-1"
               readOnly
               value={availableUsdt}
+            />
+          </div>
+          <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
+            <p className="font-medium">Processing USDT</p>
+            <input
+              className="bg-black rounded-xl text-dreamchain p-2 flex-1"
+              readOnly
+              value={withdrawPending}
             />
           </div>
           <button
@@ -325,7 +334,7 @@ const Profile = () => {
           <div className="flex justify-end">
             <button
               onClick={() => setIsEdit(true)}
-              className="flex gap-2 font-semibold hover:bg-gray-100 py-2 px-4 rounded-lg"
+              className="flex gap-2 font-semibold py-2 px-4 rounded-lg"
             >
               Update{' '}
               <svg
@@ -339,6 +348,26 @@ const Profile = () => {
                   d="M15.675 1.63718C15.3938 1.35583 15.0599 1.13267 14.6924 0.980441C14.325 0.828213 13.9311 0.749907 13.5333 0.75C13.1355 0.750093 12.7417 0.828583 12.3743 0.980982C12.0068 1.13338 11.6731 1.3567 11.392 1.63818L1.885 11.1582C1.31853 11.7259 1.00028 12.4951 1 13.2972V16.5002C1 16.9142 1.336 17.2502 1.75 17.2502H4.973C5.776 17.2502 6.546 16.9302 7.113 16.3632L16.613 6.85718C17.1797 6.28915 17.4979 5.51954 17.4979 4.71718C17.4979 3.91481 17.1797 3.1452 16.613 2.57718L15.675 1.63718ZM0.75 18.7502C0.551088 18.7502 0.360322 18.8292 0.21967 18.9698C0.0790175 19.1105 0 19.3013 0 19.5002C0 19.6991 0.0790175 19.8899 0.21967 20.0305C0.360322 20.1712 0.551088 20.2502 0.75 20.2502H16.75C16.9489 20.2502 17.1397 20.1712 17.2803 20.0305C17.421 19.8899 17.5 19.6991 17.5 19.5002C17.5 19.3013 17.421 19.1105 17.2803 18.9698C17.1397 18.8292 16.9489 18.7502 16.75 18.7502H0.75Z"
                   fill="#02071B"
                 />
+              </svg>
+            </button>
+          </div>
+        )}
+        {isEdit && (
+          <div className="flex justify-end">
+            <button
+              onClick={() => setIsEdit(false)}
+              className="flex gap-2 font-semibold py-2 px-4 rounded-lg"
+            >
+              Cancel
+              <svg
+                fill="currentColor"
+                width="24"
+                height="24"
+                viewBox="-28 0 512 512"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <title>cancel</title>
+                <path d="M64 388L196 256 64 124 96 92 228 224 360 92 392 124 260 256 392 388 360 420 228 288 96 420 64 388Z" />
               </svg>
             </button>
           </div>
@@ -423,33 +452,37 @@ const Profile = () => {
                 <div className="w-full flex justify-center">
                   <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
                     <p> {t('idCardFront')} :</p>
-                    <div className="flex flex-col items-center justify-center w-full">
-                      <UploadFile
-                        register={register}
-                        watch={watch}
-                        required={false}
-                        name="imgFront"
-                      />
-                      <p className="text-red-500 text-sm">
-                        {errors.imgFront?.message}
-                      </p>
-                    </div>
+                    {isEdit && (
+                      <div className="flex flex-col items-center justify-center w-full">
+                        <UploadFile
+                          register={register}
+                          watch={watch}
+                          required={false}
+                          name="imgFront"
+                        />
+                        <p className="text-red-500 text-sm">
+                          {errors.imgFront?.message}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="flex justify-center">
+                <div className="flex justify-center bg-[#E5E9EE] rounded-lg">
                   <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
                     <p> {t('idCardBack')} :</p>
-                    <div className="flex items-center justify-center w-full">
-                      <UploadFile
-                        register={register}
-                        watch={watch}
-                        required={false}
-                        name="imgBack"
-                      />
-                      <p className="text-red-500 text-sm">
-                        {errors.imgBack?.message}
-                      </p>
-                    </div>
+                    {isEdit && (
+                      <div className="flex items-center justify-center w-full">
+                        <UploadFile
+                          register={register}
+                          watch={watch}
+                          required={false}
+                          name="imgBack"
+                        />
+                        <p className="text-red-500 text-sm">
+                          {errors.imgBack?.message}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </>
