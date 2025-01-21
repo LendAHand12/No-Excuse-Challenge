@@ -136,24 +136,24 @@ const PaymentPage = () => {
   // );
 
   const paymentMetamask = useCallback(async () => {
-    // setLoadingPayment(true);
-    // try {
-      // const referralTransaction = await transfer(
-      //   import.meta.env.VITE_MAIN_WALLET_ADDRESS,
-      //   100.2,
-      // );
-      // if (referralTransaction) {
-      //   const { transactionHash } = referralTransaction;
-        await donePayment("transactionHash");
-        // window.location.reload();
-    //   } else {
-    //     setLoadingPayment(false);
-    //     throw new Error(t('payment error'));
-    //   }
-    // } catch (error) {
-    //   toast.error(t(error.message));
-    //   setLoadingPayment(false);
-    // }
+    setLoadingPayment(true);
+    try {
+      const referralTransaction = await transfer(
+        import.meta.env.VITE_MAIN_WALLET_ADDRESS,
+        100.2,
+      );
+      if (referralTransaction) {
+        const { transactionHash } = referralTransaction;
+        await donePayment(transactionHash);
+        window.location.reload();
+      } else {
+        setLoadingPayment(false);
+        throw new Error(t('payment error'));
+      }
+    } catch (error) {
+      toast.error(t(error.message));
+      setLoadingPayment(false);
+    }
   }, [paymentsList]);
 
   const donePayment = useCallback(
