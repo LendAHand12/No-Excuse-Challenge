@@ -10,7 +10,6 @@ import { useSelector } from 'react-redux';
 import DefaultLayout from '../../../layout/DefaultLayout';
 
 const AdminTransactionDetail = () => {
-  const { userInfo } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const transId = pathname.split('/')[3];

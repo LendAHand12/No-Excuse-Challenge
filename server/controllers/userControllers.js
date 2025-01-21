@@ -150,6 +150,12 @@ const getUserById = asyncHandler(async (req, res) => {
       refUser = await User.findById(tree.refId);
     }
 
+    const withdraws = await Withdraw.find({
+      userId: user._id,
+      status: "PENDING",
+    });
+    const totalWithdraws = withdraws.reduce((sum, withdraw) => sum + withdraw.amount, 0);
+
     res.json({
       id: user._id,
       email: user.email,
@@ -159,11 +165,6 @@ const getUserById = asyncHandler(async (req, res) => {
       isConfirmed: user.isConfirmed,
       avatar: user.avatar,
       walletAddress: user.walletAddress,
-      walletAddress1: user.walletAddress1,
-      walletAddress2: user.walletAddress2,
-      walletAddress3: user.walletAddress3,
-      walletAddress4: user.walletAddress4,
-      walletAddress5: user.walletAddress5,
       tier: user.tier,
       createdAt: user.createdAt,
       fine: user.fine,
@@ -205,6 +206,9 @@ const getUserById = asyncHandler(async (req, res) => {
       claimedHewe: user.claimedHewe,
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
+      ranking: user.ranking,
+      totalEarning: user.availableUsdt + user.claimedUsdt,
+      withdrawPending: totalWithdraws,
     });
   } else {
     res.status(404);
@@ -272,11 +276,6 @@ const getUserInfo = asyncHandler(async (req, res) => {
       isConfirmed: user.isConfirmed,
       avatar: user.avatar,
       walletAddress: user.walletAddress,
-      walletAddress1: user.walletAddress1,
-      walletAddress2: user.walletAddress2,
-      walletAddress3: user.walletAddress3,
-      walletAddress4: user.walletAddress4,
-      walletAddress5: user.walletAddress5,
       tier: user.tier,
       createdAt: user.createdAt,
       fine: user.fine,

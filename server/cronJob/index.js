@@ -361,3 +361,20 @@ export const distributionHewe = asyncHandler(async () => {
     }
   }
 });
+
+export const rankingCalc = asyncHandler(async () => {
+  const listUser = await User.find({
+    $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }, { countPay: 13 }],
+  }).exec();
+
+  for (let u of listUser) {
+    try {
+      if(u.ranking === 1) {
+        let treeUser = await Tree.findOne({userId: u._id});
+        console.log({treeUser})
+      }
+    } catch (error) {
+      console.log({ error });
+    }
+  }
+});
