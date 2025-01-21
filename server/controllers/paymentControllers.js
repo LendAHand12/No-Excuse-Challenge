@@ -424,12 +424,21 @@ const getAllPayments = asyncHandler(async (req, res) => {
   let { pageNumber, keyword, status, tier } = req.query;
   const page = Number(pageNumber) || 1;
   let searchType = {};
-  if (status === "DIRECT" || status === "REFERRAL" || status === "REGISTER" || status === "FINE") {
+  if (
+    status === "DIRECT" ||
+    status === "REFERRAL" ||
+    status === "REGISTER" ||
+    status === "FINE" ||
+    status === "PIG" ||
+    status === "COMPANY"
+  ) {
     searchType = { type: status };
   }
   if (status === "HOLD") {
     searchType = { type: { $regex: status, $options: "i" } };
   }
+
+  console.log({ searchType });
 
   const pageSize = 10;
 
@@ -488,7 +497,13 @@ const getAllPayments = asyncHandler(async (req, res) => {
         type: pay.type,
         createdAt: pay.createdAt,
       });
-    } else if (status === "DIRECT" || status === "REFERRAL" || status === "ALL") {
+    } else if (
+      status === "DIRECT" ||
+      status === "REFERRAL" ||
+      status === "ALL" ||
+      status === "PIG" ||
+      status === "COMPANY"
+    ) {
       const userRef = await User.findById(pay.userId_to);
       result.push({
         _id: pay._id,
