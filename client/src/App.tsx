@@ -38,6 +38,10 @@ import GetVerifyLinkPage from './pages/Admin/GetVerifyLink';
 import AdminTransactionDetail from './pages/Admin/TransactionDetail';
 import AdminWithdrawPages from './pages/Admin/Withdraw';
 import AdminUserProfile from './pages/Admin/UserProfile'
+import NewsPage from './pages/News';
+import AdminNewsPage from './pages/Admin/News';
+import AdminCreateNewsPage from './pages/Admin/News/Create';
+import AdminEditNewsPage from './pages/Admin/News/Edit';
 
 function App() {
   const { pathname } = useLocation();
@@ -110,6 +114,15 @@ function App() {
             <>
               <PageTitle title="Member’s Guidelines | DreamChain" />
               <GuidePage />
+            </>
+          }
+        />
+        <Route
+          path="/news"
+          element={
+            <>
+              <PageTitle title="News | DreamChain" />
+              <NewsPage />
             </>
           }
         />
@@ -196,6 +209,33 @@ function App() {
             <>
               <PageTitle title="Withdraw request | DreamChain" />
               <AdminWithdrawPages />
+            </>
+          }
+        />
+        <Route
+          path="/admin/news"
+          element={
+            <>
+              <PageTitle title="News | DreamChain" />
+              <AdminNewsPage />
+            </>
+          }
+        />
+        <Route
+          path="/admin/news/create"
+          element={
+            <>
+              <PageTitle title="Create News | DreamChain" />
+              <AdminCreateNewsPage />
+            </>
+          }
+        />
+        <Route
+          path="/admin/news/edit"
+          element={
+            <>
+              <PageTitle title="Edit News | DreamChain" />
+              <AdminEditNewsPage />
             </>
           }
         />

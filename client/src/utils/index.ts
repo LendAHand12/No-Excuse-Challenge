@@ -9,3 +9,17 @@ export const shortenWalletAddress = (walletAddress: string, length = 20) => {
     return '';
   }
 };
+export const getFirstImageSrc = (htmlString: string) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, "text/html");
+  const img = doc.querySelector("img");
+  return img ? img.src : null;
+}
+
+export const formatDateDDMM = (datetime: string) => {
+  const date = new Date(datetime);
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+  }).format(date);
+}

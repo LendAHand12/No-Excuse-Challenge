@@ -8,10 +8,19 @@ const postSchema = new mongoose.Schema(
     title_en: {
       type: String,
     },
+    banner: {
+      type: String,
+    },
     text_vn: {
       type: String,
     },
     text_en: {
+      type: String,
+    },
+    desc_vn: {
+      type: String,
+    },
+    desc_en: {
       type: String,
     },
     cid: {
@@ -23,14 +32,14 @@ const postSchema = new mongoose.Schema(
     type: {
       /* text or file */ type: String,
     },
-    category: {
-      type: String,
-    },
     filename_vn: {
       type: String,
     },
     filename_en: {
       type: String,
+    },
+    views: {
+      type: Number
     },
     status: {
       type: String,

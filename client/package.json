@@ -44,6 +44,8 @@
     "react-switch": "^7.1.0",
     "react-toastify": "^9.1.3",
     "sort-by": "^0.0.2",
+    "suneditor": "^2.47.5",
+    "suneditor-react": "^3.6.1",
     "viem": "^2.21.55",
     "wagmi": "^2.14.1",
     "web3": "^4.16.0"

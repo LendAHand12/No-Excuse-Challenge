@@ -2,9 +2,9 @@ import API from "./API";
 import { URL_API_POSTS } from "./URL";
 
 const Posts = {
-  getAllPosts: (pageNumber, keyword, category, statusSearch) => {
+  getAllPosts: (pageNumber, keyword, statusSearch) => {
     return API.get(
-      `${URL_API_POSTS}/?pageNumber=${pageNumber}&keyword=${keyword}&category=${category}&status=${statusSearch}`
+      `${URL_API_POSTS}/?pageNumber=${pageNumber}&keyword=${keyword}&status=${statusSearch}`
     );
   },
   createPost: (body) => {

@@ -232,8 +232,8 @@ span.flatpickr-weekday,
   fill: none;
   stroke: currentColor;
   strokewidth: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  strokeLinecap: round;
+  strokeLinejoin: round;
   stroke-miterlimit: 10;
 }
 
@@ -241,8 +241,8 @@ span.flatpickr-weekday,
   fill: none;
   stroke: currentColor;
   strokewidth: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  strokeLinecap: round;
+  strokeLinejoin: round;
   stroke-miterlimit: 10;
   stroke-dasharray: 3;
 }
@@ -250,7 +250,7 @@ span.flatpickr-weekday,
   fill: none;
   stroke: currentColor;
   strokewidth: 2;
-  stroke-linejoin: round;
+  strokeLinejoin: round;
   stroke-miterlimit: 10;
 }
 .st3 {

@@ -2,13 +2,11 @@ import React, { useState, ReactNode } from 'react';
 import Header from '../components/Header/index';
 import Sidebar from '../components/Sidebar/index';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import AdminRoutes from '@/routes/admin';
 import UserRoutes from '@/routes/user';
 import PublicRoutes from '@/routes/public';
 
 const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { userInfo } = useSelector((state) => state.auth);
   var routes = PublicRoutes;

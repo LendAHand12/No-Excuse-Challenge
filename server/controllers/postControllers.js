@@ -2,7 +2,7 @@ import asyncHandler from "express-async-handler";
 import Post from "../models/postModel.js";
 
 const createPosts = async (req, res) => {
-  const { title_vn, title_en, text_vn, text_en, type, category } = req.body;
+  const { title_vn, title_en, text_vn, text_en, desc_vn, desc_en, type } = req.body;
 
   const files = req.files;
 
@@ -24,11 +24,12 @@ const createPosts = async (req, res) => {
       title_en,
       text_vn,
       text_en,
+      desc_vn,
+      desc_en,
       cid: req.user.id,
       type,
       filename_vn,
       filename_en,
-      category,
       status: "PUBLIC",
     });
 
@@ -42,7 +43,7 @@ const createPosts = async (req, res) => {
 };
 
 const getAllPosts = asyncHandler(async (req, res) => {
-  const { pageNumber, keyword, category } = req.query;
+  const { pageNumber, keyword } = req.query;
   const page = Number(pageNumber) || 1;
 
   const pageSize = 20;
@@ -53,10 +54,9 @@ const getAllPosts = asyncHandler(async (req, res) => {
         $or: [
           { title_vn: { $regex: keyword, $options: "i" } },
           { title_en: { $regex: keyword, $options: "i" } },
+          { desc_vn: { $regex: keyword, $options: "i" } },
+          { desc_en: { $regex: keyword, $options: "i" } },
         ],
-      },
-      {
-        category: { $regex: category, $options: "i" },
       },
       {
         status: "PUBLIC",
@@ -69,10 +69,9 @@ const getAllPosts = asyncHandler(async (req, res) => {
         $or: [
           { title_vn: { $regex: keyword, $options: "i" } },
           { title_en: { $regex: keyword, $options: "i" } },
+          { desc_vn: { $regex: keyword, $options: "i" } },
+          { desc_en: { $regex: keyword, $options: "i" } },
         ],
-      },
-      {
-        category: { $regex: category, $options: "i" },
       },
       {
         status: "PUBLIC",
@@ -116,7 +115,7 @@ const deletePostById = asyncHandler(async (req, res) => {
 });
 
 const updatePosts = asyncHandler(async (req, res) => {
-  const { title_vn, title_en, text_vn, text_en, type, category } = req.body;
+  const { title_vn, title_en, text_vn, text_en, desc_vn, desc_en, type } = req.body;
   const post = await Post.findOne({ _id: req.params.id });
 
   if (post) {
@@ -124,8 +123,9 @@ const updatePosts = asyncHandler(async (req, res) => {
     post.title_en = title_en || post.title_en;
     post.text_vn = text_vn || post.text_vn;
     post.text_en = text_en || post.text_en;
+    post.desc_vn = desc_vn || post.desc_vn;
+    post.desc_en = desc_en || post.desc_en;
     post.type = type || post.type;
-    post.category = category || post.category;
 
     const files = req.files;
 
