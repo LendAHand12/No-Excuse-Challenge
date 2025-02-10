@@ -128,8 +128,17 @@ const UserProfile = () => {
       if (values.newFine !== data.fine) {
         body.newFine = values.newFine;
       }
+
       if (values.hold !== data.hold) {
         body.hold = values.hold;
+      }
+
+      if (values.availableHewe !== data.availableHewe) {
+        body.availableHewe = values.availableHewe;
+      }
+
+      if (values.availableUsdt !== data.availableUsdt) {
+        body.availableUsdt = values.availableUsdt;
       }
 
       if (values.holdLevel !== data.holdLevel) {
@@ -758,7 +767,7 @@ const UserProfile = () => {
                         {t('count pay')}
                       </div>
                       <div className="px-4 py-2">
-                        {data.countPay === 0 ? 0 : data.countPay - 1}{' '}
+                        {data.countPay === 0 ? 0 : data.countPay - 3}{' '}
                         {t('times')}
                       </div>
                     </div>
@@ -824,29 +833,53 @@ const UserProfile = () => {
                       <div className="px-4 py-2 font-semibold">
                         Available HEWE
                       </div>
-                      <div className="px-4 py-2">{data.availableHewe}</div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('availableHewe', {
+                              required: 'Available Hewe is required',
+                            })}
+                            defaultValue={data.availableHewe}
+                          />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">{data.availableHewe}</div>
+                      )}
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                      Reward HEWE
+                      <div className="px-4 py-2 font-semibold">Reward HEWE</div>
+                      <div className="px-4 py-2">
+                        {data.totalHewe - data.claimedHewe - data.availableHewe}
                       </div>
-                      <div className="px-4 py-2">{data.totalHewe - data.claimedHewe - data.availableHewe}</div>
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">
                         Available USDT
                       </div>
-                      <div className="px-4 py-2">{data.availableUsdt}</div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('availableUsdt', {
+                              required: 'Available Usdt is required',
+                            })}
+                            defaultValue={data.availableUsdt}
+                          />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">{data.availableUsdt}</div>
+                      )}
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">
-                      Processing USDT
+                        Processing USDT
                       </div>
                       <div className="px-4 py-2">{data.withdrawPending}</div>
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">
-                      Total Earned
+                        Total Earned
                       </div>
                       <div className="px-4 py-2">{data.totalEarning}</div>
                     </div>

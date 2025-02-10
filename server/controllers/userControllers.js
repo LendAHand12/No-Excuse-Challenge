@@ -446,6 +446,8 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     note,
     hold,
     holdLevel,
+    availableHewe,
+    availableUsdt
   } = req.body;
 
   if (userId) {
@@ -515,6 +517,8 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     user.idCode = idCode || user.idCode;
     user.hold = hold || user.hold;
     user.holdLevel = holdLevel || user.holdLevel;
+    user.availableHewe = availableHewe || user.availableHewe;
+    user.availableUsdt = availableUsdt || user.availableUsdt;
     if (user.status === "LOCKED" && newStatus !== "LOCKED") {
       user.lockedTime = null;
     }

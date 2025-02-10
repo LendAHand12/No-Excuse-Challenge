@@ -7,7 +7,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import NoContent from '@/components/NoContent';
 import Loading from '@/components/Loading';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import DefaultLayout from '@/layout/DefaultLayout';
 import Modal from 'react-modal';
 import { shortenWalletAddress } from '@/utils';
@@ -25,7 +24,6 @@ const AdminUserPages = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   const [refresh, setRefresh] = useState(false);
-  const { userInfo } = useSelector((state) => state.auth);
   const [objectFilter, setObjectFilter] = useState({
     pageNumber: page,
     keyword: key,

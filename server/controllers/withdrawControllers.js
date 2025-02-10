@@ -3,7 +3,6 @@ import Withdraw from "../models/withdrawModel.js";
 
 const getAllWithdraws = asyncHandler(async (req, res) => {
   const { pageNumber, status } = req.query;
-  console.log({ status });
   const page = Number(pageNumber) || 1;
   const searchStatus = status === "all" ? "" : status;
 
@@ -32,15 +31,17 @@ const getAllWithdraws = asyncHandler(async (req, res) => {
 
 const updateWithdraw = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { hash } = req.body;
+  const { hash, status } = req.body;
 
   try {
     const withdraw = await Withdraw.findById(id);
-    withdraw.status = "APPROVED";
-    withdraw.hash = hash;
+    withdraw.status = status;
+    if (status === "APPROVED") {
+      withdraw.hash = hash;
+    }
     await withdraw.save();
 
-    res.status(200).json({ message: "Withdraw successful" });
+    res.status(200).json({ message: status === "APPROVED" ? "Withdraw successful" : "Cancel!" });
   } catch (err) {
     res.status(400).json({ error: "Internal Error" });
   }

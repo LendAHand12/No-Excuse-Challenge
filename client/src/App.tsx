@@ -42,7 +42,8 @@ import NewsPage from './pages/News';
 import AdminNewsPage from './pages/Admin/News';
 import AdminCreateNewsPage from './pages/Admin/News/Create';
 import AdminEditNewsPage from './pages/Admin/News/Edit';
-
+import NewsDetailPage from './pages/News/Detail'
+ 
 function App() {
   const { pathname } = useLocation();
 
@@ -123,6 +124,15 @@ function App() {
             <>
               <PageTitle title="News | DreamChain" />
               <NewsPage />
+            </>
+          }
+        />
+        <Route
+          path="/news/:id"
+          element={
+            <>
+              <PageTitle title="News | DreamChain" />
+              <NewsDetailPage />
             </>
           }
         />

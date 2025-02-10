@@ -1,10 +1,12 @@
 import React from 'react';
-import DefaultLayout from '../../layout/DefaultLayout';
+import DefaultLayout from '@/layout/DefaultLayout';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Posts from '@/api/Posts';
 import { formatDateDDMM, getFirstImageSrc } from '@/utils';
+import LOGO_ICON from '@/images/logo/logo-icon.svg';
+import NoContent from '@/components/NoContent';
 
 const NewsPage: React.FC = () => {
   const news = [
@@ -70,7 +72,6 @@ const NewsPage: React.FC = () => {
       await Posts.getAllPosts(pageNumber, '', '')
         .then((response) => {
           const { list, pages } = response.data;
-          console.log({ list });
           setData(list);
           setTotalPage(pages);
 
@@ -106,14 +107,15 @@ const NewsPage: React.FC = () => {
             >
               <div>
                 <img
-                  src={getFirstImageSrc(ele.content_en)}
-                  className="rounded-lg w-full object-cover max-h-32 object-center"
+                  src={getFirstImageSrc(ele.text_en)}
+                  className="rounded-lg w-full object-cover max-h-48 object-center"
                 />
               </div>
               <h3 className="text-xl font-semibold">{ele.title_en}</h3>
               <p className="text-md text-gray-500">{ele.desc_en}</p>
               <div className="flex justify-between font-thin">
                 <div className="flex gap-2">
+                  <img src={LOGO_ICON} className='w-6' />
                   <p>DREAMCHAIN</p>
                   <p className="text-dreamchain">.</p>
                   <p className="text-dreamchain">{formatDateDDMM(ele.createdAt)}</p>
@@ -134,13 +136,80 @@ const NewsPage: React.FC = () => {
                 </div>
               </div>
               <div className="w-full flex justify-center py-1.5 border rounded-md border-dreamchain">
-                <Link href="#" className="w-full text-center">
+                <Link to={`/news/${ele._id}`} className="w-full text-center">
                   See more
                 </Link>
               </div>
             </div>
           ))}
         </div>
+        {!loading && data.length === 0 && <NoContent />}
+          {data.length > 0 && (
+            <nav
+              className="flex items-center justify-between pt-4"
+              aria-label="Table navigation"
+            >
+              <span className="text-sm font-normal text-gray-500">
+                Showing{" "}
+                <span className="font-semibold text-gray-900">
+                  {pageNumber}
+                </span>{" "}
+                of{" "}
+                <span className="font-semibold text-gray-900">{totalPage}</span>{" "}
+                page
+              </span>
+              <ul className="inline-flex items-center -space-x-px">
+                <li>
+                  <button
+                    disabled={pageNumber === 1}
+                    onClick={handlePrevPage}
+                    className={`block px-3 py-2 ml-0 leading-tight text-gray-500 ${
+                      pageNumber === 1 ? "bg-gray-100" : "bg-white"
+                    } border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700`}
+                  >
+                    <span className="sr-only">Previous</span>
+                    <svg
+                      className="w-5 h-5"
+                      aria-hidden="true"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      ></path>
+                    </svg>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    disabled={pageNumber === totalPage}
+                    onClick={handleNextPage}
+                    className={`block px-3 py-2 leading-tight text-gray-500 ${
+                      pageNumber === totalPage ? "bg-gray-100" : "bg-white"
+                    } border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700`}
+                  >
+                    <span className="sr-only">Next</span>
+                    <svg
+                      className="w-5 h-5"
+                      aria-hidden="true"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                        clipRule="evenodd"
+                      ></path>
+                    </svg>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          )}
       </div>
     </DefaultLayout>
   );

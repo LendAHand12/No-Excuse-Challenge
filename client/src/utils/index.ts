@@ -23,3 +23,13 @@ export const formatDateDDMM = (datetime: string) => {
     month: "short",
   }).format(date);
 }
+
+export const formatDateDDMMYYYY = (datetime: string) => {
+  const date = new Date(datetime);
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
+

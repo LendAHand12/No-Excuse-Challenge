@@ -30,9 +30,9 @@ const Admin = {
       `${URL_API_WITHDRAW}/?pageNumber=${pageNumber}&status=${status}`,
     );
   },
-  updateWithdraw: ({ id, hash }) => {
+  updateWithdraw: ({ id, hash, status }) => {
     return API.put(`${URL_API_WITHDRAW}/${id}`, {
-      hash,
+      hash, status
     });
   },
 };

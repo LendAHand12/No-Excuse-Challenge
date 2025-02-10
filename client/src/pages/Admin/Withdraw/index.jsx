@@ -29,7 +29,9 @@ const AdminWithdrawPages = () => {
   });
   const [showModal, setShowModal] = useState(false);
   const [currentApproveRequest, setCurrentApproveRequest] = useState(null);
+  const [currentCancelRequest, setCurrentCancelRequest] = useState(null);
   const [loadingPayment, setLoadingPayment] = useState(false);
+  const [currentRequestStatus, setCurrentRequestStatus] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -94,6 +96,7 @@ const AdminWithdrawPages = () => {
 
   const handleApprove = async (request) => {
     setShowModal(true);
+    setCurrentRequestStatus("approve");
     setCurrentApproveRequest(request);
   };
 
@@ -122,10 +125,12 @@ const AdminWithdrawPages = () => {
     async (hash) => {
       await Admin.updateWithdraw({
         hash,
+        status: 'APPROVED',
         id: currentApproveRequest._id,
       })
         .then((response) => {
           toast.success(t(response.data.message));
+          setShowModal(false);
         })
         .catch((error) => {
           let message =
@@ -137,6 +142,31 @@ const AdminWithdrawPages = () => {
     },
     [currentApproveRequest],
   );
+
+  const handleCancel = async (request) => {
+    setShowModal(true);
+    setCurrentRequestStatus("cancel");
+    setCurrentCancelRequest(request);
+  };
+
+  const cancelWithdraw = useCallback(async () => {
+    await Admin.updateWithdraw({
+      hash: '',
+      status: 'CANCEL',
+      id: currentCancelRequest._id,
+    })
+      .then((response) => {
+        toast.success(t(response.data.message));
+        setShowModal(false);
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message;
+        toast.error(t(message));
+      });
+  }, [currentCancelRequest]);
 
   return (
     <DefaultLayout>
@@ -195,7 +225,7 @@ const AdminWithdrawPages = () => {
                 />
               </svg>
               <p className="mb-4 text-gray-500 ">
-                Are you sure you want to approve this request?
+                Are you sure you want to {currentRequestStatus} this request?
               </p>
               <div className="flex justify-center items-center space-x-4">
                 <button
@@ -205,7 +235,7 @@ const AdminWithdrawPages = () => {
                   No, cancel
                 </button>
                 <button
-                  onClick={paymentMetamask}
+                  onClick={currentRequestStatus === "approve" ? paymentMetamask : cancelWithdraw}
                   className="flex items-center py-2 px-3 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900"
                 >
                   {loadingPayment && <Loading />}
@@ -349,6 +379,27 @@ const AdminWithdrawPages = () => {
                           Approve
                         </button>
                       )}
+                      {ele.status === 'PENDING' && (
+                        <button
+                          onClick={() => handleCancel(ele)}
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-200 font-medium text-red-700"
+                        >
+                          <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 1024 1024"
+                            class="icon"
+                            version="1.1"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M512 128C300.8 128 128 300.8 128 512s172.8 384 384 384 384-172.8 384-384S723.2 128 512 128z m0 85.333333c66.133333 0 128 23.466667 179.2 59.733334L273.066667 691.2C236.8 640 213.333333 578.133333 213.333333 512c0-164.266667 134.4-298.666667 298.666667-298.666667z m0 597.333334c-66.133333 0-128-23.466667-179.2-59.733334l418.133333-418.133333C787.2 384 810.666667 445.866667 810.666667 512c0 164.266667-134.4 298.666667-298.666667 298.666667z"
+                              fill="#D50000"
+                            />
+                          </svg>
+                          Cancel
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -363,71 +414,71 @@ const AdminWithdrawPages = () => {
         {!loading && data.length === 0 && <NoContent />}
         {!loading && data.length > 0 && (
           <nav
-            className="flex items-center justify-between pt-4"
-            aria-label="Table navigation"
-          >
-            <span className="text-sm font-normal text-gray-500">
-              Showing
-              <span className="font-semibold text-gray-900">
-                {objectFilter.pageNumber}
-              </span>
-              of{' '}
-              <span className="font-semibold text-gray-900">{totalPage}</span>{' '}
-              page
-            </span>
-            <ul className="inline-flex items-center -space-x-px">
-              <li>
-                <button
-                  disabled={objectFilter.pageNumber === 1}
-                  onClick={() => handleChangePage(objectFilter.pageNumber - 1)}
-                  className={`block px-3 py-2 ml-0 leading-tight text-gray-500 ${
-                    objectFilter.pageNumber === 1 ? 'bg-gray-100' : 'bg-white'
-                  } border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700`}
+          className="flex items-center justify-between pt-4"
+          aria-label="Table navigation"
+        >
+          <span className="text-sm font-normal text-gray-500">
+            Showing{' '}
+            <span className="font-semibold text-gray-900">
+              {objectFilter.pageNumber}
+            </span>{' '}
+            of{' '}
+            <span className="font-semibold text-gray-900">{totalPage}</span>{' '}
+            page
+          </span>
+          <ul className="inline-flex items-center -space-x-px">
+            <li>
+              <button
+                disabled={objectFilter.pageNumber === 1}
+                onClick={() => handleChangePage(objectFilter.pageNumber - 1)}
+                className={`block px-3 py-2 ml-0 leading-tight text-gray-500 ${
+                  objectFilter.pageNumber === 1 ? 'bg-gray-100' : 'bg-white'
+                } border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700`}
+              >
+                <span className="sr-only">Previous</span>
+                <svg
+                  className="w-5 h-5"
+                  aria-hidden="true"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <span className="sr-only">Previous</span>
-                  <svg
-                    className="w-5 h-5"
-                    aria-hidden="true"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                </button>
-              </li>
-              <li>
-                <button
-                  disabled={objectFilter.pageNumber === totalPage}
-                  onClick={() => handleChangePage(objectFilter.pageNumber + 1)}
-                  className={`block px-3 py-2 leading-tight text-gray-500 ${
-                    objectFilter.pageNumber === totalPage
-                      ? 'bg-gray-100'
-                      : 'bg-white'
-                  } border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700`}
+                  <path
+                    fillRule="evenodd"
+                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+              </button>
+            </li>
+            <li>
+              <button
+                disabled={objectFilter.pageNumber === totalPage}
+                onClick={() => handleChangePage(objectFilter.pageNumber + 1)}
+                className={`block px-3 py-2 leading-tight text-gray-500 ${
+                  objectFilter.pageNumber === totalPage
+                    ? 'bg-gray-100'
+                    : 'bg-white'
+                } border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700`}
+              >
+                <span className="sr-only">Next</span>
+                <svg
+                  className="w-5 h-5"
+                  aria-hidden="true"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <span className="sr-only">Next</span>
-                  <svg
-                    className="w-5 h-5"
-                    aria-hidden="true"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                </button>
-              </li>
-            </ul>
-          </nav>
+                  <path
+                    fillRule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+              </button>
+            </li>
+          </ul>
+        </nav>
         )}
       </div>
     </DefaultLayout>
