@@ -116,7 +116,7 @@ const AdminNewsPage = () => {
                 type="text"
                 onChange={onSearch}
                 className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50"
-                placeholder={t('search with user name or email')}
+                placeholder={t('search with title or description')}
                 defaultValue={searchKey}
               />
               <button
@@ -173,7 +173,15 @@ const AdminNewsPage = () => {
                   </td>
                   <td className="px-6 py-4">{ele.title_vn}</td>
 
-                  <td className="px-6 py-4">{ele.type}</td>
+                  <td className="px-6 py-4">
+                    <div
+                      className={`px-2 py-1 rounded-md text-white font-semibold text-sm ${
+                        ele.type === 'text' ? 'bg-green-500' : 'bg-blue-500'
+                      }`}
+                    >
+                      {ele.type}
+                    </div>
+                  </td>
                   <td className="px-6 py-4">{ele.createdAt}</td>
                   <td className="px-6 py-4">
                     <div className="flex gap-6">

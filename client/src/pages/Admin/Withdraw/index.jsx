@@ -96,7 +96,7 @@ const AdminWithdrawPages = () => {
 
   const handleApprove = async (request) => {
     setShowModal(true);
-    setCurrentRequestStatus("approve");
+    setCurrentRequestStatus('approve');
     setCurrentApproveRequest(request);
   };
 
@@ -131,6 +131,7 @@ const AdminWithdrawPages = () => {
         .then((response) => {
           toast.success(t(response.data.message));
           setShowModal(false);
+          setRefresh(!refresh);
         })
         .catch((error) => {
           let message =
@@ -145,7 +146,7 @@ const AdminWithdrawPages = () => {
 
   const handleCancel = async (request) => {
     setShowModal(true);
-    setCurrentRequestStatus("cancel");
+    setCurrentRequestStatus('cancel');
     setCurrentCancelRequest(request);
   };
 
@@ -158,6 +159,7 @@ const AdminWithdrawPages = () => {
       .then((response) => {
         toast.success(t(response.data.message));
         setShowModal(false);
+        setRefresh(!refresh);
       })
       .catch((error) => {
         let message =
@@ -235,7 +237,11 @@ const AdminWithdrawPages = () => {
                   No, cancel
                 </button>
                 <button
-                  onClick={currentRequestStatus === "approve" ? paymentMetamask : cancelWithdraw}
+                  onClick={
+                    currentRequestStatus === 'approve'
+                      ? paymentMetamask
+                      : cancelWithdraw
+                  }
                   className="flex items-center py-2 px-3 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900"
                 >
                   {loadingPayment && <Loading />}
@@ -414,71 +420,71 @@ const AdminWithdrawPages = () => {
         {!loading && data.length === 0 && <NoContent />}
         {!loading && data.length > 0 && (
           <nav
-          className="flex items-center justify-between pt-4"
-          aria-label="Table navigation"
-        >
-          <span className="text-sm font-normal text-gray-500">
-            Showing{' '}
-            <span className="font-semibold text-gray-900">
-              {objectFilter.pageNumber}
-            </span>{' '}
-            of{' '}
-            <span className="font-semibold text-gray-900">{totalPage}</span>{' '}
-            page
-          </span>
-          <ul className="inline-flex items-center -space-x-px">
-            <li>
-              <button
-                disabled={objectFilter.pageNumber === 1}
-                onClick={() => handleChangePage(objectFilter.pageNumber - 1)}
-                className={`block px-3 py-2 ml-0 leading-tight text-gray-500 ${
-                  objectFilter.pageNumber === 1 ? 'bg-gray-100' : 'bg-white'
-                } border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700`}
-              >
-                <span className="sr-only">Previous</span>
-                <svg
-                  className="w-5 h-5"
-                  aria-hidden="true"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
+            className="flex items-center justify-between pt-4"
+            aria-label="Table navigation"
+          >
+            <span className="text-sm font-normal text-gray-500">
+              Showing{' '}
+              <span className="font-semibold text-gray-900">
+                {objectFilter.pageNumber}
+              </span>{' '}
+              of{' '}
+              <span className="font-semibold text-gray-900">{totalPage}</span>{' '}
+              page
+            </span>
+            <ul className="inline-flex items-center -space-x-px">
+              <li>
+                <button
+                  disabled={objectFilter.pageNumber === 1}
+                  onClick={() => handleChangePage(objectFilter.pageNumber - 1)}
+                  className={`block px-3 py-2 ml-0 leading-tight text-gray-500 ${
+                    objectFilter.pageNumber === 1 ? 'bg-gray-100' : 'bg-white'
+                  } border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700`}
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-              </button>
-            </li>
-            <li>
-              <button
-                disabled={objectFilter.pageNumber === totalPage}
-                onClick={() => handleChangePage(objectFilter.pageNumber + 1)}
-                className={`block px-3 py-2 leading-tight text-gray-500 ${
-                  objectFilter.pageNumber === totalPage
-                    ? 'bg-gray-100'
-                    : 'bg-white'
-                } border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700`}
-              >
-                <span className="sr-only">Next</span>
-                <svg
-                  className="w-5 h-5"
-                  aria-hidden="true"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
+                  <span className="sr-only">Previous</span>
+                  <svg
+                    className="w-5 h-5"
+                    aria-hidden="true"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    ></path>
+                  </svg>
+                </button>
+              </li>
+              <li>
+                <button
+                  disabled={objectFilter.pageNumber === totalPage}
+                  onClick={() => handleChangePage(objectFilter.pageNumber + 1)}
+                  className={`block px-3 py-2 leading-tight text-gray-500 ${
+                    objectFilter.pageNumber === totalPage
+                      ? 'bg-gray-100'
+                      : 'bg-white'
+                  } border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700`}
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-              </button>
-            </li>
-          </ul>
-        </nav>
+                  <span className="sr-only">Next</span>
+                  <svg
+                    className="w-5 h-5"
+                    aria-hidden="true"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                      clipRule="evenodd"
+                    ></path>
+                  </svg>
+                </button>
+              </li>
+            </ul>
+          </nav>
         )}
       </div>
     </DefaultLayout>
