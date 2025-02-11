@@ -96,7 +96,7 @@ const NewsDetailPage = () => {
                 {news.type === 'file' && (
                   <div className="mt-3">
                     <label className="block text-sm text-gray-700 dark:text-gray-400">
-                      <span>{t('Tải File')} : </span>
+                      <span>Download File : </span>
                       <div className="mt-2">
                         <a
                           className="font-normal underline text-blue-500"

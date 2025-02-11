@@ -92,8 +92,33 @@ const claimUsdt = asyncHandler(async (req, res) => {
       throw new Error("Insufficient balance in account");
     }
   } catch (err) {
-    res.status(400).json({ error: err.message ? err.message.split(",")[0] : "Internal Error" });
+    res.status(400).json({
+      error: err.message ? err.message.split(",")[0] : "Internal Error",
+    });
   }
 });
 
-export { claimHewe, claimUsdt };
+const getAllClaims = asyncHandler(async (req, res) => {
+  let { pageNumber, coin } = req.query;
+  const page = Number(pageNumber) || 1;
+
+  const pageSize = 10;
+
+  const count = await Claim.countDocuments({
+    $and: [coin === "HEWE" || coin === "USDT" ? { coin } : {}],
+  });
+
+  const allClaims = await Claim.find({
+    $and: [coin === "HEWE" || coin === "USDT" ? { coin } : {}],
+  }).populate("userId", "_id userId email walletAddress")
+    .limit(pageSize)
+    .skip(pageSize * (page - 1))
+    .sort("-createdAt");
+
+  res.json({
+    claims: allClaims,
+    pages: Math.ceil(count / pageSize),
+  });
+});
+
+export { claimHewe, claimUsdt, getAllClaims };

@@ -43,7 +43,7 @@ const UploadFile = ({ onFileChange }) => {
       >
         <div className="drop-file-input__label">
           <img src={uploadImg} alt="" />
-          <p>Kéo & thả tệp của bạn vào đây</p>
+          <p>Drag & drop your files here</p>
         </div>
         <input type="file" value="" onChange={onFileDrop} />
       </div>

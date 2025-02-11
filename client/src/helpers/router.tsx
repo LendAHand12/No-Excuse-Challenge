@@ -23,7 +23,7 @@ export const PublicRoute = () => {
 
   if (accessToken && userInfo) {
     if (userInfo && userInfo.role !== 'user') {
-      return <Navigate to="/admin/dashboard" />;
+      return <Navigate to="/admin/transactions" />;
     } else if (userInfo && userInfo.role === 'user') {
       return <Navigate to="/user/profile" />;
     }
