@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 
 import { ImageConfig } from "@/helpers/ImageFile";
-import uploadImg from "@/assets/img/cloud-upload-regular-240.png";
 
 import "./index.css";
 
@@ -42,7 +41,6 @@ const UploadFile = ({ onFileChange }) => {
         onDrop={onDrop}
       >
         <div className="drop-file-input__label">
-          <img src={uploadImg} alt="" />
           <p>Drag & drop your files here</p>
         </div>
         <input type="file" value="" onChange={onFileDrop} />
