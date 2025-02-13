@@ -31,6 +31,7 @@ const createPosts = async (req, res) => {
       filename_vn,
       filename_en,
       status: "PUBLIC",
+      views: Math.floor(Math.random() * (999 - 100 + 1)) + 100
     });
 
     res.status(200).json({
@@ -90,6 +91,8 @@ const getAllPosts = asyncHandler(async (req, res) => {
 
 const getPostById = asyncHandler(async (req, res) => {
   const post = await Post.findOne({ _id: req.params.id, status: "PUBLIC" });
+  post.views = post.views + 1;
+  await post.save();
 
   if (post) {
     res.json(post);

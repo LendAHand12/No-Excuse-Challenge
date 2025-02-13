@@ -930,7 +930,13 @@ const UserProfile = () => {
                                 <label className="flex flex-col w-full h-40 border-4 border-blue-200 border-dashed hover:bg-gray-100 hover:border-gray-300">
                                   {imgFront !== '' ? (
                                     <img
-                                      src={imgFront}
+                                      src={`${
+                                        imgFront.includes('cloudinary')
+                                          ? imgFront
+                                          : import.meta.env.VITE_API_URL +
+                                            '/uploads/CCCD/' +
+                                            imgFront
+                                      }`}
                                       className="w-full h-full"
                                       alt="the front of identity card"
                                     />
@@ -987,7 +993,13 @@ const UserProfile = () => {
                                 <label className="flex flex-col w-full h-40 border-4 border-blue-200 border-dashed hover:bg-gray-100 hover:border-gray-300">
                                   {imgBack !== '' ? (
                                     <img
-                                      src={imgBack}
+                                      src={`${
+                                        imgBack.includes('cloudinary')
+                                          ? imgBack
+                                          : import.meta.env.VITE_API_URL +
+                                            '/uploads/CCCD/' +
+                                            imgBack
+                                      }`}
                                       className="w-full h-full"
                                       alt="the back of identity card"
                                     />
@@ -1043,13 +1055,30 @@ const UserProfile = () => {
                           </div>
                           <img
                             onClick={handleToggler}
-                            src={data.imgFront}
+                            src={`${
+                              data.imgFront.includes('cloudinary')
+                                ? data.imgFront
+                                : import.meta.env.VITE_API_URL +
+                                  '/uploads/CCCD/' +
+                                  data.imgFront
+                            }`}
                             className="w-full px-4 py-2"
                           />
                         </div>
                         <FsLightbox
                           toggler={toggler}
-                          sources={[data.imgFront, data.imgBack]}
+                          sources={[
+                            data.imgFront.includes('cloudinary')
+                              ? data.imgFront
+                              : import.meta.env.VITE_API_URL +
+                                '/uploads/CCCD/' +
+                                data.imgFront,
+                            data.imgBack.includes('cloudinary')
+                              ? data.imgBack
+                              : import.meta.env.VITE_API_URL +
+                                '/uploads/CCCD/' +
+                                data.imgBack,
+                          ]}
                         />
                         <div className="grid lg:grid-cols-2 grid-cols-1">
                           <div className="px-4 py-2 font-semibold">
@@ -1057,7 +1086,13 @@ const UserProfile = () => {
                           </div>
                           <img
                             onClick={handleToggler}
-                            src={data.imgBack}
+                            src={`${
+                              data.imgBack.includes('cloudinary')
+                                ? data.imgBack
+                                : import.meta.env.VITE_API_URL +
+                                  '/uploads/CCCD/' +
+                                  data.imgBack
+                            }`}
                             className="w-full px-4 py-2"
                           />
                         </div>
