@@ -58,6 +58,7 @@ const Profile = () => {
     totalEarning,
     withdrawPending,
     chartData,
+    targetSales
   } = userInfo;
   const totalChild = chartData.reduce((acc, num) => acc + num, 0);
   const [imgFront, setImgFront] = useState('');
@@ -71,12 +72,12 @@ const Profile = () => {
   const [showModal, setShowModal] = useState(false);
 
   const data = {
-    labels: ['Group 1', 'Group 2', 'Group 3'],
+    labels: ['Group 1', 'Group 2', 'Group 3', 'Remaining target'],
     datasets: [
       {
         label: 'Members',
-        data: chartData,
-        backgroundColor: ['#FFCF65', '#02071B', '#C1C9D3'],
+        data: [...chartData, targetSales-totalChild],
+        backgroundColor: ['#FFCF65', '#02071B', '#C1C9D3', 'red'],
       },
     ],
   };
@@ -432,7 +433,7 @@ const Profile = () => {
                     formatter: (value) => {
                       return value <= 0
                         ? ''
-                        : Math.round((value / totalChild) * 100) + '%';
+                        : Math.round((value / targetSales) * 100) + '%';
                     },
                   },
                 },

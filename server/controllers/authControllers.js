@@ -279,6 +279,7 @@ const authUser = asyncHandler(async (req, res) => {
         ranking: user.ranking,
         totalEarning: user.availableUsdt + user.claimedUsdt,
         chartData: mergeIntoThreeGroups(listDirectUser),
+        targetSales: process.env[`LEVEL_${user.ranking + 1}`]
       },
       accessToken,
       refreshToken,

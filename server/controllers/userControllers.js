@@ -323,6 +323,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       totalEarning: user.availableUsdt + user.claimedUsdt,
       withdrawPending: totalWithdraws,
       chartData: mergeIntoThreeGroups(listDirectUser),
+      targetSales: process.env[`LEVEL_${user.ranking + 1}`]
     });
   } else {
     res.status(404);
