@@ -8,7 +8,7 @@ import bcrypt from "bcryptjs";
 import Tree from "../models/treeModel.js";
 import { getActivePackages } from "./packageControllers.js";
 import Permission from "../models/permissionModel.js";
-import { checkSerepayWallet } from "../utils/methods.js";
+import { checkSerepayWallet, mergeIntoThreeGroups } from "../utils/methods.js";
 import axios from "axios";
 
 const checkLinkRef = asyncHandler(async (req, res) => {
@@ -221,8 +221,8 @@ const authUser = asyncHandler(async (req, res) => {
     const listRefIdOfUser = await Tree.find({ refId: user._id, tier: 1 });
     if (listRefIdOfUser && listRefIdOfUser.length > 0) {
       for (let refId of listRefIdOfUser) {
-        const refedUser = await User.findById(refId.userId).select("userId email");
-        listDirectUser.push(refedUser);
+        const refedUser = await User.findById(refId.userId).select("userId email countChild");
+        listDirectUser.push({ ...refedUser, countChild: refedUser.countChild[0] });
       }
     }
 
@@ -278,6 +278,7 @@ const authUser = asyncHandler(async (req, res) => {
         heweWallet: user.heweWallet,
         ranking: user.ranking,
         totalEarning: user.availableUsdt + user.claimedUsdt,
+        chartData: mergeIntoThreeGroups(listDirectUser),
       },
       accessToken,
       refreshToken,
