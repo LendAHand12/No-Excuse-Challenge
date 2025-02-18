@@ -872,18 +872,9 @@ const getListChildOfUser = asyncHandler(async (req, res) => {
   let result = [];
 
   const parent = await Tree.findOne({ userId: req.user.id }).lean();
-  if (!parent || parent.children.length === 0) return [];
+  if (!parent || parent.children.length <= 5) return [];
 
-  if (parent.children.length <= 5) {
-    for (let id of parent.children) {
-      let child = await Tree.findOne({ userId: id }).lean();
-      if (child) {
-        result.push({ id: child.userId, userId: child.userName });
-      }
-    }
-  } else {
-    result = await getAllDescendants(req.user.id);
-  }
+  result = await getAllDescendants(req.user.id);
 
   res.json(result);
 });
