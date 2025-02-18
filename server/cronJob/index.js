@@ -384,7 +384,6 @@ export const rankingCalc = asyncHandler(async () => {
     try {
       if (u.ranking === 1) {
         let treeUser = await Tree.findOne({ userId: u._id });
-        console.log({ treeUser });
         if (u.ranking === 1) {
           if (treeUser.children.length === 5) {
             let currentDay = moment();

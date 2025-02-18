@@ -12,6 +12,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import USER_RANKINGS from '@/constants/userRankings';
 import Modal from 'react-modal';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Doughnut } from 'react-chartjs-2';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Profile = () => {
   const { t } = useTranslation();
@@ -52,7 +57,9 @@ const Profile = () => {
     ranking,
     totalEarning,
     withdrawPending,
+    chartData,
   } = userInfo;
+  const totalChild = chartData.reduce((acc, num) => acc + num, 0);
   const [imgFront, setImgFront] = useState('');
   const [imgBack, setImgBack] = useState('');
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -62,6 +69,17 @@ const Profile = () => {
   const [loadingClaimHewe, setLoadingClaimHewe] = useState(false);
   const [loadingClaimUsdt, setLoadingClaimUsdt] = useState(false);
   const [showModal, setShowModal] = useState(false);
+
+  const data = {
+    labels: ['Group 1', 'Group 2', 'Group 3'],
+    datasets: [
+      {
+        label: 'Members',
+        data: chartData,
+        backgroundColor: ['#FFCF65', '#02071B', '#C1C9D3'],
+      },
+    ],
+  };
 
   const {
     register,
@@ -337,79 +355,90 @@ const Profile = () => {
           </button>
         </div>
         <div className="grid lg:grid-cols-2 gap-10 font-semibold">
-          <div className="bg-[#FAFBFC] p-4 rounded-2xl ">
-            <div className="flex justify-between items-center py-2 px-4">
-              <p>Status</p>
-              <div
-                className={`p-2 text-sm ${
-                  status === 'UNVERIFY'
-                    ? 'bg-red-600'
-                    : status === 'PENDING'
-                    ? 'bg-yellow-600'
-                    : status === 'APPROVED'
-                    ? 'bg-green-600'
-                    : status === 'REJECTED'
-                    ? 'bg-red-600'
-                    : status === 'LOCKED'
-                    ? 'bg-red-600'
-                    : ''
-                } text-white rounded-[50px]`}
-              >
-                {status}
+          <div>
+            <div className="bg-[#FAFBFC] p-4 rounded-2xl mb-4">
+              <div className="flex justify-between items-center py-2 px-4">
+                <p>Status</p>
+                <div
+                  className={`p-2 text-sm ${
+                    status === 'UNVERIFY'
+                      ? 'bg-red-600'
+                      : status === 'PENDING'
+                      ? 'bg-yellow-600'
+                      : status === 'APPROVED'
+                      ? 'bg-green-600'
+                      : status === 'REJECTED'
+                      ? 'bg-red-600'
+                      : status === 'LOCKED'
+                      ? 'bg-red-600'
+                      : ''
+                  } text-white rounded-[50px]`}
+                >
+                  {status}
+                </div>
               </div>
-            </div>
-            <div className="flex justify-between bg-[#E5E9EE] py-2 px-4 rounded-lg">
-              <p>Member since</p>
-              <p> {new Date(createdAt).toLocaleDateString('vi')}</p>
-            </div>
-            {/* <div className="flex justify-between py-2 px-4">
+              <div className="flex justify-between bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                <p>Member since</p>
+                <p> {new Date(createdAt).toLocaleDateString('vi')}</p>
+              </div>
+              {/* <div className="flex justify-between py-2 px-4">
               <p>Completed tier 1</p>
               <p>{tier1Time}</p>
             </div> */}
-          </div>
-          <div className="bg-[#FAFBFC] p-4 rounded-2xl ">
-            <div className="flex justify-between items-center py-2 px-4">
-              <p>Rank</p>
-              {ranking !== 0 && (
+            </div>
+            <div className="bg-[#FAFBFC] p-4 rounded-2xl ">
+              <div className="flex justify-between items-center py-2 px-4">
+                <p>Rank</p>
+                {ranking !== 0 && (
+                  <div
+                    className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
+                  >
+                    {USER_RANKINGS.find((ele) => ele.value === ranking).label}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                <p>Total Earned</p>
                 <div
                   className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
                 >
-                  {USER_RANKINGS.find((ele) => ele.value === ranking).label}
+                  {totalEarning} USD
                 </div>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between bg-[#E5E9EE] py-2 px-4 rounded-lg">
-              <p>Total Earned</p>
-              <div
-                className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
-              >
-                {totalEarning} USD
               </div>
-            </div>
-            {/* <div className="flex justify-between py-2 px-4">
+              {/* <div className="flex justify-between py-2 px-4">
               <p>Completed tier 1</p>
               <p>{tier1Time}</p>
             </div> */}
+            </div>
           </div>
-          {/* <div className="bg-[#FAFBFC] p-4 rounded-2xl">
-            <div className="flex justify-between py-2 px-4">
-              <p>Completed tier 2</p>
-              <p>{tier2Time}</p>
-            </div>
-            <div className="flex justify-between py-2 px-4 bg-[#E5E9EE] rounded-lg">
-              <p>Completed tier 3</p>
-              <p>{tier3Time}</p>
-            </div>
-            <div className="flex justify-between py-2 px-4">
-              <p>Completed tier 4</p>
-              <p>{tier4Time}</p>
-            </div>
-            <div className="flex justify-between py-2 px-4 bg-[#E5E9EE] rounded-lg">
-              <p>Completed tier 5</p>
-              <p>{tier5Time}</p>
-            </div>
-          </div> */}
+          <div className="bg-[#FAFBFC] p-4 rounded-2xl max-w-sm">
+            <Doughnut
+              data={data}
+              plugins={[ChartDataLabels]}
+              options={{
+                responsive: true,
+                plugins: {
+                  legend: {
+                    position: 'bottom' as const,
+                  },
+                  tooltip: {
+                    enabled: true,
+                  },
+                  datalabels: {
+                    color: '#ffffff',
+                    anchor: 'center',
+                    font: { size: 16, weight: "bold" },
+                    formatter: (value) => {
+                      return value <= 0
+                        ? ''
+                        : Math.round((value / totalChild) * 100) + '%';
+                    },
+                  },
+                },
+              }}
+            />
+          </div>
         </div>
         {!isEdit && (
           <div className="flex justify-end">

@@ -334,3 +334,32 @@ export const findNextUserByIndex = async (tier) => {
   console.log({ nextUserTree: nextUserTree[1] });
   return nextUserTree.userId;
 };
+
+export const mergeIntoThreeGroups = (A) => {
+  if (A.length === 0) return [0, 0, 0];
+  if (A.length === 1) return [A[0].countChild, 0, 0];
+  if (A.length === 2) return [A[0].countChild, A[1].countChild, 0];
+
+  // Shuffle array to ensure randomness
+  const shuffled = [...A].sort(() => Math.random() - 0.5);
+
+  // Determine the size of each group
+  const groupSizes = [1, 1, 1];
+  for (let i = 3; i < A.length; i++) {
+    groupSizes[i % 3]++;
+  }
+
+  // Merge elements based on group sizes
+  const mergedCounts = [];
+  let index = 0;
+  for (const size of groupSizes) {
+    let sum = 0;
+    for (let i = 0; i < size; i++) {
+      sum += shuffled[index].countChild;
+      index++;
+    }
+    mergedCounts.push(sum);
+  }
+
+  return mergedCounts;
+}
