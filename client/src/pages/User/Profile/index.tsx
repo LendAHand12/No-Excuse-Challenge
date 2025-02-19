@@ -58,7 +58,7 @@ const Profile = () => {
     totalEarning,
     withdrawPending,
     chartData,
-    targetSales
+    targetSales,
   } = userInfo;
   const totalChild = chartData.reduce((acc, num) => acc + num, 0);
   const [imgFront, setImgFront] = useState('');
@@ -76,7 +76,7 @@ const Profile = () => {
     datasets: [
       {
         label: 'Members',
-        data: [...chartData, targetSales-totalChild],
+        data: [...chartData, targetSales - totalChild],
         backgroundColor: ['#FFCF65', '#02071B', '#C1C9D3', 'red'],
       },
     ],
@@ -355,8 +355,12 @@ const Profile = () => {
             WITHDRAW USDT
           </button>
         </div>
-        <div className="grid lg:grid-cols-2 gap-10 font-semibold">
-          <div>
+        <div
+          className={`grid ${
+            ranking >= 2 ? 'lg:grid-cols-2' : ''
+          }  gap-10 font-semibold`}
+        >
+          <div className={`${ranking >= 2 ? '' : 'grid grid-cols-2 gap-2'}`}>
             <div className="bg-[#FAFBFC] p-4 rounded-2xl mb-4">
               <div className="flex justify-between items-center py-2 px-4">
                 <p>Status</p>
@@ -413,33 +417,35 @@ const Profile = () => {
             </div> */}
             </div>
           </div>
-          <div className="bg-[#FAFBFC] p-4 rounded-2xl max-w-sm">
-            <Doughnut
-              data={data}
-              plugins={[ChartDataLabels]}
-              options={{
-                responsive: true,
-                plugins: {
-                  legend: {
-                    position: 'bottom' as const,
-                  },
-                  tooltip: {
-                    enabled: true,
-                  },
-                  datalabels: {
-                    color: '#ffffff',
-                    anchor: 'center',
-                    font: { size: 16, weight: "bold" },
-                    formatter: (value) => {
-                      return value <= 0
-                        ? ''
-                        : Math.round((value / targetSales) * 100) + '%';
+          {ranking >= 2 && (
+            <div className="bg-[#FAFBFC] p-4 rounded-2xl max-w-sm">
+              <Doughnut
+                data={data}
+                plugins={[ChartDataLabels]}
+                options={{
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      position: 'bottom' as const,
+                    },
+                    tooltip: {
+                      enabled: true,
+                    },
+                    datalabels: {
+                      color: '#ffffff',
+                      anchor: 'center',
+                      font: { size: 16, weight: 'bold' },
+                      formatter: (value) => {
+                        return value <= 0
+                          ? ''
+                          : Math.round((value / targetSales) * 100) + '%';
+                      },
                     },
                   },
-                },
-              }}
-            />
-          </div>
+                }}
+              />
+            </div>
+          )}
         </div>
         {!isEdit && (
           <div className="flex justify-end">
