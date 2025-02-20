@@ -357,10 +357,10 @@ const Profile = () => {
         </div>
         <div
           className={`grid ${
-            ranking >= 2 ? 'lg:grid-cols-2' : ''
+            ranking >= 1 ? 'lg:grid-cols-2' : ''
           }  gap-10 font-semibold`}
         >
-          <div className={`${ranking >= 2 ? '' : 'grid grid-cols-2 gap-2'}`}>
+          <div className={`${ranking >= 1 ? '' : 'grid grid-cols-2 gap-2'}`}>
             <div className="bg-[#FAFBFC] p-4 rounded-2xl mb-4">
               <div className="flex justify-between items-center py-2 px-4">
                 <p>Status</p>
@@ -417,7 +417,7 @@ const Profile = () => {
             </div> */}
             </div>
           </div>
-          {ranking >= 2 && (
+          {ranking >= 1 && (
             <div className="bg-[#FAFBFC] p-4 rounded-2xl max-w-sm">
               <Doughnut
                 data={data}
