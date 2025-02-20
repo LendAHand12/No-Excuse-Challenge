@@ -33,3 +33,8 @@ export const formatDateDDMMYYYY = (datetime: string) => {
   }).format(date);
 }
 
+export const adjustSales = (arr, targetSales) => {
+  const maxLimit = targetSales * 0.4;
+  return arr.map(item => (item > maxLimit ? maxLimit : item));
+}
+

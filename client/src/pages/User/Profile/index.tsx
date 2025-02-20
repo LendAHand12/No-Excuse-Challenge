@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import DefaultLayout from '../../../layout/DefaultLayout';
-import { shortenWalletAddress } from '../../../utils';
+import { shortenWalletAddress, adjustSales } from '../../../utils';
 import { useTranslation } from 'react-i18next';
 import Loading from '@/components/Loading';
 import { UPDATE_USER_INFO } from '@/slices/auth';
@@ -60,7 +60,10 @@ const Profile = () => {
     chartData,
     targetSales,
   } = userInfo;
-  const totalChild = chartData.reduce((acc, num) => acc + num, 0);
+  const totalChild = adjustSales(chartData, targetSales).reduce(
+    (acc, num) => acc + num,
+    0,
+  );
   const [imgFront, setImgFront] = useState('');
   const [imgBack, setImgBack] = useState('');
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -76,7 +79,7 @@ const Profile = () => {
     datasets: [
       {
         label: 'Members',
-        data: [...chartData, targetSales - totalChild],
+        data: [...adjustSales(chartData, targetSales), targetSales - totalChild],
         backgroundColor: ['#FFCF65', '#02071B', '#C1C9D3', 'red'],
       },
     ],
