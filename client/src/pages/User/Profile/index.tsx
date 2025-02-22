@@ -79,7 +79,10 @@ const Profile = () => {
     datasets: [
       {
         label: 'Members',
-        data: [...adjustSales(chartData, targetSales), targetSales - totalChild],
+        data: [
+          ...adjustSales(chartData, targetSales),
+          targetSales - totalChild,
+        ],
         backgroundColor: ['#FFCF65', '#02071B', '#C1C9D3', 'red'],
       },
     ],
@@ -432,7 +435,7 @@ const Profile = () => {
                       position: 'bottom' as const,
                     },
                     tooltip: {
-                      enabled: true,
+                      enabled: false,
                     },
                     datalabels: {
                       color: '#ffffff',
@@ -447,6 +450,28 @@ const Profile = () => {
                   },
                 }}
               />
+              <div className="mt-2">
+                <ul className="flex flex-col items-center gap-3">
+                  <li>
+                    <span className="bg-[#FFCF65] px-2 py-1 text-sm">
+                      Group 1 :
+                    </span>{' '}
+                    {chartData[0]} members
+                  </li>
+                  <li>
+                    <span className="bg-[#02071B] text-white px-2 py-1 text-sm">
+                      Group 2 :
+                    </span>{' '}
+                    {chartData[1]} members
+                  </li>
+                  <li>
+                    <span className="bg-[#C1C9D3] px-2 py-1 text-sm">
+                      Group 3 :
+                    </span>{' '}
+                    {chartData[2]} members
+                  </li>
+                </ul>
+              </div>
             </div>
           )}
         </div>
