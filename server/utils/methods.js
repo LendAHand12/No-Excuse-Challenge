@@ -326,12 +326,10 @@ export const findNextUserByIndex = async (tier) => {
     userId: lastUserTree.parentId,
     tier,
   });
-  console.log({ parentOfLastUserTree });
   const nextUserTree = await Tree.find({
     createdAt: { $gte: parentOfLastUserTree.createdAt },
     tier,
   });
-  console.log({ nextUserTree: nextUserTree[1] });
   return nextUserTree.userId;
 };
 
@@ -340,26 +338,13 @@ export const mergeIntoThreeGroups = (A) => {
   if (A.length === 1) return [A[0].countChild, 0, 0];
   if (A.length === 2) return [A[0].countChild, A[1].countChild, 0];
 
-  // Shuffle array to ensure randomness
-  const shuffled = [...A].sort(() => Math.random() - 0.5);
+  // Sort by countChild descending
+  const sorted = [...A].sort((a, b) => b.countChild - a.countChild);
 
-  // Determine the size of each group
-  const groupSizes = [1, 1, 1];
-  for (let i = 3; i < A.length; i++) {
-    groupSizes[i % 3]++;
-  }
+  // Assign groups
+  const group1 = sorted[0].countChild;
+  const group2 = sorted[1]?.countChild || 0;
+  const group3 = sorted.slice(2).reduce((sum, item) => sum + item.countChild, 0);
 
-  // Merge elements based on group sizes
-  const mergedCounts = [];
-  let index = 0;
-  for (const size of groupSizes) {
-    let sum = 0;
-    for (let i = 0; i < size; i++) {
-      sum += shuffled[index].countChild;
-      index++;
-    }
-    mergedCounts.push(sum);
-  }
-
-  return mergedCounts;
-}
+  return [group1, group2, group3];
+};
