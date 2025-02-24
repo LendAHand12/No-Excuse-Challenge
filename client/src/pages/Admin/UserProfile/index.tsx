@@ -15,6 +15,10 @@ import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import DefaultLayout from '../../../layout/DefaultLayout';
 import USER_RANKINGS from '@/constants/userRankings';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Doughnut } from 'react-chartjs-2';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { adjustSales } from '../../../utils';
 
 const UserProfile = () => {
   const { pathname } = useLocation();
@@ -37,6 +41,9 @@ const UserProfile = () => {
   const [loadingUploadFileBack, setLoadingUploadFileBack] = useState(false);
   const [imgFront, setImgFront] = useState('');
   const [imgBack, setImgBack] = useState('');
+  const [totalChild, setTotalChild] = useState(0);
+  const [chartData, setChartData] = useState([]);
+  const [targetSales, setTargetSales] = useState(0);
 
   const handleToggler = () => setToggler(!toggler);
 
@@ -62,6 +69,8 @@ const UserProfile = () => {
             tier,
             openLah,
             closeLah,
+            chartData,
+            targetSales,
           } = response.data;
           setValue('userId', userId);
           setValue('email', email);
@@ -71,6 +80,14 @@ const UserProfile = () => {
           setValue('walletAddress', walletAddress);
           setCurrentOpenLah(openLah);
           setCurrentCloseLah(closeLah);
+          setTotalChild(
+            adjustSales(chartData, targetSales).reduce(
+              (acc, num) => acc + num,
+              0,
+            ),
+          );
+          setChartData(chartData);
+          setTargetSales(targetSales);
         })
         .catch((error) => {
           let message =
@@ -622,6 +639,79 @@ const UserProfile = () => {
                     </ul>
                   </div>
                 )}
+              </div>
+              <div className="py-10">
+                <div className="max-w-sm">
+                  <Doughnut
+                    data={{
+                      labels: [
+                        'Group 1',
+                        'Group 2',
+                        'Group 3',
+                        'Remaining target',
+                      ],
+                      datasets: [
+                        {
+                          label: 'Members',
+                          data: [
+                            ...adjustSales(chartData, targetSales),
+                            targetSales - totalChild,
+                          ],
+                          backgroundColor: [
+                            '#FFCF65',
+                            '#02071B',
+                            '#C1C9D3',
+                            'red',
+                          ],
+                        },
+                      ],
+                    }}
+                    plugins={[ChartDataLabels]}
+                    options={{
+                      responsive: true,
+                      plugins: {
+                        legend: {
+                          position: 'bottom' as const,
+                        },
+                        tooltip: {
+                          enabled: false,
+                        },
+                        datalabels: {
+                          color: '#ffffff',
+                          anchor: 'center',
+                          font: { size: 16, weight: 'bold' },
+                          formatter: (value) => {
+                            return value <= 0
+                              ? ''
+                              : Math.round((value / targetSales) * 100) + '%';
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </div>
+                <div className="w-full mt-6">
+                  <ul className="flex flex-col items-center gap-3">
+                    <li>
+                      <span className="bg-[#FFCF65] px-2 py-1 text-sm">
+                        Group 1 :
+                      </span>{' '}
+                      {chartData[0]} members
+                    </li>
+                    <li>
+                      <span className="bg-[#02071B] text-white px-2 py-1 text-sm">
+                        Group 2 :
+                      </span>{' '}
+                      {chartData[1]} members
+                    </li>
+                    <li>
+                      <span className="bg-[#C1C9D3] px-2 py-1 text-sm">
+                        Group 3 :
+                      </span>{' '}
+                      {chartData[2]} members
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
             <div className="w-full lg:w-2/3 lg:mx-2">

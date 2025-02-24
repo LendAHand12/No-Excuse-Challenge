@@ -11,30 +11,29 @@ export const shortenWalletAddress = (walletAddress: string, length = 20) => {
 };
 export const getFirstImageSrc = (htmlString: string) => {
   const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlString, "text/html");
-  const img = doc.querySelector("img");
+  const doc = parser.parseFromString(htmlString, 'text/html');
+  const img = doc.querySelector('img');
   return img ? img.src : null;
-}
+};
 
 export const formatDateDDMM = (datetime: string) => {
   const date = new Date(datetime);
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
   }).format(date);
-}
+};
 
 export const formatDateDDMMYYYY = (datetime: string) => {
   const date = new Date(datetime);
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
   }).format(date);
-}
+};
 
 export const adjustSales = (arr, targetSales) => {
   const maxLimit = targetSales * 0.4;
-  return arr.map(item => (item > maxLimit ? maxLimit : item));
-}
-
+  return arr.map((item) => (item > maxLimit ? maxLimit : item));
+};

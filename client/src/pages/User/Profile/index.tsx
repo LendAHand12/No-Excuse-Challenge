@@ -366,8 +366,12 @@ const Profile = () => {
             ranking >= 1 ? 'lg:grid-cols-2' : ''
           }  gap-10 font-semibold`}
         >
-          <div className={`${ranking >= 1 ? '' : 'grid grid-cols-2 gap-2'}`}>
-            <div className="bg-[#FAFBFC] p-4 rounded-2xl mb-4">
+          <div
+            className={`${
+              ranking >= 1 ? 'space-y-4' : 'grid grid-cols-2 gap-2'
+            }`}
+          >
+            <div className="bg-[#FAFBFC] p-4 rounded-2xl">
               <div className="flex justify-between items-center py-2 px-4">
                 <p>Status</p>
                 <div
@@ -397,7 +401,7 @@ const Profile = () => {
               <p>{tier1Time}</p>
             </div> */}
             </div>
-            <div className="bg-[#FAFBFC] p-4 rounded-2xl ">
+            <div className="bg-[#FAFBFC] p-4 rounded-2xl">
               <div className="flex justify-between items-center py-2 px-4">
                 <p>Rank</p>
                 {ranking !== 0 && (
@@ -422,36 +426,68 @@ const Profile = () => {
               <p>{tier1Time}</p>
             </div> */}
             </div>
+            <div className="bg-[#FAFBFC] p-4 rounded-2xl">
+              <div className="py-2 px-4">
+                <p className="uppercase mt-2 font-bold">{t('children')}</p>
+                <div className="py-2">
+                  <ul>
+                    {listDirectUser.map((ele) => (
+                      <li className="" key={ele._id}>
+                        <div className="py-2">
+                          <div className="text-base">
+                            <span
+                              className={`${
+                                ele.isGray
+                                  ? 'bg-[#8c8c8c]'
+                                  : ele.isRed
+                                  ? 'bg-[#b91c1c]'
+                                  : ele.isYellow
+                                  ? 'bg-[#F4B400]'
+                                  : 'bg-[#16a34a]'
+                              } py-1 px-2 rounded text-white text-sm`}
+                            >
+                              {ele.userId}
+                            </span>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
           {ranking >= 1 && (
-            <div className="bg-[#FAFBFC] p-4 rounded-2xl max-w-sm">
-              <Doughnut
-                data={data}
-                plugins={[ChartDataLabels]}
-                options={{
-                  responsive: true,
-                  plugins: {
-                    legend: {
-                      position: 'bottom' as const,
-                    },
-                    tooltip: {
-                      enabled: false,
-                    },
-                    datalabels: {
-                      color: '#ffffff',
-                      anchor: 'center',
-                      font: { size: 16, weight: 'bold' },
-                      formatter: (value) => {
-                        return value <= 0
-                          ? ''
-                          : Math.round((value / targetSales) * 100) + '%';
+            <div className="bg-[#FAFBFC] p-4 rounded-2xl flex flex-col items-center">
+              <div className="max-w-sm">
+                <Doughnut
+                  data={data}
+                  plugins={[ChartDataLabels]}
+                  options={{
+                    responsive: true,
+                    plugins: {
+                      legend: {
+                        position: 'bottom' as const,
+                      },
+                      tooltip: {
+                        enabled: false,
+                      },
+                      datalabels: {
+                        color: '#ffffff',
+                        anchor: 'center',
+                        font: { size: 16, weight: 'bold' },
+                        formatter: (value) => {
+                          return value <= 0
+                            ? ''
+                            : Math.round((value / targetSales) * 100) + '%';
+                        },
                       },
                     },
-                  },
-                }}
-              />
-              <div className="mt-2">
-                <ul className="flex flex-col items-center gap-3">
+                  }}
+                />
+              </div>
+              <div className="w-full mt-2">
+                <ul className="flex flex-col md:flex-row md:justify-center md:items-center gap-3">
                   <li>
                     <span className="bg-[#FFCF65] px-2 py-1 text-sm">
                       Group 1 :

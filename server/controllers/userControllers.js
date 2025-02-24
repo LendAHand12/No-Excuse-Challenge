@@ -115,7 +115,7 @@ const getUserById = asyncHandler(async (req, res) => {
     if (listRefIdOfUser && listRefIdOfUser.length > 0) {
       for (let refId of listRefIdOfUser) {
         const refedUser = await User.findById(refId.userId).select(
-          "userId email walletAddress status countPay tier errLahCode buyPackage"
+          "userId email walletAddress status countPay tier errLahCode buyPackage countChild"
         );
         listDirectUser.push({
           userId: refedUser.userId,
@@ -129,6 +129,7 @@ const getUserById = asyncHandler(async (req, res) => {
               ? true
               : false,
           isYellow: refedUser.errLahCode === "OVER30",
+          countChild: refedUser.countChild[0] + 1,
         });
       }
     }
@@ -210,6 +211,8 @@ const getUserById = asyncHandler(async (req, res) => {
       ranking: user.ranking,
       totalEarning: user.availableUsdt + user.claimedUsdt,
       withdrawPending: totalWithdraws,
+      chartData: mergeIntoThreeGroups(listDirectUser),
+      targetSales: process.env[`LEVEL_${user.ranking + 1}`],
     });
   } else {
     res.status(404);
@@ -240,7 +243,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
               ? true
               : false,
           isYellow: refedUser.errLahCode === "OVER30",
-          countChild: refedUser.countChild[0],
+          countChild: refedUser.countChild[0] + 1,
         });
       }
     }
@@ -323,7 +326,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       totalEarning: user.availableUsdt + user.claimedUsdt,
       withdrawPending: totalWithdraws,
       chartData: mergeIntoThreeGroups(listDirectUser),
-      targetSales: process.env[`LEVEL_${user.ranking + 1}`]
+      targetSales: process.env[`LEVEL_${user.ranking + 1}`],
     });
   } else {
     res.status(404);

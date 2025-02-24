@@ -222,7 +222,7 @@ const authUser = asyncHandler(async (req, res) => {
     if (listRefIdOfUser && listRefIdOfUser.length > 0) {
       for (let refId of listRefIdOfUser) {
         const refedUser = await User.findById(refId.userId).select("userId email countChild");
-        listDirectUser.push({ ...refedUser, countChild: refedUser.countChild[0] });
+        listDirectUser.push({ ...refedUser, countChild: refedUser.countChild[0] + 1 });
       }
     }
 
@@ -279,7 +279,7 @@ const authUser = asyncHandler(async (req, res) => {
         ranking: user.ranking,
         totalEarning: user.availableUsdt + user.claimedUsdt,
         chartData: mergeIntoThreeGroups(listDirectUser),
-        targetSales: process.env[`LEVEL_${user.ranking + 1}`]
+        targetSales: process.env[`LEVEL_${user.ranking + 1}`],
       },
       accessToken,
       refreshToken,
