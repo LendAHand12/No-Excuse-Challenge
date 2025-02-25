@@ -107,7 +107,7 @@ const SignUpPage = () => {
                       </h1>
                       <div className="w-full flex-1 mt-8">
                         <form
-                          className="mx-auto max-w-xl"
+                          className="mx-auto w-[350px] xl:w-[500px]"
                           onSubmit={handleSubmit(onSubmit)}
                           autoComplete="off"
                         >
@@ -137,33 +137,31 @@ const SignUpPage = () => {
                           <p className="text-red-500 mt-1 text-sm">
                             {errors.email?.message}
                           </p>
-                          <div className="grid grid-cols-2 gap-5">
-                            <div>
-                              <PhoneInput
-                                defaultCountry="US"
-                                placeholder={t('Phone')}
-                                value={phone}
-                                onChange={setPhone}
-                              />
-                              <p className="text-red-500 mt-1 text-sm">
-                                {errorPhone && t('Phone is required')}
-                              </p>
-                            </div>
-                            {/* Id code */}
-                            <div>
-                              <input
-                                className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
-                                type="text"
-                                placeholder={`${t('id code')}`}
-                                {...register('idCode', {
-                                  required: t('ID code is required'),
-                                })}
-                                disabled={loading}
-                              />
-                              <p className="text-red-500 mt-1 text-sm">
-                                {errors.idCode?.message}
-                              </p>
-                            </div>
+                          <div>
+                            <PhoneInput
+                              defaultCountry="US"
+                              placeholder={t('Phone')}
+                              value={phone}
+                              onChange={setPhone}
+                            />
+                            <p className="text-red-500 mt-1 text-sm">
+                              {errorPhone && t('Phone is required')}
+                            </p>
+                          </div>
+                          {/* Id code */}
+                          <div>
+                            <input
+                              className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
+                              type="text"
+                              placeholder={`${t('id code')}`}
+                              {...register('idCode', {
+                                required: t('ID code is required'),
+                              })}
+                              disabled={loading}
+                            />
+                            <p className="text-red-500 mt-1 text-sm">
+                              {errors.idCode?.message}
+                            </p>
                           </div>
                           {/* Wallet address */}
                           <input
