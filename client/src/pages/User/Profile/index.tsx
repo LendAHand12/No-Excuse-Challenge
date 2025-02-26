@@ -97,6 +97,7 @@ const Profile = () => {
     defaultValues: {
       idCode,
       phone,
+      walletAddress,
       imgBackData: '',
       imgFrontData: '',
     },
@@ -104,7 +105,7 @@ const Profile = () => {
 
   const onSubmit = useCallback(
     async (data) => {
-      const { idCode } = data;
+      const { idCode, walletAddress } = data;
       if (!phoneNumber || phoneNumber === '') {
         setErrPhone(true);
       } else {
@@ -118,8 +119,8 @@ const Profile = () => {
         const { imgBack } = data;
         const [fileObjectImgBack] = imgBack;
 
-        formData.append('phone', phoneNumber.trim());
         formData.append('idCode', idCode.trim());
+        formData.append('walletAddress', walletAddress.trim());
         formData.append('imgFront', fileObjectImgFront);
         formData.append('imgBack', fileObjectImgBack);
 
@@ -578,7 +579,20 @@ const Profile = () => {
             </div>
             <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
               <p>ID/DL/Passport number :</p>
-              <p>{idCode}</p>
+              {isEdit ? (
+                <div className="">
+                  <input
+                    className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                    {...register('idCode', {
+                      required: t('id code is required'),
+                    })}
+                    autoComplete="off"
+                  />
+                  <p className="text-sm text-red-500">{errors.idCode?.message}</p>
+                </div>
+              ) : (
+                <p>{idCode}</p>
+              )}
             </div>
             {/* <div className="grid lg:grid-cols-2 gap-2 lg:gap-0  py-2 px-4 rounded-lg">
               <p>Serepay wallet (USDT) :</p>
@@ -590,7 +604,20 @@ const Profile = () => {
             </div> */}
             <div className="grid lg:grid-cols-2 gap-2 bg-[#E5E9EE] lg:gap-0 items-center py-2 px-4 rounded-lg">
               <p>Wallet Address :</p>
-              <p>{shortenWalletAddress(walletAddress, 14)}</p>
+              {isEdit ? (
+                <div className="">
+                  <input
+                    className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                    {...register('walletAddress', {
+                      required: t('walletAddress is required'),
+                    })}
+                    autoComplete="off"
+                  />
+                  <p className="text-sm text-red-500">{errors.walletAddress?.message}</p>
+                </div>
+              ) : (
+                <p>{shortenWalletAddress(walletAddress, 14)}</p>
+              )}
             </div>
             {/* <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
               <p>Wallet address Tier 2</p>
@@ -628,79 +655,44 @@ const Profile = () => {
               <p>Fine :</p>
               <p>{fine} USDT</p>
             </div>
-            {status === 'UNVERIFY' ? (
               <>
                 <div className="w-full flex justify-center">
                   <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
                     <p> {t('idCardFront')} :</p>
-                    {isEdit && (
                       <div className="flex flex-col items-center justify-center w-full">
                         <UploadFile
                           register={register}
                           watch={watch}
                           required={false}
+                          imgSrc={userInfo.imgFront}
                           name="imgFront"
+                          isEdit={isEdit}
                         />
                         <p className="text-red-500 text-sm">
                           {errors.imgFront?.message}
                         </p>
                       </div>
-                    )}
                   </div>
                 </div>
                 <div className="flex justify-center bg-[#E5E9EE] rounded-lg">
                   <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
                     <p> {t('idCardBack')} :</p>
-                    {isEdit && (
                       <div className="flex items-center justify-center w-full">
                         <UploadFile
                           register={register}
                           watch={watch}
                           required={false}
                           name="imgBack"
+                          imgSrc={userInfo.imgBack}
+                          isEdit={isEdit}
                         />
                         <p className="text-red-500 text-sm">
                           {errors.imgBack?.message}
                         </p>
                       </div>
-                    )}
                   </div>
                 </div>
               </>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 lg:grid-cols-2">
-                  <div className="px-4 py-2 font-semibold">
-                    {t('idCardFront')}
-                  </div>
-                  <img
-                    src={`${
-                      userInfo.imgFront.includes('cloudinary')
-                        ? userInfo.imgFront
-                        : import.meta.env.VITE_API_URL +
-                          '/uploads/CCCD/' +
-                          userInfo.imgFront
-                    }`}
-                    className="w-full px-4 py-2"
-                  />
-                </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2">
-                  <div className="px-4 py-2 font-semibold">
-                    {t('idCardBack')}
-                  </div>
-                  <img
-                    src={`${
-                      userInfo.imgBack.includes('cloudinary')
-                        ? userInfo.imgBack
-                        : import.meta.env.VITE_API_URL +
-                          '/uploads/CCCD/' +
-                          userInfo.imgBack
-                    }`}
-                    className="w-full px-4 py-2"
-                  />
-                </div>
-              </>
-            )}
           </div>
           {isEdit && (
             <button

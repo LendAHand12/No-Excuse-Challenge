@@ -45,7 +45,7 @@ const SignInPage: React.FC = () => {
       <ToastContainer />
       <SignInLayout>
         <div className="w-full h-screen overflow-auto flex flex-col lg:justify-center items-end lg:items-center">
-          <img src={COVER4} className="lg:hidden" />
+          <img src={COVER4} className="lg:hidden w-full" />
           <form
             onSubmit={handleSubmit(onSubmit)}
             autoComplete="off"

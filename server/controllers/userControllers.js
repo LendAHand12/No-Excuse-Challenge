@@ -119,13 +119,22 @@ const getUserById = asyncHandler(async (req, res) => {
         );
         listDirectUser.push({
           userId: refedUser.userId,
-          isGray: refedUser.status === "LOCKED" ? (req.user.isAdmin ? true : false) : false,
+          isGray:
+            refedUser.status === "LOCKED"
+              ? req.user.isAdmin
+                ? true
+                : false
+              : false,
           isRed:
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "B" && refedUser.countPay < 7
+              : refedUser.tier === 1 &&
+                refedUser.buyPackage === "B" &&
+                refedUser.countPay < 7
               ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "A" && refedUser.countPay < 13
+              : refedUser.tier === 1 &&
+                refedUser.buyPackage === "A" &&
+                refedUser.countPay < 13
               ? true
               : false,
           isYellow: refedUser.errLahCode === "OVER30",
@@ -136,7 +145,9 @@ const getUserById = asyncHandler(async (req, res) => {
     const listOldParent = [];
     if (user.oldParents && user.oldParents.length > 0) {
       for (let parentId of user.oldParents) {
-        const oldParent = await User.findById(parentId).select("userId email walletAddress");
+        const oldParent = await User.findById(parentId).select(
+          "userId email walletAddress"
+        );
         listOldParent.push(oldParent);
       }
     }
@@ -156,7 +167,10 @@ const getUserById = asyncHandler(async (req, res) => {
       userId: user._id,
       status: "PENDING",
     });
-    const totalWithdraws = withdraws.reduce((sum, withdraw) => sum + withdraw.amount, 0);
+    const totalWithdraws = withdraws.reduce(
+      (sum, withdraw) => sum + withdraw.amount,
+      0
+    );
 
     res.json({
       id: user._id,
@@ -233,13 +247,22 @@ const getUserInfo = asyncHandler(async (req, res) => {
         );
         listDirectUser.push({
           userId: refedUser.userId,
-          isGray: refedUser.status === "LOCKED" ? (req.user.isAdmin ? true : false) : false,
+          isGray:
+            refedUser.status === "LOCKED"
+              ? req.user.isAdmin
+                ? true
+                : false
+              : false,
           isRed:
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "B" && refedUser.countPay < 7
+              : refedUser.tier === 1 &&
+                refedUser.buyPackage === "B" &&
+                refedUser.countPay < 7
               ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "A" && refedUser.countPay < 13
+              : refedUser.tier === 1 &&
+                refedUser.buyPackage === "A" &&
+                refedUser.countPay < 13
               ? true
               : false,
           isYellow: refedUser.errLahCode === "OVER30",
@@ -250,7 +273,9 @@ const getUserInfo = asyncHandler(async (req, res) => {
     const listOldParent = [];
     if (user.oldParents && user.oldParents.length > 0) {
       for (let parentId of user.oldParents) {
-        const oldParent = await User.findById(parentId).select("userId email walletAddress");
+        const oldParent = await User.findById(parentId).select(
+          "userId email walletAddress"
+        );
         listOldParent.push(oldParent);
       }
     }
@@ -263,7 +288,10 @@ const getUserInfo = asyncHandler(async (req, res) => {
       userId: user._id,
       status: "PENDING",
     });
-    const totalWithdraws = withdraws.reduce((sum, withdraw) => sum + withdraw.amount, 0);
+    const totalWithdraws = withdraws.reduce(
+      (sum, withdraw) => sum + withdraw.amount,
+      0
+    );
 
     const tree = await Tree.findOne({ userId: user._id, tier: 1 });
 
@@ -335,7 +363,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
 });
 
 const updateUser = asyncHandler(async (req, res) => {
-  const { phone, idCode, buyPackage } = req.body;
+  const { phone, idCode, buyPackage, walletAddress } = req.body;
   const user = await User.findOne({ _id: req.params.id }).select("-password");
   const userHavePhone = await User.find({
     $and: [{ phone }, { email: { $ne: user.email } }, { isAdmin: false }],
@@ -344,17 +372,25 @@ const updateUser = asyncHandler(async (req, res) => {
     $and: [{ idCode }, { email: { $ne: user.email } }, { isAdmin: false }],
   });
 
-  if (userHavePhone.length >= 1 || userHaveIdCode.length >= 1) {
+  const userHaveWalletAddress = await User.find({
+    $and: [{ walletAddress }, { email: { $ne: user.email } }, { isAdmin: false }],
+  });
+
+  if (userHavePhone.length >= 1 || userHaveIdCode.length >= 1 || userHaveWalletAddress.length >= 1) {
     res.status(400).json({ error: "duplicateInfo" });
   }
   if (user) {
     user.phone = phone || user.phone;
     user.idCode = idCode || user.idCode;
+    user.walletAddress = walletAddress || user.walletAddress;
     if (buyPackage) {
       const newBuyPackage = await Package.findOne({ name: buyPackage });
       if (newBuyPackage.status === "active") {
         user.buyPackage = buyPackage || user.buyPackage;
-        await Tree.findOneAndUpdate({ userName: user.userId }, { buyPackage: buyPackage });
+        await Tree.findOneAndUpdate(
+          { userName: user.userId },
+          { buyPackage: buyPackage }
+        );
       } else {
         res.status(400).json({ error: "Package has been disabled" });
       }
@@ -372,10 +408,48 @@ const updateUser = asyncHandler(async (req, res) => {
     }
     const updatedUser = await user.save();
     if (updatedUser) {
-      const listDirectUser = await User.find({
-        refId: user._id,
-        tier: 1,
-      }).select("userId email walletAddress");
+      const listDirectUser = [];
+      const listRefIdOfUser = await Tree.find({ refId: user._id, tier: 1 });
+      if (listRefIdOfUser && listRefIdOfUser.length > 0) {
+        for (let refId of listRefIdOfUser) {
+          const refedUser = await User.findById(refId.userId).select(
+            "userId email walletAddress status countPay countChild tier errLahCode buyPackage"
+          );
+          listDirectUser.push({
+            userId: refedUser.userId,
+            isGray:
+              refedUser.status === "LOCKED"
+                ? req.user.isAdmin
+                  ? true
+                  : false
+                : false,
+            isRed:
+              refedUser.tier === 1 && refedUser.countPay === 0
+                ? true
+                : refedUser.tier === 1 &&
+                  refedUser.buyPackage === "B" &&
+                  refedUser.countPay < 7
+                ? true
+                : refedUser.tier === 1 &&
+                  refedUser.buyPackage === "A" &&
+                  refedUser.countPay < 13
+                ? true
+                : false,
+            isYellow: refedUser.errLahCode === "OVER30",
+            countChild: refedUser.countChild[0] + 1,
+          });
+        }
+      }
+
+      const withdraws = await Withdraw.find({
+        userId: user._id,
+        status: "PENDING",
+      });
+      const totalWithdraws = withdraws.reduce(
+        (sum, withdraw) => sum + withdraw.amount,
+        0
+      );
+
       const packages = await getActivePackages();
       const permissions = await Permission.findOne({
         role: user.role,
@@ -420,8 +494,11 @@ const updateUser = asyncHandler(async (req, res) => {
           claimedHewe: updatedUser.claimedHewe,
           claimedUsdt: updatedUser.claimedUsdt,
           heweWallet: updatedUser.heweWallet,
-          ranking: user.ranking,
-          totalEarning: user.availableUsdt + user.claimedUsdt,
+          ranking: updatedUser.ranking,
+          totalEarning: updatedUser.availableUsdt + updatedUser.claimedUsdt,
+          withdrawPending: totalWithdraws,
+          chartData: mergeIntoThreeGroups(listDirectUser),
+          targetSales: process.env[`LEVEL_${updatedUser.ranking + 1}`],
         },
       });
     }
@@ -550,12 +627,19 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     user.imgFront = imgFront || user.imgFront;
     user.imgBack = imgBack || user.imgBack;
     const listTransSuccess = await Transaction.find({
-      $and: [{ userId: user._id }, { status: "SUCCESS" }, { type: { $ne: "REGISTER" } }],
+      $and: [
+        { userId: user._id },
+        { status: "SUCCESS" },
+        { type: { $ne: "REGISTER" } },
+      ],
     });
     if (buyPackage && buyPackage !== user.buyPackage) {
       if (listTransSuccess.length === 0) {
         user.buyPackage = buyPackage || user.buyPackage;
-        await Tree.updateMany({ $and: [{ userId: user._id }, { tier: 1 }] }, { buyPackage });
+        await Tree.updateMany(
+          { $and: [{ userId: user._id }, { tier: 1 }] },
+          { buyPackage }
+        );
       } else {
         res.status(400).json({ error: "User has generated a transaction" });
       }
@@ -725,9 +809,13 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
           isRed:
             child.tier === 1 && child.countPay === 0
               ? true
-              : child.tier === 1 && child.buyPackage === "B" && child.countPay < 7
+              : child.tier === 1 &&
+                child.buyPackage === "B" &&
+                child.countPay < 7
               ? true
-              : child.tier === 1 && child.buyPackage === "A" && child.countPay < 13
+              : child.tier === 1 &&
+                child.buyPackage === "A" &&
+                child.countPay < 13
               ? true
               : false,
           isYellow: child.errLahCode === "OVER30",
@@ -799,13 +887,22 @@ const getUserProfile = asyncHandler(async (req, res) => {
         );
         listDirectUser.push({
           userId: refedUser.userId,
-          isGray: refedUser.status === "LOCKED" ? (req.user.isAdmin ? true : false) : false,
+          isGray:
+            refedUser.status === "LOCKED"
+              ? req.user.isAdmin
+                ? true
+                : false
+              : false,
           isRed:
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "B" && refedUser.countPay < 7
+              : refedUser.tier === 1 &&
+                refedUser.buyPackage === "B" &&
+                refedUser.countPay < 7
               ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "A" && refedUser.countPay < 13
+              : refedUser.tier === 1 &&
+                refedUser.buyPackage === "A" &&
+                refedUser.countPay < 13
               ? true
               : false,
           isYellow: refedUser.errLahCode === "OVER30",
@@ -1046,7 +1143,10 @@ const getAllUsersForExport = asyncHandler(async (req, res) => {
           {
             $match: {
               $expr: {
-                $and: [{ $eq: ["$userId", { $toString: "$$userId" }] }, { $eq: ["$tier", 1] }],
+                $and: [
+                  { $eq: ["$userId", { $toString: "$$userId" }] },
+                  { $eq: ["$tier", 1] },
+                ],
               },
             },
           },
@@ -1065,7 +1165,10 @@ const getAllUsersForExport = asyncHandler(async (req, res) => {
           {
             $match: {
               $expr: {
-                $and: [{ $eq: ["$userId", { $toString: "$$parentId" }] }, { $eq: ["$tier", 1] }],
+                $and: [
+                  { $eq: ["$userId", { $toString: "$$parentId" }] },
+                  { $eq: ["$tier", 1] },
+                ],
               },
             },
           },
@@ -1166,8 +1269,12 @@ const mailForChangeWallet = asyncHandler(async (req, res) => {
 });
 
 const changeWallet = asyncHandler(async (req, res) => {
-  const { token, newWallet1, newWallet2, newWallet3, newWallet4, newWallet5 } = req.body;
-  const decodedToken = jwt.verify(token, process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET);
+  const { token, newWallet1, newWallet2, newWallet3, newWallet4, newWallet5 } =
+    req.body;
+  const decodedToken = jwt.verify(
+    token,
+    process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET
+  );
   if (decodedToken) {
     const user = await User.findById(decodedToken.id);
 
@@ -1323,7 +1430,8 @@ const pushChildrent1ToUp = async (userTree, parentTree, tierIndex) => {
   userUp.oldParents = [childTree.parentId, ...userUp.oldParents];
   await userUp.save();
   childTree.parentId = parentTree.userId;
-  childTree.refId = childTree.refId === userTree.userId ? parentTree.userId : childTree.refId;
+  childTree.refId =
+    childTree.refId === userTree.userId ? parentTree.userId : childTree.refId;
   await childTree.save();
   parentTree.children.push(childTree.userId);
   await parentTree.save();
@@ -1434,7 +1542,10 @@ const checkCanIncreaseNextTier = async (u) => {
             }
           }
 
-          if (highestChildSales >= 0.4 * u.countChild && lowestChildSales >= 0.2 * u.countChild) {
+          if (
+            highestChildSales >= 0.4 * u.countChild &&
+            lowestChildSales >= 0.2 * u.countChild
+          ) {
             // const haveC = await doesAnyUserInHierarchyHaveBuyPackageC(u.id, 1);
             return true;
           }
@@ -1487,8 +1598,17 @@ const doesAnyUserInHierarchyHaveBuyPackageC = async (userId) => {
 };
 
 const adminCreateUser = asyncHandler(async (req, res) => {
-  const { userId, walletAddress, email, password, phone, idCode, imgFront, imgBack, tier } =
-    req.body;
+  const {
+    userId,
+    walletAddress,
+    email,
+    password,
+    phone,
+    idCode,
+    imgFront,
+    imgBack,
+    tier,
+  } = req.body;
 
   const userExistsUserId = await User.findOne({
     userId: { $regex: userId, $options: "i" },
@@ -1959,7 +2079,8 @@ const updateAdmin = asyncHandler(async (req, res) => {
     if (phone) user.phone = phone;
     if (email) user.email = email;
     if (role) user.role = role;
-    if (walletAddress) user.walletAddress = [walletAddress, ...user.walletAddress];
+    if (walletAddress)
+      user.walletAddress = [walletAddress, ...user.walletAddress];
     if (password) user.password = password;
     await user.save();
 
