@@ -9,10 +9,10 @@ const HomePage: React.FC = () => {
         <div className="flex">
           <div className="py-14 2xl:pl-16 px-10">
             <p className="text-[#] font-bold">About us</p>
-            <h1 className="text-black text-6xl font-medium mt-3 mb-6">
+            <h1 className="text-black text-6xl font-medium mt-3 mb-2">
               DreamChain
             </h1>
-            <h3 className="text-xl font-semibold mb-4">HeWe Challenge</h3>
+            <h3 className="text-xl font-semibold mb-6">HeWe Challenge</h3>
             <p className="text-[#02071B] text-lg">
               Welcome to DreamChain: Where Dreams Connect DreamChain is more
               than a platform; it's a mission and a challenge. Every morning, as
@@ -52,7 +52,7 @@ const HomePage: React.FC = () => {
               dreams." – Eleanor Roosevelt
             </p>
           </div>
-          {/* <div className="py-10 2xl:pl-16 px-10">
+          <div className="py-10 2xl:pl-16 px-10">
             <div className="border w-1/2 border-black"></div>
             <h1 className="text-black text-2xl font-semibold mt-3 mb-6 pt-3">
               Giving and Receiving
@@ -67,7 +67,7 @@ const HomePage: React.FC = () => {
             <p className="text-[#02071B] text-lg font-semibold mt-10">
               "No one has ever become poor by giving." – Anne Frank
             </p>
-          </div> */}
+          </div>
           <div className="py-10 2xl:pl-16 px-10 3xl:-mt-32">
             <div className="border w-1/2 border-black"></div>
             <h1 className="text-black text-2xl font-semibold mt-3 mb-6 pt-3">
@@ -92,7 +92,7 @@ const HomePage: React.FC = () => {
               championships." – Michael Jordan
             </p>
           </div>
-          {/* <div className="py-10 pb-20 2xl:pl-16 px-10">
+          <div className="py-10 pb-20 2xl:pl-16 px-10">
             <div className="border w-1/2 border-black"></div>
             <h1 className="text-black text-2xl font-semibold mt-3 mb-6 pt-3">
               Join Us Today
@@ -106,7 +106,7 @@ const HomePage: React.FC = () => {
               "Alone, we can do so little; together, we can do so much." – Helen
               Keller
             </p>
-          </div> */}
+          </div>
         </div>
       </div>
     </DefaultLayout>
