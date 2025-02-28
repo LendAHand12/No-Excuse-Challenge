@@ -152,9 +152,9 @@ const AdminClaimsPage = () => {
                         </div>
                       </div>
                     </th>
-                    <td className="px-6 py-4">{ele.amount} USDT</td>
+                    <td className="px-6 py-4">{ele.amount} {ele.coin}</td>
                     <td className="px-6 py-4">{ele.coin}</td>
-                    <td className="px-6 py-4 text-blue-600 hover:underline"><a target='_blank' href={`https://explorer.amchain.net/transactions_detail/${ele.hash}`}>{shortenWalletAddress(ele.hash, 20)}</a></td>
+                    <td className="px-6 py-4 text-blue-600 hover:underline"><a target='_blank' href={ele.coin === "HEWE" ? `https://explorer.amchain.net/transactions_detail/${ele.hash}` : `https://bscscan.com/tx/${ele.hash}`}>{shortenWalletAddress(ele.hash, 20)}</a></td>
                     <td className="px-6 py-4">{ele.createdAt}</td>
                   </tr>
                 ))}
