@@ -95,7 +95,7 @@ const Profile = () => {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      idCode,
+      idCode: status !== "REJECTED" ? idCode : null,
       phone,
       walletAddress,
       imgBackData: '',
@@ -579,7 +579,7 @@ const Profile = () => {
             </div>
             <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
               <p>ID/DL/Passport number :</p>
-              {isEdit ? (
+              {isEdit && status !== "APPROVED" ? (
                 <div className="">
                   <input
                     className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
@@ -591,7 +591,7 @@ const Profile = () => {
                   <p className="text-sm text-red-500">{errors.idCode?.message}</p>
                 </div>
               ) : (
-                <p>{idCode}</p>
+                <p>{status !== "REJECTED" && idCode}</p>
               )}
             </div>
             {/* <div className="grid lg:grid-cols-2 gap-2 lg:gap-0  py-2 px-4 rounded-lg">
@@ -665,6 +665,7 @@ const Profile = () => {
                           watch={watch}
                           required={false}
                           imgSrc={userInfo.imgFront}
+                          userStatus={userInfo.status}
                           name="imgFront"
                           isEdit={isEdit}
                         />
@@ -684,6 +685,7 @@ const Profile = () => {
                           required={false}
                           name="imgBack"
                           imgSrc={userInfo.imgBack}
+                          userStatus={userInfo.status}
                           isEdit={isEdit}
                         />
                         <p className="text-red-500 text-sm">

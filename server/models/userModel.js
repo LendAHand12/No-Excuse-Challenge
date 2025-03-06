@@ -35,7 +35,7 @@ const userSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["UNVERIFY", "PENDING", "APPROVED", "LOCKED", "DELETED"],
+      enum: ["UNVERIFY", "PENDING", "APPROVED", "LOCKED", "DELETED", "REJECTED"],
       default: "UNVERIFY",
     },
     imgFront: {

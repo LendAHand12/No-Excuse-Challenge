@@ -23,7 +23,10 @@ import {
 } from "../utils/methods.js";
 import generateGravatar from "../utils/generateGravatar.js";
 import { areArraysEqual } from "../cronJob/index.js";
-import { sendMailUserCanInceaseTierToAdmin } from "../utils/sendMailCustom.js";
+import {
+  sendMailReject,
+  sendMailUserCanInceaseTierToAdmin,
+} from "../utils/sendMailCustom.js";
 import Permission from "../models/permissionModel.js";
 import Withdraw from "../models/withdrawModel.js";
 
@@ -373,10 +376,18 @@ const updateUser = asyncHandler(async (req, res) => {
   });
 
   const userHaveWalletAddress = await User.find({
-    $and: [{ walletAddress }, { email: { $ne: user.email } }, { isAdmin: false }],
+    $and: [
+      { walletAddress },
+      { email: { $ne: user.email } },
+      { isAdmin: false },
+    ],
   });
 
-  if (userHavePhone.length >= 1 || userHaveIdCode.length >= 1 || userHaveWalletAddress.length >= 1) {
+  if (
+    userHavePhone.length >= 1 ||
+    userHaveIdCode.length >= 1 ||
+    userHaveWalletAddress.length >= 1
+  ) {
     res.status(400).json({ error: "duplicateInfo" });
   }
   if (user) {
@@ -402,7 +413,7 @@ const updateUser = asyncHandler(async (req, res) => {
       req.files.imgFront[0] &&
       req.files?.imgBack[0]
     ) {
-      user.status = "APPROVED";
+      user.status = "PENDING";
       user.imgFront = req.files.imgFront[0].filename || user.imgFront;
       user.imgBack = req.files.imgBack[0].filename || user.imgBack;
     }
@@ -693,14 +704,17 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
 });
 
 const changeStatusUser = asyncHandler(async (req, res) => {
-  const { id, status } = req.body;
+  const { id, status, reason } = req.body;
   const user = await User.findOne({ _id: id }).select("-password");
   if (user) {
     user.status = status || user.status;
+    if (status === "REJECTED") {
+      await sendMailReject({ email: user.email, reason });
+    }
     const updatedUser = await user.save();
     if (updatedUser) {
       res.status(200).json({
-        message: "Approve successful",
+        message: `${status.toLowerCase()} successful`,
       });
     }
   } else {

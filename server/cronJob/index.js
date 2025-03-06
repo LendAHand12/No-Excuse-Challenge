@@ -382,48 +382,48 @@ export const rankingCalc = asyncHandler(async () => {
 
   for (let u of listUser) {
     try {
-      if (u.ranking === 1) {
+      if (u.ranking === 0) {
         let treeUser = await Tree.findOne({ userId: u._id });
-        if (u.ranking === 1) {
+        if (u.ranking === 0) {
           if (treeUser.children.length === 5) {
             let currentDay = moment();
             const diffDays = currentDay.diff(u.createdAt, "days");
             if(diffDays < 30) {
               u.availableUsdt = u.availableUsdt + 25;
             } 
+            u.ranking = 1;
+          }
+        } else if(u.ranking === 1) {
+          if(u.countChild > 30) {
             u.ranking = 2;
           }
         } else if(u.ranking === 2) {
-          if(u.countChild > 30) {
+          if(u.countChild > 155) {
             u.ranking = 3;
           }
         } else if(u.ranking === 3) {
-          if(u.countChild > 155) {
+          if(u.countChild > 780) {
             u.ranking = 4;
           }
         } else if(u.ranking === 4) {
-          if(u.countChild > 780) {
+          if(u.countChild > 3905) {
             u.ranking = 5;
           }
         } else if(u.ranking === 5) {
-          if(u.countChild > 3905) {
+          if(u.countChild > 19530) {
             u.ranking = 6;
           }
         } else if(u.ranking === 6) {
-          if(u.countChild > 19530) {
+          if(u.countChild > 89843) {
             u.ranking = 7;
           }
         } else if(u.ranking === 7) {
-          if(u.countChild > 89843) {
+          if(u.countChild > 441406) {
             u.ranking = 8;
           }
         } else if(u.ranking === 8) {
-          if(u.countChild > 441406) {
-            u.ranking = 9;
-          }
-        } else if(u.ranking === 9) {
           if(u.countChild > 2199219) {
-            u.ranking = 10;
+            u.ranking = 9;
           }
         }
 

@@ -264,3 +264,37 @@ export const sendMailRefDc = async (mailInfo) => {
   // send a promise since nodemailer is async
   if (mailSent) return Promise.resolve(1);
 };
+
+export const sendMailReject = async (mailInfo) => {
+  const { senderName, email, reason } = mailInfo;
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: email,
+    subject: "DreamChain Fund",
+    html: `
+      Your KYC approval application has been rejected with reason : <b> ${reason}</b>.
+      <br></br>
+      Thank you for participating in our DreamChain referral program. 
+      <br></br>
+      DreamChain believes you will continue to make significant contributions to the DreamChain community as we work together toward even greater success.
+      <br></br>
+      ________________________________________
+      <br></br>
+      <b>
+      The DreamChain Team
+      </b>
+			`,
+  };
+
+  const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(info);
+    }
+  });
+
+  // send a promise since nodemailer is async
+  if (mailSent) return Promise.resolve(1);
+};

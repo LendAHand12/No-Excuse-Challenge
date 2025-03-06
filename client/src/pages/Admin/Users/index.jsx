@@ -31,6 +31,10 @@ const AdminUserPages = () => {
   });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentDeleteId, setCurrentDeleteId] = useState('');
+  const [showKYCModal, setShowKYCModal] = useState(false);
+  const [currentKYCId, setCurrentKYCId] = useState('');
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectReasonError, setRejectReasonError] = useState(false);
 
   const openModal = () => {
     setShowDeleteModal(true);
@@ -38,6 +42,18 @@ const AdminUserPages = () => {
 
   const closeModal = () => {
     setShowDeleteModal(false);
+  };
+
+  const openKYCModal = () => {
+    setShowKYCModal(true);
+  };
+
+  const closeKYCModal = () => {
+    setShowKYCModal(false);
+  };
+
+  const onRejectReasonChange = (e) => {
+    setRejectReason(e.target.value);
   };
 
   useEffect(() => {
@@ -93,21 +109,52 @@ const AdminUserPages = () => {
     navigate(url);
   };
 
-  const handleApprove = async (id) => {
-    await User.changeStatus({ id, status: 'APPROVED' })
+  const handleApprove = (id) => {
+    setCurrentKYCId(id);
+    setShowKYCModal(true);
+  };
+
+  const handleApproveUser = useCallback(async () => {
+    await User.changeStatus({ id: currentKYCId, status: 'APPROVED' })
       .then((response) => {
         const { message } = response.data;
+        setShowKYCModal(false);
         setRefresh(!refresh);
         toast.success(t(message));
       })
       .catch((error) => {
         let message =
-          error.response && error.response.data.error
-            ? error.response.data.error
+          error.response && error.response.data.message
+            ? error.response.data.message
             : error.message;
         toast.error(t(message));
       });
-  };
+  }, [currentKYCId]);
+
+  const handleRejectUser = useCallback(async () => {
+    if (!rejectReason) {
+      setRejectReasonError(true);
+    } else {
+      await User.changeStatus({
+        id: currentKYCId,
+        status: 'REJECTED',
+        reason: rejectReason,
+      })
+        .then((response) => {
+          const { message } = response.data;
+          setRefresh(!refresh);
+          toast.success(t(message));
+          setShowKYCModal(false);
+        })
+        .catch((error) => {
+          let message =
+            error.response && error.response.data.message
+              ? error.response.data.message
+              : error.message;
+          toast.error(t(message));
+        });
+    }
+  }, [currentKYCId, rejectReason]);
 
   const handleDetail = (id) => {
     navigate(`/admin/users/${id}`);
@@ -187,7 +234,7 @@ const AdminUserPages = () => {
                 <span className="sr-only">Close modal</span>
               </button>
               <svg
-                className="text-gray-400 dark:text-gray-500 w-11 h-11 mb-3.5 mx-auto"
+                className="text-gray-400 w-11 h-11 mb-3.5 mx-auto"
                 aria-hidden="true"
                 fill="currentColor"
                 viewBox="0 0 20 20"
@@ -215,6 +262,83 @@ const AdminUserPages = () => {
                 >
                   Yes, I'm sure
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={showKYCModal}
+        onRequestClose={closeKYCModal}
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+          },
+        }}
+      >
+        <div className="overflow-y-auto overflow-x-hidden justify-center items-center w-full md:inset-0 h-modal md:h-full">
+          <div className="relative w-full max-w-md h-full md:h-auto">
+            <div className="relative text-center bg-white rounded-lg sm:p-5">
+              <button
+                onClick={closeKYCModal}
+                className="text-gray-400 absolute top-2.5 right-2.5 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+                <span className="sr-only">Close modal</span>
+              </button>
+              <svg
+                fill="currentColor"
+                width="26"
+                height="26"
+                viewBox="0 0 24 24"
+                className="text-gray-400 w-11 h-11 mb-3.5 mx-auto"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M18.71,7.21a1,1,0,0,0-1.42,0L9.84,14.67,6.71,11.53A1,1,0,1,0,5.29,13l3.84,3.84a1,1,0,0,0,1.42,0l8.16-8.16A1,1,0,0,0,18.71,7.21Z" />
+              </svg>
+              <p className="mb-4 text-gray-500">Approve or Reject?</p>
+              <div className="space-y-4">
+                <div>
+                  <textarea
+                    id="message"
+                    onChange={onRejectReasonChange}
+                    rows="4"
+                    className="block p-2.5 w-full min-w-62.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-yellow-500 focus:border-yellow-500"
+                    placeholder="Write the reason for reject..."
+                  ></textarea>
+                  {rejectReasonError && <p className='text-sm text-red-500 mt-2'>Please input reject reason</p>}
+                </div>
+                <div className="flex justify-center items-center space-x-4">
+                  <button
+                    onClick={handleRejectUser}
+                    className="py-2 px-3 text-sm font-medium text-white bg-red-600 rounded-lg border border-red-200 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-primary-300 focus:z-10"
+                  >
+                    Reject
+                  </button>
+                  <button
+                    onClick={handleApproveUser}
+                    className="py-2 px-3 text-sm font-medium text-center text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-red-300 "
+                  >
+                    Approve
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -1,6 +1,14 @@
 import useFilePreview from '@/hooks/useFilePreview';
 
-const UploadFile = ({ watch, register, required, name, imgSrc, isEdit }) => {
+const UploadFile = ({
+  watch,
+  register,
+  required,
+  name,
+  imgSrc,
+  isEdit,
+  userStatus,
+}) => {
   const file = watch(name, false);
   const [filePreview] = useFilePreview(file);
 
@@ -16,7 +24,7 @@ const UploadFile = ({ watch, register, required, name, imgSrc, isEdit }) => {
             className="w-full h-full rounded-md object-cover"
             alt="the front of identity card"
           />
-        ) : imgSrc ? (
+        ) : imgSrc && userStatus !== 'REJECTED' ? (
           <img
             src={`${
               imgSrc.includes('cloudinary')
@@ -47,7 +55,7 @@ const UploadFile = ({ watch, register, required, name, imgSrc, isEdit }) => {
           </div>
         )}
 
-        {isEdit && (
+        {isEdit && userStatus !== "APPROVED" && (
           <input
             type="file"
             name={name}
