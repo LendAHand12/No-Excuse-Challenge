@@ -179,7 +179,7 @@ const PaymentPage = () => {
   return (
     <DefaultLayout>
       <ToastContainer />
-      <div className="p-24">
+      <div className="py-24 lg:p-24">
         {
           // userInfo.countPay === 13 ? (
           //   !loadingCheckIncrease && showCanIncrease ? (
@@ -395,7 +395,7 @@ const PaymentPage = () => {
                       className="w-2xl mx-auto flex justify-center border border-black items-center hover:underline  font-medium rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
                     >
                       {loadingPayment && <Loading />}
-                      {t('Pay Now')}
+                      {t('payment')}
                     </button>
                   </div>
                 </>

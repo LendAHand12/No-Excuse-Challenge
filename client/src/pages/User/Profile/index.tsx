@@ -95,7 +95,7 @@ const Profile = () => {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      idCode: status !== "REJECTED" ? idCode : null,
+      idCode: status !== 'REJECTED' ? idCode : null,
       phone,
       walletAddress,
       imgBackData: '',
@@ -398,9 +398,9 @@ const Profile = () => {
                 <p> {new Date(createdAt).toLocaleDateString('vi')}</p>
               </div>
               {/* <div className="flex justify-between py-2 px-4">
-              <p>Completed tier 1</p>
-              <p>{tier1Time}</p>
-            </div> */}
+                <p>Completed tier 1</p>
+                <p>{tier1Time}</p>
+              </div> */}
             </div>
             <div className="bg-[#FAFBFC] p-4 rounded-2xl">
               <div className="flex justify-between items-center py-2 px-4">
@@ -413,8 +413,20 @@ const Profile = () => {
                   </div>
                 )}
               </div>
-
-              <div className="flex items-center justify-between bg-[#E5E9EE] py-2 px-4 rounded-lg">
+              <div className="flex justify-between items-center bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                <p>Next Rank</p>
+                {ranking !== 0 && (
+                  <div
+                    className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
+                  >
+                    {
+                      USER_RANKINGS.find((ele) => ele.value === ranking + 1)
+                        .label
+                    }
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-between py-2 px-4">
                 <p>Total Earned</p>
                 <div
                   className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
@@ -508,6 +520,16 @@ const Profile = () => {
                     {chartData[2]} members
                   </li>
                 </ul>
+                <ul className="flex justify-center mt-4 gap-4">
+                  <li>
+                    <span className="font-thin">Total members :</span>{' '}
+                    {totalChild} members
+                  </li>
+                  <li>
+                    <span className="font-thin">Remaining target :</span>{' '}
+                    {targetSales - totalChild} members
+                  </li>
+                </ul>
               </div>
             </div>
           )}
@@ -579,7 +601,7 @@ const Profile = () => {
             </div>
             <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
               <p>ID/DL/Passport number :</p>
-              {isEdit && status !== "APPROVED" ? (
+              {isEdit && status !== 'APPROVED' ? (
                 <div className="">
                   <input
                     className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
@@ -588,10 +610,12 @@ const Profile = () => {
                     })}
                     autoComplete="off"
                   />
-                  <p className="text-sm text-red-500">{errors.idCode?.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.idCode?.message}
+                  </p>
                 </div>
               ) : (
-                <p>{status !== "REJECTED" && idCode}</p>
+                <p>{status !== 'REJECTED' && idCode}</p>
               )}
             </div>
             {/* <div className="grid lg:grid-cols-2 gap-2 lg:gap-0  py-2 px-4 rounded-lg">
@@ -613,7 +637,9 @@ const Profile = () => {
                     })}
                     autoComplete="off"
                   />
-                  <p className="text-sm text-red-500">{errors.walletAddress?.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.walletAddress?.message}
+                  </p>
                 </div>
               ) : (
                 <p>{shortenWalletAddress(walletAddress, 14)}</p>
@@ -655,46 +681,46 @@ const Profile = () => {
               <p>Fine :</p>
               <p>{fine} USDT</p>
             </div>
-              <>
-                <div className="w-full flex justify-center">
-                  <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
-                    <p> {t('idCardFront')} :</p>
-                      <div className="flex flex-col items-center justify-center w-full">
-                        <UploadFile
-                          register={register}
-                          watch={watch}
-                          required={false}
-                          imgSrc={userInfo.imgFront}
-                          userStatus={userInfo.status}
-                          name="imgFront"
-                          isEdit={isEdit}
-                        />
-                        <p className="text-red-500 text-sm">
-                          {errors.imgFront?.message}
-                        </p>
-                      </div>
+            <>
+              <div className="w-full flex justify-center">
+                <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+                  <p> {t('idCardFront')} :</p>
+                  <div className="flex flex-col items-center justify-center w-full">
+                    <UploadFile
+                      register={register}
+                      watch={watch}
+                      required={false}
+                      imgSrc={userInfo.imgFront}
+                      userStatus={userInfo.status}
+                      name="imgFront"
+                      isEdit={isEdit}
+                    />
+                    <p className="text-red-500 text-sm">
+                      {errors.imgFront?.message}
+                    </p>
                   </div>
                 </div>
-                <div className="flex justify-center bg-[#E5E9EE] rounded-lg">
-                  <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
-                    <p> {t('idCardBack')} :</p>
-                      <div className="flex items-center justify-center w-full">
-                        <UploadFile
-                          register={register}
-                          watch={watch}
-                          required={false}
-                          name="imgBack"
-                          imgSrc={userInfo.imgBack}
-                          userStatus={userInfo.status}
-                          isEdit={isEdit}
-                        />
-                        <p className="text-red-500 text-sm">
-                          {errors.imgBack?.message}
-                        </p>
-                      </div>
+              </div>
+              <div className="flex justify-center bg-[#E5E9EE] rounded-lg">
+                <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+                  <p> {t('idCardBack')} :</p>
+                  <div className="flex items-center justify-center w-full">
+                    <UploadFile
+                      register={register}
+                      watch={watch}
+                      required={false}
+                      name="imgBack"
+                      imgSrc={userInfo.imgBack}
+                      userStatus={userInfo.status}
+                      isEdit={isEdit}
+                    />
+                    <p className="text-red-500 text-sm">
+                      {errors.imgBack?.message}
+                    </p>
                   </div>
                 </div>
-              </>
+              </div>
+            </>
           </div>
           {isEdit && (
             <button
