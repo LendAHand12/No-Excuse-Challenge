@@ -37,7 +37,8 @@ import {
   resetTransTierUnPay,
   checkBlockChildren,
   distributionHewe,
-  rankingCalc
+  rankingCalc,
+  checkUserRegisteredOver6Month,
 } from "./cronJob/index.js";
 import {
   transferUserToTree,
@@ -180,6 +181,13 @@ const cron9 = new CronJob("00 07 * * *", async () => {
   console.log("Ranking calc done");
 });
 
+// const cron10 = new CronJob("00 07 * * *", async () => {
+// 7h
+console.log("Over 6 month calc start");
+await checkUserRegisteredOver6Month();
+console.log("Over 6 month calc done");
+// });
+
 cron0.start();
 // cron1.start();
 // cron2.start();
@@ -190,6 +198,7 @@ cron5.start();
 // cron7.start();
 // cron8.start();
 // cron9.start();
+// cron10.start();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>

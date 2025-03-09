@@ -397,10 +397,10 @@ const Profile = () => {
                 <p>Member since</p>
                 <p> {new Date(createdAt).toLocaleDateString('vi')}</p>
               </div>
-              {/* <div className="flex justify-between py-2 px-4">
-                <p>Completed tier 1</p>
-                <p>{tier1Time}</p>
-              </div> */}
+              <div className="flex justify-between py-2 px-4">
+                <p>Completed ranking time</p>
+                <p>{userInfo[`tier${ranking}Time`]}</p>
+              </div>
             </div>
             <div className="bg-[#FAFBFC] p-4 rounded-2xl">
               <div className="flex justify-between items-center py-2 px-4">

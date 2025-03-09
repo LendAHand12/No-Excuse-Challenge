@@ -11,12 +11,7 @@ import Transaction from "../models/transactionModel.js";
 
 export const deleteUser24hUnPay = asyncHandler(async () => {
   const listUser = await User.find({
-    $and: [
-      { tier: 1 },
-      { countPay: 0 },
-      { isAdmin: false },
-      { status: { $ne: "DELETED" } },
-    ],
+    $and: [{ tier: 1 }, { countPay: 0 }, { isAdmin: false }, { status: { $ne: "DELETED" } }],
   });
   const currentDay = moment();
   for (let u of listUser) {
@@ -320,9 +315,7 @@ export const checkBlockChildren = asyncHandler(async () => {
       });
 
     if (listRefChild.length >= 3) {
-      const listLockedChild = listRefChild.filter(
-        (ele) => ele.userId.status === "LOCKED"
-      );
+      const listLockedChild = listRefChild.filter((ele) => ele.userId.status === "LOCKED");
       const countChildLocked = listRefChild.length - listLockedChild.length;
       if (countChildLocked < 2) {
         if (user.lockedTime === null) {
@@ -331,10 +324,7 @@ export const checkBlockChildren = asyncHandler(async () => {
         }
         if (countChildLocked === 1) {
           const closedChild = getUserClosestToNow(listLockedChild);
-          const diffDays = currentDay.diff(
-            closedChild.userId.lockedTime,
-            "days"
-          );
+          const diffDays = currentDay.diff(closedChild.userId.lockedTime, "days");
           if (diffDays >= 30) {
             user.lockedTime = new Date();
             user.status = "LOCKED";
@@ -343,10 +333,7 @@ export const checkBlockChildren = asyncHandler(async () => {
         }
         if (countChildLocked === 0) {
           const closedChild = getUserClosestToNow(listLockedChild);
-          const diffDays = currentDay.diff(
-            closedChild.userId.lockedTime,
-            "days"
-          );
+          const diffDays = currentDay.diff(closedChild.userId.lockedTime, "days");
           if (diffDays >= 45) {
             user.lockedTime = new Date();
             user.status = "LOCKED";
@@ -388,46 +375,78 @@ export const rankingCalc = asyncHandler(async () => {
           if (treeUser.children.length === 5) {
             let currentDay = moment();
             const diffDays = currentDay.diff(u.createdAt, "days");
-            if(diffDays < 30) {
+            if (diffDays < 30) {
               u.availableUsdt = u.availableUsdt + 25;
-            } 
+            }
             u.ranking = 1;
+            u.tier1Time = new Date();
           }
-        } else if(u.ranking === 1) {
-          if(u.countChild > 30) {
+        } else if (u.ranking === 1) {
+          if (u.countChild > 30) {
             u.ranking = 2;
+            u.tier2Time = new Date();
           }
-        } else if(u.ranking === 2) {
-          if(u.countChild > 155) {
+        } else if (u.ranking === 2) {
+          if (u.countChild > 155) {
             u.ranking = 3;
+            u.tier3Time = new Date();
           }
-        } else if(u.ranking === 3) {
-          if(u.countChild > 780) {
+        } else if (u.ranking === 3) {
+          if (u.countChild > 780) {
             u.ranking = 4;
+            u.tier4Time = new Date();
           }
-        } else if(u.ranking === 4) {
-          if(u.countChild > 3905) {
+        } else if (u.ranking === 4) {
+          if (u.countChild > 3905) {
             u.ranking = 5;
+            u.tier5Time = new Date();
           }
-        } else if(u.ranking === 5) {
-          if(u.countChild > 19530) {
+        } else if (u.ranking === 5) {
+          if (u.countChild > 19530) {
             u.ranking = 6;
+            u.tier6Time = new Date();
           }
-        } else if(u.ranking === 6) {
-          if(u.countChild > 89843) {
+        } else if (u.ranking === 6) {
+          if (u.countChild > 89843) {
             u.ranking = 7;
+            u.tier7Time = new Date();
           }
-        } else if(u.ranking === 7) {
-          if(u.countChild > 441406) {
+        } else if (u.ranking === 7) {
+          if (u.countChild > 441406) {
             u.ranking = 8;
+            u.tier8Time = new Date();
           }
-        } else if(u.ranking === 8) {
-          if(u.countChild > 2199219) {
+        } else if (u.ranking === 8) {
+          if (u.countChild > 2199219) {
             u.ranking = 9;
+            u.tier9Time = new Date();
           }
         }
 
+        await u.save();
+      }
+    } catch (error) {
+      console.log({ error });
+    }
+  }
+});
 
+export const checkUserRegisteredOver6Month = asyncHandler(async () => {
+  const listUser = await User.find({
+    $and: [
+      { isAdmin: false },
+      { userId: { $ne: "Admin2" } },
+      { countPay: 13 },
+      { status: { $ne: "DELETED" } },
+      { status: { $ne: "LOCKED" } },
+    ],
+  }).exec();
+
+  for (let u of listUser) {
+    try {
+      const diffMonths = moment().diff(moment(u.createdAt), "months", true);
+      if (diffMonths > 6) {
+        u.status = "LOCKED";
         await u.save();
       }
     } catch (error) {
