@@ -1190,7 +1190,7 @@ const UserProfile = () => {
                     )}
                   </div>
                 </div>
-                {data.status === 'PENDING' && (
+                {/* {data.status === 'PENDING' && (
                   <>
                     <div
                       onClick={() => handleApprove(id)}
@@ -1199,7 +1199,7 @@ const UserProfile = () => {
                       {t('accept')}
                     </div>
                   </>
-                )}
+                )} */}
                 {isEditting && (
                   <>
                     <button
@@ -1218,16 +1218,14 @@ const UserProfile = () => {
                     </button>
                   </>
                 )}
-                {!isEditting &&
-                  data.status !== 'UNVERIFY' &&
-                  data.status !== 'DELETED' && (
-                    <button
-                      onClick={() => setEditting(true)}
-                      className="w-full flex justify-center items-center hover:underline text-dreamchain bg-black font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
-                    >
-                      {t('edit')}
-                    </button>
-                  )}
+                {!isEditting && data.status !== 'DELETED' && (
+                  <button
+                    onClick={() => setEditting(true)}
+                    className="w-full flex justify-center items-center hover:underline text-dreamchain bg-black font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                  >
+                    {t('edit')}
+                  </button>
+                )}
                 {!isEditting && data.status !== 'DELETED' && (
                   <div
                     onClick={handleDelete}
