@@ -415,7 +415,7 @@ const Profile = () => {
               </div>
               <div className="flex justify-between items-center bg-[#E5E9EE] py-2 px-4 rounded-lg">
                 <p>Next Rank</p>
-                {ranking !== 0 && (
+                {countPay !== 0 && (
                   <div
                     className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
                   >
