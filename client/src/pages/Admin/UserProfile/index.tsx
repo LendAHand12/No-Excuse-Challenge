@@ -906,7 +906,7 @@ const UserProfile = () => {
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">Rank</div>
                       <div className="px-4 py-2">
-                        {data.ranking !== 0 && (
+                        {data.countPay !== 0 && (
                           <div
                             className={`p-2 max-w-fit text-sm bg-green-600 text-white rounded-[50px]`}
                           >
