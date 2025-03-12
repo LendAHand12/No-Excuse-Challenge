@@ -307,7 +307,7 @@ const Profile = () => {
           </div>
         )}
 
-        <div className="bg-[#FAFBFC] p-4 rounded-2xl flex xl:flex-row flex-col items-start 2xl:items-center xl:justify-between gap-8">
+        <div className="bg-[#FAFBFC] p-4 rounded-2xl flex 2xl:flex-row flex-col items-start 2xl:items-center xl:justify-between gap-8">
           <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
             <p className="font-medium">Available HEWE</p>
             <input
@@ -335,7 +335,7 @@ const Profile = () => {
             WITHDRAW HEWE
           </button>
         </div>
-        <div className="bg-[#FAFBFC] p-4 rounded-2xl flex xl:flex-row flex-col items-start xl:items-center gap-8">
+        <div className="bg-[#FAFBFC] p-4 rounded-2xl flex 2xl:flex-row flex-col items-start xl:items-center gap-8">
           <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
             <p className="font-medium">Available USDT</p>
             <input

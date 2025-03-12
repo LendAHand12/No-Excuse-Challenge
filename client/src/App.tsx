@@ -37,14 +37,16 @@ import AdminSystemPage from './pages/Admin/System';
 import GetVerifyLinkPage from './pages/Admin/GetVerifyLink';
 import AdminTransactionDetail from './pages/Admin/TransactionDetail';
 import AdminWithdrawPages from './pages/Admin/Withdraw';
-import AdminUserProfile from './pages/Admin/UserProfile'
+import AdminUserProfile from './pages/Admin/UserProfile';
 import NewsPage from './pages/News';
 import AdminNewsPage from './pages/Admin/News';
 import AdminCreateNewsPage from './pages/Admin/News/Create';
 import AdminEditNewsPage from './pages/Admin/News/Edit';
 import NewsDetailPage from './pages/News/Detail';
 import AdminClaimsPage from './pages/Admin/Claims';
- 
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+
 function App() {
   const { pathname } = useLocation();
 
@@ -140,6 +142,8 @@ function App() {
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/confirm" element={<ConfirmPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Route>
       <Route element={<PrivateRoute />}>
         <Route

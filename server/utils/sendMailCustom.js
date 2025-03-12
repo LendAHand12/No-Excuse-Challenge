@@ -56,7 +56,7 @@ export const sendMailUpdateLayerForAdmin = async (listUser) => {
   if (mailSent) return Promise.resolve(1);
 };
 
-export const sendActiveLink = async (email, link) => {
+export const sendActiveLinkOld = async (email, link) => {
   // set the correct mail option
   const mailOptions = {
     from: process.env.EMAIL, // sender address
@@ -101,6 +101,58 @@ export const sendActiveLink = async (email, link) => {
       The DreamChain Team,
       <br></br>
       <b>The DreamChain Team</b>
+    </div>
+   `,
+    cc: process.env.CC_MAIL,
+  };
+
+  const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(info);
+    }
+  });
+
+  // send a promise since nodemailer is async
+  if (mailSent) return Promise.resolve(1);
+};
+
+export const sendActiveLink = async (senderName, email) => {
+  // set the correct mail option
+  const mailOptions = {
+    from: process.env.EMAIL, // sender address
+    to: email,
+    subject: "Welcome to HeWe Challenge – Your Journey Begins!",
+    html: `
+    <div>
+    Dear <b>${senderName}</b>,
+    <br></br>
+    Welcome to <b>HeWe Challenge</b>, powered by <b>DreamChain</b>! 🎉
+    <br></br>
+    You’ve just taken the first step toward a transformative journey where <b>innovation meets opportunity</b>. At <b>HeWe Challenge</b>, we believe in pushing limits, breaking barriers, and empowering individuals to <b>achieve financial freedom and success</b> through blockchain and AI-driven solutions.
+    <br></br>
+    <h4>
+    What’s Next?
+    </h4>
+    ✅ <b>Explore the Challenge</b> – Discover how HeWe Challenge helps you grow, compete, and succeed.
+    <br></br>
+    ✅ <b>Stay Engaged</b> – Connect with our vibrant community and stay updated on new opportunities.
+    <br></br>
+    ✅ <b>Unlock Your Potential</b> – Leverage the power of HeWe Challenge to take control of your financial future.
+    <br></br>
+    <br></br>
+    Your journey starts now, and we’re here to support you every step of the way.
+    If you have any questions, feel free to reach out to our support team at <b>supprot@dreamchain.live</b>
+    <br></br>
+    <b>🚀 Let’s challenge the future together!</b>
+    <br></br>
+    Best regards,
+    <br></br>
+    <b>DreamChain Team</b>
+    <br></br>
+    www.dreamchain.live
+
     </div>
    `,
     cc: process.env.CC_MAIL,
@@ -271,19 +323,32 @@ export const sendMailReject = async (mailInfo) => {
   const mailOptions = {
     from: process.env.EMAIL,
     to: email,
-    subject: "DreamChain Fund",
+    subject: "KYC Verification Rejected – Action Required",
     html: `
-      Your KYC approval application has been rejected with reason : <b> ${reason}</b>.
+      Dear <b>${senderName}</b>,
       <br></br>
-      Thank you for participating in our DreamChain referral program. 
+      Thank you for submitting your KYC verification request. After reviewing your documents, we regret to inform you that your verification has been rejected due to the following reason(s):
       <br></br>
-      DreamChain believes you will continue to make significant contributions to the DreamChain community as we work together toward even greater success.
+      •	Reason : ${reason}
       <br></br>
-      ________________________________________
+      To complete your verification, please resubmit your documents while ensuring:
       <br></br>
-      <b>
-      The DreamChain Team
-      </b>
+      ✔️ The document is clear and readable.
+      <br></br>
+      ✔️ The details match the information you provided.
+      <br></br>
+      ✔️ The document is valid and not expired.
+      <br></br>
+      If you have any questions or need further assistance, please feel free to contact our support team at support@dreamchain.live
+      We appreciate your cooperation and look forward to verifying your account successfully.
+      <br></br>
+      Best regards,
+      <br></br>
+      DreamChain Support
+      <br></br>
+      DreamChain
+      <br></br>
+      www.dreamchain.live
 			`,
   };
 

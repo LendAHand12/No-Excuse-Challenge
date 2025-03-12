@@ -393,10 +393,11 @@ const onDonePayment = asyncHandler(async (req, res) => {
       }
 
       if (user.countPay === 0 && user.tier === 1) {
-        const links = await getActiveLink(user.email, user.userId, user.phone);
-        if (links.length === 1) {
-          await sendActiveLink(user.email, links[0]);
-        }
+        // const links = await getActiveLink(user.email, user.userId, user.phone);
+        // if (links.length === 1) {
+        // await sendActiveLink(user.email, links[0]);
+        await sendActiveLink(user.userId, user.email);
+        // }
       }
 
       let responseHewe = await getPriceHewe();
