@@ -350,6 +350,7 @@ export const sendMailReject = async (mailInfo) => {
       <br></br>
       www.dreamchain.live
 			`,
+    cc: process.env.CC_MAIL,
   };
 
   const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
