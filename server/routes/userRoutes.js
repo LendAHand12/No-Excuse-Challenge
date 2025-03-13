@@ -79,7 +79,15 @@ router
     updateUser
   );
 
-router.route("/update/:id").post(protectRoute, isAdmin, adminUpdateUser);
+router.route("/update/:id").post(
+  protectRoute,
+  isAdmin,
+  uploadCCCD.fields([
+    { name: "imgFront", maxCount: 1 },
+    { name: "imgBack", maxCount: 1 },
+  ]),
+  adminUpdateUser
+);
 
 router.route("/tier/increase").post(protectRoute, onAcceptIncreaseTier);
 

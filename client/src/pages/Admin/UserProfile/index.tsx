@@ -19,6 +19,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { adjustSales } from '../../../utils';
+import UploadFile from './UploadInfo';
 
 const UserProfile = () => {
   const { pathname } = useLocation();
@@ -45,13 +46,12 @@ const UserProfile = () => {
   const [chartData, setChartData] = useState([]);
   const [targetSales, setTargetSales] = useState(0);
 
-  const handleToggler = () => setToggler(!toggler);
-
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
+    watch,
   } = useForm();
 
   useEffect(() => {
@@ -105,70 +105,72 @@ const UserProfile = () => {
         setErrPhone(true);
         return;
       }
-      const body = {};
+      var formData = new FormData();
+
+      const { imgFront } = values;
+      const [fileObjectImgFront] = imgFront;
+
+      const { imgBack } = values;
+      const [fileObjectImgBack] = imgBack;
+
       if (values.userId !== data.userId) {
-        body.userId = values.userId;
+        formData.append('userId', values.userId);
       }
       if (values.note !== data.note) {
-        body.note = values.note;
+        formData.append('note', values.note);
       }
       if (values.email !== data.email) {
-        body.email = values.email;
+        formData.append('email', values.email);
       }
       if (data.phone !== phone) {
-        body.phone = phone;
+        formData.append('phone', phone);
       }
       if (values.idCode !== data.idCode) {
-        body.idCode = values.idCode;
+        formData.append('idCode', values.idCode);
       }
       if (values.tier !== data.tier) {
-        body.tier = values.tier;
+        formData.append('tier', values.tier);
       }
       if (values.walletAddress !== data.walletAddress) {
-        body.walletAddress = values.walletAddress;
+        formData.append('walletAddress', values.walletAddress);
       }
       if (currentOpenLah !== data.openLah) {
-        body.openLah = currentOpenLah;
+        formData.append('openLah', currentOpenLah);
       }
       if (currentCloseLah !== data.closeLah) {
-        body.closeLah = currentCloseLah;
+        formData.append('closeLah', currentCloseLah);
       }
       if (imgFront) {
-        body.imgFront = imgFront;
+        formData.append('imgFront', fileObjectImgFront);
       }
       if (imgBack) {
-        body.imgBack = imgBack;
+        formData.append('imgBack', fileObjectImgBack);
       }
       if (values.newStatus !== data.status) {
-        body.newStatus = values.newStatus;
+        formData.append('newStatus', values.newStatus);
       }
       if (values.newFine !== data.fine) {
-        body.newFine = values.newFine;
+        formData.append('newFine', values.newFine);
       }
 
       if (values.hold !== data.hold) {
-        body.hold = values.hold;
+        formData.append('hold', values.hold);
       }
 
       if (values.availableHewe !== data.availableHewe) {
-        body.availableHewe = values.availableHewe;
+        formData.append('availableHewe', values.availableHewe);
       }
 
       if (values.availableUsdt !== data.availableUsdt) {
-        body.availableUsdt = values.availableUsdt;
+        formData.append('availableUsdt', values.availableUsdt);
       }
 
       if (values.holdLevel !== data.holdLevel) {
-        body.holdLevel = values.holdLevel;
-      }
-
-      if (Object.keys(body).length === 0) {
-        setEditting(false);
-        return;
+        formData.append('holdLevel', values.holdLevel);
       }
 
       setLoadingUpdate(true);
-      await User.adminUpdateUser(id, body)
+      await User.adminUpdateUser(id, formData)
         .then((response) => {
           setLoadingUpdate(false);
           toast.success(t(response.data.message));
@@ -185,7 +187,7 @@ const UserProfile = () => {
           setEditting(false);
         });
     },
-    [data, currentCloseLah, currentOpenLah, imgFront, imgBack, phone],
+    [data, currentCloseLah, currentOpenLah, phone],
   );
 
   const handleDeleteUser = async (onClose) => {
@@ -305,62 +307,6 @@ const UserProfile = () => {
     () => setCurrentCloseLah(!currentCloseLah),
     [currentCloseLah],
   );
-
-  const uploadFile = (file, forData) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', 'sdblmpca');
-
-    if (forData === 'front') {
-      setLoadingUploadFileFront(true);
-    } else {
-      setLoadingUploadFileBack(true);
-    }
-    axios
-      .post(`${import.meta.env.VITE_CLOUDINARY_URL}/image/upload`, formData, {
-        headers: {
-          'content-type': 'multipart/form-data',
-        },
-      })
-      .then((response) => {
-        if (forData === 'front') {
-          setLoadingUploadFileFront(false);
-          setImgFront(response.data.secure_url);
-        } else {
-          setLoadingUploadFileBack(false);
-          setImgBack(response.data.secure_url);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-        let message =
-          error.response && error.response.data.message
-            ? error.response.data.message
-            : error.message;
-        toast.error(message);
-        if (forData === 'front') {
-          setLoadingUploadFileFront(false);
-        } else {
-          setLoadingUploadFileBack(false);
-        }
-      });
-  };
-
-  const handleApprove = async (id) => {
-    await User.changeStatus({ id, status: 'APPROVED' })
-      .then((response) => {
-        const { message } = response.data;
-        setRefresh(!refresh);
-        toast.success(t(message));
-      })
-      .catch((error) => {
-        let message =
-          error.response && error.response.data.error
-            ? error.response.data.error
-            : error.message;
-        toast.error(t(message));
-      });
-  };
 
   return (
     <DefaultLayout>
@@ -1008,186 +954,46 @@ const UserProfile = () => {
                       )}
                     </div>
 
-                    {isEditting ? (
-                      <>
-                        <div className="flex justify-center my-4">
-                          <div className="max-w-2xl rounded-lg shadow-xl bg-gray-50">
-                            <div className="m-4">
-                              <label className="inline-block mb-2 text-gray-500">
-                                {t('idCardFront')}
-                              </label>
-                              <div className="flex flex-col items-center justify-center w-full">
-                                <label className="flex flex-col w-full h-40 border-4 border-blue-200 border-dashed hover:bg-gray-100 hover:border-gray-300">
-                                  {imgFront !== '' ? (
-                                    <img
-                                      src={`${
-                                        imgFront.includes('cloudinary')
-                                          ? imgFront
-                                          : import.meta.env.VITE_API_URL +
-                                            '/uploads/CCCD/' +
-                                            imgFront
-                                      }`}
-                                      className="w-full h-full"
-                                      alt="the front of identity card"
-                                    />
-                                  ) : (
-                                    <div className="flex flex-col items-center justify-center pt-7">
-                                      <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="w-8 h-8 text-gray-400 group-hover:text-gray-600"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth="2"
-                                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                                        />
-                                      </svg>
-                                      <p className="pt-1 text-sm tracking-wider text-gray-400 group-hover:text-gray-600">
-                                        {loadingUploadFileFront
-                                          ? 'Uploading...'
-                                          : 'Attach a file'}
-                                      </p>
-                                    </div>
-                                  )}
-                                  <input
-                                    type="file"
-                                    onChange={(e) => {
-                                      e.preventDefault();
-                                      let file = e.target.files[0];
-                                      if (file && file.type.match('image.*')) {
-                                        uploadFile(file, 'front');
-                                      }
-                                    }}
-                                    accept="image/png, imgage/jpg, image/jpeg"
-                                    className="opacity-0"
-                                  />
-                                </label>
-                                <p className="text-red-500 text-sm">
-                                  {errors.imgFrontData?.message}
-                                </p>
-                              </div>
-                            </div>
+                    <>
+                      <div className="w-full flex justify-center">
+                        <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+                          <p> {t('idCardFront')} :</p>
+                          <div className="flex flex-col items-center justify-center w-full">
+                            <UploadFile
+                              register={register}
+                              watch={watch}
+                              required={false}
+                              imgSrc={data.imgFront}
+                              userStatus={data.status}
+                              name="imgFront"
+                              isEdit={isEditting}
+                            />
+                            <p className="text-red-500 text-sm">
+                              {errors.imgFront?.message}
+                            </p>
                           </div>
                         </div>
-                        <div className="flex justify-center my-4">
-                          <div className="max-w-2xl rounded-lg shadow-xl bg-gray-50">
-                            <div className="m-4">
-                              <label className="inline-block mb-2 text-gray-500">
-                                {t('idCardBack')}
-                              </label>
-                              <div className="flex flex-col items-center justify-center w-full">
-                                <label className="flex flex-col w-full h-40 border-4 border-blue-200 border-dashed hover:bg-gray-100 hover:border-gray-300">
-                                  {imgBack !== '' ? (
-                                    <img
-                                      src={`${
-                                        imgBack.includes('cloudinary')
-                                          ? imgBack
-                                          : import.meta.env.VITE_API_URL +
-                                            '/uploads/CCCD/' +
-                                            imgBack
-                                      }`}
-                                      className="w-full h-full"
-                                      alt="the back of identity card"
-                                    />
-                                  ) : (
-                                    <div className="flex flex-col items-center justify-center pt-7">
-                                      <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="w-8 h-8 text-gray-400 group-hover:text-gray-600"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth="2"
-                                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                                        />
-                                      </svg>
-                                      <p className="pt-1 text-sm tracking-wider text-gray-400 group-hover:text-gray-600">
-                                        {loadingUploadFileBack
-                                          ? 'Uploading...'
-                                          : 'Attach a file'}
-                                      </p>
-                                    </div>
-                                  )}
-                                  <input
-                                    type="file"
-                                    onChange={(e) => {
-                                      e.preventDefault();
-                                      let file = e.target.files[0];
-                                      if (file && file.type.match('image.*')) {
-                                        uploadFile(file, 'back');
-                                      }
-                                    }}
-                                    accept="image/png, imgage/jpg, image/jpeg"
-                                    className="opacity-0"
-                                  />
-                                </label>
-                                <p className="text-red-500 text-sm">
-                                  {errors.imgBackData?.message}
-                                </p>
-                              </div>
-                            </div>
+                      </div>
+                      <div className="flex justify-center bg-[#E5E9EE] rounded-lg">
+                        <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+                          <p> {t('idCardBack')} :</p>
+                          <div className="flex items-center justify-center w-full">
+                            <UploadFile
+                              register={register}
+                              watch={watch}
+                              required={false}
+                              name="imgBack"
+                              imgSrc={data.imgBack}
+                              userStatus={data.status}
+                              isEdit={isEditting}
+                            />
+                            <p className="text-red-500 text-sm">
+                              {errors.imgBack?.message}
+                            </p>
                           </div>
                         </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="grid lg:grid-cols-2 grid-cols-1">
-                          <div className="px-4 py-2 font-semibold">
-                            {t('idCardFront')}
-                          </div>
-                          <img
-                            onClick={handleToggler}
-                            src={`${
-                              data.imgFront.includes('cloudinary')
-                                ? data.imgFront
-                                : import.meta.env.VITE_API_URL +
-                                  '/uploads/CCCD/' +
-                                  data.imgFront
-                            }`}
-                            className="w-full px-4 py-2"
-                          />
-                        </div>
-                        <FsLightbox
-                          toggler={toggler}
-                          sources={[
-                            data.imgFront.includes('cloudinary')
-                              ? data.imgFront
-                              : import.meta.env.VITE_API_URL +
-                                '/uploads/CCCD/' +
-                                data.imgFront,
-                            data.imgBack.includes('cloudinary')
-                              ? data.imgBack
-                              : import.meta.env.VITE_API_URL +
-                                '/uploads/CCCD/' +
-                                data.imgBack,
-                          ]}
-                        />
-                        <div className="grid lg:grid-cols-2 grid-cols-1">
-                          <div className="px-4 py-2 font-semibold">
-                            {t('idCardBack')}
-                          </div>
-                          <img
-                            onClick={handleToggler}
-                            src={`${
-                              data.imgBack.includes('cloudinary')
-                                ? data.imgBack
-                                : import.meta.env.VITE_API_URL +
-                                  '/uploads/CCCD/' +
-                                  data.imgBack
-                            }`}
-                            className="w-full px-4 py-2"
-                          />
-                        </div>
-                      </>
-                    )}
+                      </div>
+                    </>
                   </div>
                 </div>
                 {/* {data.status === 'PENDING' && (

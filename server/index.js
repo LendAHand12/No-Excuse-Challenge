@@ -181,12 +181,12 @@ const cron9 = new CronJob("00 07 * * *", async () => {
   console.log("Ranking calc done");
 });
 
-// const cron10 = new CronJob("00 07 * * *", async () => {
-// 7h
-console.log("Over 6 month calc start");
-await checkUserRegisteredOver6Month();
-console.log("Over 6 month calc done");
-// });
+const cron10 = new CronJob("00 07 * * *", async () => {
+  // 7h
+  console.log("Over 6 month calc start");
+  await checkUserRegisteredOver6Month();
+  console.log("Over 6 month calc done");
+});
 
 cron0.start();
 cron1.start();

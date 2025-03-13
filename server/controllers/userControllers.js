@@ -480,8 +480,6 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     userId,
     phone,
     email,
-    imgBack,
-    imgFront,
     tier,
     walletAddress1,
     walletAddress2,
@@ -585,8 +583,15 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     if (closeLah) {
       user.closeLah = true;
     }
-    user.imgFront = imgFront || user.imgFront;
-    user.imgBack = imgBack || user.imgBack;
+
+    if (req.files && req.files.imgFront && req.files.imgFront[0]) {
+      user.imgFront = req.files.imgFront[0].filename || user.imgFront;
+    }
+
+    if (req.files && req.files.imgBack && req.files?.imgBack[0]) {
+      user.imgBack = req.files.imgBack[0].filename || user.imgBack;
+    }
+
     const listTransSuccess = await Transaction.find({
       $and: [{ userId: user._id }, { status: "SUCCESS" }, { type: { $ne: "REGISTER" } }],
     });
