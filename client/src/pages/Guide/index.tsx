@@ -125,10 +125,10 @@ const GuidePage: React.FC = () => {
               community. It operates through:
             </p>
             <div className="space-y-4">
-              <b>Biannual Draws</b>
+              <b>Year End Splash Party</b>
               <p>
-                Held every June and December, the DreamPool creates excitement
-                and provides members with opportunities for substantial rewards.
+                Held every December, the DreamPool creates excitement and
+                provides members with opportunities for substantial rewards.
               </p>
             </div>
             <div className="space-y-4">
@@ -139,14 +139,20 @@ const GuidePage: React.FC = () => {
                   <span>
                     <span className="font-semibold">1. 25%</span> shared among
                     the
-                    <span className="font-semibold"> 5 luckiest members.</span>
+                    <span className="font-semibold">
+                      {' '}
+                      6 members with the highest rank + members.
+                    </span>
                   </span>
                 </li>
                 <li className="flex items-start gap-6">
                   <span>
                     <span className="font-semibold">2. 25%</span> shared among
                     the
-                    <span className="font-semibold"> 25 luckier members.</span>
+                    <span className="font-semibold">
+                      {' '}
+                      25 members with the highest rank + members.
+                    </span>
                   </span>
                 </li>
                 <li className="flex items-start gap-6">
@@ -169,8 +175,8 @@ const GuidePage: React.FC = () => {
               <b>Qualification Requirements</b>
               <p>
                 To qualify for the DreamPool draw, members must achieve the rank
-                of Mentor or above at least 3 days prior to the drawing date,
-                which occurs on the last day of June and December.
+                of Mentor or above at least 3 days prior to the drawing date in
+                December, Year End Splash Party.
               </p>
             </div>
           </div>
