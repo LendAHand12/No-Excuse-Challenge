@@ -74,8 +74,8 @@ connectDB();
 // await countIndexTree();
 // const usersAtLevel = await findNextUserByIndex(2);
 // console.log({ usersAtLevel });
-// const nextRef = await findNextReferrer("67de506aec9630a7c650415f")
-// console.log({ nextRef });
+const nextRef = await findNextReferrer("67de506aec9630a7c650415f")
+console.log({ nextRef });
 
 app.use(express.json({ limit: "50mb", extended: true }));
 app.use(express.urlencoded({ extended: false, limit: "2gb" }));

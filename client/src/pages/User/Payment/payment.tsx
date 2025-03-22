@@ -17,15 +17,12 @@ const PaymentPage = () => {
   const [loadingPaymentInfo, setLoadingPaymentInfo] = useState(true);
   const [paymentsList, setPaymentsList] = useState([]);
   const [paymentIdsList, setPaymentIdsList] = useState([]);
-  const [loadingGetOtp, setLoadingGetOtp] = useState(false);
   const [loadingPayment, setLoadingPayment] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
 
   const {
-    register,
-    handleSubmit,
     formState: { errors },
   } = useForm();
 
@@ -64,83 +61,12 @@ const PaymentPage = () => {
     onGetPaymentInfo();
   }, []);
 
-  const openModal = () => {
-    setShowOtpModal(true);
-  };
-
-  const closeModal = () => {
-    setShowOtpModal(false);
-  };
-
-  // const handleSubmitOTPSerepay = useCallback(() => {
-  //   setLoadingGetOtp(true);
-  //   axios
-  //     .post(
-  //       `${
-  //         import.meta.env.VITE_HOST_SEREPAY
-  //       }/api/payment/sendCodeWalletTransferArray`,
-  //       {
-  //         wallet: userInfo.walletAddress1,
-  //         arrayWallet: paymentsList,
-  //       },
-  //     )
-  //     .then(() => {
-  //       setLoadingGetOtp(false);
-  //       openModal();
-  //     })
-  //     .catch((error) => {
-  //       let message =
-  //         error.response && error.response.data.message
-  //           ? error.response.data.message
-  //           : error.message;
-  //       toast.error(t(message));
-  //       setLoadingGetOtp(false);
-  //     });
-  // }, [paymentsList]);
-
-  // const handlePaySerepay = useCallback(
-  //   async (values) => {
-  //     const { otp } = values;
-  //     setLoadingPayment(true);
-  //     axios
-  //       .post(
-  //         `${
-  //           import.meta.env.VITE_HOST_SEREPAY
-  //         }/api/payment/confirmWalletTransferArray`,
-  //         {
-  //           code: otp,
-  //           wallet: userInfo[`walletAddress${userInfo.tier}`],
-  //           arrayWallet: paymentsList,
-  //         },
-  //       )
-  //       .then(async (response) => {
-  //         const { message, status } = response.data;
-  //         if (status) {
-  //           await donePayment();
-  //           closeModal();
-  //           toast.success(t(message));
-  //           window.location.reload();
-  //         }
-  //         setLoadingPayment(false);
-  //       })
-  //       .catch((error) => {
-  //         let message =
-  //           error.response && error.response.data.message
-  //             ? error.response.data.message
-  //             : error.message;
-  //         toast.error(t(message));
-  //         setLoadingPayment(false);
-  //       });
-  //   },
-  //   [paymentsList],
-  // );
-
   const paymentMetamask = useCallback(async () => {
     setLoadingPayment(true);
     try {
       const referralTransaction = await transfer(
         import.meta.env.VITE_MAIN_WALLET_ADDRESS,
-        100.2,
+        105.2,
       );
       if (referralTransaction) {
         const { transactionHash } = referralTransaction;
@@ -181,133 +107,12 @@ const PaymentPage = () => {
       <ToastContainer />
       <div className="py-24 lg:p-24">
         {
-          // userInfo.countPay === 13 ? (
-          //   !loadingCheckIncrease && showCanIncrease ? (
-          //     <div className="">
-          //       <div
-          //         className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-5"
-          //         role="alert"
-          //       >
-          //         <span className="block sm:inline">
-          //           {t('congraTier')} {userInfo.tier + 1}{' '}
-          //         </span>
-          //       </div>
-          //       <span>{t('pleaseEnterToIncreaseTier')} :</span>
-          //       <div>
-          //         <div>
-          //           <button
-          //             onClick={handleAcceptIncreaseTier}
-          //             disabled={loadingAcceptIncrease}
-          //             className="w-xl flex justify-center items-center hover:underline bg-black text-white font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
-          //           >
-          //             {loadingAcceptIncrease ? (
-          //               <Loading />
-          //             ) : (
-          //               `${t('increaseNextTier')} ${userInfo.tier + 1}`
-          //             )}
-          //           </button>
-          //         </div>
-          //       </div>
-          //     </div>
-          //   ) : !loadingCheckIncrease && !showCanIncrease ? (
-          //     <div
-          //       className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-5"
-          //       role="alert"
-          //     >
-          //       <span className="block sm:inline">
-          //         {t('noTier')} {userInfo.tier}
-          //       </span>
-          //     </div>
-          //   ) : (
-          //     <Loading />
-          //   )
-          // ) :
           loadingPaymentInfo ? (
             <div className="w-xl flex justify-center">
               <Loading />
             </div>
           ) : (
             <>
-              {/* <Modal
-                isOpen={showOtpModal}
-                onRequestClose={closeModal}
-                style={{
-                  content: {
-                    top: '50%',
-                    left: '50%',
-                    right: 'auto',
-                    bottom: 'auto',
-                    marginRight: '-50%',
-                    transform: 'translate(-50%, -50%)',
-                  },
-                }}
-                contentLabel="Example Modal"
-              >
-                <div className="mx-auto flex w-full max-w-md flex-col space-y-8">
-                  <div className="flex flex-col items-center justify-center text-center space-y-2">
-                    <div className="font-semibold text-3xl">
-                      <p>OTP Verification</p>
-                    </div>
-                    <div className="flex flex-row text-sm text-gray-700">
-                      <p>{t('We have sent a code to your email')}</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <form onSubmit={handleSubmit(handlePaySerepay)}>
-                      <div className="flex flex-col space-y-4">
-                        <div className="flex flex-row items-center justify-between mx-auto w-full max-w-sm gap-2">
-                          <div className="w-full h-16">
-                            <input
-                              className="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-gray-200 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700"
-                              type="text"
-                              {...register('otp', {
-                                required: t('otp is required'),
-                              })}
-                              autoComplete="off"
-                            />
-                          </div>
-                        </div>
-                        <div className="text-red-500 tex-tsm">
-                          {errors.otp?.message}
-                        </div>
-
-                        <div className="flex flex-col space-y-5">
-                          <div className="flex justify-center gap-4">
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                closeModal();
-                              }}
-                              className="flex flex-row items-center justify-center text-center border rounded-xl outline-none py-5 bg-red-500 border-none text-white text-sm shadow-sm px-8 font-semibold"
-                            >
-                              {t('cancel')}
-                            </button>
-                            <button
-                              type="submit"
-                              className="flex flex-row items-center justify-center text-center border text-white bg-black rounded-xl outline-none py-5 gradient border-none text-sm shadow-sm px-8 font-semibold"
-                            >
-                              {loadingPayment && <Loading />}
-                              {t('confirm')}
-                            </button>
-                          </div>
-                          <div className="flex flex-row items-center justify-center text-center text-sm font-medium space-x-1 text-gray-500">
-                            <p>{t("Didn't recieve code?")}</p>{' '}
-                            <a
-                              className="flex flex-row items-center text-blue-600"
-                              href="http://"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {t('Resend')}
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </Modal> */}
               {showPayment && (
                 <>
                   <div className="w-full max-w-203 mx-auto rounded-lg bg-white p-10 text-gray-700 mt-4">

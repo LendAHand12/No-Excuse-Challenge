@@ -8,7 +8,7 @@ import bcrypt from "bcryptjs";
 import Tree from "../models/treeModel.js";
 import { getActivePackages } from "./packageControllers.js";
 import Permission from "../models/permissionModel.js";
-import { checkSerepayWallet, mergeIntoThreeGroups } from "../utils/methods.js";
+import { checkSerepayWallet, findNextReferrer, mergeIntoThreeGroups } from "../utils/methods.js";
 import axios from "axios";
 
 const checkLinkRef = asyncHandler(async (req, res) => {
@@ -32,7 +32,7 @@ const checkLinkRef = asyncHandler(async (req, res) => {
         tier: 1,
       });
 
-      if(!treeUserReceive.parentId) {
+      if (!treeUserReceive.parentId) {
         message = "validUrl";
         res.status(200).json({
           message,
@@ -60,7 +60,15 @@ const checkLinkRef = asyncHandler(async (req, res) => {
 });
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { userId, email, password, ref, receiveId, phone, idCode, walletAddress } = req.body;
+  const {
+    userId,
+    email,
+    password,
+    ref,
+    phone,
+    idCode,
+    walletAddress,
+  } = req.body;
 
   const userExistsUserId = await User.findOne({
     userId: { $regex: userId, $options: "i" },
@@ -104,47 +112,38 @@ const registerUser = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error(message);
   } else {
-    const treeReceiveUser = await Tree.findOne({ userId: receiveId, tier: 1 });
+    const userNextRefIdBySystem = await findNextReferrer(ref);
+    const treeReceiveUser = await Tree.findOne({ userId: userNextRefIdBySystem, tier: 1 });
 
-    if (treeReceiveUser.children.length < 5) {
-      // const token = await registerSerepayFnc(userId, email.toLowerCase(), password);
-      // const heweWallet = await createSerepayHeweWallet(token); // hewe wallet
+    const user = await User.create({
+      userId,
+      email: email.toLowerCase(),
+      phone,
+      password,
+      walletAddress,
+      idCode,
+      buyPackage: "A",
+      role: "user",
+    });
 
-      // const wallet = await createSerepayUsdtWallet(token); // usdt wallet
+    const tree = await Tree.create({
+      userName: user.userId,
+      userId: user._id,
+      parentId: userNextRefIdBySystem,
+      refId: ref,
+      children: [],
+    });
 
-      const user = await User.create({
-        userId,
-        email: email.toLowerCase(),
-        phone,
-        password,
-        walletAddress,
-        idCode,
-        buyPackage: "A",
-        role: "user",
-      });
+    await sendMail(user._id, email, "email verification");
 
-      const tree = await Tree.create({
-        userName: user.userId,
-        userId: user._id,
-        parentId: receiveId,
-        refId: ref,
-        children: [],
-      });
+    treeReceiveUser.children.push(user._id);
+    await treeReceiveUser.save();
 
-      await sendMail(user._id, email, "email verification");
+    let message = "registerSuccessful";
 
-      treeReceiveUser.children.push(user._id);
-      await treeReceiveUser.save();
-
-      let message = "registerSuccessful";
-
-      res.status(201).json({
-        message,
-      });
-    } else {
-      res.status(400);
-      throw new Error("Internal error");
-    }
+    res.status(201).json({
+      message,
+    });
   }
 });
 
@@ -227,8 +226,13 @@ const authUser = asyncHandler(async (req, res) => {
     const listRefIdOfUser = await Tree.find({ refId: user._id, tier: 1 });
     if (listRefIdOfUser && listRefIdOfUser.length > 0) {
       for (let refId of listRefIdOfUser) {
-        const refedUser = await User.findById(refId.userId).select("userId email countChild");
-        listDirectUser.push({ ...refedUser, countChild: refedUser.countChild[0] + 1 });
+        const refedUser = await User.findById(refId.userId).select(
+          "userId email countChild"
+        );
+        listDirectUser.push({
+          ...refedUser,
+          countChild: refedUser.countChild[0] + 1,
+        });
       }
     }
 
@@ -299,7 +303,10 @@ const resetUserPassword = asyncHandler(async (req, res) => {
   try {
     // update the user password if the jwt is verified successfully
     const { token, password } = req.body;
-    const decodedToken = jwt.verify(token, process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET);
+    const decodedToken = jwt.verify(
+      token,
+      process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET
+    );
     const user = await User.findById(decodedToken.id);
 
     if (user && password) {
@@ -323,7 +330,10 @@ const confirmUser = asyncHandler(async (req, res) => {
   try {
     // set the user to a confirmed status, once the corresponding JWT is verified correctly
     const emailToken = req.params.token;
-    const decodedToken = jwt.verify(emailToken, process.env.JWT_EMAIL_TOKEN_SECRET);
+    const decodedToken = jwt.verify(
+      emailToken,
+      process.env.JWT_EMAIL_TOKEN_SECRET
+    );
     const user = await User.findById(decodedToken.id).select("-password");
     user.isConfirmed = true;
     await user.save();
@@ -349,21 +359,29 @@ const getAccessToken = asyncHandler(async (req, res) => {
   }
 
   // If the refresh token is valid, create a new accessToken and return it.
-  jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, (err, user) => {
-    if (!err) {
-      const accessToken = generateToken(user.id, "access");
-      return res.json({ accessToken });
-    } else {
-      return res.status(400).json({
-        message: "Invalid refresh token",
-      });
+  jwt.verify(
+    refreshToken,
+    process.env.JWT_REFRESH_TOKEN_SECRET,
+    (err, user) => {
+      if (!err) {
+        const accessToken = generateToken(user.id, "access");
+        return res.json({ accessToken });
+      } else {
+        return res.status(400).json({
+          message: "Invalid refresh token",
+        });
+      }
     }
-  });
+  );
 });
 
 const checkSendMail = asyncHandler(async (req, res) => {
   const { mail } = req.body;
-  const mailInfo = await sendMail("6480c10538aa7ded76b631c1", mail, "email verification");
+  const mailInfo = await sendMail(
+    "6480c10538aa7ded76b631c1",
+    mail,
+    "email verification"
+  );
   res.json({
     mailInfo,
   });

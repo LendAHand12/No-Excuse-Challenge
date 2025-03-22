@@ -198,7 +198,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         //   directCommissionWallet,
         //   user.continueWithBuyPackageB
         // );
-        const ancestorsData = await findAncestors(user.id, 10, user.tier);
+        const ancestorsData = await findAncestors(user.id, 11, user.tier);
         let ancestors = ancestorsData.map((data, index) => {
           if (index === 0) {
             data.isFirst = true;
