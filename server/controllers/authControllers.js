@@ -31,7 +31,13 @@ const checkLinkRef = asyncHandler(async (req, res) => {
         userId: userReceive._id,
         tier: 1,
       });
-      if (treeUserReceive && treeUserReceive.children.length < 5) {
+
+      if(!treeUserReceive.parentId) {
+        message = "validUrl";
+        res.status(200).json({
+          message,
+        });
+      } else if (treeUserReceive.children.length < 2) {
         message = "validUrl";
         res.status(200).json({
           message,

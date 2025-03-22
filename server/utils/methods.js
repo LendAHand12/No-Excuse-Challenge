@@ -348,3 +348,35 @@ export const mergeIntoThreeGroups = (A) => {
 
   return [group1, group2, group3];
 };
+
+export const findNextReferrer = async (referrerId) => {
+  const referrer = await Tree.findOne({ userId: referrerId });
+  if (!referrer) return null;
+
+  // Nếu referrer là root (không có parentId), cho phép nhiều nhánh
+  if (!referrer.parentId) {
+    return referrer.userId;
+  }
+
+  // Nếu người giới thiệu chưa đủ 2 nhánh, trả về chính họ
+  if (referrer.children.length < 2) {
+    return referrer.userId;
+  }
+
+  // BFS để tìm vị trí thích hợp trong hệ thống của referrer
+  const queue = [...referrer.children];
+  while (queue.length > 0) {
+    const currentId = queue.shift();
+    const currentUser = await Tree.findOne({ userId: currentId });
+    
+    if (!currentUser) continue;
+    
+    if (currentUser.children.length < 2) {
+      return currentUser.userId;
+    }
+    
+    queue.push(...currentUser.children);
+  }
+  
+  return null; // Không tìm thấy vị trí hợp lệ
+}

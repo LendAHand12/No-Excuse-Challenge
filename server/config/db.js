@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 // connect to the mongoDB collection
 const connectDB = () => {
   var connectionString =
-    process.env.MONGO_URI || "mongodb://localhost:27017/LendAHand";
+    process.env.MONGO_URI;
   mongoose
     .connect(connectionString, {
       useUnifiedTopology: true,
