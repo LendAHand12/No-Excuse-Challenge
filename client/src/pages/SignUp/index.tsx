@@ -283,7 +283,7 @@ const SignUpPage = () => {
                           Already have an account?{' '}
                           <Link
                             to="/signin"
-                            className="text-dreamchain hover:underline"
+                            className="text-NoExcuseChallenge hover:underline"
                           >
                             Signin
                           </Link>

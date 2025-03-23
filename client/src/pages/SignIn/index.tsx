@@ -126,7 +126,7 @@ const SignInPage: React.FC = () => {
               </div>
               <Link
                 to="/forgot-password"
-                className="text-dreamchain font-medium hover:underline"
+                className="text-NoExcuseChallenge font-medium hover:underline"
               >
                 Forgot password?
               </Link>
@@ -158,8 +158,8 @@ const SignInPage: React.FC = () => {
               Back to Homepage
             </Link>
           </form>
-          <div className="lg:hidden w-full bg-black text-dreamchain text-center py-2">
-            © 2024, made with by <span className="font-bold">DreamChain.</span>
+          <div className="lg:hidden w-full bg-black text-NoExcuseChallenge text-center py-2">
+            © 2024, made with by <span className="font-bold">NoExcuseChallenge.</span>
           </div>
         </div>
       </SignInLayout>

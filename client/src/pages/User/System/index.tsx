@@ -203,7 +203,7 @@ const SystemPage = () => {
                   key={i}
                   onClick={() => setCurrentTier(i + 1)}
                   className={`flex justify-center items-center hover:underline text-black font-medium ${
-                    currentTier === i + 1 ? 'bg-black text-dreamchain' : ''
+                    currentTier === i + 1 ? 'bg-black text-NoExcuseChallenge' : ''
                   } rounded-full my-6 py-4 px-8 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
                 >
                   {t('tier')} {i + 1}
@@ -213,7 +213,7 @@ const SystemPage = () => {
             {!loading && (
               <button
                 onClick={() => setShowType(!showType)}
-                className="flex justify-center items-center gap-2 hover:underline bg-black text-dreamchain font-bold rounded-full mt-2 mb-6 py-2 px-6 focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                className="flex justify-center items-center gap-2 hover:underline bg-black text-NoExcuseChallenge font-bold rounded-full mt-2 mb-6 py-2 px-6 focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
               >
                 <svg
                   fill="currentColor"

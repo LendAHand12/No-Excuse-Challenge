@@ -122,7 +122,7 @@ const AdminNewsPage = () => {
               <button
                 onClick={handleSearch}
                 disabled={loading}
-                className="h-8 flex text-xs justify-center items-center hover:underline text-dreamchain bg-black font-bold rounded-full py-1 px-4 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                className="h-8 flex text-xs justify-center items-center hover:underline text-NoExcuseChallenge bg-black font-bold rounded-full py-1 px-4 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
               >
                 {t('search')}
               </button>
@@ -132,7 +132,7 @@ const AdminNewsPage = () => {
           <button
             onClick={handleCreate}
             disabled={loading}
-            className="px-8 py-2 flex text-xs justify-center items-center hover:underline text-dreamchain bg-black font-bold rounded-full shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+            className="px-8 py-2 flex text-xs justify-center items-center hover:underline text-NoExcuseChallenge bg-black font-bold rounded-full shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
           >
             Create news
           </button>

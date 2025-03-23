@@ -1,5 +1,5 @@
 {
-  "name": "dreamchain",
+  "name": "NoExcuseChallenge",
   "private": true,
   "version": "1.3.8",
   "type": "module",
@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "author": {
-    "name": "DreamChain"
+    "name": "NoExcuseChallenge"
   },
   "dependencies": {
     "@metamask/detect-provider": "^2.0.0",

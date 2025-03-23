@@ -122,7 +122,7 @@ const EditPostPage = () => {
               {t("saveDrap")}
             </button> */}
               <button
-                className="w-64 flex justify-center items-center hover:underline text-dreamchain bg-black font-bold rounded-full my-6 py-2 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                className="w-64 flex justify-center items-center hover:underline text-NoExcuseChallenge bg-black font-bold rounded-full my-6 py-2 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
                 onClick={(e) => {
                   e.preventDefault();
                   navigate('/admin/news');
@@ -289,7 +289,7 @@ const EditPostPage = () => {
               )}
               <button
                 type="submit"
-                className="w-full flex justify-center items-center hover:underline text-dreamchain bg-black font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                className="w-full flex justify-center items-center hover:underline text-NoExcuseChallenge bg-black font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
               >
                 {t('update')}
               </button>

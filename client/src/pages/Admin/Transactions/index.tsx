@@ -132,7 +132,7 @@ const AdminTransactionsPage = () => {
               key={i}
               onClick={() => handleChangeTier(i + 1)}
               className={`flex justify-center items-center hover:underline bg-white border text-gray-700 font-medium text-sm ${
-                objectFilter.tier === i + 1 ? 'bg-black text-dreamchain' : ''
+                objectFilter.tier === i + 1 ? 'bg-black text-NoExcuseChallenge' : ''
               } rounded-full my-6 py-4 px-8 focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
             >
               {t('tier')} {i + 1}

@@ -62,7 +62,7 @@ function App() {
           path="/home"
           element={
             <>
-              <PageTitle title="Homepage | DreamChain" />
+              <PageTitle title="Homepage | NoExcuseChallenge" />
               <HomePage />
             </>
           }
@@ -71,7 +71,7 @@ function App() {
           path="/services"
           element={
             <>
-              <PageTitle title="Services | DreamChain" />
+              <PageTitle title="Services | NoExcuseChallenge" />
               <ServicePage />
             </>
           }
@@ -80,7 +80,7 @@ function App() {
           path="/mechanism"
           element={
             <>
-              <PageTitle title="Mechanism | DreamChain" />
+              <PageTitle title="Mechanism | NoExcuseChallenge" />
               <Mechanism />
             </>
           }
@@ -89,7 +89,7 @@ function App() {
           path="/policy"
           element={
             <>
-              <PageTitle title="Policy | DreamChain" />
+              <PageTitle title="Policy | NoExcuseChallenge" />
               <PolicyPage />
             </>
           }
@@ -98,7 +98,7 @@ function App() {
           path="/contact"
           element={
             <>
-              <PageTitle title="Contact | DreamChain" />
+              <PageTitle title="Contact | NoExcuseChallenge" />
               <ContactPage />
             </>
           }
@@ -107,7 +107,7 @@ function App() {
           path="/terms"
           element={
             <>
-              <PageTitle title="Terms & Conditions | DreamChain" />
+              <PageTitle title="Terms & Conditions | NoExcuseChallenge" />
               <TermsPage />
             </>
           }
@@ -116,7 +116,7 @@ function App() {
           path="/guide"
           element={
             <>
-              <PageTitle title="Member’s Guidelines | DreamChain" />
+              <PageTitle title="Member’s Guidelines | NoExcuseChallenge" />
               <GuidePage />
             </>
           }
@@ -125,7 +125,7 @@ function App() {
           path="/news"
           element={
             <>
-              <PageTitle title="News | DreamChain" />
+              <PageTitle title="News | NoExcuseChallenge" />
               <NewsPage />
             </>
           }
@@ -134,7 +134,7 @@ function App() {
           path="/news/:id"
           element={
             <>
-              <PageTitle title="News | DreamChain" />
+              <PageTitle title="News | NoExcuseChallenge" />
               <NewsDetailPage />
             </>
           }
@@ -150,7 +150,7 @@ function App() {
           path="/admin/dashboard"
           element={
             <>
-              <PageTitle title="Dashboard | DreamChain" />
+              <PageTitle title="Dashboard | NoExcuseChallenge" />
               <DashboardPage />
             </>
           }
@@ -159,7 +159,7 @@ function App() {
           path="/admin/transactions"
           element={
             <>
-              <PageTitle title="Transactions | DreamChain" />
+              <PageTitle title="Transactions | NoExcuseChallenge" />
               <AdminTransactionsPage />
             </>
           }
@@ -168,7 +168,7 @@ function App() {
           path="/admin/users/:id"
           element={
             <>
-              <PageTitle title="User Profile | DreamChain" />
+              <PageTitle title="User Profile | NoExcuseChallenge" />
               <AdminUserProfile />
             </>
           }
@@ -177,7 +177,7 @@ function App() {
           path="/admin/transactions/:id"
           element={
             <>
-              <PageTitle title="Transaction Detail | DreamChain" />
+              <PageTitle title="Transaction Detail | NoExcuseChallenge" />
               <AdminTransactionDetail />
             </>
           }
@@ -186,7 +186,7 @@ function App() {
           path="/admin/wallets"
           element={
             <>
-              <PageTitle title="Setting Wallets | DreamChain" />
+              <PageTitle title="Setting Wallets | NoExcuseChallenge" />
               <SettingWallets />
             </>
           }
@@ -195,7 +195,7 @@ function App() {
           path="/admin/users"
           element={
             <>
-              <PageTitle title="Users | DreamChain" />
+              <PageTitle title="Users | NoExcuseChallenge" />
               <AdminUserPages />
             </>
           }
@@ -204,7 +204,7 @@ function App() {
           path="/admin/system/:id"
           element={
             <>
-              <PageTitle title="System | DreamChain" />
+              <PageTitle title="System | NoExcuseChallenge" />
               <AdminSystemPage />
             </>
           }
@@ -213,7 +213,7 @@ function App() {
           path="/admin/linkVerify"
           element={
             <>
-              <PageTitle title="Link verify | DreamChain" />
+              <PageTitle title="Link verify | NoExcuseChallenge" />
               <GetVerifyLinkPage />
             </>
           }
@@ -222,7 +222,7 @@ function App() {
           path="/admin/withdraw"
           element={
             <>
-              <PageTitle title="Withdraw request | DreamChain" />
+              <PageTitle title="Withdraw request | NoExcuseChallenge" />
               <AdminWithdrawPages />
             </>
           }
@@ -231,7 +231,7 @@ function App() {
           path="/admin/news"
           element={
             <>
-              <PageTitle title="News | DreamChain" />
+              <PageTitle title="News | NoExcuseChallenge" />
               <AdminNewsPage />
             </>
           }
@@ -240,7 +240,7 @@ function App() {
           path="/admin/claims"
           element={
             <>
-              <PageTitle title="Claims | DreamChain" />
+              <PageTitle title="Claims | NoExcuseChallenge" />
               <AdminClaimsPage />
             </>
           }
@@ -249,7 +249,7 @@ function App() {
           path="/admin/news/create"
           element={
             <>
-              <PageTitle title="Create News | DreamChain" />
+              <PageTitle title="Create News | NoExcuseChallenge" />
               <AdminCreateNewsPage />
             </>
           }
@@ -258,7 +258,7 @@ function App() {
           path="/admin/news/edit"
           element={
             <>
-              <PageTitle title="Edit News | DreamChain" />
+              <PageTitle title="Edit News | NoExcuseChallenge" />
               <AdminEditNewsPage />
             </>
           }
@@ -269,7 +269,7 @@ function App() {
           path="/user/profile"
           element={
             <>
-              <PageTitle title="Profile | DreamChain" />
+              <PageTitle title="Profile | NoExcuseChallenge" />
               <Profile />
             </>
           }
@@ -278,7 +278,7 @@ function App() {
           path="/user/payment"
           element={
             <>
-              <PageTitle title="Payment | DreamChain" />
+              <PageTitle title="Payment | NoExcuseChallenge" />
               <Payment />
             </>
           }
@@ -287,7 +287,7 @@ function App() {
           path="/user/system"
           element={
             <>
-              <PageTitle title="System | DreamChain" />
+              <PageTitle title="System | NoExcuseChallenge" />
               <SystemPage />
             </>
           }
@@ -296,7 +296,7 @@ function App() {
           path="/user/referral"
           element={
             <>
-              <PageTitle title="Referral | DreamChain" />
+              <PageTitle title="Referral | NoExcuseChallenge" />
               <ReferralPage />
             </>
           }
@@ -305,7 +305,7 @@ function App() {
           path="/user/transactions"
           element={
             <>
-              <PageTitle title="Transactions | DreamChain" />
+              <PageTitle title="Transactions | NoExcuseChallenge" />
               <Transactions />
             </>
           }
@@ -314,7 +314,7 @@ function App() {
           path="/user/dreampool"
           element={
             <>
-              <PageTitle title="DreamPool | DreamChain" />
+              <PageTitle title="DreamPool | NoExcuseChallenge" />
               <DreamPoolPage />
             </>
           }
@@ -325,7 +325,7 @@ function App() {
           path="/calendar"
           element={
             <>
-              <PageTitle title="Calendar | DreamChain" />
+              <PageTitle title="Calendar | NoExcuseChallenge" />
               <Calendar />
             </>
           }
@@ -335,7 +335,7 @@ function App() {
           path="/forms/form-elements"
           element={
             <>
-              <PageTitle title="Form Elements | DreamChain" />
+              <PageTitle title="Form Elements | NoExcuseChallenge" />
               <FormElements />
             </>
           }
@@ -344,7 +344,7 @@ function App() {
           path="/forms/form-layout"
           element={
             <>
-              <PageTitle title="Form Layout | DreamChain" />
+              <PageTitle title="Form Layout | NoExcuseChallenge" />
               <FormLayout />
             </>
           }
@@ -353,7 +353,7 @@ function App() {
           path="/tables"
           element={
             <>
-              <PageTitle title="Tables | DreamChain" />
+              <PageTitle title="Tables | NoExcuseChallenge" />
               <Tables />
             </>
           }
@@ -362,7 +362,7 @@ function App() {
           path="/settings"
           element={
             <>
-              <PageTitle title="Settings | DreamChain" />
+              <PageTitle title="Settings | NoExcuseChallenge" />
               <Settings />
             </>
           }
@@ -371,7 +371,7 @@ function App() {
           path="/chart"
           element={
             <>
-              <PageTitle title="Basic Chart | DreamChain" />
+              <PageTitle title="Basic Chart | NoExcuseChallenge" />
               <Chart />
             </>
           }
@@ -380,7 +380,7 @@ function App() {
           path="/ui/alerts"
           element={
             <>
-              <PageTitle title="Alerts | DreamChain" />
+              <PageTitle title="Alerts | NoExcuseChallenge" />
               <Alerts />
             </>
           }
@@ -389,7 +389,7 @@ function App() {
           path="/ui/buttons"
           element={
             <>
-              <PageTitle title="Buttons | DreamChain" />
+              <PageTitle title="Buttons | NoExcuseChallenge" />
               <Buttons />
             </>
           }
@@ -398,7 +398,7 @@ function App() {
           path="/auth/signin"
           element={
             <>
-              <PageTitle title="Signin | DreamChain" />
+              <PageTitle title="Signin | NoExcuseChallenge" />
               <SignIn />
             </>
           }

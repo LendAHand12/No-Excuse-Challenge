@@ -25,7 +25,7 @@ const DropdownUser = () => {
         className="flex items-center text-sm gap-2 bg-black rounded-3xl p-2 text-white pr-4"
         to="#"
       >
-        <span className="h-8 w-8 flex justify-center items-center rounded-full bg-dreamchain">
+        <span className="h-8 w-8 flex justify-center items-center rounded-full bg-NoExcuseChallenge">
           <svg
             fill="#000000"
             width="24"
@@ -124,7 +124,7 @@ const DropdownUser = () => {
           </ul> */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-dreamchain lg:text-base"
+            className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-NoExcuseChallenge lg:text-base"
           >
             <svg
               className="fill-current"

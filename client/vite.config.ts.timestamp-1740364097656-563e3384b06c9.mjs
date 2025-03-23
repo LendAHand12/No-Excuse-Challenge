@@ -1,6 +1,6 @@
 // vite.config.ts
-import { defineConfig } from "file:///C:/Users/Admin/Desktop/DreamChain/client/node_modules/vite/dist/node/index.js";
-import react from "file:///C:/Users/Admin/Desktop/DreamChain/client/node_modules/@vitejs/plugin-react/dist/index.mjs";
+import { defineConfig } from "file:///C:/Users/Admin/Desktop/NoExcuseChallenge/client/node_modules/vite/dist/node/index.js";
+import react from "file:///C:/Users/Admin/Desktop/NoExcuseChallenge/client/node_modules/@vitejs/plugin-react/dist/index.mjs";
 import path from "path";
 var vite_config_default = defineConfig({
   plugins: [react()],

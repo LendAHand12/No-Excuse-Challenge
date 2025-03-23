@@ -10,13 +10,13 @@ const HomePage: React.FC = () => {
           <div className="py-14 2xl:pl-16 px-10">
             <p className="text-[#] font-bold">About us</p>
             <h1 className="text-black text-6xl font-medium mt-3 mb-2">
-              DreamChain
+              NoExcuseChallenge
             </h1>
             <h3 className="text-xl font-semibold mb-6">HeWe Challenge</h3>
             <p className="text-[#02071B] text-lg">
-              Welcome to DreamChain: Where Dreams Connect DreamChain is more
+              Welcome to NoExcuseChallenge: Where Dreams Connect NoExcuseChallenge is more
               than a platform; it's a mission and a challenge. Every morning, as
-              you wake up, let "DreamChain" remind you: you have a purpose—to
+              you wake up, let "NoExcuseChallenge" remind you: you have a purpose—to
               give, to receive, and to achieve your dreams.
             </p>
             <p className="text-[#02071B] text-lg font-semibold mt-10">
@@ -36,7 +36,7 @@ const HomePage: React.FC = () => {
               Our Vision
             </h1>
             <p className="text-[#02071B] text-lg">
-              At DreamChain, we believe everyone has a dream, a vision of a
+              At NoExcuseChallenge, we believe everyone has a dream, a vision of a
               better future. We exist to connect those dreams, building a
               community of individuals who are willing, committed, and ready to
               take challenge toward success.
@@ -58,7 +58,7 @@ const HomePage: React.FC = () => {
               Giving and Receiving
             </h1>
             <p className="text-[#02071B] text-lg">
-              Giving and Receiving In DreamChain, we embrace the philosophy that
+              Giving and Receiving In NoExcuseChallenge, we embrace the philosophy that
               success is achieved through mutual support. By contributing
               members to members, you’re not only helping others but also taking
               a step closer to realizing your dreams. Together, we create an
@@ -74,7 +74,7 @@ const HomePage: React.FC = () => {
               Your Journey
             </h1>
             <p className="text-[#02071B] text-lg">
-              At DreamChain, we believe that greatness lies within you. The only
+              At NoExcuseChallenge, we believe that greatness lies within you. The only
               question is—are you ready to unlock it? The Hewe Challenge is your
               call to step up, push beyond limits, and take control of your
               future.
@@ -99,7 +99,7 @@ const HomePage: React.FC = () => {
             </h1>
             <p className="text-[#02071B] text-lg">
               Join Us Today Be part of a movement where dreams come alive.
-              DreamChain is your community to grow, give, and achieve. Let’s
+              NoExcuseChallenge is your community to grow, give, and achieve. Let’s
               build a future of shared success, one connection at a time.
             </p>
             <p className="text-[#02071B] text-lg font-semibold mt-10">

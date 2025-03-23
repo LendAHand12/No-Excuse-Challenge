@@ -126,7 +126,7 @@ const PaymentPage = () => {
                       <div className="mb-3">
                         <p className="text-lg mb-2 ml-1">
                           <span className="font-bold">{t('buyPackage')}</span> :
-                          DreamChain
+                          NoExcuseChallenge
                         </p>
                       </div>
                       <div className="mb-3">

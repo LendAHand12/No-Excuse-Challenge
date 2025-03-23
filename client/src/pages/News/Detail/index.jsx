@@ -50,11 +50,11 @@ const NewsDetailPage = () => {
                 <h1 className="sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">
                   {news?.title_en}
                 </h1>
-                <div className="h-1 w-20 bg-dreamchain rounded"></div>
+                <div className="h-1 w-20 bg-NoExcuseChallenge rounded"></div>
               </div>
               {/* <button
                 onClick={() => navigate('/news')}
-                className="px-6 py-2 text-center flex text-xs justify-center items-center hover:underline text-dreamchain bg-black font-bold rounded-full shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                className="px-6 py-2 text-center flex text-xs justify-center items-center hover:underline text-NoExcuseChallenge bg-black font-bold rounded-full shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
               >
                 <svg
                   fill="currentColor"
@@ -78,7 +78,7 @@ const NewsDetailPage = () => {
                 <img src={LOGO_ICON} className="w-10" />
                 <div>
                   <p className='text-sm text-gray-600'>Posted By</p>
-                  <p className='text-black font-semibold mt-2'>DREAMCHAIN</p>
+                  <p className='text-black font-semibold mt-2'>NoExcuseChallenge</p>
                 </div>
                 <div>
                   <p className='text-sm text-gray-600'>Date created</p>

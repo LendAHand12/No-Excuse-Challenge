@@ -47,8 +47,8 @@ const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
         </div>
         {/* <!-- ===== Content Area End ===== --> */}
       </div>
-      <div className="lg:hidden bg-black text-dreamchain text-center py-3">
-        © 2024, made with by <span className="font-bold">DreamChain.</span>
+      <div className="lg:hidden bg-black text-NoExcuseChallenge text-center py-3">
+        © 2024, made with by <span className="font-bold">NoExcuseChallenge.</span>
       </div>
       {/* <!-- ===== Page Wrapper End ===== --> */}
     </div>

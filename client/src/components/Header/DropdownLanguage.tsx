@@ -29,8 +29,8 @@ const DropdownLanguage = () => {
               <button
                 onClick={() => onChangeLanguage('vi')}
                 className={`flex items-center ${
-                  i18n.language.includes('vi') ? 'bg-black text-dreamchain' : ''
-                } text-sm px-6 py-1 rounded-xl font-medium duration-300 ease-in-out hover:text-dreamchain lg:text-base`}
+                  i18n.language.includes('vi') ? 'bg-black text-NoExcuseChallenge' : ''
+                } text-sm px-6 py-1 rounded-xl font-medium duration-300 ease-in-out hover:text-NoExcuseChallenge lg:text-base`}
               >
                 Vie
               </button>
@@ -39,8 +39,8 @@ const DropdownLanguage = () => {
               <button
                 onClick={() => onChangeLanguage('en')}
                 className={`flex items-center ${
-                  i18n.language.includes('en') ? 'bg-black text-dreamchain' : ''
-                } text-sm px-6 py-1 rounded-xl font-medium duration-300 ease-in-out hover:text-dreamchain lg:text-base`}
+                  i18n.language.includes('en') ? 'bg-black text-NoExcuseChallenge' : ''
+                } text-sm px-6 py-1 rounded-xl font-medium duration-300 ease-in-out hover:text-NoExcuseChallenge lg:text-base`}
               >
                 Eng
               </button>

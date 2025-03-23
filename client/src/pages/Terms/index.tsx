@@ -7,7 +7,7 @@ const TermsPage: React.FC = () => {
       <div className="w-full md:p-24 py-24 px-10 space-y-10">
         <div>
           <h1 className="text-3xl font-bold mb-4">
-            DreamChain TERMS & CONDITIONS
+            NoExcuseChallenge TERMS & CONDITIONS
           </h1>
           <p className="">Effective Date: November 12, 2024</p>
         </div>
@@ -16,9 +16,9 @@ const TermsPage: React.FC = () => {
             <b className="text-xl font-bold">1. Acceptance of Terms</b>
             <ul className="grid list-disc gap-4 md:gap-8">
               <li className="ml-6">
-                By accessing or using the DreamChain website dc.ameritecps.com
+                By accessing or using the NoExcuseChallenge website dc.ameritecps.com
                 services, or products MTD phone protection and our management
-                program DreamChain , you (“User” or “you”) agree to be bound by
+                program NoExcuseChallenge , you (“User” or “you”) agree to be bound by
                 these Terms & Conditions . If you do not agree to all of the
                 Terms, please do not use the Services.
               </li>
@@ -44,7 +44,7 @@ const TermsPage: React.FC = () => {
             <b className="text-xl font-bold"> 3. Changes to Terms</b>
             <ul className="grid list-disc gap-4 md:gap-8">
               <li className="ml-6">
-                DreamChain reserves the right, at our discretion, to modify,
+                NoExcuseChallenge reserves the right, at our discretion, to modify,
                 update, or replace these Terms at any time. Any changes will be
                 effective immediately upon posting. It is your responsibility to
                 review these Terms periodically for updates. Your continued use
@@ -60,7 +60,7 @@ const TermsPage: React.FC = () => {
             <ul className="grid list-disc gap-4 md:gap-8">
               <li className="ml-6">
                 All content, logos, designs, text, graphics, images, and other
-                materials on the Site are the property of DreamChain or its
+                materials on the Site are the property of NoExcuseChallenge or its
                 licensors and are protected by intellectual property laws. You
                 agree not to reproduce, distribute, modify, create derivative
                 works, or otherwise exploit any content without our express
@@ -105,7 +105,7 @@ const TermsPage: React.FC = () => {
             <ul className="grid list-disc gap-4 md:gap-8">
               <li className="ml-6">
                 The Site may contain links to third-party websites or resources.
-                DreamChain does not endorse and is not responsible for the
+                NoExcuseChallenge does not endorse and is not responsible for the
                 accuracy or content of these external sites. Your use of
                 third-party websites is at your own risk and subject to their
                 respective terms and conditions.
@@ -120,7 +120,7 @@ const TermsPage: React.FC = () => {
               <li className="ml-6">
                 The Services are provided on an “as is” and “as available” basis
                 without warranties of any kind, whether express or implied.
-                DreamChain does not guarantee that the Services will be secure,
+                NoExcuseChallenge does not guarantee that the Services will be secure,
                 error-free, uninterrupted, or meet your specific requirements.
               </li>
             </ul>
@@ -131,7 +131,7 @@ const TermsPage: React.FC = () => {
             <b className="text-xl font-bold">8. Limitation of Liability</b>
             <ul className="grid list-disc gap-4 md:gap-8">
               <li className="ml-6">
-                To the fullest extent permitted by law, DreamChain and its
+                To the fullest extent permitted by law, NoExcuseChallenge and its
                 officers, directors, employees, agents, and affiliates shall not
                 be liable for any indirect, incidental, special, consequential,
                 or punitive damages arising out of or related to your use of the
@@ -145,7 +145,7 @@ const TermsPage: React.FC = () => {
             <b className="text-xl font-bold">9. Indemnification</b>
             <ul className="grid list-disc gap-4 md:gap-8">
               <li className="ml-6">
-                You agree to indemnify, defend, and hold harmless DreamChain and
+                You agree to indemnify, defend, and hold harmless NoExcuseChallenge and
                 its affiliates, officers, directors, employees, and agents from
                 and against any claims, liabilities, damages, losses, and
                 expenses arising from your use of the Services or violation of
@@ -199,7 +199,7 @@ const TermsPage: React.FC = () => {
             <ul className="grid list-disc gap-4 md:gap-8">
               <li className="ml-6">
                 These Terms constitute the entire agreement between you and
-                DreamChain concerning your use of the Services, superseding any
+                NoExcuseChallenge concerning your use of the Services, superseding any
                 prior agreements.
               </li>
             </ul>

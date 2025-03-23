@@ -315,7 +315,7 @@ const UserProfile = () => {
         <div className="container mx-10 my-24">
           <form onSubmit={handleSubmit(onSubmit)} className="md:flex no-wrap">
             <div className="w-full lg:w-3/12 lg:mx-2 mb-4 lg:mb-0">
-              <div className="bg-white shadow-md p-3 border-t-4 border-dreamchain">
+              <div className="bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                 <ul className=" text-gray-600 py-2 px-3 mt-3 divide-y rounded">
                   <li className="flex items-center py-3">
                     <span>{t('status')}</span>
@@ -519,7 +519,7 @@ const UserProfile = () => {
                   )}
                 </ul>
               </div>
-              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-dreamchain">
+              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                 <p className="uppercase mt-2 font-bold">{t('children')}</p>
                 <div className="py-2">
                   <ul>
@@ -550,7 +550,7 @@ const UserProfile = () => {
                   </ul>
                 </div>
               </div>
-              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-dreamchain">
+              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                 <p className="uppercase mt-2 font-bold">{t('refUserName')}</p>
                 <div className="py-2">
                   <ul>
@@ -568,7 +568,7 @@ const UserProfile = () => {
                   </ul>
                 </div>
               </div>
-              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-dreamchain">
+              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                 <p className="uppercase mt-2 font-bold">{t('oldParent')}</p>
                 {data.listOldParent.length > 0 && (
                   <div className="py-2">
@@ -661,7 +661,7 @@ const UserProfile = () => {
               </div>
             </div>
             <div className="w-full lg:w-2/3 lg:mx-2">
-              <div className="bg-white p-6 shadow-md rounded-sm border-t-4 border-dreamchain">
+              <div className="bg-white p-6 shadow-md rounded-sm border-t-4 border-NoExcuseChallenge">
                 <div className="text-gray-700">
                   <div className="grid grid-cols-1 text-sm">
                     <div className="grid lg:grid-cols-2 grid-cols-1">
@@ -1011,7 +1011,7 @@ const UserProfile = () => {
                     <button
                       onClick={() => setEditting(true)}
                       disabled={loading}
-                      className="w-full flex justify-center items-center hover:underline bg-black text-dreamchain font-semibold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                      className="w-full flex justify-center items-center hover:underline bg-black text-NoExcuseChallenge font-semibold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
                     >
                       {loading && <Loading />}
                       {t('update')}
@@ -1027,7 +1027,7 @@ const UserProfile = () => {
                 {!isEditting && data.status !== 'DELETED' && (
                   <button
                     onClick={() => setEditting(true)}
-                    className="w-full flex justify-center items-center hover:underline text-dreamchain bg-black font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                    className="w-full flex justify-center items-center hover:underline text-NoExcuseChallenge bg-black font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
                   >
                     {t('edit')}
                   </button>

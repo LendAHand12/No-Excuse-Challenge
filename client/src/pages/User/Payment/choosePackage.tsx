@@ -68,11 +68,11 @@ const ChoosePackagePage = () => {
                   Feature Package
                 </div>
               </div>
-              <div className="flex gap-4 text-dreamchain">
+              <div className="flex gap-4 text-NoExcuseChallenge">
                 <p>USDT</p>
                 <p>100.2</p>
               </div>
-              <div className="flex gap-4 text-dreamchain">
+              <div className="flex gap-4 text-NoExcuseChallenge">
                 <p>Level</p>
                 <p>9</p>
               </div>
@@ -91,11 +91,11 @@ const ChoosePackagePage = () => {
                   Feature Package
                 </div>
               </div>
-              <div className="flex gap-4 text-dreamchain">
+              <div className="flex gap-4 text-NoExcuseChallenge">
                 <p>USDT</p>
                 <p>1000</p>
               </div>
-              <div className="flex gap-4 text-dreamchain">
+              <div className="flex gap-4 text-NoExcuseChallenge">
                 <p>Level</p>
                 <p>9</p>
               </div>

@@ -209,7 +209,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, routes }: SidebarProps) => {
                     to={route.link}
                     className={`group relative flex items-center rounded-s-2xl gap-8 py-3 pl-6 font-medium duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
                       pathname.includes(route.link) &&
-                      'bg-graydark text-dreamchain'
+                      'bg-graydark text-NoExcuseChallenge'
                     }`}
                   >
                     {route.icon}
@@ -330,7 +330,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, routes }: SidebarProps) => {
                 <li className="w-full lg:hidden py-3 px-6 lg:pr-16">
                   <Link
                     to="/signin"
-                    className="rounded-lg shadow-dreamchain text-center bg-dreamchain px-4 py-3 shadow-1 font-medium text-sm block"
+                    className="rounded-lg shadow-NoExcuseChallenge text-center bg-NoExcuseChallenge px-4 py-3 shadow-1 font-medium text-sm block"
                   >
                     Sign in
                   </Link>
@@ -345,14 +345,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, routes }: SidebarProps) => {
         <img src={COVER3} />
         <div className="flex items-center justify-between">
           <p className="w-1/2 text-white">
-            ©2024 Dreamchain. All Rights Reserved.
+            ©2024 NoExcuseChallenge. All Rights Reserved.
           </p>
           <div className="flex text-gray-500 lg:hidden items-center gap-2 font-medium">
             <div className="flex gap-2">
               {/* <span
                 onClick={() => onChangeLanguage('vi')}
                 className={`${
-                  i18n.language === 'vi' ? 'text-dreamchain' : ''
+                  i18n.language === 'vi' ? 'text-NoExcuseChallenge' : ''
                 } cursor-pointer`}
               >
                 Vie
@@ -360,7 +360,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, routes }: SidebarProps) => {
               <span
                 onClick={() => onChangeLanguage('en')}
                 className={`${
-                  i18n.language === 'en' ? 'text-dreamchain' : ''
+                  i18n.language === 'en' ? 'text-NoExcuseChallenge' : ''
                 } cursor-pointer`}
               >
                 Eng
@@ -368,7 +368,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, routes }: SidebarProps) => {
             </div>
           </div>
           {/* <select
-            className="lg:hidden bg-inherit text-dreamchain"
+            className="lg:hidden bg-inherit text-NoExcuseChallenge"
             onChange={onChangeLanguage}
             defaultValue={i18n.language.includes('vi') ? 'vi' : 'en'}
           >

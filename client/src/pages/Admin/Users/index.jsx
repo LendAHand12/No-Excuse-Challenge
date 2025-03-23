@@ -391,7 +391,7 @@ const AdminUserPages = () => {
               <button
                 onClick={handleSearch}
                 disabled={loading}
-                className="h-8 flex text-xs justify-center items-center hover:underline bg-black text-dreamchain font-bold rounded-full py-1 px-4 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                className="h-8 flex text-xs justify-center items-center hover:underline bg-black text-NoExcuseChallenge font-bold rounded-full py-1 px-4 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
               >
                 {t('search')}
               </button>
@@ -456,7 +456,7 @@ const AdminUserPages = () => {
                       {ele.status === 'PENDING' && (
                         <button
                           onClick={() => handleApprove(ele._id)}
-                          className="font-medium text-gray-500 hover:text-dreamchain"
+                          className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
                         >
                           <svg
                             fill="currentColor"
@@ -483,7 +483,7 @@ const AdminUserPages = () => {
 
                       <button
                         onClick={() => handleDetail(ele._id)}
-                        className="font-medium text-gray-500 hover:text-dreamchain"
+                        className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
                       >
                         <svg
                           fill="currentColor"
@@ -497,7 +497,7 @@ const AdminUserPages = () => {
 
                       <button
                         onClick={() => handleTree(ele._id)}
-                        className="font-medium text-gray-500 hover:text-dreamchain"
+                        className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
                       >
                         <svg
                           className="w-6 h-auto"
@@ -545,7 +545,7 @@ const AdminUserPages = () => {
                       {ele.countPay === 0 && ele.status !== 'DELETED' && (
                         <button
                           onClick={() => handleDelete(ele._id)}
-                          className="font-medium text-gray-500 hover:text-dreamchain"
+                          className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
                         >
                           <svg
                             fill="currentColor"

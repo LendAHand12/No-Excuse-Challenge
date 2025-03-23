@@ -9,10 +9,10 @@ const ServicePage: React.FC = () => {
       <div className="w-full p-24 space-y-20">
         <div className="flex flex-col items-center gap-6">
           <h1 className="text-5xl font-bold text-center">
-            DreamChain Services{' '}
+            NoExcuseChallenge Services{' '}
           </h1>
           <p className="text-[20px] text-center max-w-4xl leading-8">
-            At DreamChain, we are committed to empowering individuals and
+            At NoExcuseChallenge, we are committed to empowering individuals and
             fostering a thriving community through innovative software
             solutions. Our services include:
           </p>
@@ -33,7 +33,7 @@ const ServicePage: React.FC = () => {
         </div>
         <div className="flex flex-col items-center gap-6">
           <h1 className="text-3xl font-bold text-center">
-            DreamChain is more than a platform
+            NoExcuseChallenge is more than a platform
           </h1>
           <p className="text-[20px] text-center max-w-4xl leading-8 font-medium">
             it's a community-driven ecosystem where technology meets purpose,

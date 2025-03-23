@@ -65,9 +65,9 @@ export const sendActiveLinkOld = async (email, link) => {
     html: `
     <div>
     <h4>
-      Congratulations! You are now a valued member of DreamChain!
+      Congratulations! You are now a valued member of NoExcuseChallenge!
       </h4>
-      DreamChain believes that you will continue contributing significantly to the DreamChain community and work together toward even greater success.
+      NoExcuseChallenge believes that you will continue contributing significantly to the NoExcuseChallenge community and work together toward even greater success.
       <br></br>
       Ameritec IPS specializes in providing security software for mobile devices.
       We are pleased to provide you with the Activation Link (QR CODE) to activate your “MTD “ Ameritec Intrusion Prevention System.
@@ -91,16 +91,16 @@ export const sendActiveLinkOld = async (email, link) => {
       <br></br>
       1.	Please keep your Activation Link (QR CODE) safe and secure.
       <br></br>
-      2.	The license period is 365 days from the date you successfully register as a member on the website: https://dreamchain.live. When the license expires, we will send you an email notification with instructions to renew.
+      2.	The license period is 365 days from the date you successfully register as a member on the website: https://NoExcuseChallenge.live. When the license expires, we will send you an email notification with instructions to renew.
       <br></br>
       3.	This Activation Link is for mobile devices running Android or iOS only.
       <br></br>
       4.	Each Activation Link (QR CODE) is valid for activation on a single device only. Any misuse of the Activation Link may result in the permanent termination of your MTD license.
       <br></br>
       5.	If you have any questions, please contact our technical support team for assistance. Thank you!
-      The DreamChain Team,
+      The NoExcuseChallenge Team,
       <br></br>
-      <b>The DreamChain Team</b>
+      <b>The NoExcuseChallenge Team</b>
     </div>
    `,
     cc: process.env.CC_MAIL,
@@ -128,7 +128,7 @@ export const sendActiveLink = async (senderName, email) => {
     <div>
     Dear <b>${senderName}</b>,
     <br></br>
-    Welcome to <b>HeWe Challenge</b>, powered by <b>DreamChain</b>! 🎉
+    Welcome to <b>HeWe Challenge</b>, powered by <b>NoExcuseChallenge</b>! 🎉
     <br></br>
     You’ve just taken the first step toward a transformative journey where <b>innovation meets opportunity</b>. At <b>HeWe Challenge</b>, we believe in pushing limits, breaking barriers, and empowering individuals to <b>achieve financial freedom and success</b> through blockchain and AI-driven solutions.
     <br></br>
@@ -143,15 +143,15 @@ export const sendActiveLink = async (senderName, email) => {
     <br></br>
     <br></br>
     Your journey starts now, and we’re here to support you every step of the way.
-    If you have any questions, feel free to reach out to our support team at <b>supprot@dreamchain.live</b>
+    If you have any questions, feel free to reach out to our support team at <b>supprot@NoExcuseChallenge.live</b>
     <br></br>
     <b>🚀 Let’s challenge the future together!</b>
     <br></br>
     Best regards,
     <br></br>
-    <b>DreamChain Team</b>
+    <b>NoExcuseChallenge Team</b>
     <br></br>
-    www.dreamchain.live
+    www.NoExcuseChallenge.live
 
     </div>
    `,
@@ -252,19 +252,19 @@ export const sendMailReceiveCommission = async (mailInfo) => {
   const mailOptions = {
     from: process.env.EMAIL,
     to: email,
-    subject: "Direct Commission from DreamChain",
+    subject: "Direct Commission from NoExcuseChallenge",
     html: `
     <div>
     Congratulations! You have received <b>$15</b> commission from user <b>${senderName}</b>.
     <br></br>
-    Thank you for participating in our DreamChain referral program. 
+    Thank you for participating in our NoExcuseChallenge referral program. 
     <br></br>
-    DreamChain believes you will continue to make significant contributions to the DreamChain community as we work together toward even greater success.
+    NoExcuseChallenge believes you will continue to make significant contributions to the NoExcuseChallenge community as we work together toward even greater success.
     <br></br>
     ________________________________________
     <br></br>
     <b>
-    The DreamChain Team
+    The NoExcuseChallenge Team
     </b>
     </div>
 
@@ -289,18 +289,18 @@ export const sendMailRefDc = async (mailInfo) => {
   const mailOptions = {
     from: process.env.EMAIL,
     to: email,
-    subject: "DreamChain Fund",
+    subject: "NoExcuseChallenge Fund",
     html: `
-      Congratulations! You have received <b>$5</b> DreamChain Contribution Fund from user <b>${senderName}</b>.
+      Congratulations! You have received <b>$5</b> NoExcuseChallenge Contribution Fund from user <b>${senderName}</b>.
       <br></br>
-      Thank you for participating in our DreamChain referral program. 
+      Thank you for participating in our NoExcuseChallenge referral program. 
       <br></br>
-      DreamChain believes you will continue to make significant contributions to the DreamChain community as we work together toward even greater success.
+      NoExcuseChallenge believes you will continue to make significant contributions to the NoExcuseChallenge community as we work together toward even greater success.
       <br></br>
       ________________________________________
       <br></br>
       <b>
-      The DreamChain Team
+      The NoExcuseChallenge Team
       </b>
 			`,
   };
@@ -339,16 +339,16 @@ export const sendMailReject = async (mailInfo) => {
       <br></br>
       ✔️ The document is valid and not expired.
       <br></br>
-      If you have any questions or need further assistance, please feel free to contact our support team at support@dreamchain.live
+      If you have any questions or need further assistance, please feel free to contact our support team at support@NoExcuseChallenge.live
       We appreciate your cooperation and look forward to verifying your account successfully.
       <br></br>
       Best regards,
       <br></br>
-      DreamChain Support
+      NoExcuseChallenge Support
       <br></br>
-      DreamChain
+      NoExcuseChallenge
       <br></br>
-      www.dreamchain.live
+      www.NoExcuseChallenge.live
 			`,
     cc: process.env.CC_MAIL,
   };
