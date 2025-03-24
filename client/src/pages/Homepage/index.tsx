@@ -9,19 +9,19 @@ const HomePage: React.FC = () => {
         <div className="flex">
           <div className="py-14 2xl:pl-16 px-10">
             <p className="text-[#] font-bold">About us</p>
-            <h1 className="text-black text-6xl font-medium mt-3 mb-2">
-              NoExcuseChallenge
+            <h1 className="text-black text-4xl font-medium mt-3 mb-2">
+              No Excuse Challenge
             </h1>
-            <h3 className="text-xl font-semibold mb-6">HeWe Challenge</h3>
             <p className="text-[#02071B] text-lg">
-              Welcome to NoExcuseChallenge: Where Dreams Connect NoExcuseChallenge is more
-              than a platform; it's a mission and a challenge. Every morning, as
-              you wake up, let "NoExcuseChallenge" remind you: you have a purpose—to
-              give, to receive, and to achieve your dreams.
+              Get Up. Shut Up. Take Action. No More Excuses. Welcome to the No
+              Excuse Challenge – where weakness gets crushed, and winners are
+              made. You’ve been soft for too long. Excuses won’t pay your bills,
+              won’t build your dreams, and won’t make you stronger. Stop
+              talking. Stop waiting. Stop blaming. It’s time to wake up, put in
+              the work, and take full control of your life – NOW!
             </p>
             <p className="text-[#02071B] text-lg font-semibold mt-10">
-              "A dream you dream alone is only a dream. A dream you dream
-              together is reality." <br></br>– John Lennon –
+              "Excuses don’t pay. Effort does. Get to work."
             </p>
           </div>
           <img
@@ -33,79 +33,75 @@ const HomePage: React.FC = () => {
           <div className="py-10 2xl:pl-16 px-10 3xl:-mt-64">
             <div className="border w-1/2 border-black"></div>
             <h1 className="text-black text-2xl font-semibold mt-3 mb-6 pt-3">
-              Our Vision
+              What is the No Excuse Challenge?
             </h1>
             <p className="text-[#02071B] text-lg">
-              At NoExcuseChallenge, we believe everyone has a dream, a vision of a
-              better future. We exist to connect those dreams, building a
-              community of individuals who are willing, committed, and ready to
-              take challenge toward success.
-              <br></br>
-              <br></br>
-              Our ultimate goal is to become the place where most millionaires
-              achieve their success—empowering dreamers, fostering growth, and
-              providing the tools and support to turn aspirations into
-              achievements.
+              This isn’t some feel-good, pat-on-the-back motivation speech. This
+              is a reality check. The No Excuse Challenge is here to shake you,
+              break your old habits, and force you to take responsibility.
+              Success isn’t given—it’s taken. And if you’re not willing to take
+              it, step aside for those who will. Ready to own your life? Prove
+              it.
             </p>
             <p className="text-[#02071B] text-lg font-semibold mt-10">
-              "The future belongs to those who believe in the beauty of their
-              dreams." – Eleanor Roosevelt
+              "Nobody’s coming to save you. Get up and do it yourself."
             </p>
           </div>
           <div className="py-10 2xl:pl-16 px-10">
             <div className="border w-1/2 border-black"></div>
             <h1 className="text-black text-2xl font-semibold mt-3 mb-6 pt-3">
-              Giving and Receiving
+              Why Join the No Excuse Challenge?
             </h1>
             <p className="text-[#02071B] text-lg">
-              Giving and Receiving In NoExcuseChallenge, we embrace the philosophy that
-              success is achieved through mutual support. By contributing
-              members to members, you’re not only helping others but also taking
-              a step closer to realizing your dreams. Together, we create an
-              ecosystem of giving and receiving that empowers every member.
+              • No More Excuses – You’re either all in or out. There’s no
+              in-between.
+              <br></br>• Get Uncomfortable – Growth happens when you push past
+              your limits. No pain, no gain.
+              <br></br>• Prove Yourself – Talk is cheap. Show up, work hard, and
+              earn your success.
+              <br></br>• Join a Relentless Community – Winners only. If you’re
+              looking for sympathy, look else where.
             </p>
             <p className="text-[#02071B] text-lg font-semibold mt-10">
-              "No one has ever become poor by giving." – Anne Frank
+              "Soft people make excuses. Strong people make moves."
             </p>
           </div>
           <div className="py-10 2xl:pl-16 px-10 3xl:-mt-32">
             <div className="border w-1/2 border-black"></div>
             <h1 className="text-black text-2xl font-semibold mt-3 mb-6 pt-3">
-              Your Journey
+              How It Works
             </h1>
             <p className="text-[#02071B] text-lg">
-              At NoExcuseChallenge, we believe that greatness lies within you. The only
-              question is—are you ready to unlock it? The Hewe Challenge is your
-              call to step up, push beyond limits, and take control of your
-              future.
-              <br></br>
-              <br></br>
-              Dare to challenge yourself. Dare to rise. Dare to succeed.
-              <br></br>
-              <br></br>
-              Join a community of visionaries, risk-takers, and achievers who
-              are committed to transforming dreams into reality. The choice is
-              yours—will you take the challenge?
+              • Stop Complaining – Nobody cares about your excuses. Nobody. Get
+              up and get to work.
+              <br></br>• Set a Goal – Make it real. Make it tough. No easy wins.
+              <br></br>• Do the Work – No skipping. No shortcuts. No giving up.
+              <br></br>• Own Your Results – Win or lose, it’s on YOU. No
+              blaming. No whining.
             </p>
             <p className="text-[#02071B] text-lg font-semibold mt-10">
-              "Talent wins games, but teamwork and intelligence win
-              championships." – Michael Jordan
+              "You either suffer the pain of discipline or the pain of regret.
+              Choose."
             </p>
           </div>
-          <div className="py-10 pb-20 2xl:pl-16 px-10">
+          <div className="py-10 pb-10 2xl:pl-16 px-10">
             <div className="border w-1/2 border-black"></div>
             <h1 className="text-black text-2xl font-semibold mt-3 mb-6 pt-3">
-              Join Us Today
+              Enough Talk. Take Action.
             </h1>
             <p className="text-[#02071B] text-lg">
-              Join Us Today Be part of a movement where dreams come alive.
-              NoExcuseChallenge is your community to grow, give, and achieve. Let’s
-              build a future of shared success, one connection at a time.
+              This isn’t for the weak. It’s for those who refuse to stay stuck
+              in the same cycle of failure. It’s time to push harder, level up,
+              and MAKE THINGS HAPPEN. If you can’t handle it, move aside. Join
+              the No Excuse Challenge today. No more whining. No more waiting.
+              Just results.
             </p>
             <p className="text-[#02071B] text-lg font-semibold mt-10">
-              "Alone, we can do so little; together, we can do so much." – Helen
-              Keller
+              "Success isn’t for crybabies. Step up or step aside."
             </p>
+          </div>
+          <div className="pb-20 2xl:pl-16 px-10">
+          These are built to push people into action with no room for weakness. Want them even more aggressive? 🔥🚀
           </div>
         </div>
       </div>

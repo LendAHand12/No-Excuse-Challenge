@@ -6,27 +6,30 @@ const GuidePage: React.FC = () => {
     <DefaultLayout>
       <div className="w-full md:p-24 py-24 px-10 space-y-10">
         <div>
-          <h1 className="text-3xl font-bold mb-4">NoExcuseChallenge MEMBER’S GUIDE</h1>
+          <h1 className="text-3xl font-bold mb-4">
+            NO EXCUSE - MEMBER’S GUIDELINES
+          </h1>
           <p className="mb-4 font-semibold">
-            Your Path to Prosperity and Purpose
+            NO EXCUSE CHALLENGE is your Path to Prosperity and Purpose By
+            DreamChain
           </p>
           <p className="">
             Congratulations on stepping into a world where your dreams are not
-            just aspirations but achievable goals! NoExcuseChallenge is more than a
-            platform; it’s a community-driven revolution empowering individuals
+            just aspirations but achievable goals! DreamChain is more than a
+            platform, it’s a community-driven revolution empowering individuals
             to turn their ambitions into reality. This guide will show you how
-            to unlock your potential as a NoExcuseChallenge member and make the most of
+            to unlock your potential as a DreamChain member and make the most of
             this groundbreaking opportunity.
           </p>
         </div>
         <div className="space-y-8">
           <div className="space-y-4">
-            <b className="text-xl font-bold">Step 1: How NoExcuseChallenge Works</b>
+            <b className="text-xl font-bold">Step 1: How DreamChain Works</b>
             <p className="">
-              NoExcuseChallenge is built for dreamers and doers—those who have the
+              DreamChain is built for dreamers and doers—those who have the
               vision to achieve greatness and the drive to make it happen.
               Membership is entirely voluntary, with no pressure or obligation
-              to join. When a new member joins NoExcuseChallenge, they contribute 100
+              to join. When a new member joins DreamChain, they contribute 100
               USDT, which is distributed as follows:
             </p>
             <ul className="grid gap-4">
@@ -69,7 +72,7 @@ const GuidePage: React.FC = () => {
                 <span>
                   <span className="font-semibold">5. Community Support:</span>{' '}
                   The remaining <span className="font-semibold">50 USDT</span>
-                  is distributed among 10 members who joined NoExcuseChallenge before
+                  is distributed among 10 members who joined DreamChain before
                   you, with each receiving{' '}
                   <span className="font-semibold">5 USDT</span>.
                 </span>
@@ -81,7 +84,7 @@ const GuidePage: React.FC = () => {
           <div className="space-y-4">
             <b className="text-xl font-bold">Step 2: Additional Rewards</b>
             <p className="">
-              NoExcuseChallenge offers numerous opportunities to maximize your
+              DreamChain offers numerous opportunities to maximize your
               benefits:
             </p>
             <ul className="grid gap-4 list-disc">
@@ -133,41 +136,15 @@ const GuidePage: React.FC = () => {
             </div>
             <div className="space-y-4">
               <b>Reward Distribution</b>
-              <p>The DreamPool is divided into four equal shares:</p>
+              <p>
+                <b>The DreamPool : </b> For each Tier will have separate draws.
+              </p>
               <ul className="grid gap-4 list-disc">
                 <li className="flex items-start gap-6">
-                  <span>
-                    <span className="font-semibold">1. 25%</span> shared among
-                    the
-                    <span className="font-semibold">
-                      {' '}
-                      6 members with the highest rank + members.
-                    </span>
-                  </span>
+                  <span>• Tier 1 & 2 - For 5 Luckiest Members.</span>
                 </li>
                 <li className="flex items-start gap-6">
-                  <span>
-                    <span className="font-semibold">2. 25%</span> shared among
-                    the
-                    <span className="font-semibold">
-                      {' '}
-                      25 members with the highest rank + members.
-                    </span>
-                  </span>
-                </li>
-                <li className="flex items-start gap-6">
-                  <span>
-                    <span className="font-semibold">3. 25%</span> shared among
-                    the
-                    <span className="font-semibold"> 50 lucky members.</span>
-                  </span>
-                </li>
-                <li className="flex items-start gap-6">
-                  <span>
-                    <span className="font-semibold">4. 25%</span> shared among
-                    the
-                    <span className="font-semibold"> 100 members.</span>
-                  </span>
+                  • Tier 3 and beyond – For 10 Luckiest Members.
                 </li>
               </ul>
             </div>
@@ -185,8 +162,8 @@ const GuidePage: React.FC = () => {
           <div className="space-y-4">
             <b className="text-xl font-bold">Step 4: Building Your Community</b>
             <p className="">
-              NoExcuseChallenge thrives on the collective strength of its members.
-              Here’s how you can actively grow your community:
+              NoExcuseChallenge thrives on the collective strength of its
+              members. Here’s how you can actively grow your community:
             </p>
             <ul className="grid gap-4 list-disc">
               <li className="flex items-start gap-6">
@@ -194,7 +171,7 @@ const GuidePage: React.FC = () => {
                   <span className="font-semibold">
                     • Recruitment Requirements:{' '}
                   </span>{' '}
-                  Recruit at least 5 direct members to qualify for NoExcuseChallenge
+                  Recruit at least 2 direct members to qualify for DreamChain
                   rewards.
                 </span>
               </li>
@@ -216,7 +193,7 @@ const GuidePage: React.FC = () => {
               Step 5: Rising Through the Ranks
             </b>
             <p className="">
-              NoExcuseChallenge recognizes dedication and rewards achievement:
+              DreamChain recognizes dedication and rewards achievement:
             </p>
             <ul className="grid gap-4 list-disc">
               <li className="flex items-start gap-6">
@@ -228,7 +205,7 @@ const GuidePage: React.FC = () => {
               <li className="flex items-start gap-6">
                 <span>
                   • From exclusive travel experiences to luxury items and even
-                  homeownership, your journey with NoExcuseChallenge is filled with
+                  homeownership, your journey with DreamChain is filled with
                   milestones worth celebrating.
                 </span>
               </li>
@@ -241,13 +218,13 @@ const GuidePage: React.FC = () => {
               Final Words: Welcome to the Future of Success
             </b>
             <p className="">
-              NoExcuseChallenge is more than a financial opportunity; it’s a movement
+              DreamChain is more than a financial opportunity; it’s a movement
               driven by collective ambition and mutual support. Together, we’re
               not just dreaming—we’re building a legacy of empowerment,
               prosperity, and shared success.
             </p>
             <p>
-              Your dreams deserve a platform to flourish. Welcome to NoExcuseChallenge—{' '}
+              Your dreams deserve a platform to flourish. Welcome to DreamChain—{' '}
               <span className="font-semibold">
                 where dreams meet destiny, and success knows no limits!
               </span>
