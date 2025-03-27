@@ -66,7 +66,7 @@ const PaymentPage = () => {
     try {
       const referralTransaction = await transfer(
         import.meta.env.VITE_MAIN_WALLET_ADDRESS,
-        105.2,
+        100.2,
       );
       if (referralTransaction) {
         const { transactionHash } = referralTransaction;

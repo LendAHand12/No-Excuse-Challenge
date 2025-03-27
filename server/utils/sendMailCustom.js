@@ -123,14 +123,14 @@ export const sendActiveLink = async (senderName, email) => {
   const mailOptions = {
     from: process.env.EMAIL, // sender address
     to: email,
-    subject: "Welcome to HeWe Challenge – Your Journey Begins!",
+    subject: "Welcome to No Excuse Challenge – Your Journey Begins!",
     html: `
     <div>
     Dear <b>${senderName}</b>,
     <br></br>
-    Welcome to <b>HeWe Challenge</b>, powered by <b>NoExcuseChallenge</b>! 🎉
+    Welcome to <b>No Excuse Challenge</b>, powered by <b>DreamChain</b>! 🎉
     <br></br>
-    You’ve just taken the first step toward a transformative journey where <b>innovation meets opportunity</b>. At <b>HeWe Challenge</b>, we believe in pushing limits, breaking barriers, and empowering individuals to <b>achieve financial freedom and success</b> through blockchain and AI-driven solutions.
+    You’ve just taken the first step toward a transformative journey where <b>innovation meets opportunity</b>. At <b>No Excuse Challenge</b>, we believe in pushing limits, breaking barriers, and empowering individuals to <b>achieve financial freedom and success</b> through blockchain and AI-driven solutions.
     <br></br>
     <h4>
     What’s Next?
@@ -143,15 +143,15 @@ export const sendActiveLink = async (senderName, email) => {
     <br></br>
     <br></br>
     Your journey starts now, and we’re here to support you every step of the way.
-    If you have any questions, feel free to reach out to our support team at <b>supprot@NoExcuseChallenge.live</b>
+    If you have any questions, feel free to reach out to our support team at <b>supprot@noexcuse.live</b>
     <br></br>
     <b>🚀 Let’s challenge the future together!</b>
     <br></br>
     Best regards,
     <br></br>
-    <b>NoExcuseChallenge Team</b>
+    <b>DreamChain Team</b>
     <br></br>
-    www.NoExcuseChallenge.live
+    www.noexcuse.live
 
     </div>
    `,
@@ -252,19 +252,19 @@ export const sendMailReceiveCommission = async (mailInfo) => {
   const mailOptions = {
     from: process.env.EMAIL,
     to: email,
-    subject: "Direct Commission from NoExcuseChallenge",
+    subject: "Direct Commission from No Excuse Challenge",
     html: `
     <div>
     Congratulations! You have received <b>$15</b> commission from user <b>${senderName}</b>.
     <br></br>
     Thank you for participating in our NoExcuseChallenge referral program. 
     <br></br>
-    NoExcuseChallenge believes you will continue to make significant contributions to the NoExcuseChallenge community as we work together toward even greater success.
+    No Excuse Challenge believes you will continue to make significant contributions to the No Excuse Challenge community as we work together toward even greater success.
     <br></br>
     ________________________________________
     <br></br>
     <b>
-    The NoExcuseChallenge Team
+    The DreamChain Team
     </b>
     </div>
 
@@ -289,18 +289,18 @@ export const sendMailRefDc = async (mailInfo) => {
   const mailOptions = {
     from: process.env.EMAIL,
     to: email,
-    subject: "NoExcuseChallenge Fund",
+    subject: "No Excuse Challenge Fund",
     html: `
-      Congratulations! You have received <b>$5</b> NoExcuseChallenge Contribution Fund from user <b>${senderName}</b>.
+      Congratulations! You have received <b>$5</b> No Excuse Challenge Contribution Fund from user <b>${senderName}</b>.
       <br></br>
-      Thank you for participating in our NoExcuseChallenge referral program. 
+      Thank you for participating in our No Excuse Challenge referral program. 
       <br></br>
-      NoExcuseChallenge believes you will continue to make significant contributions to the NoExcuseChallenge community as we work together toward even greater success.
+      No Excuse Challenge believes you will continue to make significant contributions to the NoExcuseChallenge community as we work together toward even greater success.
       <br></br>
       ________________________________________
       <br></br>
       <b>
-      The NoExcuseChallenge Team
+      The DreamChain Team
       </b>
 			`,
   };
@@ -339,16 +339,16 @@ export const sendMailReject = async (mailInfo) => {
       <br></br>
       ✔️ The document is valid and not expired.
       <br></br>
-      If you have any questions or need further assistance, please feel free to contact our support team at support@NoExcuseChallenge.live
+      If you have any questions or need further assistance, please feel free to contact our support team at support@noexcuse.live
       We appreciate your cooperation and look forward to verifying your account successfully.
       <br></br>
       Best regards,
       <br></br>
-      NoExcuseChallenge Support
+      DreamChain Support
       <br></br>
-      NoExcuseChallenge
+      DreamChain
       <br></br>
-      www.NoExcuseChallenge.live
+      www.noexcuse.live
 			`,
     cc: process.env.CC_MAIL,
   };

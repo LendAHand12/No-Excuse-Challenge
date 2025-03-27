@@ -474,11 +474,11 @@ const checkSendMail = asyncHandler(async (req, res) => {
 
 const getLinkVerify = asyncHandler(async (req, res) => {
   const { email } = req.body;
-  const user = await User.findOne({ email });
-  if (user.isConfirmed) {
-    throw new Error("User confirmed");
-  }
+  const user = await User.findOne({$and: [{ email }, {status : {$ne: "DELETED"}}]});
   if (user) {
+    if (user.isConfirmed) {
+      throw new Error("User confirmed");
+    }
     const emailToken = generateToken(user._id, "email");
     const url = `${process.env.FRONTEND_BASE_URL}/confirm?token=${emailToken}`;
     res.json({

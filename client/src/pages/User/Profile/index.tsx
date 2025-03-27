@@ -113,16 +113,22 @@ const Profile = () => {
         setLoading(true);
         var formData = new FormData();
 
-        const { imgFront } = data;
+        const { imgFront = [] } = data;
         const [fileObjectImgFront] = imgFront;
 
-        const { imgBack } = data;
+        const { imgBack = [] } = data;
         const [fileObjectImgBack] = imgBack;
 
         formData.append('idCode', idCode.trim());
         formData.append('walletAddress', walletAddress.trim());
-        formData.append('imgFront', fileObjectImgFront);
-        formData.append('imgBack', fileObjectImgBack);
+
+        if (fileObjectImgFront) {
+          formData.append('imgFront', fileObjectImgFront);
+        }
+
+        if (fileObjectImgBack) {
+          formData.append('imgBack', fileObjectImgBack);
+        }
 
         await User.update(id, formData)
           .then((response) => {

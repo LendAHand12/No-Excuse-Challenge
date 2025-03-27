@@ -17,25 +17,24 @@ const sendMail = async (id, email, option) => {
     const mailOptions = {
       from: process.env.EMAIL, // sender address
       to: email,
-      subject: "NoExcuseChallenge",
+      subject: "Activate Your No Excuse Challenge Account Power By DreamChain",
       html: `
         <div>
             <h2 style="text-align: center">
-            Welcome to NoExcuseChallenge!
+            Welcome to DreamChain! 
             </h2> 
             <br>
             Thank you for becoming a valued member of our community.
             <br></br>
-            <b>Subject</b>: Activate Your NoExcuseChallenge Account
             <br><br>
             Dear Member,
             <br><br>
-            •	Your NoExcuseChallenge account is pending activation.
+            •	Your No Excuse Challenge account is pending activation.
             <br>
             •	To activate your account, please click the link below:
             Activation Link: <a href="${url}">[Activate now]</a>
             <br>
-            •	After successfully activating your account, you are now able log in to your account on the website <a href="https://NoExcuseChallenge.live">https://NoExcuseChallenge.live</a> to start your journey.
+            •	After successfully activating your account, you are now able log in to your account on the website <a href="https://noexcuse.live">https://noexcuse.live</a> to start your journey.
             <br><br>
             <b>Withdraw Assets</b> 
             <br><br>
@@ -70,11 +69,11 @@ const sendMail = async (id, email, option) => {
     const mailOptions = {
       from: process.env.EMAIL, // sender address
       to: email,
-      subject: "Reset Password for NoExcuseChallenge", // Subject line
+      subject: "Reset Your No Excuse Challenge Password", // Subject line
       html: `
         <div>
           <h2 style="text-align: center">
-          Welcome to NoExcuseChallenge!
+          Welcome to No Excuse Challenge!
           </h2> 
           <br>
           Thank you for becoming a valued member of our community.
