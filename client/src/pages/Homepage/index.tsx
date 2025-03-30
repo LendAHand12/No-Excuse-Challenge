@@ -101,7 +101,6 @@ const HomePage: React.FC = () => {
             </p>
           </div>
           <div className="pb-20 2xl:pl-16 px-10">
-          These are built to push people into action with no room for weakness. Want them even more aggressive? 🔥🚀
           </div>
         </div>
       </div>
