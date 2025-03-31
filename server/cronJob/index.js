@@ -364,19 +364,33 @@ export const distributionHewe = asyncHandler(async () => {
 
 export const rankingCalc = asyncHandler(async () => {
   const listUser = await User.find({
-    $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }, { countPay: 13 }],
+    $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }, { countPay: 13 }, {status: "APPROVED"}],
   }).exec();
 
   for (let u of listUser) {
     try {
+      console.log({u: u.userId});
       if (u.ranking === 0) {
-        let treeUser = await Tree.findOne({ userId: u._id });
+        let refChild = await Tree.find({refId: u._id, tier: 1});
+        let refLength = 0;
+        for(let child of refChild) {
+          let childData = await User.findById(child.userId);
+          if(childData.status === "APPROVED" && childData.countPay === 13 && childData.imgFront) {
+            refLength += 1;
+          }
+        }
+        console.log({refLength})
         if (u.ranking === 0) {
-          if (treeUser.children.length === 5) {
+          if (refChild.length === 2) {
             let currentDay = moment();
             const diffDays = currentDay.diff(u.createdAt, "days");
-            if (diffDays < 30) {
-              u.availableUsdt = u.availableUsdt + 25;
+            console.log({userdudieukien: u.userId});
+            if (diffDays < 15) {
+              // u.availableUsdt = u.availableUsdt + 10;
+              // await Honor.create({
+              //   userId: u._id,
+              //   userName: u.userId
+              // });
             }
             u.ranking = 1;
             u.tier1Time = new Date();

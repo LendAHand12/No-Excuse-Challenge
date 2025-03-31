@@ -176,12 +176,12 @@ const cron8 = new CronJob("30 06 * * *", async () => {
   console.log("Check block children done");
 });
 
-const cron9 = new CronJob("00 07 * * *", async () => {
+// const cron9 = new CronJob("00 07 * * *", async () => {
   // 7h
   console.log("Ranking calc start");
   await rankingCalc();
   console.log("Ranking calc done");
-});
+// });
 
 const cron10 = new CronJob("00 07 * * *", async () => {
   // 7h
