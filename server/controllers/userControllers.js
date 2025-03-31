@@ -29,6 +29,7 @@ import {
 } from "../utils/sendMailCustom.js";
 import Permission from "../models/permissionModel.js";
 import Withdraw from "../models/withdrawModel.js";
+import Honor from "../models/honorModel.js";
 
 dotenv.config();
 
@@ -2150,8 +2151,10 @@ const getDreamPool = asyncHandler(async (req, res) => {
     status: "SUCCESS",
   });
 
+  const countHonor = await Honor.countDocuments({});
+
   res.json({
-    dreampool: count * 5 - process.env.PIG,
+    dreampool: count * 5 - process.env.PIG - 10*countHonor,
   });
 });
 

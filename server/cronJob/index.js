@@ -8,10 +8,16 @@ import { getCountAllChildren } from "../controllers/userControllers.js";
 import { findRootLayer, getUserClosestToNow } from "../utils/methods.js";
 import Tree from "../models/treeModel.js";
 import Transaction from "../models/transactionModel.js";
+import Honor from "../models/honorModel.js";
 
 export const deleteUser24hUnPay = asyncHandler(async () => {
   const listUser = await User.find({
-    $and: [{ tier: 1 }, { countPay: 0 }, { isAdmin: false }, { status: { $ne: "DELETED" } }],
+    $and: [
+      { tier: 1 },
+      { countPay: 0 },
+      { isAdmin: false },
+      { status: { $ne: "DELETED" } },
+    ],
   });
   const currentDay = moment();
   for (let u of listUser) {
@@ -315,7 +321,9 @@ export const checkBlockChildren = asyncHandler(async () => {
       });
 
     if (listRefChild.length >= 3) {
-      const listLockedChild = listRefChild.filter((ele) => ele.userId.status === "LOCKED");
+      const listLockedChild = listRefChild.filter(
+        (ele) => ele.userId.status === "LOCKED"
+      );
       const countChildLocked = listRefChild.length - listLockedChild.length;
       if (countChildLocked < 2) {
         if (user.lockedTime === null) {
@@ -324,7 +332,10 @@ export const checkBlockChildren = asyncHandler(async () => {
         }
         if (countChildLocked === 1) {
           const closedChild = getUserClosestToNow(listLockedChild);
-          const diffDays = currentDay.diff(closedChild.userId.lockedTime, "days");
+          const diffDays = currentDay.diff(
+            closedChild.userId.lockedTime,
+            "days"
+          );
           if (diffDays >= 30) {
             user.lockedTime = new Date();
             user.status = "LOCKED";
@@ -333,7 +344,10 @@ export const checkBlockChildren = asyncHandler(async () => {
         }
         if (countChildLocked === 0) {
           const closedChild = getUserClosestToNow(listLockedChild);
-          const diffDays = currentDay.diff(closedChild.userId.lockedTime, "days");
+          const diffDays = currentDay.diff(
+            closedChild.userId.lockedTime,
+            "days"
+          );
           if (diffDays >= 45) {
             user.lockedTime = new Date();
             user.status = "LOCKED";
@@ -364,81 +378,87 @@ export const distributionHewe = asyncHandler(async () => {
 
 export const rankingCalc = asyncHandler(async () => {
   const listUser = await User.find({
-    $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }, { countPay: 13 }, {status: "APPROVED"}],
+    $and: [
+      { isAdmin: false },
+      { userId: { $ne: "Admin2" } },
+      { countPay: 13 },
+      { status: "APPROVED" },
+    ],
   }).exec();
 
   for (let u of listUser) {
     try {
-      console.log({u: u.userId});
       if (u.ranking === 0) {
-        let refChild = await Tree.find({refId: u._id, tier: 1});
+        let refChild = await Tree.find({ refId: u._id, tier: 1 });
         let refLength = 0;
-        for(let child of refChild) {
+        for (let child of refChild) {
           let childData = await User.findById(child.userId);
-          if(childData.status === "APPROVED" && childData.countPay === 13 && childData.imgFront) {
+          if (childData.status === "APPROVED" && childData.countPay === 13) {
             refLength += 1;
           }
         }
-        console.log({refLength})
-        if (u.ranking === 0) {
-          if (refChild.length === 2) {
+
+        if (refLength >= 2) {
+          const checkInHonor = await Honor.findOne({ userId: u._id });
+          if (!checkInHonor) {
             let currentDay = moment();
             const diffDays = currentDay.diff(u.createdAt, "days");
-            console.log({userdudieukien: u.userId});
+            console.log({ diffDays });
             if (diffDays < 15) {
-              // u.availableUsdt = u.availableUsdt + 10;
-              // await Honor.create({
-              //   userId: u._id,
-              //   userName: u.userId
-              // });
+              console.log({ userdudieukien: u.userId });
+              u.availableUsdt = u.availableUsdt + 10;
+              await Honor.create({
+                userId: u._id,
+                userName: u.userId,
+              });
             }
-            u.ranking = 1;
-            u.tier1Time = new Date();
           }
-        } else if (u.ranking === 1) {
-          if (u.countChild > 30) {
-            u.ranking = 2;
-            u.tier2Time = new Date();
-          }
-        } else if (u.ranking === 2) {
-          if (u.countChild > 155) {
-            u.ranking = 3;
-            u.tier3Time = new Date();
-          }
-        } else if (u.ranking === 3) {
-          if (u.countChild > 780) {
-            u.ranking = 4;
-            u.tier4Time = new Date();
-          }
-        } else if (u.ranking === 4) {
-          if (u.countChild > 3905) {
-            u.ranking = 5;
-            u.tier5Time = new Date();
-          }
-        } else if (u.ranking === 5) {
-          if (u.countChild > 19530) {
-            u.ranking = 6;
-            u.tier6Time = new Date();
-          }
-        } else if (u.ranking === 6) {
-          if (u.countChild > 89843) {
-            u.ranking = 7;
-            u.tier7Time = new Date();
-          }
-        } else if (u.ranking === 7) {
-          if (u.countChild > 441406) {
-            u.ranking = 8;
-            u.tier8Time = new Date();
-          }
-        } else if (u.ranking === 8) {
-          if (u.countChild > 2199219) {
-            u.ranking = 9;
-            u.tier9Time = new Date();
-          }
+          u.ranking = 1;
+          u.tier1Time = new Date();
         }
-
-        await u.save();
+      } else if (u.ranking === 1) {
+        if (u.countChild > 30) {
+          u.ranking = 2;
+          u.tier2Time = new Date();
+        }
+      } else if (u.ranking === 2) {
+        if (u.countChild > 155) {
+          u.ranking = 3;
+          u.tier3Time = new Date();
+        }
+      } else if (u.ranking === 3) {
+        if (u.countChild > 780) {
+          u.ranking = 4;
+          u.tier4Time = new Date();
+        }
+      } else if (u.ranking === 4) {
+        if (u.countChild > 3905) {
+          u.ranking = 5;
+          u.tier5Time = new Date();
+        }
+      } else if (u.ranking === 5) {
+        if (u.countChild > 19530) {
+          u.ranking = 6;
+          u.tier6Time = new Date();
+        }
+      } else if (u.ranking === 6) {
+        if (u.countChild > 89843) {
+          u.ranking = 7;
+          u.tier7Time = new Date();
+        }
+      } else if (u.ranking === 7) {
+        if (u.countChild > 441406) {
+          u.ranking = 8;
+          u.tier8Time = new Date();
+        }
+      } else if (u.ranking === 8) {
+        if (u.countChild > 2199219) {
+          u.ranking = 9;
+          u.tier9Time = new Date();
+        }
       }
+
+      await u.save();
     } catch (error) {
       console.log({ error });
     }
