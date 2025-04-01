@@ -53,7 +53,7 @@ const IceBreakerPage = () => {
       <ToastContainer />
       <div className="relative py-24 px-6 min-h-screen flex flex-col items-center overflow-hidden">
         <h1 className="text-3xl font-bold mb-6 flex items-center gap-2 relative z-10">
-          <Sparkles className="text-yellow-300" /> Vinh Danh Người Dùng
+          <Sparkles className="text-yellow-300" /> Ice Breakers
         </h1>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
         {data.map((user, index) => (
