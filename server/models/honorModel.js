@@ -3,11 +3,8 @@ import mongoose from "mongoose";
 const honorSchema = mongoose.Schema(
   {
     userId: {
-      type: String,
-      required: true,
-    },
-    userName: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
   },

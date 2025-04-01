@@ -312,10 +312,10 @@ function App() {
           }
         />
         <Route
-          path="/user/ice-breaker"
+          path="/user/ice-breakers"
           element={
             <>
-              <PageTitle title="Ice Breaker | NoExcuseChallenge" />
+              <PageTitle title="Ice Breakers | NoExcuseChallenge" />
               <IceBreakerPage />
             </>
           }

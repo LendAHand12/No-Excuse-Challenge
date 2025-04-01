@@ -197,7 +197,7 @@ const routes = [
   },
   {
     title: 'Ice Breaker',
-    link: '/user/ice-breaker',
+    link: '/user/ice-breakers',
     icon: (
       <svg
         width="24"

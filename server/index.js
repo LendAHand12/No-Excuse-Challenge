@@ -26,6 +26,7 @@ import pageSettingRoutes from "./routes/pageSettingRoutes.js";
 import claimRoutes from "./routes/claimRoutes.js";
 import dreampoolRoutes from "./routes/dreampoolRoutes.js";
 import withdrawRoutes from "./routes/withdrawRoutes.js";
+import iceBreakerRoutes from "./routes/iceBreakerRoutes.js";
 
 import {
   countChildToData,
@@ -107,6 +108,7 @@ app.use("/api/page-settings", pageSettingRoutes);
 app.use("/api/claim", claimRoutes);
 app.use("/api/dreampool", dreampoolRoutes);
 app.use("/api/withdraw", withdrawRoutes);
+app.use("/api/ice-breaker", iceBreakerRoutes);
 
 app.use(notFound);
 

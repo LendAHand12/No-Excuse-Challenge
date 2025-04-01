@@ -403,13 +403,10 @@ export const rankingCalc = asyncHandler(async () => {
           if (!checkInHonor) {
             let currentDay = moment();
             const diffDays = currentDay.diff(u.createdAt, "days");
-            console.log({ diffDays });
             if (diffDays < 15) {
-              console.log({ userdudieukien: u.userId });
               u.availableUsdt = u.availableUsdt + 10;
               await Honor.create({
                 userId: u._id,
-                userName: u.userId,
               });
             }
           }
