@@ -59,14 +59,14 @@ const IceBreakerPage = () => {
         {data.map((user, index) => (
           <div
             key={index}
-            className="relative bg-gradient-to-br from-[#d99300] to-[#b57700] text-white shadow-2xl p-6 rounded-3xl border border-yellow-500 transform hover:scale-110 transition-transform overflow-hidden hover:shadow-yellow-500/50 flex items-center gap-4"
+            className="relative bg-gradient-to-br from-[#d99300] to-[#b57700] text-white shadow-2xl p-3 rounded-3xl border border-yellow-500 transform hover:scale-110 transition-transform overflow-hidden hover:shadow-yellow-500/50 flex items-center gap-4"
           >
-            <div className="bg-white p-4 rounded-full">
-              <img src={logo} className="text-[#d99300] w-12 h-12" />
+            <div className="bg-white p-2 rounded-full">
+              <img src={logo} className="text-[#d99300] w-6 h-6" />
             </div>
-            <div className="relative z-10">
-              <h2 className="text-2xl font-bold">{user.userId.userId}</h2>
-              <p className="text-gray-200">{user.userId.email}</p>
+            <div className="relative max-w-48">
+              <h2 className="w-full text-lg font-bold truncate">{user.userId.userId}</h2>
+              <p className="text-gray-200 text-sm italic truncate">{user.userId.email}</p>
             </div>
           </div>
         ))}
