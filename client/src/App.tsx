@@ -29,6 +29,7 @@ import ServicePage from './pages/Service';
 import SettingWallets from './pages/Admin/SettingWallets';
 import AdminTransactionsPage from './pages/Admin/Transactions';
 import SystemPage from './pages/User/System';
+import IceBreakerPage from './pages/User/IceBreaker';
 import TermsPage from './pages/Terms';
 import GuidePage from './pages/Guide';
 import DreamPoolPage from './pages/User/DreamPool';
@@ -307,6 +308,15 @@ function App() {
             <>
               <PageTitle title="Transactions | NoExcuseChallenge" />
               <Transactions />
+            </>
+          }
+        />
+        <Route
+          path="/user/ice-breaker"
+          element={
+            <>
+              <PageTitle title="Ice Breaker | NoExcuseChallenge" />
+              <IceBreakerPage />
             </>
           }
         />

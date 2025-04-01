@@ -369,14 +369,10 @@ const Profile = () => {
           </button>
         </div>
         <div
-          className={`grid ${
-            ranking >= 1 ? 'lg:grid-cols-2' : ''
-          }  gap-10 font-semibold`}
+          className={`grid gap-10 font-semibold`}
         >
           <div
-            className={`${
-              ranking >= 1 ? 'space-y-4' : 'grid grid-cols-2 gap-2'
-            }`}
+            className={`grid grid-cols-2 gap-2`}
           >
             <div className="bg-[#FAFBFC] p-4 rounded-2xl">
               <div className="flex justify-between items-center py-2 px-4">
@@ -405,7 +401,7 @@ const Profile = () => {
               </div>
               <div className="flex justify-between py-2 px-4">
                 <p>Completed ranking time</p>
-                <p>{userInfo[`tier${ranking}Time`]}</p>
+                <p className="whitespace-nowrap">{userInfo[`tier${ranking}Time`]}</p>
               </div>
             </div>
             <div className="bg-[#FAFBFC] p-4 rounded-2xl">
@@ -449,7 +445,7 @@ const Profile = () => {
               <div className="py-2 px-4">
                 <p className="uppercase mt-2 font-bold">{t('children')}</p>
                 <div className="py-2">
-                  <ul>
+                  <ul className='flex gap-4'>
                     {listDirectUser.map((ele) => (
                       <li className="" key={ele._id}>
                         <div className="py-2">
@@ -476,69 +472,6 @@ const Profile = () => {
               </div>
             </div>
           </div>
-          {ranking >= 1 && (
-            <div className="bg-[#FAFBFC] p-4 rounded-2xl flex flex-col items-center">
-              <div className="max-w-sm">
-                <Doughnut
-                  data={data}
-                  plugins={[ChartDataLabels]}
-                  options={{
-                    responsive: true,
-                    plugins: {
-                      legend: {
-                        position: 'bottom' as const,
-                      },
-                      tooltip: {
-                        enabled: false,
-                      },
-                      datalabels: {
-                        color: '#ffffff',
-                        anchor: 'center',
-                        font: { size: 16, weight: 'bold' },
-                        formatter: (value) => {
-                          return value <= 0
-                            ? ''
-                            : Math.round((value / targetSales) * 100) + '%';
-                        },
-                      },
-                    },
-                  }}
-                />
-              </div>
-              <div className="w-full mt-2">
-                <ul className="flex flex-col md:flex-row md:justify-center md:items-center gap-3">
-                  <li>
-                    <span className="bg-[#FFCF65] px-2 py-1 text-sm">
-                      Group 1 :
-                    </span>{' '}
-                    {chartData[0]} members
-                  </li>
-                  <li>
-                    <span className="bg-[#02071B] text-white px-2 py-1 text-sm">
-                      Group 2 :
-                    </span>{' '}
-                    {chartData[1]} members
-                  </li>
-                  <li>
-                    <span className="bg-[#C1C9D3] px-2 py-1 text-sm">
-                      Group 3 :
-                    </span>{' '}
-                    {chartData[2]} members
-                  </li>
-                </ul>
-                <ul className="flex justify-center mt-4 gap-4">
-                  <li>
-                    <span className="font-thin">Total members :</span>{' '}
-                    {totalChild} members
-                  </li>
-                  <li>
-                    <span className="font-thin">Remaining target :</span>{' '}
-                    {targetSales - totalChild} members
-                  </li>
-                </ul>
-              </div>
-            </div>
-          )}
         </div>
         {!isEdit && (
           <div className="flex justify-end">

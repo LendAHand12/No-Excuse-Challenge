@@ -24,15 +24,23 @@ const routes = [
     icon: (
       <svg
         width="24"
-        height="25"
-        viewBox="0 0 24 25"
-        fill="none"
+        height="24"
+        viewBox="0 0 48 48"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <path
-          d="M15.75 15.5C15.5511 15.5 15.3603 15.579 15.2197 15.7197C15.079 15.8603 15 16.0511 15 16.25C15 16.4489 15.079 16.6397 15.2197 16.7803C15.3603 16.921 15.5511 17 15.75 17H18.75C18.9489 17 19.1397 16.921 19.2803 16.7803C19.421 16.6397 19.5 16.4489 19.5 16.25C19.5 16.0511 19.421 15.8603 19.2803 15.7197C19.1397 15.579 18.9489 15.5 18.75 15.5H15.75ZM1.5 8.75C1.5 7.75544 1.89509 6.80161 2.59835 6.09835C3.30161 5.39509 4.25544 5 5.25 5H18.75C19.7446 5 20.6984 5.39509 21.4017 6.09835C22.1049 6.80161 22.5 7.75544 22.5 8.75V16.25C22.5 17.2446 22.1049 18.1984 21.4017 18.9017C20.6984 19.6049 19.7446 20 18.75 20H5.25C4.25544 20 3.30161 19.6049 2.59835 18.9017C1.89509 18.1984 1.5 17.2446 1.5 16.25V8.75ZM21 9.5V8.75C21 8.15326 20.7629 7.58097 20.341 7.15901C19.919 6.73705 19.3467 6.5 18.75 6.5H5.25C4.65326 6.5 4.08097 6.73705 3.65901 7.15901C3.23705 7.58097 3 8.15326 3 8.75V9.5H21ZM3 11V16.25C3 16.8467 3.23705 17.419 3.65901 17.841C4.08097 18.2629 4.65326 18.5 5.25 18.5H18.75C19.3467 18.5 19.919 18.2629 20.341 17.841C20.7629 17.419 21 16.8467 21 16.25V11H3Z"
-          fill="currentColor"
-        />
+        <path d="M0 0h48v48H0z" fill="none" />
+        <g id="Shopicon">
+          <path
+            fill="currentColor"
+            d="M40.228,21.494L30,11.267V8c0-2.2-1.8-4-4-4H10C7.8,4,6,5.8,6,8v23.955c0,2.2,1.8,4,4,4h3.992l0.121,0.799
+		c0.621,4.105,4.012,7.201,7.888,7.201h20v-17C42,23.483,40.656,21.907,40.228,21.494z M26,9.185c-0.198-0.019-0.398-0.03-0.6-0.03
+		c-1.605,0-3.112,0.623-4.24,1.751c-1.132,1.125-1.758,2.629-1.76,4.234c-0.003,1.611,0.621,3.123,1.756,4.259L26,24.243v7.712h-7V8
+		h7V9.185z M10,8h3v23.955h-3V8z M38,39.955H22c-1.915,0-3.605-1.633-3.933-3.799l-0.03-0.201H26c2.2,0,4-1.8,4-4v-3.712l2.12,2.12
+		l2.829-2.828l-4.663-4.663L25,17.587l-1.016-1.016c-0.378-0.378-0.585-0.884-0.584-1.424c0.001-0.534,0.207-1.033,0.584-1.408
+		c0.423-0.423,1.024-0.6,1.604-0.548c0.455,0.04,0.897,0.217,1.228,0.548L31,17.923l6.416,6.416l-0.072-0.022l0.109,0.072
+		C37.584,24.586,38,25.337,38,26.955V39.955z"
+          />
+        </g>
       </svg>
     ),
   },
@@ -115,37 +123,128 @@ const routes = [
     link: '/user/dreampool',
     icon: (
       <svg
-        version="1.1"
-        id="Icons"
+        width="24"
+        height="24"
+        viewBox="0 0 48 48"
+        fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 32 32"
-        width={24}
-        height={24}
       >
-        <path
-          className="st0"
-          d="M25.9,15c-0.1-1.5-0.6-2.9-1.3-4.2c-0.9-1.7-0.6-3.9,0.8-5.3l0,0c-1.7-1.7-4.3-1.7-6,0
-  c-0.1,0.1-0.2,0.2-0.3,0.3C17.9,5.3,16.5,5,15,5c-3.7,0-7,1.8-9,4.6c-1.3,1.8-2,4-2,6.4c0,2,0.6,4,1.5,5.6L10,29h4l-0.3-2.1
-  C14.1,27,14.5,27,15,27c0.8,0,1.6,0,2.3-0.1L17,29h4l2.2-3.3c2.4-0.9,4.5-2.1,5.8-3.6V15H25.9z"
+        <rect width="48" height="48" fill="currentColor" fill-opacity="0.01" />
+        <ellipse
+          cx="14"
+          cy="10"
+          rx="10"
+          ry="5"
+          stroke="currentColor"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
         />
         <path
-          className="st0"
-          d="M5.9,22.4c-0.2,0.6-0.8,1.1-1.4,1.1C3.7,23.5,3,22.8,3,22"
+          d="M4 10C4 10 4 14.2386 4 17C4 19.7614 8.47715 22 14 22C19.5228 22 24 19.7614 24 17C24 15.3644 24 10 24 10"
+          stroke="currentColor"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
         />
         <path
-          className="st0"
-          d="M18,13.5c0-1.1-0.8-1.9-1.9-1.9h-1.3c-1,0-1.9,0.9-1.9,1.9v0c0,1.1,0.8,1.9,1.9,1.9h1.3"
+          d="M4 17C4 17 4 21.2386 4 24C4 26.7614 8.47715 29 14 29C19.5228 29 24 26.7614 24 24C24 22.3644 24 17 24 17"
+          stroke="currentColor"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
         />
         <path
-          className="st0"
-          d="M14.9,15.5h1.3c1,0,1.9,0.9,1.9,1.9v0c0,1.1-0.8,1.9-1.9,1.9h-1.3c-1,0-1.9-0.9-1.9-1.9"
+          d="M4 24C4 24 4 28.2386 4 31C4 33.7614 8.47715 36 14 36C19.5228 36 24 33.7614 24 31C24 29.3644 24 24 24 24"
+          stroke="currentColor"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
         />
-        <line className="st0" x1="15.5" y1="10" x2="15.5" y2="11.6" />
-        <line className="st0" x1="15.5" y1="21" x2="15.5" y2="19.4" />
-        <rect x="-72" y="-288" className="st3" width="536" height="680" />
+        <path
+          d="M4 31C4 31 4 35.2386 4 38C4 40.7614 8.47715 43 14 43C19.5228 43 24 40.7614 24 38C24 36.3644 24 31 24 31"
+          stroke="currentColor"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <ellipse
+          cx="34"
+          cy="24"
+          rx="10"
+          ry="5"
+          stroke="currentColor"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M24 24C24 24 24 28.2386 24 31C24 33.7614 28.4772 36 34 36C39.5228 36 44 33.7614 44 31C44 29.3644 44 24 44 24"
+          stroke="currentColor"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M24 31C24 31 24 35.2386 24 38C24 40.7614 28.4772 43 34 43C39.5228 43 44 40.7614 44 38C44 36.3644 44 31 44 31"
+          stroke="currentColor"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
     ),
   },
+  {
+    title: 'Ice Breaker',
+    link: '/user/ice-breaker',
+    icon: (
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M4 13H20V20C20 21.1046 19.1046 22 18 22H6C4.89543 22 4 21.1046 4 20V13Z"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M2 9H22V13H2V9Z"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M12 5L12 22"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M12 5.5C12 3.567 10.433 2 8.5 2C6.567 2 5 3.567 5 5.5C5 7.433 6.567 9 8.5 9"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M15.5 9C17.433 9 19 7.433 19 5.5C19 3.567 17.433 2 15.5 2C13.567 2 12 3.567 12 5.5"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    ),
+  },
+
   // {
   //   title: 'Withdraw',
   //   link: '/user/withdraw',
