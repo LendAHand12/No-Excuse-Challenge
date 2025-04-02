@@ -327,8 +327,9 @@ const UserProfile = () => {
                           defaultValue={data.status}
                           disabled={loadingUpdate}
                         >
-                          <option value="APPROVED">{t('active')}</option>
-                          <option value="LOCKED">{t('inactive')}</option>
+                          <option value="UNVERIFY">Unverify</option>
+                          <option value="APPROVED">Approved</option>
+                          <option value="LOCKED">Locked</option>
                         </select>
                       ) : (
                         <span
@@ -586,7 +587,7 @@ const UserProfile = () => {
                   </div>
                 )}
               </div>
-              <div className="py-10">
+              {/* <div className="py-10">
                 <div className="max-w-sm">
                   <Doughnut
                     data={{
@@ -658,7 +659,7 @@ const UserProfile = () => {
                     </li>
                   </ul>
                 </div>
-              </div>
+              </div> */}
             </div>
             <div className="w-full lg:w-2/3 lg:mx-2">
               <div className="bg-white p-6 shadow-md rounded-sm border-t-4 border-NoExcuseChallenge">

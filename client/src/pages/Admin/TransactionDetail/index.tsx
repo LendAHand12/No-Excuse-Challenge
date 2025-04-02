@@ -291,15 +291,15 @@ const AdminTransactionDetail = () => {
                       {t('refund')}
                     </button>
                   )}
-                  {/* {
+                  {!trans.isHoldRefund && (
                     <button
-                      onClick={() => handRefund('B')}
-                      className="w-xl bg-red-600 text-white flex justify-center items-center hover:underline border font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                      onClick={handRefund}
+                      className="w-xl bg-red-600 text-white flex justify-center items-center hover:underline border font-bold rounded-lg my-6 py-2 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
                     >
                       {loadingUntilRefund && <Loading />}
-                      {t('untilRefunds')}
+                      Refund regardless
                     </button>
-                  } */}
+                  )}
                 </div>
               </div>
             </div>

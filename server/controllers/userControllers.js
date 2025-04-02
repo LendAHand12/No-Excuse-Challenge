@@ -2062,8 +2062,7 @@ const getDreamPool = asyncHandler(async (req, res) => {
     .sort("-createdAt");
 
   res.json({
-    // dreampool: count * 5 - process.env.PIG,
-    dreampool: 100,
+    dreampool: count * 5 - process.env.PIG,
     allBreakers,
   });
 });
