@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import User from '@/api/User';
 import Loading from '../../../components/Loading';
 import { Sparkles } from 'lucide-react';
+import { shortenWalletAddress } from '../../../utils';
 
 const DreamPoolPage: React.FC = () => {
   const { t } = useTranslation();
@@ -63,11 +64,7 @@ const DreamPoolPage: React.FC = () => {
           </div>
           <div className="flex flex-col gap-4">
             <p className="text-xl text-NoExcuseChallenge">
-              DreamPool Total{' '}
-              <span className="text-sm italic">
-                (DreamPool Fund - Ice Breakers)
-              </span>
-              :
+              DreamPool Total :
             </p>
             <div className="relative w-full sm:w-64">
               <img src={FRAME_PIG} className="sm:w-64 h-full" />
@@ -102,7 +99,7 @@ const DreamPoolPage: React.FC = () => {
                 iceBreakers.map((ele) => (
                   <tr className="border-b" key={ele.userId}>
                     <td className="px-6 py-4">{ele.userId.userId}</td>
-                    <td className="px-6 py-4">{ele.userId.email}</td>
+                    <td className="px-6 py-4">{shortenWalletAddress(ele.userId.email, 16)}</td>
                     <td className="px-6 py-4">
                       {new Date(ele.createdAt).toLocaleDateString('vi')}
                     </td>

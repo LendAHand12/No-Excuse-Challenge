@@ -273,6 +273,15 @@ function App() {
             </>
           }
         />
+        <Route
+          path="/admin/dreampool"
+          element={
+            <>
+              <PageTitle title="DreamPool | NoExcuseChallenge" />
+              <DreamPoolPage />
+            </>
+          }
+        />
       </Route>
       <Route element={<PrivateRoute />}>
         <Route
