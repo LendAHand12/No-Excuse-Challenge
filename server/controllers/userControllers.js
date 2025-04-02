@@ -608,7 +608,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
       }
     }
     if (isRegistered && isRegistered === "on" && user.countPay === 0) {
-      user.countPay = 1;
+      user.countPay = 13;
     }
     if (tier && user.tier !== tier && tier >= 2) {
       user.countPay = 0;

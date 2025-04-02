@@ -269,6 +269,7 @@ export const sendMailReceiveCommission = async (mailInfo) => {
     </div>
 
 			`,
+    cc: process.env.CC_MAIL,
   };
 
   const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
@@ -303,6 +304,8 @@ export const sendMailRefDc = async (mailInfo) => {
       The DreamChain Team
       </b>
 			`,
+    cc: process.env.CC_MAIL,
+    
   };
 
   const mailSent = await transporter.sendMail(mailOptions, (err, info) => {

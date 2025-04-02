@@ -1,23 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import User from '@/api/User';
-import FsLightbox from 'fslightbox-react';
-import { useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
-import { ToastContainer, toast } from 'react-toastify';
 import Loading from '@/components/Loading';
-import PhoneInput from 'react-phone-number-input';
+import USER_RANKINGS from '@/constants/userRankings';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
-import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import PhoneInput from 'react-phone-number-input';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Switch from 'react-switch';
-import axios from 'axios';
-import { useLocation } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
 import DefaultLayout from '../../../layout/DefaultLayout';
-import USER_RANKINGS from '@/constants/userRankings';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Doughnut } from 'react-chartjs-2';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { adjustSales } from '../../../utils';
 import UploadFile from './UploadInfo';
 
@@ -30,7 +24,6 @@ const UserProfile = () => {
   const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [data, setData] = useState({});
-  const [toggler, setToggler] = useState(false);
   const [isEditting, setEditting] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [packageOptions, setPackageOptions] = useState([]);
@@ -38,10 +31,6 @@ const UserProfile = () => {
   const [currentCloseLah, setCurrentCloseLah] = useState(null);
   const [phone, setPhone] = useState('');
   const [errorPhone, setErrPhone] = useState(false);
-  const [loadingUploadFileFront, setLoadingUploadFileFront] = useState(false);
-  const [loadingUploadFileBack, setLoadingUploadFileBack] = useState(false);
-  const [imgFront, setImgFront] = useState('');
-  const [imgBack, setImgBack] = useState('');
   const [totalChild, setTotalChild] = useState(0);
   const [chartData, setChartData] = useState([]);
   const [targetSales, setTargetSales] = useState(0);
@@ -101,6 +90,7 @@ const UserProfile = () => {
 
   const onSubmit = useCallback(
     async (values) => {
+      console.log({ values });
       if (phone === '') {
         setErrPhone(true);
         return;
@@ -168,6 +158,8 @@ const UserProfile = () => {
       if (values.holdLevel !== data.holdLevel) {
         formData.append('holdLevel', values.holdLevel);
       }
+
+      formData.append('isRegistered', values.isRegistered);
 
       setLoadingUpdate(true);
       await User.adminUpdateUser(id, formData)
