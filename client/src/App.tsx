@@ -264,6 +264,15 @@ function App() {
             </>
           }
         />
+        <Route
+          path="/admin/ice-breakers"
+          element={
+            <>
+              <PageTitle title="Ice Breakers | NoExcuseChallenge" />
+              <IceBreakerPage />
+            </>
+          }
+        />
       </Route>
       <Route element={<PrivateRoute />}>
         <Route
