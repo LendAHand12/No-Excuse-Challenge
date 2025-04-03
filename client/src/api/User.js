@@ -95,6 +95,9 @@ const User = {
   getDreamPool: () => {
     return API.get(`${URL_API_DREAMPOOL}`);
   },
+  adminChangeWalletUser: (body) => {
+    return API.put(`${URL_API_USER}/change-wallet`, body);
+  },
 };
 
 export default User;

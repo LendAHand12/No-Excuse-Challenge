@@ -32,6 +32,8 @@ const UserProfile = () => {
   const [phone, setPhone] = useState('');
   const [errorPhone, setErrPhone] = useState(false);
   const [isBonusRef, setIsBonusRef] = useState(false);
+  const [walletChange, setWalletChange] = useState('');
+  const [loadingChangeWallet, setLoadingChangeWallet] = useState(false);
 
   const {
     register,
@@ -56,7 +58,8 @@ const UserProfile = () => {
             tier,
             openLah,
             closeLah,
-            bonusRef
+            bonusRef,
+            walletAddressChange,
           } = response.data;
           setValue('userId', userId);
           setValue('email', email);
@@ -67,6 +70,7 @@ const UserProfile = () => {
           setCurrentOpenLah(openLah);
           setCurrentCloseLah(closeLah);
           setIsBonusRef(bonusRef);
+          setWalletChange(walletAddressChange);
         })
         .catch((error) => {
           let message =
@@ -261,6 +265,91 @@ const UserProfile = () => {
     });
   }, [loadingDelete]);
 
+  const handleApproveChangeWallet = useCallback(async () => {
+    confirmAlert({
+      closeOnClickOutside: true,
+      customUI: ({ onClose }) => {
+        return (
+          <div className="custom-ui">
+            <div className="relative p-4 w-full max-w-md h-full md:h-auto mb-40">
+              <div className="relative p-4 text-center bg-gray-100 rounded-lg shadow-lg sm:p-5">
+                <button
+                  onClick={onClose}
+                  disabled={loadingChangeWallet}
+                  className="text-gray-400 absolute top-2.5 right-2.5 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    ></path>
+                  </svg>
+                  <span className="sr-only">Close modal</span>
+                </button>
+                <svg
+                  className="text-gray-400 w-11 h-11 mb-3.5 mx-auto"
+                  viewBox="0 0 16 16"
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M14.5 4h-12.12c-0.057 0.012-0.123 0.018-0.19 0.018-0.552 0-1-0.448-1-1 0-0.006 0-0.013 0-0.019l12.81-0.499v-1.19c0.005-0.041 0.008-0.089 0.008-0.138 0-0.652-0.528-1.18-1.18-1.18-0.049 0-0.097 0.003-0.144 0.009l-11.374 1.849c-0.771 0.289-1.31 1.020-1.31 1.877 0 0.011 0 0.023 0 0.034l-0 10.728c-0 0.003-0 0.006-0 0.010 0 0.828 0.672 1.5 1.5 1.5 0 0 0 0 0 0h13c0 0 0 0 0 0 0.828 0 1.5-0.672 1.5-1.5 0-0.004-0-0.007-0-0.011v-8.999c0-0.012 0.001-0.027 0.001-0.041 0-0.801-0.649-1.45-1.45-1.45-0.018 0-0.036 0-0.053 0.001zM13 11c-0.828 0-1.5-0.672-1.5-1.5s0.672-1.5 1.5-1.5c0.828 0 1.5 0.672 1.5 1.5s-0.672 1.5-1.5 1.5z"
+                  ></path>
+                </svg>
+                <p className="mb-4 text-gray-500">Are you sure to do this</p>
+                <div className="flex justify-center items-center space-x-4">
+                  <button
+                    onClick={onClose}
+                    disabled={loadingChangeWallet}
+                    className="py-2 px-3 text-sm font-medium text-gray-500 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 hover:text-gray-900 focus:z-10 "
+                  >
+                    {t('cancel')}
+                  </button>
+                  <button
+                    onClick={() => handleChangeWallet(onClose)}
+                    className="flex items-center py-2 px-3 text-sm font-medium text-center text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 "
+                  >
+                    {loadingChangeWallet && <Loading />}
+                    {t('Approve')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      },
+    });
+  }, [loadingChangeWallet]);
+
+  const handleChangeWallet = async (onClose) => {
+    setLoadingDelete(true);
+    onClose();
+    toast.warning(t('updating...'));
+    await User.adminChangeWalletUser({ userId: id })
+      .then((response) => {
+        const { message } = response.data;
+        setLoadingChangeWallet(false);
+        toast.success(t(message));
+        setRefresh(!refresh);
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message;
+        toast.error(t(message));
+        setLoadingDelete(false);
+      });
+  };
+
   useEffect(() => {
     if (data.countPay === 0) {
       setPackageOptions(['A', 'B', 'C']);
@@ -296,13 +385,27 @@ const UserProfile = () => {
       {!loading && (
         <div className="container mx-10 my-24">
           {isBonusRef && (
-          <div
-            className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-5"
-            role="alert"
-          >
-            <span className="block sm:inline">{t('You have received 10 USDT from DreamPool fund')}</span>
-          </div>
-        )}
+            <div
+              className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-5"
+              role="alert"
+            >
+              <span className="block sm:inline">
+                {t('You have received 10 USDT from DreamPool fund')}
+              </span>
+            </div>
+          )}
+
+          {walletChange && (
+            <div
+              className="w-full bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded mb-5"
+              role="alert"
+            >
+              <span className="block sm:inline">
+                {t('Wallet information update is pending admin approval')}
+              </span>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit(onSubmit)} className="md:flex no-wrap">
             <div className="w-full lg:w-3/12 lg:mx-2 mb-4 lg:mb-0">
               <div className="bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
@@ -948,7 +1051,7 @@ const UserProfile = () => {
                     <>
                       <div className="w-full flex justify-center">
                         <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
-                          <p> {t('idCardFront')} :</p>
+                          <p className="font-semibold"> {t('idCardFront')} :</p>
                           <div className="flex flex-col items-center justify-center w-full">
                             <UploadFile
                               register={register}
@@ -965,9 +1068,9 @@ const UserProfile = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="flex justify-center bg-[#E5E9EE] rounded-lg">
+                      <div className="flex justify-center">
                         <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
-                          <p> {t('idCardBack')} :</p>
+                          <p className="font-semibold"> {t('idCardBack')} :</p>
                           <div className="flex items-center justify-center w-full">
                             <UploadFile
                               register={register}
@@ -1029,6 +1132,14 @@ const UserProfile = () => {
                     className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-red-500 text-white"
                   >
                     {t('delete')}
+                  </div>
+                )}
+                {walletChange && (
+                  <div
+                    onClick={handleApproveChangeWallet}
+                    className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-orange-500 text-white"
+                  >
+                    {t('Approve change wallet address')}
                   </div>
                 )}
               </div>

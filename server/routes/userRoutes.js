@@ -31,6 +31,7 @@ import {
   deleteAdmin,
   getAdminById,
   getUserInfo,
+  adminChangeWalletUser
 } from "../controllers/userControllers.js";
 import { protectRoute, isAdmin, isSuperAdmin } from "../middleware/authMiddleware.js";
 import uploadCCCD from "../middleware/uploadCCCD.js";
@@ -54,6 +55,7 @@ router.route("/getAllUsersForExport").post(protectRoute, isAdmin, getAllUsersFor
 
 router.route("/getAllUsersWithKeyword").post(protectRoute, isAdmin, getAllUsersWithKeyword);
 router.route("/listChild").get(protectRoute, getListChildOfUser);
+router.route("/change-wallet").put(protectRoute, isAdmin, adminChangeWalletUser);
 
 router
   .route("/admin")

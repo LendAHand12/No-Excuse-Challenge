@@ -24,6 +24,7 @@ import {
 import generateGravatar from "../utils/generateGravatar.js";
 import { areArraysEqual } from "../cronJob/index.js";
 import {
+  sendMailChangeWalletToAdmin,
   sendMailReject,
   sendMailUserCanInceaseTierToAdmin,
 } from "../utils/sendMailCustom.js";
@@ -232,7 +233,8 @@ const getUserById = asyncHandler(async (req, res) => {
       withdrawPending: totalWithdraws,
       chartData: mergeIntoThreeGroups(listDirectUser),
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
-      bonusRef: user.bonusRef
+      bonusRef: user.bonusRef,
+      walletAddressChange: user.walletAddressChange,
     });
   } else {
     res.status(404);
@@ -361,7 +363,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
       withdrawPending: totalWithdraws,
       chartData: mergeIntoThreeGroups(listDirectUser),
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
-      bonusRef: user.bonusRef
+      bonusRef: user.bonusRef,
+      walletAddressChange: user.walletAddressChange,
     });
   } else {
     res.status(404);
@@ -397,7 +400,16 @@ const updateUser = asyncHandler(async (req, res) => {
   if (user) {
     user.phone = phone || user.phone;
     user.idCode = idCode || user.idCode;
-    user.walletAddress = walletAddress || user.walletAddress;
+    if (walletAddress && walletAddress !== user.walletAddress) {
+      await sendMailChangeWalletToAdmin({
+        userId: user._id,
+        userName: user.userId,
+        phone: user.phone,
+        email: user.email,
+      });
+      user.walletAddressChange = walletAddress;
+    }
+
     if (buyPackage) {
       const newBuyPackage = await Package.findOne({ name: buyPackage });
       if (newBuyPackage.status === "active") {
@@ -514,7 +526,8 @@ const updateUser = asyncHandler(async (req, res) => {
           withdrawPending: totalWithdraws,
           chartData: mergeIntoThreeGroups(listDirectUser),
           targetSales: process.env[`LEVEL_${updatedUser.ranking + 1}`],
-          bonusRef: updatedUser.bonusRef
+          bonusRef: updatedUser.bonusRef,
+          walletAddressChange: updatedUser.walletAddressChange,
         },
       });
     }
@@ -987,7 +1000,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
       isSerepayWallet: await checkSerepayWallet(user.walletAddress1),
       role: user.role,
       permissions: permissions ? permissions.pagePermissions : [],
-      bonusRef: user.bonusRef
+      bonusRef: user.bonusRef,
     });
   } else {
     res.status(400);
@@ -2166,6 +2179,25 @@ const getDreamPool = asyncHandler(async (req, res) => {
   });
 });
 
+const adminChangeWalletUser = asyncHandler(async (req, res) => {
+  const { userId } = req.body;
+  const user = await User.findOne({ _id: userId }).select(
+    "walletAddress walletAddressChange"
+  );
+  if (user) {
+    user.walletAddress = user.walletAddressChange;
+    user.walletAddressChange = "";
+    const updatedUser = await user.save();
+    if (updatedUser) {
+      res.status(200).json({
+        message: `Update successful`,
+      });
+    }
+  } else {
+    res.status(400).json({ error: "User not found" });
+  }
+});
+
 export {
   getUserProfile,
   getAllUsers,
@@ -2202,4 +2234,5 @@ export {
   getAdminById,
   getUserInfo,
   getDreamPool,
+  adminChangeWalletUser,
 };

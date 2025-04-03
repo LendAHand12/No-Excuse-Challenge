@@ -60,6 +60,7 @@ const Profile = () => {
     chartData,
     targetSales,
     bonusRef,
+    walletAddressChange,
   } = userInfo;
   const totalChild = adjustSales(chartData, targetSales).reduce(
     (acc, num) => acc + num,
@@ -298,6 +299,16 @@ const Profile = () => {
           </div>
         )}
 
+        {walletAddressChange && (
+          <div
+            className="bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded relative mb-5"
+            role="alert"
+          >
+            <span className="block sm:inline">
+              {t('Wallet information update is pending admin approval')}
+            </span>
+          </div>
+        )}
 
         {status === 'UNVERIFY' && (
           <div

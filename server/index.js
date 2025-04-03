@@ -78,8 +78,8 @@ connectDB();
 // const nextRef = await findNextReferrer("67de506aec9630a7c650415f")
 // console.log({ nextRef });
 
-app.use(express.json({ limit: "200mb", extended: true }));
-app.use(express.urlencoded({ extended: false, limit: "2gb" }));
+app.use(express.json({ limit: "50mb", extended: true }));
+app.use(express.urlencoded({ extended: true, limit: "2gb" }));
 app.use(cors()); // to avoid CORS errors
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(express.static("public"));

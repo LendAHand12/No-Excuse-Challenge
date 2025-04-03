@@ -246,6 +246,45 @@ export const sendMailContactWithAdmin = async (mailInfo) => {
   if (mailSent) return Promise.resolve(1);
 };
 
+export const sendMailChangeWalletToAdmin = async (mailInfo) => {
+  const { userId, userName, phone, email } = mailInfo;
+
+  const mailOptions = { 
+    from: process.env.EMAIL,
+    to: process.env.CC_MAIL,
+    subject: "THÔNG TIN NGƯỜI DÙNG CẦN DUYỆT ĐỔI VÍ",
+    html: `
+    <div>
+    <h1>
+     Thông tin người cần duyệt đổi ví
+    </h1>
+    <p>
+    <strong>Họ và tên :</strong> ${userName}
+    </p><p>
+    <strong>Số điện thoại :</strong> ${phone}
+    </p>
+    <p>
+    <strong>Email :</strong> ${email}
+    </p>
+    <p>
+    <strong>Link profile :</strong> ${process.env.FRONTEND_BASE_URL}/admin/users/${userId}
+    </p>
+    </div>
+			`,
+  };
+
+  const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(info);
+    }
+  });
+
+  // send a promise since nodemailer is async
+  if (mailSent) return Promise.resolve(1);
+};
+
 export const sendMailReceiveCommission = async (mailInfo) => {
   const { senderName, email } = mailInfo;
 
