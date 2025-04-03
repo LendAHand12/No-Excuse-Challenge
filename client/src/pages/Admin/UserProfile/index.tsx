@@ -31,9 +31,7 @@ const UserProfile = () => {
   const [currentCloseLah, setCurrentCloseLah] = useState(null);
   const [phone, setPhone] = useState('');
   const [errorPhone, setErrPhone] = useState(false);
-  const [totalChild, setTotalChild] = useState(0);
-  const [chartData, setChartData] = useState([]);
-  const [targetSales, setTargetSales] = useState(0);
+  const [isBonusRef, setIsBonusRef] = useState(false);
 
   const {
     register,
@@ -58,8 +56,7 @@ const UserProfile = () => {
             tier,
             openLah,
             closeLah,
-            chartData,
-            targetSales,
+            bonusRef
           } = response.data;
           setValue('userId', userId);
           setValue('email', email);
@@ -69,14 +66,7 @@ const UserProfile = () => {
           setValue('walletAddress', walletAddress);
           setCurrentOpenLah(openLah);
           setCurrentCloseLah(closeLah);
-          setTotalChild(
-            adjustSales(chartData, targetSales).reduce(
-              (acc, num) => acc + num,
-              0,
-            ),
-          );
-          setChartData(chartData);
-          setTargetSales(targetSales);
+          setIsBonusRef(bonusRef);
         })
         .catch((error) => {
           let message =
@@ -305,6 +295,14 @@ const UserProfile = () => {
       <ToastContainer />
       {!loading && (
         <div className="container mx-10 my-24">
+          {isBonusRef && (
+          <div
+            className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-5"
+            role="alert"
+          >
+            <span className="block sm:inline">{t('You have received 10 USDT from DreamPool fund')}</span>
+          </div>
+        )}
           <form onSubmit={handleSubmit(onSubmit)} className="md:flex no-wrap">
             <div className="w-full lg:w-3/12 lg:mx-2 mb-4 lg:mb-0">
               <div className="bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
@@ -519,7 +517,7 @@ const UserProfile = () => {
                     {data.listDirectUser.map((ele) => (
                       <li
                         className="bg-white border-b hover:bg-gray-50"
-                        key={ele._id}
+                        key={ele.userId}
                       >
                         <div className="py-2">
                           <div className="text-base">

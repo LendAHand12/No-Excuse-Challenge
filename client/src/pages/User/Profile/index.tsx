@@ -59,6 +59,7 @@ const Profile = () => {
     withdrawPending,
     chartData,
     targetSales,
+    bonusRef,
   } = userInfo;
   const totalChild = adjustSales(chartData, targetSales).reduce(
     (acc, num) => acc + num,
@@ -286,6 +287,18 @@ const Profile = () => {
         </div>
       </Modal>
       <div className="px-2 lg:px-24 py-24 space-y-6 lg:space-y-8">
+        {bonusRef && (
+          <div
+            className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-5"
+            role="alert"
+          >
+            <span className="block sm:inline">
+              {t('Have received 10 USDT from DreamPool fund')}
+            </span>
+          </div>
+        )}
+
+
         {status === 'UNVERIFY' && (
           <div
             className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-5"
@@ -368,12 +381,8 @@ const Profile = () => {
             WITHDRAW USDT
           </button>
         </div>
-        <div
-          className={`grid gap-10 font-semibold`}
-        >
-          <div
-            className={`grid grid-cols-2 gap-2`}
-          >
+        <div className={`grid gap-10 font-semibold`}>
+          <div className={`grid grid-cols-2 gap-2`}>
             <div className="bg-[#FAFBFC] p-4 rounded-2xl">
               <div className="flex justify-between items-center py-2 px-4">
                 <p>Status</p>
@@ -401,7 +410,9 @@ const Profile = () => {
               </div>
               <div className="flex justify-between py-2 px-4">
                 <p>Completed ranking time</p>
-                <p className="whitespace-nowrap">{userInfo[`tier${ranking}Time`]}</p>
+                <p className="whitespace-nowrap">
+                  {userInfo[`tier${ranking}Time`]}
+                </p>
               </div>
             </div>
             <div className="bg-[#FAFBFC] p-4 rounded-2xl">
@@ -445,9 +456,9 @@ const Profile = () => {
               <div className="py-2 px-4">
                 <p className="uppercase mt-2 font-bold">{t('children')}</p>
                 <div className="py-2">
-                  <ul className='flex gap-4'>
+                  <ul className="flex gap-4">
                     {listDirectUser.map((ele) => (
-                      <li className="" key={ele._id}>
+                      <li className="" key={ele.userId}>
                         <div className="py-2">
                           <div className="text-base">
                             <span

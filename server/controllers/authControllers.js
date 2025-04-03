@@ -10,6 +10,8 @@ import { getActivePackages } from "./packageControllers.js";
 import Permission from "../models/permissionModel.js";
 import { checkSerepayWallet, findNextReferrer, mergeIntoThreeGroups } from "../utils/methods.js";
 import axios from "axios";
+import Honor from "../models/honorModel.js";
+import mongoose from "mongoose";
 
 const checkLinkRef = asyncHandler(async (req, res) => {
   const { ref, receiveId } = req.body;
@@ -375,6 +377,7 @@ const authUser = asyncHandler(async (req, res) => {
         totalEarning: user.availableUsdt + user.claimedUsdt,
         chartData: mergeIntoThreeGroups(listDirectUser),
         targetSales: process.env[`LEVEL_${user.ranking + 1}`],
+        bonusRef: user.bonusRef
       },
       accessToken,
       refreshToken,

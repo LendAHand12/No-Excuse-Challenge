@@ -186,6 +186,10 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
+    bonusRef: {
+      type: Boolean,
+      default: false
+    },
     role: {
       type: String,
       // enum: ["USER", "ADMIN", "ADMIN1", "ADMIN2"],

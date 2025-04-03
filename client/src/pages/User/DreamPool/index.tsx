@@ -35,7 +35,7 @@ const DreamPoolPage: React.FC = () => {
 
   return (
     <DefaultLayout>
-      <div className="relative w-full px-10 py-24 bg-black">
+      <div className="relative w-full min-h-screen px-10 py-24 bg-black">
         <h1 className="text-4xl font-bold mb-12 flex items-center justify-center gap-2 text-white relative z-10">
           <Sparkles className="text-yellow-300" /> DreamPool
         </h1>

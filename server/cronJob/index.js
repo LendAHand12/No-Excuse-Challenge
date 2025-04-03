@@ -392,6 +392,7 @@ export const rankingCalc = asyncHandler(async () => {
             const diffDays = currentDay.diff(u.createdAt, "days");
             if (diffDays < 15) {
               u.availableUsdt = u.availableUsdt + 10;
+              u.bonusRef = true;
               await Honor.create({
                 userId: u._id,
               });
