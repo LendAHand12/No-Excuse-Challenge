@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux';
 import DefaultLayout from '@/layout/DefaultLayout';
 
 const EditPostPage = () => {
+  const { userInfo } = useSelector((state) => state.auth);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const { t } = useTranslation();
@@ -42,8 +43,16 @@ const EditPostPage = () => {
       setLoading(true);
       await Posts.getPostsById(id)
         .then((response) => {
-          const { title_vn, title_en, text_vn, text_en, type, desc_vn, desc_en, category } =
-            response.data;
+          const {
+            title_vn,
+            title_en,
+            text_vn,
+            text_en,
+            type,
+            desc_vn,
+            desc_en,
+            category,
+          } = response.data;
           setValue('title_vn', title_vn);
           setValue('title_en', title_en);
           setValue('text_vn', text_vn);
@@ -287,23 +296,31 @@ const EditPostPage = () => {
                   </div>
                 </>
               )}
-              <button
-                type="submit"
-                className="w-full flex justify-center items-center hover:underline text-NoExcuseChallenge bg-black font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
-              >
-                {t('update')}
-              </button>
+              {userInfo?.permissions
+                .find((p) => p.page.pageName === 'admin-news-edit')
+                ?.actions.includes('update') && (
+                <button
+                  type="submit"
+                  className="w-full flex justify-center items-center hover:underline text-NoExcuseChallenge bg-black font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                >
+                  {t('update')}
+                </button>
+              )}
 
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleDelete();
-                }}
-                className="w-full flex justify-center items-center hover:underline bg-red-500 text-white font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
-              >
-                {loadingDelete && <Loading />}
-                {t('delete')}
-              </button>
+              {userInfo?.permissions
+                .find((p) => p.page.pageName === 'admin-news-edit')
+                ?.actions.includes('delete') && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDelete();
+                  }}
+                  className="w-full flex justify-center items-center hover:underline bg-red-500 text-white font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                >
+                  {loadingDelete && <Loading />}
+                  {t('delete')}
+                </button>
+              )}
             </div>
           )}
         </form>

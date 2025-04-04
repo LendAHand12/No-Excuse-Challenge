@@ -74,7 +74,7 @@ const CreatePostPage = () => {
                 className="w-64 flex justify-center gap-2 items-center hover:underline text-NoExcuseChallenge bg-black rounded-full py-2 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
                 onClick={(e) => {
                   e.preventDefault();
-                  history.push('/admin/news');
+                  navigate('/admin/news');
                 }}
               >
                 <svg

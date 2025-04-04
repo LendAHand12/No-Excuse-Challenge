@@ -11,8 +11,10 @@ import Modal from 'react-modal';
 import Admin from '@/api/Admin';
 import { shortenWalletAddress } from '@/utils';
 import { transfer } from '@/utils/smartContract';
+import { useSelector } from 'react-redux';
 
 const AdminWithdrawPages = () => {
+  const { userInfo } = useSelector((state) => state.auth);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -357,22 +359,25 @@ const AdminWithdrawPages = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-6">
-                      {ele.status === 'PENDING' && (
-                        <button
-                          onClick={() => handleApprove(ele)}
-                          className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-green-700 text-white"
-                        >
-                          <svg
-                            fill="currentColor"
-                            height="24"
-                            width="24"
-                            version="1.1"
-                            id="Icons"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 32 32"
+                      {userInfo?.permissions
+                        .find((p) => p.page.pageName === 'admin-withdraw')
+                        ?.actions.includes('approve') &&
+                        ele.status === 'PENDING' && (
+                          <button
+                            onClick={() => handleApprove(ele)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-green-700 text-white"
                           >
-                            <path
-                              d="M24.5,11c-0.7-0.1-1.4,0-2,0.4c-0.4-0.7-1.2-1.2-2-1.4c-0.7-0.1-1.4,0-2,0.4c-0.4-0.7-1.2-1.2-2-1.4C16,9,15.5,9,15,9.2V5.1
+                            <svg
+                              fill="currentColor"
+                              height="24"
+                              width="24"
+                              version="1.1"
+                              id="Icons"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 32 32"
+                            >
+                              <path
+                                d="M24.5,11c-0.7-0.1-1.4,0-2,0.4c-0.4-0.7-1.2-1.2-2-1.4c-0.7-0.1-1.4,0-2,0.4c-0.4-0.7-1.2-1.2-2-1.4C16,9,15.5,9,15,9.2V5.1
 	c0-1.5-1.1-2.8-2.5-3.1c-0.9-0.1-1.8,0.1-2.4,0.7C9.4,3.3,9,4.1,9,5v5.3C8.4,10.1,7.8,10,7.1,10c-0.6,0.1-1.3,0.3-1.8,0.7
 	C5.1,10.9,5,11.2,5,11.5v7.7C5,24.9,9.5,29.7,15,30c0.2,0,0.3,0,0.5,0c0.1,0,0.3,0,0.4,0C22,29.8,27,24.5,27,18.1v-4
 	C27,12.6,25.9,11.3,24.5,11z M25,18.1c0,5.3-4.1,9.7-9.2,9.9c-0.3,0-0.5,0-0.8,0C10.6,27.8,7,23.8,7,19.2v-7.1C7.1,12,7.2,12,7.3,12
@@ -380,12 +385,14 @@ const AdminWithdrawPages = () => {
 	C12.6,4.1,13,4.6,13,5.1V12v2c0,0.6,0.4,1,1,1s1-0.4,1-1v-2c0-0.3,0.1-0.6,0.4-0.8c0.2-0.2,0.5-0.3,0.8-0.2c0.5,0.1,0.8,0.6,0.8,1.1
 	V13v1c0,0.6,0.4,1,1,1s1-0.4,1-1v-1c0-0.3,0.1-0.6,0.4-0.8c0.2-0.2,0.5-0.3,0.8-0.2c0.5,0.1,0.8,0.6,0.8,1.1V14v1c0,0.6,0.4,1,1,1
 	s1-0.4,1-1v-1c0-0.3,0.1-0.6,0.4-0.8c0.2-0.2,0.5-0.3,0.8-0.2c0,0,0,0,0,0c0.5,0.1,0.8,0.6,0.8,1.1V18.1z"
-                            />
-                          </svg>
-                          Approve
-                        </button>
-                      )}
-                      {ele.status === 'PENDING' && (
+                              />
+                            </svg>
+                            Approve
+                          </button>
+                        )}
+                      {userInfo?.permissions
+                        .find((p) => p.page.pageName === 'admin-withdraw')
+                        ?.actions.includes('approve') && ele.status === 'PENDING' && (
                         <button
                           onClick={() => handleCancel(ele)}
                           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-200 font-medium text-red-700"

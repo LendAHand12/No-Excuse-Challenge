@@ -227,7 +227,7 @@ const AdminSystemPage = () => {
                 width="24"
                 height="24"
                 viewBox="0 0 100 100"
-                enable-background="new 0 0 100 100"
+                enableBackground="new 0 0 100 100"
               >
                 <path
                   d="M76.5,58.3c0,0.1,0,0.2-0.1,0.2c-0.3,1.1-0.7,2.2-1.1,3.3c-0.5,1.2-1,2.3-1.6,3.4c-1.2,2.2-2.7,4.2-4.5,6

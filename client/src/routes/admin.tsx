@@ -1,3 +1,5 @@
+import AdminUserPages from '@/pages/Admin/Users';
+
 const routes = [
   // {
   //   title: 'Dashboard',
@@ -38,6 +40,7 @@ const routes = [
         <path d="M16 3.13a4 4 0 010 7.75" />
       </svg>
     ),
+    component: AdminUserPages
   },
   {
     title: 'Transactions',
@@ -85,7 +88,7 @@ const routes = [
         width="23"
         height="21"
         viewBox="0 0 20 20"
-        enable-background="new 0 0 20 20"
+        enableBackground="new 0 0 20 20"
       >
         <path
           d="M19,4h-3V1c0-0.6-0.4-1-1-1H3C1.3,0,0,1.3,0,3v14c0,1.7,1.3,3,3,3h16c0.6,0,1-0.4,1-1V5C20,4.4,19.6,4,19,4z M2,3
@@ -107,9 +110,9 @@ const routes = [
         version="1.1"
         fill="none"
         stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
       >
         <rect height="9.5" width="12.5" y="3.75" x="1.75" />
         <path d="m2.25 4.25 5.75 5 5.75-5" />
@@ -155,7 +158,7 @@ const routes = [
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          fill-rule="evenodd"
+          fillRule="evenodd"
           d="M22,17 L22,19 L8,19 L8,17 L22,17 Z M22,11 L22,13 L8,13 L8,11 L22,11 Z M22,5 L22,7 L8,7 L8,5 L22,5 Z M4,20 C2.8954305,20 2,19.1045695 2,18 C2,16.8954305 2.8954305,16 4,16 C5.1045695,16 6,16.8954305 6,18 C6,19.1045695 5.1045695,20 4,20 Z M4,14 C2.8954305,14 2,13.1045695 2,12 C2,10.8954305 2.8954305,10 4,10 C5.1045695,10 6,10.8954305 6,12 C6,13.1045695 5.1045695,14 4,14 Z M4,8 C2.8954305,8 2,7.1045695 2,6 C2,4.8954305 2.8954305,4 4,4 C5.1045695,4 6,4.8954305 6,6 C6,7.1045695 5.1045695,8 4,8 Z"
         />
       </svg>
@@ -186,6 +189,48 @@ const routes = [
           strokeLinecap="round"
           strokeLinejoin="round"
         />
+      </svg>
+    ),
+  },
+  {
+    title: 'Permissions',
+    link: '/admin/permissions',
+    icon: (
+      <svg
+        fill="currentColor"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M17,9V7A5,5,0,0,0,7,7V9a3,3,0,0,0-3,3v7a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V12A3,3,0,0,0,17,9ZM9,7a3,3,0,0,1,6,0V9H9Zm9,12a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V12a1,1,0,0,1,1-1H17a1,1,0,0,1,1,1Z" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Admins',
+    link: '/admin/admin',
+    icon: (
+      <svg
+        fill="currentColor"
+        height="24"
+        width="24"
+        version="1.1"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        enableBackground="new 0 0 24 24"
+      >
+        <g id="user-admin">
+          <path
+            d="M22.3,16.7l1.4-1.4L20,11.6l-5.8,5.8c-0.5-0.3-1.1-0.4-1.7-0.4C10.6,17,9,18.6,9,20.5s1.6,3.5,3.5,3.5s3.5-1.6,3.5-3.5
+		c0-0.6-0.2-1.2-0.4-1.7l1.9-1.9l2.3,2.3l1.4-1.4l-2.3-2.3l1.1-1.1L22.3,16.7z M12.5,22c-0.8,0-1.5-0.7-1.5-1.5s0.7-1.5,1.5-1.5
+		s1.5,0.7,1.5,1.5S13.3,22,12.5,22z"
+          />
+          <path
+            d="M2,19c0-3.9,3.1-7,7-7c2,0,3.9,0.9,5.3,2.4l1.5-1.3c-0.9-1-1.9-1.8-3.1-2.3C14.1,9.7,15,7.9,15,6c0-3.3-2.7-6-6-6
+		S3,2.7,3,6c0,1.9,0.9,3.7,2.4,4.8C2.2,12.2,0,15.3,0,19v5h8v-2H2V19z M5,6c0-2.2,1.8-4,4-4s4,1.8,4,4s-1.8,4-4,4S5,8.2,5,6z"
+          />
+        </g>
       </svg>
     ),
   },
@@ -266,185 +311,6 @@ const routes = [
       </svg>
     ),
   },
-  // {
-  //   title: 'Ice Breaker',
-  //   link: '/admin/ice-breakers',
-  //   icon: (
-  //     <svg
-  //       width="24"
-  //       height="24"
-  //       viewBox="0 0 24 24"
-  //       fill="none"
-  //       xmlns="http://www.w3.org/2000/svg"
-  //     >
-  //       <path
-  //         d="M4 13H20V20C20 21.1046 19.1046 22 18 22H6C4.89543 22 4 21.1046 4 20V13Z"
-  //         stroke="currentColor"
-  //         strokeWidth="2"
-  //         strokeLinecap="round"
-  //         strokeLinejoin="round"
-  //       />
-  //       <path
-  //         d="M2 9H22V13H2V9Z"
-  //         stroke="currentColor"
-  //         strokeWidth="2"
-  //         strokeLinecap="round"
-  //         strokeLinejoin="round"
-  //       />
-  //       <path
-  //         d="M12 5L12 22"
-  //         stroke="currentColor"
-  //         strokeWidth="2"
-  //         strokeLinecap="round"
-  //         strokeLinejoin="round"
-  //       />
-  //       <path
-  //         d="M12 5.5C12 3.567 10.433 2 8.5 2C6.567 2 5 3.567 5 5.5C5 7.433 6.567 9 8.5 9"
-  //         stroke="currentColor"
-  //         strokeWidth="2"
-  //         strokeLinecap="round"
-  //         strokeLinejoin="round"
-  //       />
-  //       <path
-  //         d="M15.5 9C17.433 9 19 7.433 19 5.5C19 3.567 17.433 2 15.5 2C13.567 2 12 3.567 12 5.5"
-  //         stroke="currentColor"
-  //         strokeWidth="2"
-  //         strokeLinecap="round"
-  //         strokeLinejoin="round"
-  //       />
-  //     </svg>
-  //   ),
-  // },
-  // {
-  //   path: "/users",
-  //   title: "users",
-  //   component: Users,
-  // },
-  // {
-  //   path: "/tree/:id",
-  //   component: Tree,
-  // },
-  // {
-  //   path: "/users/:id",
-  //   component: UserProfile,
-  // },
-  // {
-  //   path: "/transactions",
-  //   title: "transactions",
-  //   component: Transactions,
-  // },
-  // {
-  //   path: "/transactions/:id",
-  //   component: TransactionDetail,
-  // },
-  // // {
-  // //   path: "/system",
-  // //   title: "tree",
-  // //   component: System,
-  // // },
-  // {
-  //   path: "/trash",
-  //   title: "trash",
-  //   component: Trash,
-  // },
-  // {
-  //   path: "/linkVerify",
-  //   component: GetVerifyLink,
-  // },
-  // {
-  //   path: "/package",
-  //   component: SettingPackage,
-  // },
-  // {
-  //   path: "/wallet",
-  //   component: SettingWallet,
-  // },
-  // {
-  //   path: "/create-user",
-  //   component: CreateUserPage,
-  // },
-  // {
-  //   path: "/export/payment",
-  //   component: ExportPayment,
-  // },
-  // {
-  //   path: "/export/user",
-  //   component: ExportUser,
-  // },
-  // {
-  //   path: "/changeUser",
-  //   title: "changeUser",
-  //   component: ChangeUserPage,
-  // },
-  // {
-  //   path: "/changeUser/:id",
-  //   component: ChangeUserDetail,
-  // },
-  // {
-  //   path: "/listTier",
-  //   component: ListUserNextTier,
-  // },
-  // {
-  //   path: "/lastUserTier",
-  //   component: RemoveLastUserTier,
-  // },
-  // {
-  //   path: "/cms",
-  //   title: "CMS",
-  //   component: CMSPage,
-  // },
-  // {
-  //   path: "/cms/:page",
-  //   component: EditCMSPage,
-  // },
-  // {
-  //   path: "/cms/preview/cms-homepage",
-  //   component: PreviewHomePage,
-  // },
-  // {
-  //   path: "/cms/preview/cms-aboutUs",
-  //   component: PreviewAboutUsPage,
-  // },
-  // {
-  //   path: "/cms/preview/cms-ourTeam",
-  //   component: PreviewOurTeamPage,
-  // },
-  // {
-  //   path: "/posts",
-  //   component: PostsPage,
-  // },
-  // {
-  //   path: "/posts/create",
-  //   component: CreatePostsPage,
-  // },
-  // {
-  //   path: "/posts/edit",
-  //   component: EditPostsPage,
-  // },
-  // {
-  //   path: "/permissions",
-  //   component: PermissionsPage,
-  // },
-  // {
-  //   path: "/permissions/create",
-  //   component: PermissionsCreatePage,
-  // },
-  // {
-  //   path: "/permissions/:id",
-  //   component: PermissionsDetailsPage,
-  // },
-  // {
-  //   path: "/admin",
-  //   component: AdminPage,
-  // },
-  // {
-  //   path: "/create-admin",
-  //   component: CreateAdminPage,
-  // },
-  // {
-  //   path: "/admin/:id",
-  //   component: AdminDetailPage,
-  // },
 ];
 
 export default routes;

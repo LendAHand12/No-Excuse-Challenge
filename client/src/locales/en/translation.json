@@ -377,5 +377,9 @@
   "congratPackageB": "Congratulations, you have successfully paid for package B",
   "upgradeAPackage": "Upgrade to package A",
   "COMPANY": "Buy HEWE",
-  "PIG": "DreamPool"
+  "PIG": "DreamPool",
+  "addNewPermissions": "Create new permission",
+  "permissions": "Permissions",
+  "createAdmin": "Create new Admin",
+  "admin-admin-detail": "Admin Detail"
 }

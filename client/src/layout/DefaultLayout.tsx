@@ -13,8 +13,15 @@ const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   if (userInfo) {
     try {
+      const { permissions } = userInfo;
       if (userInfo.role !== 'user') {
-        routes = AdminRoutes;
+        routes = AdminRoutes.filter((route) => {
+          let currentRoute = `${route.link}`;
+          let page = permissions.find((ele) => ele.page?.path === currentRoute);
+          if (page && page.actions.includes("read")) {
+            return route;
+          }
+        });
       } else {
         routes = UserRoutes;
       }

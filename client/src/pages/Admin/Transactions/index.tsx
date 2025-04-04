@@ -9,8 +9,10 @@ import { ToastContainer, toast } from 'react-toastify';
 import { useLocation, useNavigate } from 'react-router-dom';
 // import { shortenWalletAddress } from "@/utils";
 import DefaultLayout from '../../../layout/DefaultLayout';
+import { useSelector } from 'react-redux';
 
 const AdminTransactionsPage = () => {
+  const { userInfo } = useSelector((state) => state.auth);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -100,7 +102,9 @@ const AdminTransactionsPage = () => {
   );
 
   const handleRowClick = (id) => {
-    navigate(`/admin/transactions/${id}`);
+    userInfo?.permissions
+      .find((p) => p.page.pageName === 'admin-transactions-details')
+      ?.actions.includes('read') && navigate(`/admin/transactions/${id}`);
   };
 
   const handleSearch = useCallback(() => {

@@ -10,8 +10,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DefaultLayout from '@/layout/DefaultLayout';
 import Modal from 'react-modal';
 import { shortenWalletAddress } from '@/utils';
+import { useSelector } from 'react-redux';
 
 const AdminUserPages = () => {
+  const { userInfo } = useSelector((state) => state.auth);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -323,7 +325,11 @@ const AdminUserPages = () => {
                     className="block p-2.5 w-full min-w-62.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-yellow-500 focus:border-yellow-500"
                     placeholder="Write the reason for reject..."
                   ></textarea>
-                  {rejectReasonError && <p className='text-sm text-red-500 mt-2'>Please input reject reason</p>}
+                  {rejectReasonError && (
+                    <p className="text-sm text-red-500 mt-2">
+                      Please input reject reason
+                    </p>
+                  )}
                 </div>
                 <div className="flex justify-center items-center space-x-4">
                   <button
@@ -453,7 +459,9 @@ const AdminUserPages = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-6">
-                      {ele.status === 'PENDING' && (
+                      {userInfo?.permissions
+                        .find((p) => p.page.pageName === 'admin-users-details')
+                        ?.actions.includes('approve') && ele.status === 'PENDING' && (
                         <button
                           onClick={() => handleApprove(ele._id)}
                           className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
@@ -481,68 +489,78 @@ const AdminUserPages = () => {
                         </button>
                       )}
 
-                      <button
-                        onClick={() => handleDetail(ele._id)}
-                        className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
-                      >
-                        <svg
-                          fill="currentColor"
-                          className="w-6 h-auto"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
+                      {userInfo?.permissions
+                        .find((p) => p.page.pageName === 'admin-users-details')
+                        ?.actions.includes('read') && (
+                        <button
+                          onClick={() => handleDetail(ele._id)}
+                          className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
                         >
-                          <path d="M21.92,11.6C19.9,6.91,16.1,4,12,4S4.1,6.91,2.08,11.6a1,1,0,0,0,0,.8C4.1,17.09,7.9,20,12,20s7.9-2.91,9.92-7.6A1,1,0,0,0,21.92,11.6ZM12,18c-3.17,0-6.17-2.29-7.9-6C5.83,8.29,8.83,6,12,6s6.17,2.29,7.9,6C18.17,15.71,15.17,18,12,18ZM12,8a4,4,0,1,0,4,4A4,4,0,0,0,12,8Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,14Z" />
-                        </svg>
-                      </button>
+                          <svg
+                            fill="currentColor"
+                            className="w-6 h-auto"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path d="M21.92,11.6C19.9,6.91,16.1,4,12,4S4.1,6.91,2.08,11.6a1,1,0,0,0,0,.8C4.1,17.09,7.9,20,12,20s7.9-2.91,9.92-7.6A1,1,0,0,0,21.92,11.6ZM12,18c-3.17,0-6.17-2.29-7.9-6C5.83,8.29,8.83,6,12,6s6.17,2.29,7.9,6C18.17,15.71,15.17,18,12,18ZM12,8a4,4,0,1,0,4,4A4,4,0,0,0,12,8Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,14Z" />
+                          </svg>
+                        </button>
+                      )}
 
-                      <button
-                        onClick={() => handleTree(ele._id)}
-                        className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
-                      >
-                        <svg
-                          className="w-6 h-auto"
-                          viewBox="0 0 48 48"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+                      {userInfo?.permissions
+                        .find((p) => p.page.pageName === 'admin-system')
+                        ?.actions.includes('read') && (
+                        <button
+                          onClick={() => handleTree(ele._id)}
+                          className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
                         >
-                          <rect
-                            width="48"
-                            height="48"
-                            fill="white"
-                            fillOpacity="0.01"
-                          />
-                          <path
-                            d="M13.0448 14C13.5501 8.3935 18.262 4 24 4C29.738 4 34.4499 8.3935 34.9552 14H35C39.9706 14 44 18.0294 44 23C44 27.9706 39.9706 32 35 32H13C8.02944 32 4 27.9706 4 23C4 18.0294 8.02944 14 13 14H13.0448Z"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M24 28L29 23"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M24 25L18 19"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M24 44V18"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
+                          <svg
+                            className="w-6 h-auto"
+                            viewBox="0 0 48 48"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <rect
+                              width="48"
+                              height="48"
+                              fill="white"
+                              fillOpacity="0.01"
+                            />
+                            <path
+                              d="M13.0448 14C13.5501 8.3935 18.262 4 24 4C29.738 4 34.4499 8.3935 34.9552 14H35C39.9706 14 44 18.0294 44 23C44 27.9706 39.9706 32 35 32H13C8.02944 32 4 27.9706 4 23C4 18.0294 8.02944 14 13 14H13.0448Z"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M24 28L29 23"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M24 25L18 19"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M24 44V18"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                      )}
 
-                      {ele.countPay === 0 && ele.status !== 'DELETED' && (
+                      {userInfo?.permissions
+                        .find((p) => p.page.pageName === 'admin-users-details')
+                        ?.actions.includes('delete') && ele.countPay === 0 && ele.status !== 'DELETED' && (
                         <button
                           onClick={() => handleDelete(ele._id)}
                           className="font-medium text-gray-500 hover:text-NoExcuseChallenge"

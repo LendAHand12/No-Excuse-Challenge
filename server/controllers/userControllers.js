@@ -1979,19 +1979,13 @@ const removeLastUserInTier = asyncHandler(async (req, res) => {
 });
 
 const createAdmin = asyncHandler(async (req, res) => {
-  const { userId, walletAddress, email, password, phone, role } = req.body;
+  const { userId, email, password, role } = req.body;
 
   const userExistsUserId = await User.findOne({
     userId: { $regex: userId, $options: "i" },
   });
   const userExistsEmail = await User.findOne({
     email: { $regex: email, $options: "i" },
-  });
-  const userExistsPhone = await User.findOne({
-    $and: [{ phone: { $ne: "" } }, { phone }],
-  });
-  const userExistsWalletAddress = await User.findOne({
-    walletAddress1: walletAddress,
   });
 
   if (userExistsUserId) {
@@ -2002,29 +1996,15 @@ const createAdmin = asyncHandler(async (req, res) => {
     let message = "duplicateInfoEmail";
     res.status(400);
     throw new Error(message);
-  } else if (userExistsPhone) {
-    let message = "Dupplicate phone";
-    res.status(400);
-    throw new Error(message);
-  } else if (userExistsWalletAddress) {
-    let message = "Dupplicate wallet address";
-    res.status(400);
-    throw new Error(message);
   } else {
-    const avatar = generateGravatar(email);
-
     await User.create({
       userId,
       email,
-      phone,
       password,
-      avatar,
-      walletAddress: [walletAddress],
-      walletAddress1: walletAddress,
       imgBack: "",
       imgFront: "",
       tier: 5,
-      countPay: 100,
+      countPay: 13,
       createBy: "ADMIN",
       status: "APPROVED",
       isConfirmed: true,
@@ -2040,70 +2020,19 @@ const createAdmin = asyncHandler(async (req, res) => {
 });
 
 const getListAdmin = asyncHandler(async (req, res) => {
-  const { pageNumber, keyword } = req.query;
-  const page = Number(pageNumber) || 1;
-
-  const pageSize = 20;
-
-  const count = await User.countDocuments({
-    $and: [
-      {
-        $or: [
-          { userId: { $regex: keyword, $options: "i" } }, // Tìm theo userId
-          { email: { $regex: keyword, $options: "i" } }, // Tìm theo email
-        ],
-      },
-      {
-        role: { $ne: "user" },
-      },
-    ],
-  });
-  const allUsers = await User.find({
-    $and: [
-      {
-        $or: [
-          { userId: { $regex: keyword, $options: "i" } }, // Tìm theo userId
-          { email: { $regex: keyword, $options: "i" } }, // Tìm theo email
-        ],
-      },
-      {
-        role: { $ne: "user" },
-      },
-    ],
-  })
-    .limit(pageSize)
-    .skip(pageSize * (page - 1))
+  const allUsers = await User.find({role: { $ne: "user" }})
     .sort("-createdAt")
     .select("-password");
 
   res.json({
     admins: allUsers,
-    pages: Math.ceil(count / pageSize),
   });
 });
 
 const updateAdmin = asyncHandler(async (req, res) => {
   console.log({ data: req.body });
-  const { walletAddress, email, phone, role, password } = req.body;
+  const { email, role, password } = req.body;
   const user = await User.findOne({ _id: req.params.id }).select("-password");
-
-  if (phone) {
-    const userHavePhone = await User.find({
-      $and: [{ phone }],
-    });
-    if (userHavePhone.length >= 1) {
-      res.status(400).json({ error: "duplicateInfo" });
-    }
-  }
-
-  if (walletAddress) {
-    const userHaveWalletAddress = await User.find({
-      $and: [{ walletAddress: { $in: [walletAddress] } }],
-    });
-    if (userHaveWalletAddress.length > 1) {
-      res.status(400).json({ error: "duplicateInfo" });
-    }
-  }
 
   if (email) {
     const userHaveEmail = await User.find({
@@ -2115,11 +2044,8 @@ const updateAdmin = asyncHandler(async (req, res) => {
   }
 
   if (user) {
-    if (phone) user.phone = phone;
     if (email) user.email = email;
     if (role) user.role = role;
-    if (walletAddress)
-      user.walletAddress = [walletAddress, ...user.walletAddress];
     if (password) user.password = password;
     await user.save();
 
@@ -2147,14 +2073,12 @@ const getAdminById = asyncHandler(async (req, res) => {
   const admin = await User.findById(id);
 
   if (admin) {
-    const { userId, phone, email, _id, walletAddress, role } = admin;
+    const { userId, email, _id, role } = admin;
     res.json({
       admin: {
         userId,
-        phone,
         email,
         _id,
-        walletAddress: walletAddress[0],
         role,
       },
     });

@@ -14,8 +14,10 @@ import { ToastContainer, toast } from 'react-toastify';
 import DefaultLayout from '../../../layout/DefaultLayout';
 import { adjustSales } from '../../../utils';
 import UploadFile from './UploadInfo';
+import { useSelector } from 'react-redux';
 
 const UserProfile = () => {
+  const {userInfo} = useSelector((state) => state.auth);
   const { pathname } = useLocation();
   const id = pathname.split('/')[3];
   const navigate = useNavigate();
@@ -1118,7 +1120,9 @@ const UserProfile = () => {
                     </button>
                   </>
                 )}
-                {!isEditting && data.status !== 'DELETED' && (
+                {userInfo?.permissions
+                        .find((p) => p.page.pageName === 'admin-users-details')
+                        ?.actions.includes('update') && !isEditting && data.status !== 'DELETED' && (
                   <button
                     onClick={() => setEditting(true)}
                     className="w-full flex justify-center items-center hover:underline text-NoExcuseChallenge bg-black font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
@@ -1126,7 +1130,9 @@ const UserProfile = () => {
                     {t('edit')}
                   </button>
                 )}
-                {!isEditting && data.status !== 'DELETED' && (
+                {userInfo?.permissions
+                        .find((p) => p.page.pageName === 'admin-users-details')
+                        ?.actions.includes('delete') && !isEditting && data.status !== 'DELETED' && (
                   <div
                     onClick={handleDelete}
                     className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-red-500 text-white"
@@ -1134,7 +1140,9 @@ const UserProfile = () => {
                     {t('delete')}
                   </div>
                 )}
-                {walletChange && (
+                {userInfo?.permissions
+                        .find((p) => p.page.pageName === 'admin-users-details')
+                        ?.actions.includes('update') && walletChange && (
                   <div
                     onClick={handleApproveChangeWallet}
                     className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-orange-500 text-white"
