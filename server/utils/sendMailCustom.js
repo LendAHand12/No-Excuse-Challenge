@@ -249,7 +249,7 @@ export const sendMailContactWithAdmin = async (mailInfo) => {
 export const sendMailChangeWalletToAdmin = async (mailInfo) => {
   const { userId, userName, phone, email } = mailInfo;
 
-  const mailOptions = { 
+  const mailOptions = {
     from: process.env.EMAIL,
     to: process.env.CC_MAIL,
     subject: "THÔNG TIN NGƯỜI DÙNG CẦN DUYỆT ĐỔI VÍ",
@@ -267,10 +267,11 @@ export const sendMailChangeWalletToAdmin = async (mailInfo) => {
     <strong>Email :</strong> ${email}
     </p>
     <p>
-    <strong>Link profile :</strong> ${process.env.FRONTEND_BASE_URL}/admin/users/${userId}
+    <strong>Link profile :</strong> <a href="${process.env.FRONTEND_BASE_URL}/admin/users/${userId}" target="_blank">${process.env.FRONTEND_BASE_URL}/admin/users/${userId}</a>
     </p>
     </div>
 			`,
+    cc: [process.env.MAIL_ADMIN1, process.env.MAIL_ADMIN2]
   };
 
   const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
@@ -344,7 +345,6 @@ export const sendMailRefDc = async (mailInfo) => {
       </b>
 			`,
     cc: process.env.CC_MAIL,
-    
   };
 
   const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
