@@ -1,15 +1,24 @@
 import React, { useState, ReactNode } from 'react';
 import Header from '../components/Header/index';
 import Sidebar from '../components/Sidebar/index';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import AdminRoutes from '@/routes/admin';
 import UserRoutes from '@/routes/user';
 import PublicRoutes from '@/routes/public';
+import { useDisconnect } from 'wagmi';
+import { LOGOUT } from '../slices/auth';
 
 const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { userInfo } = useSelector((state) => state.auth);
   var routes = PublicRoutes;
+  const { disconnect } = useDisconnect();
+  const dispatch = useDispatch();
+
+  const handleLogout = () => {
+    disconnect();
+    dispatch(LOGOUT());
+  };
 
   if (userInfo) {
     try {

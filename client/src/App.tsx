@@ -156,7 +156,7 @@ function App() {
       </Route>
       <Route element={<PrivateRoute />}>
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/transactions')
+          ?.find((p) => p.page.path === '/admin/transactions')
           ?.actions.includes('read') && (
           <Route
             path="/admin/transactions"
@@ -170,7 +170,7 @@ function App() {
         )}
 
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/users/:id')
+          ?.find((p) => p.page.path === '/admin/users/:id')
           ?.actions.includes('read') && (
           <Route
             path="/admin/users/:id"
@@ -184,7 +184,7 @@ function App() {
         )}
 
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/transactions/:id')
+          ?.find((p) => p.page.path === '/admin/transactions/:id')
           ?.actions.includes('read') && (
           <Route
             path="/admin/transactions/:id"
@@ -197,7 +197,7 @@ function App() {
           />
         )}
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/wallets')
+          ?.find((p) => p.page.path === '/admin/wallets')
           ?.actions.includes('read') && (
           <Route
             path="/admin/wallets"
@@ -210,7 +210,7 @@ function App() {
           />
         )}
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/users')
+          ?.find((p) => p.page.path === '/admin/users')
           ?.actions.includes('read') && (
           <Route
             path="/admin/users"
@@ -224,7 +224,7 @@ function App() {
         )}
 
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/system/:id')
+          ?.find((p) => p.page.path === '/admin/system/:id')
           ?.actions.includes('read') && (
           <Route
             path="/admin/system/:id"
@@ -237,7 +237,7 @@ function App() {
           />
         )}
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/linkVerify')
+          ?.find((p) => p.page.path === '/admin/linkVerify')
           ?.actions.includes('read') && (
           <Route
             path="/admin/linkVerify"
@@ -250,7 +250,7 @@ function App() {
           />
         )}
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/withdraw')
+          ?.find((p) => p.page.path === '/admin/withdraw')
           ?.actions.includes('read') && (
           <Route
             path="/admin/withdraw"
@@ -263,7 +263,7 @@ function App() {
           />
         )}
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/news')
+          ?.find((p) => p.page.path === '/admin/news')
           ?.actions.includes('read') && (
           <Route
             path="/admin/news"
@@ -276,7 +276,7 @@ function App() {
           />
         )}
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/claims')
+          ?.find((p) => p.page.path === '/admin/claims')
           ?.actions.includes('read') && (
           <Route
             path="/admin/claims"
@@ -289,7 +289,7 @@ function App() {
           />
         )}
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/news/create')
+          ?.find((p) => p.page.path === '/admin/news/create')
           ?.actions.includes('read') && (
           <Route
             path="/admin/news/create"
@@ -303,7 +303,7 @@ function App() {
         )}
 
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/news/edit')
+          ?.find((p) => p.page.path === '/admin/news/edit')
           ?.actions.includes('read') && (
           <Route
             path="/admin/news/edit"
@@ -317,7 +317,7 @@ function App() {
         )}
 
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/dreampool')
+          ?.find((p) => p.page.path === '/admin/dreampool')
           ?.actions.includes('read') && (
           <Route
             path="/admin/dreampool"
@@ -330,7 +330,7 @@ function App() {
           />
         )}
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/permissions')
+          ?.find((p) => p.page.path === '/admin/permissions')
           ?.actions.includes('read') && (
           <Route
             path="/admin/permissions"
@@ -343,7 +343,7 @@ function App() {
           />
         )}
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/permissions/:id')
+          ?.find((p) => p.page.path === '/admin/permissions/:id')
           ?.actions.includes('read') && (
           <Route
             path="/admin/permissions/:id"
@@ -356,7 +356,7 @@ function App() {
           />
         )}
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/permissions/create')
+          ?.find((p) => p.page.path === '/admin/permissions/create')
           ?.actions.includes('read') && (
           <Route
             path="/admin/permissions/create"
@@ -369,7 +369,7 @@ function App() {
           />
         )}
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/admin')
+          ?.find((p) => p.page.path === '/admin/admin')
           ?.actions.includes('read') && (
           <Route
             path="/admin/admin"
@@ -382,7 +382,7 @@ function App() {
           />
         )}
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/create-admin')
+          ?.find((p) => p.page.path === '/admin/create-admin')
           ?.actions.includes('read') && (
           <Route
             path="/admin/create-admin"
@@ -395,7 +395,7 @@ function App() {
           />
         )}
         {userInfo?.permissions
-          .find((p) => p.page.path === '/admin/admin/:id')
+          ?.find((p) => p.page.path === '/admin/admin/:id')
           ?.actions.includes('read') && (
           <Route
             path="/admin/admin/:id"
