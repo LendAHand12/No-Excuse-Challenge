@@ -155,6 +155,15 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
       </Route>
       <Route element={<PrivateRoute />}>
+        <Route
+          path="/admin/dashboard"
+          element={
+            <>
+              <PageTitle title="Dashboard | NoExcuseChallenge" />
+              <DashboardPage />
+            </>
+          }
+        />
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/transactions')
           ?.actions.includes('read') && (
