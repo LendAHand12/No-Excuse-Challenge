@@ -48,54 +48,58 @@ const claimHewe = asyncHandler(async (req, res) => {
 const claimUsdt = asyncHandler(async (req, res) => {
   const user = req.user;
 
-  try {
-    if (user.status !== "APPROVED") {
-      throw new Error("Please verify your account");
-    }
+  res.status(400).json({
+    error:
+      "This withdrawal function is under maintenance, please come back later",
+  });
+  // try {
+  //   if (user.status !== "APPROVED") {
+  //     throw new Error("Please verify your account");
+  //   }
 
-    if (user.availableUsdt > 0) {
-      if (user.availableUsdt < 100) {
-        const receipt = await sendUsdt({
-          amount: user.availableUsdt - 1,
-          receiverAddress: user.walletAddress,
-        });
+  //   if (user.availableUsdt > 0) {
+  //     if (user.availableUsdt < 100) {
+  //       const receipt = await sendUsdt({
+  //         amount: user.availableUsdt - 1,
+  //         receiverAddress: user.walletAddress,
+  //       });
 
-        const claimed = await Claim.create({
-          userId: user.id,
-          amount: user.availableUsdt,
-          hash: receipt.blockHash,
-          coin: "USDT",
-        });
+  //       const claimed = await Claim.create({
+  //         userId: user.id,
+  //         amount: user.availableUsdt,
+  //         hash: receipt.blockHash,
+  //         coin: "USDT",
+  //       });
 
-        user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
-        user.availableUsdt = 0;
-        await user.save();
+  //       user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
+  //       user.availableUsdt = 0;
+  //       await user.save();
 
-        res.status(200).json({
-          message: "claim USDT successful",
-        });
-      } else {
-        const withdraw = await Withdraw.create({
-          userId: user.id,
-          amount: user.availableUsdt,
-        });
+  //       res.status(200).json({
+  //         message: "claim USDT successful",
+  //       });
+  //     } else {
+  //       const withdraw = await Withdraw.create({
+  //         userId: user.id,
+  //         amount: user.availableUsdt,
+  //       });
 
-        user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
-        user.availableUsdt = 0;
-        await user.save();
+  //       user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
+  //       user.availableUsdt = 0;
+  //       await user.save();
 
-        res.status(200).json({
-          message: "Withdrawal request has been sent to Admin. Please wait!",
-        });
-      }
-    } else {
-      throw new Error("Insufficient balance in account");
-    }
-  } catch (err) {
-    res.status(400).json({
-      error: err.message ? err.message.split(",")[0] : "Internal Error",
-    });
-  }
+  //       res.status(200).json({
+  //         message: "Withdrawal request has been sent to Admin. Please wait!",
+  //       });
+  //     }
+  //   } else {
+  //     throw new Error("Insufficient balance in account");
+  //   }
+  // } catch (err) {
+  //   res.status(400).json({
+  //     error: err.message ? err.message.split(",")[0] : "Internal Error",
+  //   });
+  // }
 });
 
 const getAllClaims = asyncHandler(async (req, res) => {
@@ -110,7 +114,8 @@ const getAllClaims = asyncHandler(async (req, res) => {
 
   const allClaims = await Claim.find({
     $and: [coin === "HEWE" || coin === "USDT" ? { coin } : {}],
-  }).populate("userId", "_id userId email walletAddress")
+  })
+    .populate("userId", "_id userId email walletAddress")
     .limit(pageSize)
     .skip(pageSize * (page - 1))
     .sort("-createdAt");

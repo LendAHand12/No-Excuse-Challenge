@@ -17,7 +17,7 @@ import UploadFile from './UploadInfo';
 import { useSelector } from 'react-redux';
 
 const UserProfile = () => {
-  const {userInfo} = useSelector((state) => state.auth);
+  const { userInfo } = useSelector((state) => state.auth);
   const { pathname } = useLocation();
   const id = pathname.split('/')[3];
   const navigate = useNavigate();
@@ -86,7 +86,6 @@ const UserProfile = () => {
 
   const onSubmit = useCallback(
     async (values) => {
-      console.log({ values });
       if (phone === '') {
         setErrPhone(true);
         return;
@@ -505,28 +504,37 @@ const UserProfile = () => {
                       )}
                     </span>
                   </li>
-                  {isEditting && (
-                    <>
-                      <li className="flex items-center py-3">
-                        <span>{t('openLah')}</span>
-                        <span className="ml-auto">
-                          <Switch
-                            checked={currentOpenLah}
-                            onChange={handleChangeOpenLah}
-                          />
-                        </span>
-                      </li>
-                      <li className="flex items-center py-3">
-                        <span>{t('closeLah')}</span>
-                        <span className="ml-auto">
-                          <Switch
-                            checked={currentCloseLah}
-                            onChange={handleChangeCloseLah}
-                          />
-                        </span>
-                      </li>
-                    </>
-                  )}
+
+                  <li className="flex items-center py-3">
+                    <span>{t('openLah')}</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Switch
+                          checked={currentOpenLah}
+                          onChange={handleChangeOpenLah}
+                        />
+                      ) : currentOpenLah ? (
+                        'True'
+                      ) : (
+                        'False'
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>{t('closeLah')}</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Switch
+                          checked={currentCloseLah}
+                          onChange={handleChangeCloseLah}
+                        />
+                      ) : currentCloseLah ? (
+                        'True'
+                      ) : (
+                        'False'
+                      )}
+                    </span>
+                  </li>
                   {data.status === 'LOCKED' && (
                     <li className="flex items-center py-3">
                       <span>{t('lockedTime')}</span>
@@ -1121,35 +1129,40 @@ const UserProfile = () => {
                   </>
                 )}
                 {userInfo?.permissions
-                        .find((p) => p.page.pageName === 'admin-users-details')
-                        ?.actions.includes('update') && !isEditting && data.status !== 'DELETED' && (
-                  <button
-                    onClick={() => setEditting(true)}
-                    className="w-full flex justify-center items-center hover:underline text-NoExcuseChallenge bg-black font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
-                  >
-                    {t('edit')}
-                  </button>
-                )}
+                  .find((p) => p.page.pageName === 'admin-users-details')
+                  ?.actions.includes('update') &&
+                  !isEditting &&
+                  data.status !== 'DELETED' && (
+                    <button
+                      onClick={() => setEditting(true)}
+                      className="w-full flex justify-center items-center hover:underline text-NoExcuseChallenge bg-black font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                    >
+                      {t('edit')}
+                    </button>
+                  )}
                 {userInfo?.permissions
-                        .find((p) => p.page.pageName === 'admin-users-details')
-                        ?.actions.includes('delete') && !isEditting && data.status !== 'DELETED' && (
-                  <div
-                    onClick={handleDelete}
-                    className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-red-500 text-white"
-                  >
-                    {t('delete')}
-                  </div>
-                )}
+                  .find((p) => p.page.pageName === 'admin-users-details')
+                  ?.actions.includes('delete') &&
+                  !isEditting &&
+                  data.status !== 'DELETED' && (
+                    <div
+                      onClick={handleDelete}
+                      className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-red-500 text-white"
+                    >
+                      {t('delete')}
+                    </div>
+                  )}
                 {userInfo?.permissions
-                        .find((p) => p.page.pageName === 'admin-users-details')
-                        ?.actions.includes('update') && walletChange && (
-                  <div
-                    onClick={handleApproveChangeWallet}
-                    className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-orange-500 text-white"
-                  >
-                    {t('Approve change wallet address')}
-                  </div>
-                )}
+                  .find((p) => p.page.pageName === 'admin-users-details')
+                  ?.actions.includes('update') &&
+                  walletChange && (
+                    <div
+                      onClick={handleApproveChangeWallet}
+                      className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-orange-500 text-white"
+                    >
+                      {t('Approve change wallet address')}
+                    </div>
+                  )}
               </div>
             </div>
           </form>
