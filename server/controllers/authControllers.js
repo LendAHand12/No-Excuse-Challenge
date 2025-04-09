@@ -34,7 +34,7 @@ const checkLinkRef = asyncHandler(async (req, res) => {
         tier: 1,
       });
 
-      if (!treeUserReceive.parentId) {
+      if (!treeUserReceive.parentId || treeUserReceive.userName === "NoExcuse 9") {
         message = "validUrl";
         res.status(200).json({
           message,
@@ -196,7 +196,7 @@ const registerUser = asyncHandler(async (req, res) => {
   } else {
     const treeReceiveUser = await Tree.findOne({ userId: receiveId, tier: 1 });
 
-    if (treeReceiveUser.children.length < 2) {
+    if (treeReceiveUser.userName === "NoExcuse 9" || treeReceiveUser.children.length < 2) {
 
       const user = await User.create({
         userId,
