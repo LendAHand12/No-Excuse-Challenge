@@ -46,8 +46,18 @@ const claimHewe = asyncHandler(async (req, res) => {
   }
 });
 
+const processingUserIds = [];
+
 const claimUsdt = asyncHandler(async (req, res) => {
   const user = req.user;
+
+  if (processingUserIds.includes(user.id)) {
+    return res.status(400).json({
+      error: "Your withdraw request is already being processed. Please wait!",
+    });
+  }
+
+  processingUserIds.push(user.id);
 
   // res.status(400).json({
   //   error:
@@ -64,7 +74,6 @@ const claimUsdt = asyncHandler(async (req, res) => {
           amount: user.availableUsdt - 1,
           receiverAddress: user.walletAddress,
         });
-
         const claimed = await Claim.create({
           userId: user.id,
           amount: user.availableUsdt,
@@ -75,6 +84,11 @@ const claimUsdt = asyncHandler(async (req, res) => {
         user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
         user.availableUsdt = 0;
         await user.save();
+
+        const index = processingUserIds.indexOf(user._id);
+        if (index !== -1) {
+          processingUserIds.splice(index, 1);
+        }
 
         res.status(200).json({
           message: "claim USDT successful",
@@ -89,6 +103,11 @@ const claimUsdt = asyncHandler(async (req, res) => {
 
         // await sendTelegramMessage({ userName: user.userId });
 
+        const index = processingUserIds.indexOf(user._id);
+        if (index !== -1) {
+          processingUserIds.splice(index, 1);
+        }
+
         res.status(200).json({
           message: "Withdrawal request has been sent to Admin. Please wait!",
         });
@@ -97,6 +116,10 @@ const claimUsdt = asyncHandler(async (req, res) => {
       throw new Error("Insufficient balance in account");
     }
   } catch (err) {
+    const index = processingUserIds.indexOf(user._id);
+    if (index !== -1) {
+      processingUserIds.splice(index, 1);
+    }
     res.status(400).json({
       error: err.message ? err.message.split(",")[0] : "Internal Error",
     });
