@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
 import Withdraw from "../models/withdrawModel.js";
+import User from "../models/userModel.js";
 
 const getAllWithdraws = asyncHandler(async (req, res) => {
   const { pageNumber, status } = req.query;
@@ -35,10 +36,16 @@ const updateWithdraw = asyncHandler(async (req, res) => {
 
   try {
     const withdraw = await Withdraw.findById(id);
-    withdraw.status = status;
+    const user = await User.findById(withdraw.userId);
     if (status === "APPROVED") {
       withdraw.hash = hash;
+      user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
     }
+    if (status === "CANCEL") {
+      user.availableUsdt = user.availableUsdt + withdraw.amount;
+    }
+    withdraw.status = status;
+    await user.save();
     await withdraw.save();
 
     res.status(200).json({ message: status === "APPROVED" ? "Withdraw successful" : "Cancel!" });
