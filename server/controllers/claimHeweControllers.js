@@ -59,41 +59,40 @@ const claimUsdt = asyncHandler(async (req, res) => {
     }
 
     if (user.availableUsdt > 0) {
-      // if (user.availableUsdt < 100) {
-      //   const receipt = await sendUsdt({
-      //     amount: user.availableUsdt - 1,
-      //     receiverAddress: user.walletAddress,
-      //   });
+      if (user.availableUsdt < 100) {
+        const receipt = await sendUsdt({
+          amount: user.availableUsdt - 1,
+          receiverAddress: user.walletAddress,
+        });
 
-      //   const claimed = await Claim.create({
-      //     userId: user.id,
-      //     amount: user.availableUsdt,
-      //     hash: receipt.blockHash,
-      //     coin: "USDT",
-      //   });
+        const claimed = await Claim.create({
+          userId: user.id,
+          amount: user.availableUsdt,
+          hash: receipt.blockHash,
+          coin: "USDT",
+        });
 
-      //   user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
-      //   user.availableUsdt = 0;
-      //   await user.save();
+        user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
+        user.availableUsdt = 0;
+        await user.save();
 
-      //   res.status(200).json({
-      //     message: "claim USDT successful",
-      //   });
-      // } else {
-      const withdraw = await Withdraw.create({
-        userId: user.id,
-        amount: user.availableUsdt,
-      });
+        res.status(200).json({
+          message: "claim USDT successful",
+        });
+      } else {
+        const withdraw = await Withdraw.create({
+          userId: user.id,
+          amount: user.availableUsdt,
+        });
+        user.availableUsdt = 0;
+        await user.save();
 
-      user.availableUsdt = 0;
-      await user.save();
+        // await sendTelegramMessage({ userName: user.userId });
 
-      await sendTelegramMessage({ userName: user.userId });
-
-      res.status(200).json({
-        message: "Withdrawal request has been sent to Admin. Please wait!",
-      });
-      // }
+        res.status(200).json({
+          message: "Withdrawal request has been sent to Admin. Please wait!",
+        });
+      }
     } else {
       throw new Error("Insufficient balance in account");
     }
