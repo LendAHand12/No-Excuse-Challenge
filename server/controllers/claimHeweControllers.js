@@ -6,8 +6,18 @@ import sendUsdt from "../services/sendUsdt.js";
 import Withdraw from "../models/withdrawModel.js";
 import { sendTelegramMessage } from "../utils/sendTelegram.js";
 
+const processingHeweUserIds = [];
+
 const claimHewe = asyncHandler(async (req, res) => {
   const user = req.user;
+
+  if (processingHeweUserIds.includes(user.id)) {
+    return res.status(400).json({
+      error: "Your withdraw request is already being processed. Please wait!",
+    });
+  }
+
+  processingHeweUserIds.push(user.id);
 
   try {
     if (user.status !== "APPROVED") {
@@ -35,13 +45,27 @@ const claimHewe = asyncHandler(async (req, res) => {
       user.availableHewe = 0;
       await user.save();
 
+      const index = processingHeweUserIds.indexOf(user._id);
+      if (index !== -1) {
+        processingHeweUserIds.splice(index, 1);
+      }
+
       res.status(200).json({
         message: "claim HEWE successful",
       });
     } else {
+      const index = processingHeweUserIds.indexOf(user._id);
+      if (index !== -1) {
+        processingHeweUserIds.splice(index, 1);
+      }
+
       throw new Error("Insufficient balance in account");
     }
   } catch (err) {
+    const index = processingHeweUserIds.indexOf(user._id);
+    if (index !== -1) {
+      processingHeweUserIds.splice(index, 1);
+    }
     res.status(400).json({ error: err.message });
   }
 });
