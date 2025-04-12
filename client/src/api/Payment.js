@@ -2,9 +2,14 @@ import API from "./API";
 import { URL_API_PAYMENT } from "./URL";
 
 const Payment = {
-  getPaymentInfo: (continueWithBuyPackageB) => {
+  getPaymentInfo: () => {
     return API.get(
-      `${URL_API_PAYMENT}/info?continueWithBuyPackageB=${continueWithBuyPackageB}`
+      `${URL_API_PAYMENT}/info`
+    );
+  },
+  getPaymentNextTierInfo: () => {
+    return API.get(
+      `${URL_API_PAYMENT}/infoNextTier`
     );
   },
   addPayment: (body) => {
@@ -12,6 +17,9 @@ const Payment = {
   },
   onDonePayment: (body) => {
     return API.post(`${URL_API_PAYMENT}/done`, body);
+  },
+  onDoneNextTierPayment: (body) => {
+    return API.post(`${URL_API_PAYMENT}/doneNextTier`, body);
   },
   getAllPayments: (pageNumber, keyword, statusSearch, tier) => {
     return API.get(

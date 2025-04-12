@@ -144,7 +144,6 @@ const getUserById = asyncHandler(async (req, res) => {
               ? true
               : false,
           isYellow: refedUser.errLahCode === "OVER30",
-          countChild: refedUser.countChild[0] + 1,
         });
       }
     }
@@ -789,55 +788,37 @@ const getTreeOfUser = asyncHandler(async (req, res) => {
 const getChildsOfUserForTree = asyncHandler(async (req, res) => {
   const { id, currentTier } = req.body;
   const userRequest = req.user;
-  const user = await User.findOne({ _id: id }).select("userId countChild");
-  const treeOfUser = await Tree.findOne({
-    userId: id,
-    tier: currentTier,
-  }).select("userId children");
+  let treeOfUser;
+  let user;
+  treeOfUser = await Tree.findById(id).select("userId tier userName children countChild createdAt");
+  if(!treeOfUser) {
+    user = await User.findOne({ _id: id }).select("userId createdAt");
+    treeOfUser = await Tree.findOne({userId: user._id}).select("userId tier userName children countChild createdAt");
+  } else {
+    user = await User.findOne({ _id: treeOfUser.userId }).select("userId createdAt");
+  }
+  
 
   if (user) {
     if (treeOfUser.children.length === 0) {
       res.status(404);
       throw new Error("User not have child");
     } else {
-      const tree = { key: user._id, label: user.userId, nodes: [] };
-      // let level, listUserOfLevel;
-      // if (userRequest.isAdmin && currentTier >= 2) {
-      //   level = await findLevelById(user._id, currentTier);
-      //   listUserOfLevel = await findUsersAtLevel(
-      //     "6494e9101e2f152a593b66f2",
-      //     level + 1,
-      //     currentTier
-      //   );
-      //   listUserOfLevel.sort((a, b) => {
-      //     return new Date(a.createdAt) - new Date(b.createdAt);
-      //   });
-      // }
+      const tree = { key: treeOfUser._id, label: treeOfUser.userName, nodes: [] };
       for (const childId of treeOfUser.children) {
         const child = await User.findById(childId).select(
-          "tier userId buyPackage countChild countPay fine status errLahCode"
+          "tier userId buyPackage countPay fine status errLahCode"
         );
         const childTree = await Tree.findOne({
           userId: childId,
           tier: currentTier,
+          createdAt: {$gt: treeOfUser.createdAt}
         });
-        // const childTree = await Tree.findOneAndUpdate(
-        //   { userId: childId, tier: currentTier },
-        //   {
-        //     $set: {
-        //       indexOnLevel:
-        //         userRequest.isAdmin && currentTier >= 2
-        //           ? listUserOfLevel.findIndex((ele) => ele.userId === childId) +
-        //             1
-        //           : 0,
-        //     },
-        //   }
-        // );
 
         tree.nodes.push({
-          key: child._id,
+          key: childTree._id,
           label: `${child.userId}`,
-          totalChild: child.countChild,
+          totalChild: childTree.countChild,
           isGray:
             child.status === "LOCKED"
               ? currentTier === 1 || userRequest.isAdmin
@@ -847,17 +828,9 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
           isRed:
             child.tier === 1 && child.countPay === 0
               ? true
-              : child.tier === 1 &&
-                child.buyPackage === "B" &&
-                child.countPay < 7
-              ? true
-              : child.tier === 1 &&
-                child.buyPackage === "A" &&
-                child.countPay < 13
-              ? true
               : false,
           isYellow: child.errLahCode === "OVER30",
-          indexOnLevel: childTree.indexOnLevel,
+          indexOnLevel: childTree.indexOnLevel
         });
       }
       res.status(200).json(tree);
@@ -897,8 +870,8 @@ const getAllChildren = async (userId) => {
   return [user.userId, ...children];
 };
 
-const getCountAllChildren = async (userId, tier) => {
-  const tree = await Tree.findOne({ userId, tier }).select("userId children");
+const getCountAllChildren = async (treeId, tier) => {
+  const tree = await Tree.findById(treeId).select("userId children createdAt");
 
   if (!tree) {
     return 0;
@@ -906,7 +879,12 @@ const getCountAllChildren = async (userId, tier) => {
 
   let result = tree.children.length;
   for (const childId of tree.children) {
-    const count = await getCountAllChildren(childId, tier);
+    const treeOfChild = await Tree.findOne({
+      userId: childId,
+      tier,
+      createdAt: {$gt: tree.createdAt}
+    });
+    const count = await getCountAllChildren(treeOfChild._id, tier);
     result += count;
   }
 
@@ -1021,6 +999,19 @@ const getListChildOfUser = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
+const getListChildNotEnoughBranchOfUser = asyncHandler(async (req, res) => {
+  let result = [];
+
+  const parent = await Tree.findOne({ userId: req.user.id }).lean();
+  if (!parent) {
+    result = [];
+  } else {
+    result = await getAllDescendantsLte2(req.user.id);
+  }
+
+  res.json(result);
+});
+
 async function getAllDescendants(targetUserId) {
   try {
     const descendants = await Tree.aggregate([
@@ -1043,6 +1034,48 @@ async function getAllDescendants(targetUserId) {
       id: descendant.userId,
       userId: descendant.userName,
     }));
+
+    return descendantsList;
+  } catch (error) {
+    console.error("Lỗi khi lấy cấp dưới của người dùng:", error);
+    return [];
+  }
+}
+
+async function getAllDescendantsLte2(targetUserId) {
+  try {
+    const descendants = await Tree.aggregate([
+      {
+        $match: { userId: targetUserId, tier: 1 },
+      },
+      {
+        $graphLookup: {
+          from: "trees",
+          startWith: "$children",
+          connectFromField: "children",
+          connectToField: "userId",
+          as: "descendants",
+          maxDepth: 100,
+        },
+      },
+      {
+        $project: {
+          descendants: {
+            $filter: {
+              input: "$descendants",
+              as: "descendant",
+              cond: { $lt: [{ $size: "$$descendant.children" }, 2] },
+            },
+          },
+        },
+      },
+    ]);
+
+    const descendantsList =
+      descendants[0]?.descendants.map((descendant) => ({
+        id: descendant.userId,
+        userId: descendant.userName,
+      })) || [];
 
     return descendantsList;
   } catch (error) {
@@ -2020,7 +2053,7 @@ const createAdmin = asyncHandler(async (req, res) => {
 });
 
 const getListAdmin = asyncHandler(async (req, res) => {
-  const allUsers = await User.find({role: { $ne: "user" }})
+  const allUsers = await User.find({ role: { $ne: "user" } })
     .sort("-createdAt")
     .select("-password");
 
@@ -2159,4 +2192,5 @@ export {
   getUserInfo,
   getDreamPool,
   adminChangeWalletUser,
+  getListChildNotEnoughBranchOfUser
 };

@@ -202,7 +202,7 @@ const SystemPage = () => {
                 <button
                   key={i}
                   onClick={() => setCurrentTier(i + 1)}
-                  className={`flex justify-center items-center hover:underline text-black font-medium ${
+                  className={`flex justify-center items-center hover:underline font-medium ${
                     currentTier === i + 1 ? 'bg-black text-NoExcuseChallenge' : ''
                   } rounded-full my-6 py-4 px-8 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
                 >

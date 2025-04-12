@@ -213,20 +213,13 @@ export const checkCPackage = asyncHandler(async () => {
 });
 
 export const countChildToData = asyncHandler(async () => {
-  const listUser = await User.find({
-    $and: [{ isAdmin: false }],
-  }).select("tier countChild userId");
+  const listTrees = await Tree.find({}).select("tier countChild userId");
 
-  for (let u of listUser) {
-    console.log({ name: u.userId });
+  for (let t of listTrees) {
     try {
-      const newCountChild = [...u.countChild];
-      for (let i = 1; i <= u.tier; i++) {
-        const countChild = await getCountAllChildren(u._id, i);
-        newCountChild[i - 1] = countChild;
-      }
-      u.countChild = newCountChild;
-      await u.save();
+      const countChild = await getCountAllChildren(t._id, t.tier);
+      t.countChild = countChild;
+      await t.save();
     } catch (error) {
       console.log({ error });
     }
@@ -265,7 +258,7 @@ export const countLayerToData = asyncHandler(async () => {
       }
     }
   }
-  await sendMailUpdateLayerForAdmin(result);
+  // await sendMailUpdateLayerForAdmin(result);
   console.log("updated layer");
 });
 

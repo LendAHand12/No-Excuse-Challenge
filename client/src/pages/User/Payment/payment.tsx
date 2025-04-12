@@ -18,7 +18,6 @@ const PaymentPage = () => {
   const [paymentsList, setPaymentsList] = useState([]);
   const [paymentIdsList, setPaymentIdsList] = useState([]);
   const [loadingPayment, setLoadingPayment] = useState(false);
-  const [showOtpModal, setShowOtpModal] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
 
@@ -66,7 +65,7 @@ const PaymentPage = () => {
     try {
       const referralTransaction = await transfer(
         import.meta.env.VITE_MAIN_WALLET_ADDRESS,
-        100.2,
+        total,
       );
       if (referralTransaction) {
         const { transactionHash } = referralTransaction;
@@ -80,7 +79,7 @@ const PaymentPage = () => {
       toast.error(t(error.message));
       setLoadingPayment(false);
     }
-  }, [paymentsList]);
+  }, [paymentsList, total]);
 
   const donePayment = useCallback(
     async (transactionHash) => {

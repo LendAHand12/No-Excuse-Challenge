@@ -53,10 +53,6 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
-    countChild: {
-      type: Array,
-      default: [0],
-    },
     phone: {
       type: String,
       default: "",

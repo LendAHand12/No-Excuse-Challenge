@@ -11,6 +11,8 @@ import {
   getParentWithCount,
   getAllTransForExport,
   onDonePayment,
+  getPaymentNextTierInfo,
+  onDoneNextTierPayment
 } from "../controllers/paymentControllers.js";
 import { protectRoute, isAdmin } from "../middleware/authMiddleware.js";
 
@@ -19,6 +21,7 @@ const router = express.Router();
 router.route("/getParentWithCount").post(getParentWithCount);
 
 router.route("/info").get(protectRoute, getPaymentInfo);
+router.route("/infoNextTier").get(protectRoute, getPaymentNextTierInfo);
 router.route("/user").get(protectRoute, isAdmin, getAllPayments);
 router
   .route("/getAllTransForExport")
@@ -29,6 +32,7 @@ router
   .post(protectRoute, addPayment);
 
 router.route("/done").post(protectRoute, onDonePayment);
+router.route("/doneNextTier").post(protectRoute, onDoneNextTierPayment);
 
 router.route("/:id").get(protectRoute, isAdmin, getPaymentDetail);
 router

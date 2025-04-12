@@ -36,6 +36,9 @@ const User = {
   getListChild: () => {
     return API.get(`${URL_API_USER}/listChild`);
   },
+  getListChildLteBranch: () => {
+    return API.get(`${URL_API_USER}/listChildLteBranch`);
+  },
   getTreeOfUser: (id) => {
     return API.get(`${URL_API_USER}/tree/${id}`);
   },

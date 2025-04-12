@@ -25,17 +25,15 @@ const config = createConfig({
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <Suspense fallback={<FallbackLoading />}>
-        <WagmiProvider config={config}>
-          <QueryClientProvider client={queryClient}>
-            <Router>
-              <App />
-            </Router>
-          </QueryClientProvider>
-        </WagmiProvider>
-      </Suspense>
-    </Provider>
-  </React.StrictMode>,
+  <Provider store={store}>
+    <Suspense fallback={<FallbackLoading />}>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <Router>
+            <App />
+          </Router>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </Suspense>
+  </Provider>,
 );

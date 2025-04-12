@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Payment from '@/api/Payment';
+import User from '@/api/User';
 import Loading from '@/components/Loading';
 import { ToastContainer, toast } from 'react-toastify';
 import { useForm } from 'react-hook-form';
@@ -14,16 +15,23 @@ Modal.setAppElement('#root');
 
 const PaymentNextTierPage = () => {
   const { t } = useTranslation();
-  const {userInfo} = useSelector((state) => state.auth);
   const [loadingPaymentInfo, setLoadingPaymentInfo] = useState(true);
   const [paymentsList, setPaymentsList] = useState([]);
   const [paymentIdsList, setPaymentIdsList] = useState([]);
   const [loadingPayment, setLoadingPayment] = useState(false);
-  const [showPayment, setShowPayment] = useState(false);
-  const [resMessage, setResMessage] = useState("");
-  const [resStatus, setResStatus] = useState("PAY");
+  const [resMessage, setResMessage] = useState('');
+  const [resStatus, setResStatus] = useState('');
+  const [total, setTotal] = useState(0);
+  const [step, setStep] = useState(1);
+  const [listChild, setListChild] = useState([]);
+  const [errSubId, setErrSubId] = useState(false);
+  const [childId, setChildId] = useState(null);
 
-  const PAYMENT_AMOUNT = parseInt(import.meta.env[`VITE_PAYMENT_AMOUNT_TIER${userInfo.tier}`]) + 0.2;
+  const topRef = useRef(null);
+
+  const scrollToTop = () => {
+    topRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const {
     formState: { errors },
@@ -31,24 +39,20 @@ const PaymentNextTierPage = () => {
 
   const onGetPaymentInfo = async () => {
     setLoadingPaymentInfo(true);
-    await Payment.getPaymentInfo()
+    await Payment.getPaymentNextTierInfo()
       .then((response) => {
         const { status, payments, paymentIds, message } = response.data;
         setResMessage(message);
         setResStatus(status);
 
-        if (status === "PAY") {
+        if (status === 'OK') {
+          const totalPayment = paymentIds.reduce(
+            (accumulator, currentValue) => accumulator + currentValue.amount,
+            0,
+          );
+          setTotal(totalPayment + 0.2);
           setPaymentIdsList(paymentIds);
           setPaymentsList(payments);
-          setShowPayment(true);
-        }
-
-        if(status === "OK") {
-          setShowPayment(false);
-        }
-
-        if(status === "PENDING") {
-          setShowPayment(false);
         }
 
         setLoadingPaymentInfo(false);
@@ -66,32 +70,58 @@ const PaymentNextTierPage = () => {
     onGetPaymentInfo();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      await User.getListChildLteBranch()
+        .then((response) => {
+          setListChild([...response.data]);
+        })
+        .catch((error) => {
+          let message =
+            error.response && error.response.data.error
+              ? error.response.data.error
+              : error.message;
+          toast.error(t(message));
+        });
+    })();
+  }, []);
+
   const paymentMetamask = useCallback(async () => {
+    if (!childId) {
+      setErrSubId(true);
+      scrollToTop();
+      return;
+    }
     setLoadingPayment(true);
     try {
-      const referralTransaction = await transfer(
-        import.meta.env.VITE_MAIN_WALLET_ADDRESS,
-        PAYMENT_AMOUNT,
-      );
-      if (referralTransaction) {
-        const { transactionHash } = referralTransaction;
-        await donePayment(transactionHash);
-        window.location.reload();
-      } else {
-        setLoadingPayment(false);
-        throw new Error(t('payment error'));
-      }
+      // const referralTransaction = await transfer(
+      //   import.meta.env.VITE_MAIN_WALLET_ADDRESS,
+      //   total,
+      // );
+      // if (referralTransaction) {
+      //   const { transactionHash } = referralTransaction;
+      await doneNextTierPayment({
+        transactionHash: 'transactionHash',
+        childId,
+      });
+      // window.location.reload();
+      setStep(2);
+      // } else {
+      //   setLoadingPayment(false);
+      //   throw new Error(t('payment error'));
+      // }
     } catch (error) {
       toast.error(t(error.message));
       setLoadingPayment(false);
     }
-  }, [paymentsList]);
+  }, [paymentsList, total, childId]);
 
-  const donePayment = useCallback(
-    async (transactionHash) => {
-      await Payment.onDonePayment({
+  const doneNextTierPayment = useCallback(
+    async ({ transactionHash, childId }) => {
+      await Payment.onDoneNextTierPayment({
         transIds: paymentIdsList,
         transactionHash,
+        childId,
       })
         .then((response) => {
           toast.success(t(response.data.message));
@@ -110,20 +140,59 @@ const PaymentNextTierPage = () => {
   return (
     <DefaultLayout>
       <ToastContainer />
-      <div className="py-24 lg:p-24">
+      <div className="py-24 px-10 lg:py-24" ref={topRef}>
         {loadingPaymentInfo ? (
           <div className="w-xl flex justify-center">
             <Loading />
           </div>
         ) : (
           <>
-            {showPayment && (
+            {resStatus === 'PENDING' && (
+              <div
+                className="bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded relative mb-5"
+                role="alert"
+              >
+                <span className="block sm:inline">{resMessage}</span>
+              </div>
+            )}
+            {resStatus === 'OK' && step === 1 && (
               <>
+                <div
+                  className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-5"
+                  role="alert"
+                >
+                  <span className="block sm:inline">{resMessage}</span>
+                </div>
                 <div className="w-full max-w-203 mx-auto rounded-lg bg-white p-10 text-gray-700 mt-4">
                   <div className="mb-10">
                     <h1 className="text-center font-bold text-4xl">
                       {t('paymentTitle')}
                     </h1>
+                  </div>
+                  <div className="space-y-2  mb-10">
+                    <h1 className="text-lg font-semibold">
+                      Please select the subordinate to assign a sub ID :
+                    </h1>
+                    <select
+                      onChange={(e) => {
+                        setChildId(e.target.value);
+                        setErrSubId(false);
+                      }}
+                      className="form-select w-full px-3 py-2 border text-black border-black rounded-md focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
+                    >
+                      <option value="">{t('No choose')}</option>
+                      {listChild.length > 0 &&
+                        listChild.map((ele) => (
+                          <option key={ele.id} value={ele.id}>
+                            {ele.userId}
+                          </option>
+                        ))}
+                    </select>
+                    {errSubId && (
+                      <p className="text-red-500 mt-1 text-sm">
+                        Please select a subordinate
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex justify-between">
@@ -135,7 +204,7 @@ const PaymentNextTierPage = () => {
                     </div>
                     <div className="mb-3">
                       <p className="text-lg mb-2 ml-1">
-                        <span className="font-bold">Total</span> : {PAYMENT_AMOUNT} USDT
+                        <span className="font-bold">Total</span> : {total} USDT
                       </p>
                     </div>
                   </div>
@@ -207,6 +276,36 @@ const PaymentNextTierPage = () => {
                   </button>
                 </div>
               </>
+            )}
+            {resStatus === 'OK' && step === 2 && (
+              <div>
+                <div className="flex flex-col items-center lg:gap-10 gap-4">
+                  <svg
+                    width="78"
+                    height="78"
+                    viewBox="0 0 78 78"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M39 71.5C43.2688 71.5053 47.4965 70.667 51.4402 69.0334C55.384 67.3998 58.9661 65.003 61.9808 61.9808C65.003 58.9661 67.3998 55.384 69.0334 51.4402C70.667 47.4965 71.5053 43.2688 71.5 39C71.5053 34.7313 70.667 30.5036 69.0334 26.5598C67.3998 22.616 65.003 19.0339 61.9808 16.0193C58.9661 12.997 55.384 10.6003 51.4402 8.96664C47.4965 7.33302 43.2688 6.49476 39 6.50002C34.7313 6.49476 30.5036 7.33302 26.5598 8.96664C22.616 10.6003 19.0339 12.997 16.0193 16.0193C12.997 19.0339 10.6003 22.616 8.96664 26.5598C7.33302 30.5036 6.49476 34.7313 6.50002 39C6.49476 43.2688 7.33302 47.4965 8.96664 51.4402C10.6003 55.384 12.997 58.9661 16.0193 61.9808C19.0339 65.003 22.616 67.3998 26.5598 69.0334C30.5036 70.667 34.7313 71.5053 39 71.5Z"
+                      fill="#02071B"
+                    />
+                    <path
+                      d="M26 39L35.75 48.75L55.25 29.25"
+                      stroke="#36BA02"
+                      strokeWidth="6.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+
+                  <p className="text-md lg:text-2xl font-bold">
+                    Contribution Completed
+                  </p>
+                  <p className="text-md lg:text-2xl font-bold">Thank You </p>
+                </div>
+              </div>
             )}
           </>
         )}

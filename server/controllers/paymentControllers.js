@@ -1,7 +1,10 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
 import Transaction from "../models/transactionModel.js";
-import { getParentWithCountPay, getLevelOfRefUser } from "../utils/getParentWithCountPay.js";
+import {
+  getParentWithCountPay,
+  getLevelOfRefUser,
+} from "../utils/getParentWithCountPay.js";
 import Refund from "../models/refundModel.js";
 import { getActiveLink } from "../utils/getLinksActive.js";
 import {
@@ -14,6 +17,7 @@ import {
   getParentUser,
   getRefParentUser,
   checkSerepayWallet,
+  findNextUser,
 } from "../utils/methods.js";
 import { checkCanIncreaseNextTier } from "./userControllers.js";
 import Wallet from "../models/walletModel.js";
@@ -24,18 +28,15 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
   const { user } = req;
 
   if (user) {
-    let walletUser = user.walletAddress;
     if (user.countPay === 13) {
-      // const canIncreaseTier = await checkCanIncreaseNextTier(user);
-      // if (!canIncreaseTier) {
-      //   res.status(404);
-      //   throw new Error("You are not eligible for next step payment");
-      // }
-      res.status(200).json({
-        message: "Payment completed!",
-      });
+      if (user.currentLayer.slice(-1) < 3) {
+        res.status(200).json({
+          status: "PENDING",
+          message:
+            "Your current level is insufficient to upgrade to the next tier",
+        });
+      }
     } else {
-      // delete pending trans
       await Transaction.deleteMany({
         $and: [
           {
@@ -45,12 +46,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         ],
       });
 
-      const wallets = await Wallet.find();
       const admin = await User.findOne({ email: "admin2@gmail.com" });
-      const adminWallet = wallets.find((ele) => ele.type === "ADMIN");
-      // const pigWallet = wallets.find((ele) => ele.type === "PIG");
-      // const companyWallet = wallets.find((ele) => ele.type === "COMPANY");
-      // const holdWallet = await getAdminWallets();
       const payments = [];
       const paymentIds = [];
       if (user.fine > 0) {
@@ -156,7 +152,11 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         // giao dich hoa hong truc tiep
         if (refUser.closeLah) {
           haveRefNotPayEnough = true;
-        } else if (refUser.openLah || refUser.adminChangeTier || refUser.createBy === "ADMIN") {
+        } else if (
+          refUser.openLah ||
+          refUser.adminChangeTier ||
+          refUser.createBy === "ADMIN"
+        ) {
           haveRefNotPayEnough = false;
         } else {
           if (
@@ -223,7 +223,8 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
               receiveUser.status === "LOCKED" ||
               (receiveUser.errLahCode !== "" && indexFor > 6) ||
               receiveUser.tier < user.tier ||
-              (receiveUser.tier === user.tier && receiveUser.countPay < user.countPay + 1)
+              (receiveUser.tier === user.tier &&
+                receiveUser.countPay < user.countPay + 1)
             ) {
               haveParentNotPayEnough = true;
             } else {
@@ -237,8 +238,14 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
             ) {
               haveParentNotPayEnough = true;
             }
-          } else if (user.tier >= 2 && user.countPay >= 3 && receiveUser.countChild[0] >= 300) {
-            const checkRatioCountChild = await checkRatioCountChildOfUser(receiveUser._id);
+          } else if (
+            user.tier >= 2 &&
+            user.countPay >= 3 &&
+            receiveUser.countChild[0] >= 300
+          ) {
+            const checkRatioCountChild = await checkRatioCountChildOfUser(
+              receiveUser._id
+            );
             if (!checkRatioCountChild) haveParentNotPayEnough = true;
           }
           payments.push({
@@ -268,6 +275,278 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         }
       }
       res.json({
+        status: "PAY",
+        payments,
+        paymentIds,
+      });
+    }
+  } else {
+    res.status(404);
+    throw new Error("User does not exist");
+  }
+});
+
+const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
+  const { user } = req;
+
+  if (user) {
+    if (user.currentLayer.slice(-1) < 3) {
+      res.status(200).json({
+        status: "PENDING",
+        message:
+          "Your current level is insufficient to upgrade to the next tier",
+      });
+    } else {
+      await Transaction.deleteMany({
+        $and: [
+          {
+            status: "PENDING",
+          },
+          { userId: user.id },
+        ],
+      });
+
+      const admin = await User.findOne({ email: "admin2@gmail.com" });
+      const payments = [];
+      const paymentIds = [];
+      if (user.fine > 0) {
+        const transactionFine = await Transaction.create({
+          userId: user.id,
+          amount: user.fine,
+          userCountPay: user.countPay,
+          userId_to: admin._id,
+          username_to: "Fine Fee",
+          tier: user.tier + 1,
+          buyPackage: user.buyPackage,
+          hash: "",
+          type: "FINE",
+          status: "PENDING",
+        });
+        payments.push({
+          userName: "Fine Fee",
+          amount: user.fine,
+        });
+        paymentIds.push({
+          type: "FINE",
+          id: transactionFine._id,
+          amount: user.fine,
+          to: "Admin",
+        });
+      } else {
+        const refUser = await getRefParentUser(user.id, user.tier);
+        let haveRefNotPayEnough = false;
+        let registerFee = parseInt(
+          process.env[`REGISTER_AMOUNT_TIER${user.tier + 1}`]
+        );
+        let pigFee = parseInt(
+          process.env[`DREAMPOOL_AMOUNT_TIER${user.tier + 1}`]
+        );
+        let companyFee = parseInt(
+          process.env[`HEWE_AMOUNT_TIER${user.tier + 1}`]
+        );
+        let directCommissionFee = parseInt(
+          process.env[`DIRECT_AMOUNT_TIER${user.tier + 1}`]
+        );
+        let referralCommissionFee = parseInt(
+          process.env[`CONTRIBUTE_AMOUNT_TIER${user.tier + 1}`]
+        );
+        // giao dich dang ky
+        payments.push({
+          userName: "Registration Fee",
+          amount: registerFee,
+        });
+        const transactionRegister = await Transaction.create({
+          userId: user.id,
+          amount: registerFee,
+          userCountPay: user.countPay,
+          userId_to: admin._id,
+          username_to: "Registration Fee",
+          tier: user.tier + 1,
+          buyPackage: user.buyPackage,
+          hash: "",
+          type: "REGISTER",
+          status: "PENDING",
+        });
+        paymentIds.push({
+          type: "REGISTER",
+          id: transactionRegister._id,
+          amount: registerFee,
+          to: "Registration Fee",
+        });
+        // giao dich con heo
+        payments.push({
+          userName: "DreamPool",
+          amount: pigFee,
+        });
+        const transactionPig = await Transaction.create({
+          userId: user.id,
+          amount: pigFee,
+          userCountPay: user.countPay,
+          userId_to: admin._id,
+          username_to: "DreamPool",
+          tier: user.tier + 1,
+          buyPackage: user.buyPackage,
+          hash: "",
+          type: "PIG",
+          status: "PENDING",
+        });
+        paymentIds.push({
+          type: "PIG",
+          id: transactionPig._id,
+          amount: pigFee,
+          to: "DreamPool",
+        });
+        // giao dich hewe cho cong ty
+        if (companyFee > 0) {
+          payments.push({
+            userName: "Purchased HEWE",
+            amount: companyFee,
+          });
+          const transactionCompany = await Transaction.create({
+            userId: user.id,
+            amount: companyFee,
+            userCountPay: user.countPay,
+            userId_to: admin._id,
+            username_to: "Purchased HEWE",
+            tier: user.tier + 1,
+            buyPackage: user.buyPackage,
+            hash: "",
+            type: "COMPANY",
+            status: "PENDING",
+          });
+          paymentIds.push({
+            type: "COMPANY",
+            id: transactionCompany._id,
+            amount: companyFee,
+            to: "Purchased HEWE",
+          });
+        }
+
+        // giao dich hoa hong truc tiep
+        if (refUser.closeLah) {
+          haveRefNotPayEnough = true;
+        } else if (
+          refUser.openLah ||
+          refUser.adminChangeTier ||
+          refUser.createBy === "ADMIN"
+        ) {
+          haveRefNotPayEnough = false;
+        } else {
+          if (
+            refUser.status === "LOCKED" ||
+            refUser.tier < user.tier ||
+            (refUser.tier === user.tier && refUser.countPay < 13)
+          ) {
+            haveRefNotPayEnough = true;
+          } else {
+            haveRefNotPayEnough = false;
+          }
+        }
+        const transactionDirect = await Transaction.create({
+          userId: user.id,
+          amount: directCommissionFee,
+          userCountPay: user.countPay,
+          userId_to: refUser._id,
+          username_to: refUser.userId,
+          tier: user.tier + 1,
+          buyPackage: user.buyPackage,
+          hash: "",
+          type: haveRefNotPayEnough ? "DIRECTHOLD" : "DIRECT",
+          status: "PENDING",
+          refBuyPackage: refUser.buyPackage,
+        });
+        paymentIds.push({
+          type: "DIRECT",
+          id: transactionDirect._id,
+          amount: directCommissionFee,
+          to: refUser.userId,
+        });
+        payments.push({
+          userName: refUser.userId,
+          amount: directCommissionFee,
+        });
+        // await generatePackageTrans(
+        //   user,
+        //   refUser,
+        //   directCommissionWallet,
+        //   user.continueWithBuyPackageB
+        // );
+        const nextTierUserId = await findNextUser(user.tier + 1);
+
+        const ancestorsData = await findAncestors(
+          nextTierUserId,
+          10,
+          user.tier + 1
+        );
+        let ancestors = ancestorsData.map((data, index) => {
+          if (index === 0) {
+            data.isFirst = true;
+          }
+          return data;
+        });
+        let countPayUser = 0;
+        let indexFor = 1;
+        for (let p of ancestors) {
+          let haveParentNotPayEnough;
+          const receiveUser = await User.findById(p ? p.userId : admin._id);
+          if (receiveUser.closeLah) {
+            haveParentNotPayEnough = true;
+          } else if (
+            receiveUser.openLah ||
+            receiveUser.adminChangeTier ||
+            receiveUser.createBy === "ADMIN"
+          ) {
+            haveParentNotPayEnough = false;
+          } else {
+            if (
+              receiveUser.status === "LOCKED" ||
+              (receiveUser.errLahCode !== "" && indexFor > 6) ||
+              receiveUser.tier < user.tier ||
+              (receiveUser.tier === user.tier &&
+                receiveUser.countPay < user.countPay + 1)
+            ) {
+              haveParentNotPayEnough = true;
+            } else {
+              haveParentNotPayEnough = false;
+            }
+          }
+          if (receiveUser.hold !== "no" && receiveUser.holdLevel !== "no") {
+            if (
+              receiveUser.hold.toString() === user.tier.toString() &&
+              parseInt(receiveUser.holdLevel) <= parseInt(user.countPay)
+            ) {
+              haveParentNotPayEnough = true;
+            }
+          }
+          payments.push({
+            userName: receiveUser.userId,
+            amount: referralCommissionFee,
+          });
+          const transactionReferral = await Transaction.create({
+            userId: user.id,
+            amount: referralCommissionFee,
+            userCountPay: countPayUser,
+            userId_to: receiveUser._id,
+            username_to: receiveUser.userId,
+            tier: user.tier + 1,
+            buyPackage: user.buyPackage,
+            hash: "",
+            type: haveParentNotPayEnough ? "REFERRALHOLD" : "REFERRAL",
+            status: "PENDING",
+          });
+          paymentIds.push({
+            type: "REFERRAL",
+            id: transactionReferral._id,
+            amount: referralCommissionFee,
+            to: receiveUser.userId,
+          });
+          countPayUser = countPayUser + 1;
+          indexFor++;
+        }
+      }
+      res.json({
+        status: "OK",
+        message: `You're all set for the Tier ${user.tier + 1}. Let's move up!`,
         payments,
         paymentIds,
       });
@@ -304,9 +583,10 @@ const findAncestors = async (userId, limit, tier) => {
   const tree = await Tree.findOne({ userId, tier });
   const refTree = await Tree.findOne({ userId: tree.refId, tier });
   if (!refTree) {
-    throw new Error("Ref user does not exist");
+    ancestors.push(tree);
+  } else {
+    ancestors.push(refTree);
   }
-  ancestors.push(refTree);
 
   while (ancestors.length < limit) {
     const treeOfUser = await Tree.findOne({ userId: currentUserId, tier });
@@ -385,9 +665,15 @@ const onDonePayment = asyncHandler(async (req, res) => {
         if (trans.type === "DIRECT" || trans.type === "REFERRAL") {
           let userReceive = await User.findOne({ _id: trans.userId_to });
           if (trans.type === "REFERRAL") {
-            await sendMailRefDc({ senderName: user.userId, email: userReceive.email });
+            await sendMailRefDc({
+              senderName: user.userId,
+              email: userReceive.email,
+            });
           } else {
-            await sendMailReceiveCommission({ senderName: user.userId, email: userReceive.email });
+            await sendMailReceiveCommission({
+              senderName: user.userId,
+              email: userReceive.email,
+            });
           }
         }
       }
@@ -408,6 +694,108 @@ const onDonePayment = asyncHandler(async (req, res) => {
       user.totalHewe = totalHewe;
       user.hewePerDay = hewePerDay;
       user.countPay = 13;
+    }
+
+    const updatedUser = await user.save();
+
+    if (updatedUser) {
+      res.json({ message: "system update successful" });
+    }
+  } else {
+    throw new Error("No transaction found");
+  }
+});
+
+const onDoneNextTierPayment = asyncHandler(async (req, res) => {
+  const { user } = req;
+  const { transIds, transactionHash, childId } = req.body;
+  const transIdsList = Object.values(transIds);
+
+  if (transIdsList.length > 0) {
+    if (transIdsList.length === 1 && transIdsList[0].type === "FINE") {
+      user.fine = 0;
+    } else {
+      for (let transId of transIdsList) {
+        const trans = await Transaction.findOneAndUpdate(
+          { _id: transId.id, userId: user.id, tier: user.tier + 1 },
+          { status: "SUCCESS", hash: transactionHash }
+        );
+
+        if (!trans.type.includes("HOLD")) {
+          let userReceive = await User.findOne({ _id: trans.userId_to });
+          userReceive.availableUsdt = userReceive.availableUsdt + trans.amount;
+          await userReceive.save();
+        }
+
+        if (trans.type === "DIRECT" || trans.type === "REFERRAL") {
+          let userReceive = await User.findOne({ _id: trans.userId_to });
+          if (trans.type === "REFERRAL") {
+            await sendMailRefDc({
+              senderName: user.userId,
+              email: userReceive.email,
+            });
+          } else {
+            await sendMailReceiveCommission({
+              senderName: user.userId,
+              email: userReceive.email,
+            });
+          }
+        }
+      }
+
+      let responseHewe = await getPriceHewe();
+      const hewePrice = responseHewe.data.ticker.latest;
+      const totalHewe = Math.round(process.env[`HEWE_AMOUNT_TIER${user.tier + 1}`] / hewePrice);
+      const hewePerDay = Math.round(totalHewe / 540);
+
+      user.availableHewe = user.availableHewe + totalHewe;
+      user.countPay = 13;
+      user.countChild = [...user.countChild, 0];
+      user.currentLayer = [...user.currentLayer, 0];
+      user[`tier${user.tier + 1}Time`] = new Date();
+      user.adminChangeTier = true;
+
+      const newChildParent = await Tree.findOne({
+        userId: childId,
+        tier: user.tier,
+        isSubId: false
+      });
+      let childsOfChild = [...newChildParent.children];
+      newChildParent.children = [...childsOfChild, user._id];
+      await newChildParent.save();
+
+      await Tree.create({
+        userName: user.userId,
+        userId: user._id,
+        parentId: childId,
+        refId: childId,
+        tier: user.tier,
+        buyPackage: "A",
+        children: [],
+        isSubId: true,
+      });
+      
+
+      const newParentId = await findNextUser(user.tier + 1);
+      const newParent = await Tree.findOne({
+        userId: newParentId,
+        tier: user.tier + 1,
+      });
+      let childs = [...newParent.children];
+      newParent.children = [...childs, user._id];
+      await newParent.save();
+
+      await Tree.create({
+        userName: user.userId,
+        userId: user._id,
+        parentId: newParentId,
+        refId: newParentId,
+        tier: user.tier + 1,
+        buyPackage: "A",
+        children: [],
+      });
+
+      user.tier = user.tier + 1;
     }
 
     const updatedUser = await user.save();
@@ -553,11 +941,19 @@ const getPaymentsOfUser = asyncHandler(async (req, res) => {
   const pageSize = 20;
 
   const count = await Transaction.countDocuments({
-    $and: [{ userId: user.id }, { status: "SUCCESS" }, { type: { $ne: "PACKAGE" } }],
+    $and: [
+      { userId: user.id },
+      { status: "SUCCESS" },
+      { type: { $ne: "PACKAGE" } },
+    ],
   });
 
   const allPayments = await Transaction.find({
-    $and: [{ userId: user.id }, { status: "SUCCESS" }, { type: { $ne: "PACKAGE" } }],
+    $and: [
+      { userId: user.id },
+      { status: "SUCCESS" },
+      { type: { $ne: "PACKAGE" } },
+    ],
   })
     .limit(pageSize)
     .skip(pageSize * (page - 1))
@@ -655,9 +1051,15 @@ const checkCanRefundPayment = asyncHandler(async (req, res) => {
                 userReceive.countPay - 1
               } time but user pay = ${userCountPay} time`
         );
-      } else if (trans.type === "REFERRALHOLD" && userReceive.errLahCode === "OVER30") {
+      } else if (
+        trans.type === "REFERRALHOLD" &&
+        userReceive.errLahCode === "OVER30"
+      ) {
         throw new Error(`User has not had 3 child within 30 days`);
-      } else if (trans.type === "REFERRALHOLD" && userReceive.errLahCode === "OVER60") {
+      } else if (
+        trans.type === "REFERRALHOLD" &&
+        userReceive.errLahCode === "OVER60"
+      ) {
         throw new Error(`User has not had 3 child within 60 days`);
       } else if (
         userReceive.buyPackage === "A" &&
@@ -771,9 +1173,15 @@ const onAdminDoneRefund = asyncHandler(async (req, res) => {
     await receiveUser.save();
 
     if (trans.type === "REFERRAL") {
-      await sendMailRefDc({ senderName: user.userId, email: receiveUser.email });
+      await sendMailRefDc({
+        senderName: user.userId,
+        email: receiveUser.email,
+      });
     } else {
-      await sendMailReceiveCommission({ senderName: user.userId, email: receiveUser.email });
+      await sendMailReceiveCommission({
+        senderName: user.userId,
+        email: receiveUser.email,
+      });
     }
 
     res.json({
@@ -874,9 +1282,15 @@ const getAllTransForExport = asyncHandler(async (req, res) => {
     senderName: tran.sender.length > 0 ? tran.sender[0].userId : "unknown",
     senderEmail: tran.sender.length > 0 ? tran.sender[0].email : "unknown",
     senderStatus:
-      tran.sender.length > 0 ? (tran.sender[0].status === "DELETED" ? "TK đã xoá" : "") : "unknow",
-    receiverName: tran.receiver.length > 0 ? tran.receiver[0].userId : "unknown",
-    receiverEmail: tran.receiver.length > 0 ? tran.receiver[0].email : "unknown",
+      tran.sender.length > 0
+        ? tran.sender[0].status === "DELETED"
+          ? "TK đã xoá"
+          : ""
+        : "unknow",
+    receiverName:
+      tran.receiver.length > 0 ? tran.receiver[0].userId : "unknown",
+    receiverEmail:
+      tran.receiver.length > 0 ? tran.receiver[0].email : "unknown",
   }));
 
   res.json({ totalCount, result });
@@ -895,4 +1309,6 @@ export {
   getParentWithCount,
   getAllTransForExport,
   onDonePayment,
+  getPaymentNextTierInfo,
+  onDoneNextTierPayment,
 };
