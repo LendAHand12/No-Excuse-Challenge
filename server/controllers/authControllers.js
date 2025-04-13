@@ -197,7 +197,6 @@ const registerUser = asyncHandler(async (req, res) => {
     const treeReceiveUser = await Tree.findOne({ userId: receiveId, tier: 1 });
 
     if (treeReceiveUser.userName === "NoExcuse 9" || treeReceiveUser.children.length < 2) {
-
       const user = await User.create({
         userId,
         email: email.toLowerCase(),
@@ -313,12 +312,9 @@ const authUser = asyncHandler(async (req, res) => {
     const listRefIdOfUser = await Tree.find({ refId: user._id, tier: 1 });
     if (listRefIdOfUser && listRefIdOfUser.length > 0) {
       for (let refId of listRefIdOfUser) {
-        const refedUser = await User.findById(refId.userId).select(
-          "userId email countChild"
-        );
+        const refedUser = await User.findById(refId.userId).select("userId email countChild");
         listDirectUser.push({
           ...refedUser,
-          countChild: refedUser.countChild[0] + 1,
         });
       }
     }
@@ -378,7 +374,7 @@ const authUser = asyncHandler(async (req, res) => {
         chartData: mergeIntoThreeGroups(listDirectUser),
         targetSales: process.env[`LEVEL_${user.ranking + 1}`],
         bonusRef: user.bonusRef,
-        walletAddressChange: user.walletAddressChange
+        walletAddressChange: user.walletAddressChange,
       },
       accessToken,
       refreshToken,
@@ -392,10 +388,7 @@ const resetUserPassword = asyncHandler(async (req, res) => {
   try {
     // update the user password if the jwt is verified successfully
     const { token, password } = req.body;
-    const decodedToken = jwt.verify(
-      token,
-      process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET
-    );
+    const decodedToken = jwt.verify(token, process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET);
     const user = await User.findById(decodedToken.id);
 
     if (user && password) {
@@ -419,10 +412,7 @@ const confirmUser = asyncHandler(async (req, res) => {
   try {
     // set the user to a confirmed status, once the corresponding JWT is verified correctly
     const emailToken = req.params.token;
-    const decodedToken = jwt.verify(
-      emailToken,
-      process.env.JWT_EMAIL_TOKEN_SECRET
-    );
+    const decodedToken = jwt.verify(emailToken, process.env.JWT_EMAIL_TOKEN_SECRET);
     const user = await User.findById(decodedToken.id).select("-password");
     user.isConfirmed = true;
     await user.save();
@@ -448,29 +438,21 @@ const getAccessToken = asyncHandler(async (req, res) => {
   }
 
   // If the refresh token is valid, create a new accessToken and return it.
-  jwt.verify(
-    refreshToken,
-    process.env.JWT_REFRESH_TOKEN_SECRET,
-    (err, user) => {
-      if (!err) {
-        const accessToken = generateToken(user.id, "access");
-        return res.json({ accessToken });
-      } else {
-        return res.status(400).json({
-          message: "Invalid refresh token",
-        });
-      }
+  jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, (err, user) => {
+    if (!err) {
+      const accessToken = generateToken(user.id, "access");
+      return res.json({ accessToken });
+    } else {
+      return res.status(400).json({
+        message: "Invalid refresh token",
+      });
     }
-  );
+  });
 });
 
 const checkSendMail = asyncHandler(async (req, res) => {
   const { mail } = req.body;
-  const mailInfo = await sendMail(
-    "6480c10538aa7ded76b631c1",
-    mail,
-    "email verification"
-  );
+  const mailInfo = await sendMail("6480c10538aa7ded76b631c1", mail, "email verification");
   res.json({
     mailInfo,
   });
@@ -478,7 +460,7 @@ const checkSendMail = asyncHandler(async (req, res) => {
 
 const getLinkVerify = asyncHandler(async (req, res) => {
   const { email } = req.body;
-  const user = await User.findOne({$and: [{ email }, {status : {$ne: "DELETED"}}]});
+  const user = await User.findOne({ $and: [{ email }, { status: { $ne: "DELETED" } }] });
   if (user) {
     if (user.isConfirmed) {
       throw new Error("User confirmed");
