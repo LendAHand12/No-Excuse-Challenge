@@ -197,7 +197,7 @@ const SystemPage = () => {
       <div className="py-24 px-10">
         {userInfo && (
           <div className="flex justify-between items-center mb-10">
-            {/* <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4">
               {[...Array(userInfo.tier)].map((item, i) => (
                 <button
                   key={i}
@@ -209,7 +209,7 @@ const SystemPage = () => {
                   {t('tier')} {i + 1}
                 </button>
               ))}
-            </div> */}
+            </div>
             {!loading && (
               <button
                 onClick={() => setShowType(!showType)}
