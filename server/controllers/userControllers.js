@@ -763,7 +763,7 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
 
         tree.nodes.push({
           key: childTree._id,
-          label: `${child.userId}`,
+          label: `${childTree.userName}`,
           totalChild: childTree.countChild,
           isGray:
             child.status === "LOCKED"
@@ -774,6 +774,7 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
           isRed: child.tier === 1 && child.countPay === 0 ? true : false,
           isYellow: child.errLahCode === "OVER30",
           indexOnLevel: childTree.indexOnLevel,
+          isSubId: childTree.isSubId
         });
       }
       res.status(200).json(tree);

@@ -193,6 +193,10 @@ const userSchema = mongoose.Schema(
       type: String,
       // enum: ["USER", "ADMIN", "ADMIN1", "ADMIN2"],
     },
+    paymentStep: {
+      type: Number,
+      default: 0
+    }
   },
   {
     timestamps: true,

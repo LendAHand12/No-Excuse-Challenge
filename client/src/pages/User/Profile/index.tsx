@@ -353,7 +353,7 @@ const Profile = () => {
             <input
               className="bg-black rounded-xl text-NoExcuseChallenge p-2 flex-1"
               readOnly
-              value={totalHewe - claimedHewe - availableHewe}
+              value={totalHewe > 0 ? totalHewe  - claimedHewe - availableHewe : availableHewe}
             />
           </div>
           <button

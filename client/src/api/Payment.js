@@ -7,9 +7,9 @@ const Payment = {
       `${URL_API_PAYMENT}/info`
     );
   },
-  getPaymentNextTierInfo: () => {
+  getPaymentNextTierInfo: (childId) => {
     return API.get(
-      `${URL_API_PAYMENT}/infoNextTier`
+      `${URL_API_PAYMENT}/infoNextTier?childId=${childId}`
     );
   },
   addPayment: (body) => {
