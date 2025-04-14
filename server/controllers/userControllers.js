@@ -738,12 +738,13 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
   treeOfUser = await Tree.findById(id).select("userId tier userName children countChild createdAt");
   if (!treeOfUser) {
     user = await User.findOne({ _id: id }).select("userId createdAt");
-    treeOfUser = await Tree.findOne({ userId: user._id }).select(
+    treeOfUser = await Tree.findOne({ userId: user._id, tier: currentTier }).select(
       "userId tier userName children countChild createdAt"
     );
   } else {
     user = await User.findOne({ _id: treeOfUser.userId }).select("userId createdAt");
   }
+  
 
   if (user) {
     if (treeOfUser.children.length === 0) {
@@ -755,6 +756,7 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
         const child = await User.findById(childId).select(
           "tier userId buyPackage countPay fine status errLahCode"
         );
+        
         const childTree = await Tree.findOne({
           userId: childId,
           tier: currentTier,
