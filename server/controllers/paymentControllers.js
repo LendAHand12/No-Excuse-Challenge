@@ -1,10 +1,7 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
 import Transaction from "../models/transactionModel.js";
-import {
-  getParentWithCountPay,
-  getLevelOfRefUser,
-} from "../utils/getParentWithCountPay.js";
+import { getParentWithCountPay, getLevelOfRefUser } from "../utils/getParentWithCountPay.js";
 import Refund from "../models/refundModel.js";
 import { getActiveLink } from "../utils/getLinksActive.js";
 import {
@@ -29,11 +26,10 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
 
   if (user) {
     if (user.countPay === 13) {
-      if (user.currentLayer.slice(-1) < 3) {
+      if (user.currentLayer.slice(-1) < 6) {
         res.status(200).json({
           status: "PENDING",
-          message:
-            "Your current level is insufficient to upgrade to the next tier",
+          message: "Your current level is insufficient to upgrade to the next tier",
         });
       }
     } else {
@@ -152,11 +148,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         // giao dich hoa hong truc tiep
         if (refUser.closeLah) {
           haveRefNotPayEnough = true;
-        } else if (
-          refUser.openLah ||
-          refUser.adminChangeTier ||
-          refUser.createBy === "ADMIN"
-        ) {
+        } else if (refUser.openLah || refUser.adminChangeTier || refUser.createBy === "ADMIN") {
           haveRefNotPayEnough = false;
         } else {
           if (
@@ -223,8 +215,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
               receiveUser.status === "LOCKED" ||
               (receiveUser.errLahCode !== "" && indexFor > 6) ||
               receiveUser.tier < user.tier ||
-              (receiveUser.tier === user.tier &&
-                receiveUser.countPay < user.countPay + 1)
+              (receiveUser.tier === user.tier && receiveUser.countPay < user.countPay + 1)
             ) {
               haveParentNotPayEnough = true;
             } else {
@@ -238,14 +229,8 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
             ) {
               haveParentNotPayEnough = true;
             }
-          } else if (
-            user.tier >= 2 &&
-            user.countPay >= 3 &&
-            receiveUser.countChild[0] >= 300
-          ) {
-            const checkRatioCountChild = await checkRatioCountChildOfUser(
-              receiveUser._id
-            );
+          } else if (user.tier >= 2 && user.countPay >= 3 && receiveUser.countChild[0] >= 300) {
+            const checkRatioCountChild = await checkRatioCountChildOfUser(receiveUser._id);
             if (!checkRatioCountChild) haveParentNotPayEnough = true;
           }
           payments.push({
@@ -290,13 +275,13 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
   const { user } = req;
   const { childId } = req.query;
 
-  if(user.paymentStep > 0 && childId === "") {
+  if (user.paymentStep > 0 && childId === "") {
     res.json({
       status: "OK",
       message: `You're all set for the Tier ${user.tier + 1}. Let's move up!`,
-      payments:[],
+      payments: [],
       paymentIds: [],
-      userStepPayment: user.paymentStep
+      userStepPayment: user.paymentStep,
     });
   } else if (user.currentLayer.slice(-1) < 3) {
     res.status(200).json({
@@ -347,9 +332,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
       let pigFee = parseInt(
         process.env[`DREAMPOOL_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
       );
-      let companyFee = parseInt(
-        process.env[`HEWE_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
-      );
+      let companyFee = parseInt(process.env[`HEWE_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]);
       let directCommissionFee = parseInt(
         process.env[`DIRECT_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
       );
@@ -429,21 +412,24 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
       }
 
       let refUser;
+      let directCommissionUser;
       const nextTierUserId = await findNextUser(user.tier + 1);
       if (user.paymentStep === 0) {
         refUser = await User.findById(nextTierUserId);
+        directCommissionUser = refUser;
+      } else if (user.paymentStep === 1 && user.tier === 1) {
+        refUser = await User.findById(childId);
+        const treeUserTier1 = await Tree.findOne({ userId: user._id, tier: 1 });
+        directCommissionUser = await User.findById(treeUserTier1.refId);
       } else {
         refUser = await User.findById(childId);
+        directCommissionUser = refUser;
       }
 
       // giao dich hoa hong truc tiep
       if (refUser.closeLah) {
         haveRefNotPayEnough = true;
-      } else if (
-        refUser.openLah ||
-        refUser.adminChangeTier ||
-        refUser.createBy === "ADMIN"
-      ) {
+      } else if (refUser.openLah || refUser.adminChangeTier || refUser.createBy === "ADMIN") {
         haveRefNotPayEnough = false;
       } else {
         if (
@@ -460,8 +446,8 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
         userId: user.id,
         amount: directCommissionFee,
         userCountPay: user.countPay,
-        userId_to: refUser._id,
-        username_to: refUser.userId,
+        userId_to: directCommissionUser._id,
+        username_to: directCommissionUser.userId,
         tier: user.tier + 1 - user.paymentStep,
         buyPackage: user.buyPackage,
         hash: "",
@@ -473,10 +459,10 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
         type: "DIRECT",
         id: transactionDirect._id,
         amount: directCommissionFee,
-        to: refUser.userId,
+        to: directCommissionUser.userId,
       });
       payments.push({
-        userName: refUser.userId,
+        userName: directCommissionUser.userId,
         amount: directCommissionFee,
       });
       // await generatePackageTrans(
@@ -486,11 +472,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
       //   user.continueWithBuyPackageB
       // );
 
-      const ancestorsData = await findAncestors(
-        refUser._id,
-        10,
-        user.tier + 1 - user.paymentStep
-      );
+      const ancestorsData = await findAncestors(refUser._id, 10, user.tier + 1 - user.paymentStep);
       let ancestors = ancestorsData.map((data, index) => {
         if (index === 0) {
           data.isFirst = true;
@@ -515,8 +497,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
             receiveUser.status === "LOCKED" ||
             (receiveUser.errLahCode !== "" && indexFor > 6) ||
             receiveUser.tier < user.tier ||
-            (receiveUser.tier === user.tier &&
-              receiveUser.countPay < user.countPay + 1)
+            (receiveUser.tier === user.tier && receiveUser.countPay < user.countPay + 1)
           ) {
             haveParentNotPayEnough = true;
           } else {
@@ -760,11 +741,11 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
       } else {
         let responseHewe = await getPriceHewe();
         const hewePrice = responseHewe.data.ticker.latest;
-        console.log({hewePrice});
+        console.log({ hewePrice });
         const totalHewe = Math.round(
           (parseInt(process.env[`HEWE_AMOUNT_TIER${user.tier + 1}`]) + 25) / hewePrice
         );
-        console.log({totalHewe});
+        console.log({ totalHewe });
 
         user.availableHewe = user.availableHewe + totalHewe;
         user.countPay = 13;
@@ -960,19 +941,11 @@ const getPaymentsOfUser = asyncHandler(async (req, res) => {
   const pageSize = 20;
 
   const count = await Transaction.countDocuments({
-    $and: [
-      { userId: user.id },
-      { status: "SUCCESS" },
-      { type: { $ne: "PACKAGE" } },
-    ],
+    $and: [{ userId: user.id }, { status: "SUCCESS" }, { type: { $ne: "PACKAGE" } }],
   });
 
   const allPayments = await Transaction.find({
-    $and: [
-      { userId: user.id },
-      { status: "SUCCESS" },
-      { type: { $ne: "PACKAGE" } },
-    ],
+    $and: [{ userId: user.id }, { status: "SUCCESS" }, { type: { $ne: "PACKAGE" } }],
   })
     .limit(pageSize)
     .skip(pageSize * (page - 1))
@@ -1070,15 +1043,9 @@ const checkCanRefundPayment = asyncHandler(async (req, res) => {
                 userReceive.countPay - 1
               } time but user pay = ${userCountPay} time`
         );
-      } else if (
-        trans.type === "REFERRALHOLD" &&
-        userReceive.errLahCode === "OVER30"
-      ) {
+      } else if (trans.type === "REFERRALHOLD" && userReceive.errLahCode === "OVER30") {
         throw new Error(`User has not had 3 child within 30 days`);
-      } else if (
-        trans.type === "REFERRALHOLD" &&
-        userReceive.errLahCode === "OVER60"
-      ) {
+      } else if (trans.type === "REFERRALHOLD" && userReceive.errLahCode === "OVER60") {
         throw new Error(`User has not had 3 child within 60 days`);
       } else if (
         userReceive.buyPackage === "A" &&
@@ -1301,15 +1268,9 @@ const getAllTransForExport = asyncHandler(async (req, res) => {
     senderName: tran.sender.length > 0 ? tran.sender[0].userId : "unknown",
     senderEmail: tran.sender.length > 0 ? tran.sender[0].email : "unknown",
     senderStatus:
-      tran.sender.length > 0
-        ? tran.sender[0].status === "DELETED"
-          ? "TK đã xoá"
-          : ""
-        : "unknow",
-    receiverName:
-      tran.receiver.length > 0 ? tran.receiver[0].userId : "unknown",
-    receiverEmail:
-      tran.receiver.length > 0 ? tran.receiver[0].email : "unknown",
+      tran.sender.length > 0 ? (tran.sender[0].status === "DELETED" ? "TK đã xoá" : "") : "unknow",
+    receiverName: tran.receiver.length > 0 ? tran.receiver[0].userId : "unknown",
+    receiverEmail: tran.receiver.length > 0 ? tran.receiver[0].email : "unknown",
   }));
 
   res.json({ totalCount, result });

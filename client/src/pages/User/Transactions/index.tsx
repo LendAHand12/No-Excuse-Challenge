@@ -64,6 +64,9 @@ const Transactions = () => {
                 Type
               </th>
               <th scope="col" className="px-6 py-3">
+                Tier
+              </th>
+              <th scope="col" className="px-6 py-3">
                 Time
               </th>
             </tr>
@@ -96,7 +99,10 @@ const Transactions = () => {
                       {t(ele.type)}
                     </div>
                   </td>
-                  <td className="px-6 py-4">{ele.createdAt}</td>
+                  <td className="px-6 py-4">{ele.tier}</td>
+                  <td className="px-6 py-4">
+                    {new Date(ele.createdAt).toLocaleDateString('vi')}
+                  </td>
                 </tr>
               ))}
           </tbody>
