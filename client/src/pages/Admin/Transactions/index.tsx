@@ -29,7 +29,7 @@ const AdminTransactionsPage = () => {
     pageNumber: page,
     keyword: key,
     status,
-    tier: paramsTier,
+    tier: parseInt(paramsTier),
   });
 
   useEffect(() => {
@@ -130,19 +130,19 @@ const AdminTransactionsPage = () => {
     <DefaultLayout>
       <ToastContainer />
       <div className="py-24 px-10">
-        {/* <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
           {[...Array(5)].map((item, i) => (
             <button
               key={i}
               onClick={() => handleChangeTier(i + 1)}
-              className={`flex justify-center items-center hover:underline bg-white border text-gray-700 font-medium text-sm ${
-                objectFilter.tier === i + 1 ? 'bg-black text-NoExcuseChallenge' : ''
-              } rounded-full my-6 py-4 px-8 focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
+              className={`flex justify-center items-center hover:underline font-medium ${
+                parseInt(objectFilter.tier) === i + 1 ? 'bg-black text-NoExcuseChallenge' : ''
+              } rounded-full py-4 px-8 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
             >
               {t('tier')} {i + 1}
             </button>
           ))}
-        </div> */}
+        </div>
         <div className="relative overflow-x-auto p-10">
           <div className="flex items-center justify-between pb-4 bg-white">
             <div>

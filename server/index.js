@@ -27,6 +27,7 @@ import claimRoutes from "./routes/claimRoutes.js";
 import dreampoolRoutes from "./routes/dreampoolRoutes.js";
 import withdrawRoutes from "./routes/withdrawRoutes.js";
 import iceBreakerRoutes from "./routes/iceBreakerRoutes.js";
+import incomeRoutes from "./routes/incomeRoutes.js";
 
 import {
   countChildToData,
@@ -109,6 +110,7 @@ app.use("/api/claim", claimRoutes);
 app.use("/api/dreampool", dreampoolRoutes);
 app.use("/api/withdraw", withdrawRoutes);
 app.use("/api/ice-breaker", iceBreakerRoutes);
+app.use("/api/income", incomeRoutes);
 
 app.use(notFound);
 
@@ -198,7 +200,7 @@ cron1.start();
 // cron3.start();
 // cron4.start();
 cron5.start();
-// cron6.start();
+cron6.start();
 // cron7.start();
 // cron8.start();
 cron9.start();

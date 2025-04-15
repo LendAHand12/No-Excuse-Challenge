@@ -53,6 +53,9 @@ import PermissionsCreatePage from './pages/Admin/Permissions/Create';
 import AdminPage from './pages/Admin/Admin';
 import AdminDetailPage from './pages/Admin/Admin/Detail';
 import AdminCreatePage from './pages/Admin/Admin/Create';
+import IncomePage from './pages/User/Income';
+import ExportUsersPage from './pages/Admin/Export/ExportUsers';
+import ExportPaymentsPage from './pages/Admin/Export/ExportPayments';
 import { useSelector } from 'react-redux';
 
 function App() {
@@ -416,6 +419,32 @@ function App() {
             }
           />
         )}
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/user/export')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/user/export"
+            element={
+              <>
+                <PageTitle title="Admin Export User | NoExcuseChallenge" />
+                <ExportUsersPage />
+              </>
+            }
+          />
+        )}
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/transaction/export')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/transaction/export"
+            element={
+              <>
+                <PageTitle title="Admin Export Transaction | NoExcuseChallenge" />
+                <ExportPaymentsPage />
+              </>
+            }
+          />
+        )}
       </Route>
       <Route element={<PrivateRoute />}>
         <Route
@@ -481,90 +510,17 @@ function App() {
             </>
           }
         />
+        <Route
+          path="/user/income"
+          element={
+            <>
+              <PageTitle title="Income | NoExcuseChallenge" />
+              <IncomePage />
+            </>
+          }
+        />
       </Route>
       <Route path="*" element={<NotFoundPage />}></Route>
-      {/* <Route
-          path="/calendar"
-          element={
-            <>
-              <PageTitle title="Calendar | NoExcuseChallenge" />
-              <Calendar />
-            </>
-          }
-        />
-        
-        <Route
-          path="/forms/form-elements"
-          element={
-            <>
-              <PageTitle title="Form Elements | NoExcuseChallenge" />
-              <FormElements />
-            </>
-          }
-        />
-        <Route
-          path="/forms/form-layout"
-          element={
-            <>
-              <PageTitle title="Form Layout | NoExcuseChallenge" />
-              <FormLayout />
-            </>
-          }
-        />
-        <Route
-          path="/tables"
-          element={
-            <>
-              <PageTitle title="Tables | NoExcuseChallenge" />
-              <Tables />
-            </>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <>
-              <PageTitle title="Settings | NoExcuseChallenge" />
-              <Settings />
-            </>
-          }
-        />
-        <Route
-          path="/chart"
-          element={
-            <>
-              <PageTitle title="Basic Chart | NoExcuseChallenge" />
-              <Chart />
-            </>
-          }
-        />
-        <Route
-          path="/ui/alerts"
-          element={
-            <>
-              <PageTitle title="Alerts | NoExcuseChallenge" />
-              <Alerts />
-            </>
-          }
-        />
-        <Route
-          path="/ui/buttons"
-          element={
-            <>
-              <PageTitle title="Buttons | NoExcuseChallenge" />
-              <Buttons />
-            </>
-          }
-        />
-        <Route
-          path="/auth/signin"
-          element={
-            <>
-              <PageTitle title="Signin | NoExcuseChallenge" />
-              <SignIn />
-            </>
-          }
-        /> */}
     </Routes>
   );
 }

@@ -826,7 +826,6 @@ const getAllPayments = asyncHandler(async (req, res) => {
     searchType = { type: { $regex: status, $options: "i" } };
   }
 
-  console.log({ searchType });
 
   const pageSize = 10;
 

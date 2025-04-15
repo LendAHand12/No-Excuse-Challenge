@@ -196,6 +196,10 @@ const AdminUserPages = () => {
       });
   }, [currentDeleteId]);
 
+  const handleExportUsers = async () => {
+    navigate("/admin/user/export");
+  }
+
   return (
     <DefaultLayout>
       <ToastContainer />
@@ -352,56 +356,69 @@ const AdminUserPages = () => {
       </Modal>
       <div className="relative overflow-x-auto py-24 px-10">
         <div className="flex items-center justify-between pb-4 bg-white">
-          <div>
-            <select
-              className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
-              onChange={onChangeStatus}
-              defaultValue={objectFilter.status}
-              disabled={loading}
-            >
-              <option value="all">All</option>
-              {userStatus.map((status) => (
-                <option value={status.status} key={status.status}>
-                  {t(status.status)}
-                </option>
-              ))}
-            </select>
+          <div className="flex gap-4">
+            <div>
+              <select
+                className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
+                onChange={onChangeStatus}
+                defaultValue={objectFilter.status}
+                disabled={loading}
+              >
+                <option value="all">All</option>
+                {userStatus.map((status) => (
+                  <option value={status.status} key={status.status}>
+                    {t(status.status)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg
+                  className="w-5 h-5 text-gray-500"
+                  aria-hidden="true"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  onChange={onSearch}
+                  className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50"
+                  placeholder={t('search with user name or email')}
+                  defaultValue={objectFilter.keyword}
+                />
+                <button
+                  onClick={handleSearch}
+                  disabled={loading}
+                  className="h-8 flex text-xs justify-center items-center hover:underline bg-black text-NoExcuseChallenge font-bold rounded-full py-1 px-4 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                >
+                  {t('search')}
+                </button>
+              </div>
+            </div>
           </div>
-          <label htmlFor="table-search" className="sr-only">
-            Search
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <div>
+            <button onClick={handleExportUsers} className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm rounded-md hover:opacity-70">
               <svg
-                className="w-5 h-5 text-gray-500"
-                aria-hidden="true"
                 fill="currentColor"
-                viewBox="0 0 20 20"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path
-                  fillRule="evenodd"
-                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                  clipRule="evenodd"
-                ></path>
+                <path d="M8.71,7.71,11,5.41V15a1,1,0,0,0,2,0V5.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42l-4-4a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-4,4A1,1,0,1,0,8.71,7.71ZM21,14a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V15a1,1,0,0,0-2,0v4a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V15A1,1,0,0,0,21,14Z" />
               </svg>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                onChange={onSearch}
-                className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50"
-                placeholder={t('search with user name or email')}
-                defaultValue={objectFilter.keyword}
-              />
-              <button
-                onClick={handleSearch}
-                disabled={loading}
-                className="h-8 flex text-xs justify-center items-center hover:underline bg-black text-NoExcuseChallenge font-bold rounded-full py-1 px-4 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
-              >
-                {t('search')}
-              </button>
-            </div>
+              Export Data
+            </button>
           </div>
         </div>
         <table className="w-full text-sm text-left text-gray-500">
@@ -461,33 +478,34 @@ const AdminUserPages = () => {
                     <div className="flex gap-6">
                       {userInfo?.permissions
                         .find((p) => p.page.pageName === 'admin-users-details')
-                        ?.actions.includes('approve') && ele.status === 'PENDING' && (
-                        <button
-                          onClick={() => handleApprove(ele._id)}
-                          className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
-                        >
-                          <svg
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                            id="check"
-                            data-name="Flat Line"
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="w-6 h-auto"
+                        ?.actions.includes('approve') &&
+                        ele.status === 'PENDING' && (
+                          <button
+                            onClick={() => handleApprove(ele._id)}
+                            className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
                           >
-                            <polyline
-                              id="primary"
-                              points="5 12 10 17 19 8"
-                              style={{
-                                fill: 'none',
-                                stroke: 'currentColor',
-                                strokeLinecap: 'round',
-                                strokeLinejoin: 'round',
-                                strokeWidth: 2,
-                              }}
-                            ></polyline>
-                          </svg>
-                        </button>
-                      )}
+                            <svg
+                              fill="currentColor"
+                              viewBox="0 0 24 24"
+                              id="check"
+                              data-name="Flat Line"
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-6 h-auto"
+                            >
+                              <polyline
+                                id="primary"
+                                points="5 12 10 17 19 8"
+                                style={{
+                                  fill: 'none',
+                                  stroke: 'currentColor',
+                                  strokeLinecap: 'round',
+                                  strokeLinejoin: 'round',
+                                  strokeWidth: 2,
+                                }}
+                              ></polyline>
+                            </svg>
+                          </button>
+                        )}
 
                       {userInfo?.permissions
                         .find((p) => p.page.pageName === 'admin-users-details')
@@ -560,22 +578,24 @@ const AdminUserPages = () => {
 
                       {userInfo?.permissions
                         .find((p) => p.page.pageName === 'admin-users-details')
-                        ?.actions.includes('delete') && ele.countPay === 0 && ele.status !== 'DELETED' && (
-                        <button
-                          onClick={() => handleDelete(ele._id)}
-                          className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
-                        >
-                          <svg
-                            fill="currentColor"
-                            className="w-6 h-auto"
-                            viewBox="-3 -2 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                            preserveAspectRatio="xMinYMin"
+                        ?.actions.includes('delete') &&
+                        ele.countPay === 0 &&
+                        ele.status !== 'DELETED' && (
+                          <button
+                            onClick={() => handleDelete(ele._id)}
+                            className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
                           >
-                            <path d="M6 2V1a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1h4a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-.133l-.68 10.2a3 3 0 0 1-2.993 2.8H5.826a3 3 0 0 1-2.993-2.796L2.137 7H2a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4zm10 2H2v1h14V4zM4.141 7l.687 10.068a1 1 0 0 0 .998.932h6.368a1 1 0 0 0 .998-.934L13.862 7h-9.72zM7 8a1 1 0 0 1 1 1v7a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1zm4 0a1 1 0 0 1 1 1v7a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1z" />
-                          </svg>
-                        </button>
-                      )}
+                            <svg
+                              fill="currentColor"
+                              className="w-6 h-auto"
+                              viewBox="-3 -2 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                              preserveAspectRatio="xMinYMin"
+                            >
+                              <path d="M6 2V1a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1h4a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-.133l-.68 10.2a3 3 0 0 1-2.993 2.8H5.826a3 3 0 0 1-2.993-2.796L2.137 7H2a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4zm10 2H2v1h14V4zM4.141 7l.687 10.068a1 1 0 0 0 .998.932h6.368a1 1 0 0 0 .998-.934L13.862 7h-9.72zM7 8a1 1 0 0 1 1 1v7a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1zm4 0a1 1 0 0 1 1 1v7a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1z" />
+                            </svg>
+                          </button>
+                        )}
                     </div>
                   </td>
                 </tr>

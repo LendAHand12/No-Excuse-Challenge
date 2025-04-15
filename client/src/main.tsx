@@ -7,6 +7,7 @@ import 'jsvectormap/dist/css/jsvectormap.css';
 import 'flatpickr/dist/flatpickr.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import './i18n';
+import "react-datepicker/dist/react-datepicker.css";
 import { Provider } from 'react-redux';
 import store from './store';
 import FallbackLoading from './components/FallbackLoading';
