@@ -826,7 +826,6 @@ const getAllPayments = asyncHandler(async (req, res) => {
     searchType = { type: { $regex: status, $options: "i" } };
   }
 
-
   const pageSize = 10;
 
   const count = await Transaction.countDocuments({
@@ -1207,10 +1206,8 @@ const getParentWithCount = asyncHandler(async (req, res) => {
 
 const getAllTransForExport = asyncHandler(async (req, res) => {
   let fromDate, toDate;
-  const { limit, page } = req.body;
   let match = {
     status: "SUCCESS",
-    type: { $ne: "PACKAGE" },
   };
 
   if (req.body.fromDate) {
@@ -1227,50 +1224,35 @@ const getAllTransForExport = asyncHandler(async (req, res) => {
     };
   }
 
-  const offset = (page - 1) * limit;
-
   const transactions = await Transaction.aggregate([
     { $match: match },
-    {
-      $lookup: {
-        from: "users",
-        localField: "address_from",
-        foreignField: "walletAddress",
-        as: "sender",
-      },
-    },
-    {
-      $lookup: {
-        from: "users",
-        localField: "address_ref",
-        foreignField: "walletAddress",
-        as: "receiver",
-      },
-    },
-    { $skip: offset },
-    { $limit: limit },
     { $sort: { createdAt: -1 } },
   ]);
 
   const totalCount = await Transaction.countDocuments(match);
 
-  const result = transactions.map((tran) => ({
-    _id: tran._id,
-    type: tran.type,
-    amount: tran.amount,
-    isHoldRefund: tran.isHoldRefund,
-    status: tran.status,
-    createdAt: tran.createdAt,
-    address_from: tran.address_from,
-    tier: tran.tier,
-    address_ref: tran.address_ref,
-    senderName: tran.sender.length > 0 ? tran.sender[0].userId : "unknown",
-    senderEmail: tran.sender.length > 0 ? tran.sender[0].email : "unknown",
-    senderStatus:
-      tran.sender.length > 0 ? (tran.sender[0].status === "DELETED" ? "TK đã xoá" : "") : "unknow",
-    receiverName: tran.receiver.length > 0 ? tran.receiver[0].userId : "unknown",
-    receiverEmail: tran.receiver.length > 0 ? tran.receiver[0].email : "unknown",
-  }));
+  const result = [];
+
+  for (let tran of transactions) {
+    const sender = await User.findById(tran.userId);
+    const receiver = await User.findById(tran.userId_to);
+
+    result.push({
+      _id: tran._id,
+      type: tran.type,
+      amount: tran.amount,
+      isHoldRefund: tran.isHoldRefund,
+      status: tran.status,
+      createdAt: tran.createdAt,
+      tier: tran.tier,
+      address_ref: tran.address_ref,
+      senderName: sender ? sender.userId : "unknown",
+      senderEmail: sender ? sender.email : "unknown",
+      senderStatus: sender ? (sender.status === "DELETED" ? "TK đã xoá" : "") : "unknow",
+      receiverName: receiver ? receiver.userId : "unknown",
+      receiverEmail: receiver ? receiver.email : "unknown",
+    });
+  }
 
   res.json({ totalCount, result });
 });

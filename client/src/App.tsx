@@ -196,6 +196,20 @@ function App() {
         )}
 
         {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/transactions')
+          ?.actions.includes('export') && (
+          <Route
+            path="/admin/transaction/export"
+            element={
+              <>
+                <PageTitle title="Admin Export Transaction | NoExcuseChallenge" />
+                <ExportPaymentsPage />
+              </>
+            }
+          />
+        )}
+
+        {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/transactions/:id')
           ?.actions.includes('read') && (
           <Route
@@ -420,27 +434,14 @@ function App() {
           />
         )}
         {userInfo?.permissions
-          ?.find((p) => p.page.path === '/admin/user/export')
-          ?.actions.includes('read') && (
+          ?.find((p) => p.page.path === '/admin/users')
+          ?.actions.includes('export') && (
           <Route
             path="/admin/user/export"
             element={
               <>
                 <PageTitle title="Admin Export User | NoExcuseChallenge" />
                 <ExportUsersPage />
-              </>
-            }
-          />
-        )}
-        {userInfo?.permissions
-          ?.find((p) => p.page.path === '/admin/transaction/export')
-          ?.actions.includes('read') && (
-          <Route
-            path="/admin/transaction/export"
-            element={
-              <>
-                <PageTitle title="Admin Export Transaction | NoExcuseChallenge" />
-                <ExportPaymentsPage />
               </>
             }
           />

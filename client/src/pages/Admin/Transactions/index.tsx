@@ -126,6 +126,10 @@ const AdminTransactionsPage = () => {
     [objectFilter],
   );
 
+  const handleExportTrans = async () => {
+    navigate('/admin/transaction/export');
+  };
+
   return (
     <DefaultLayout>
       <ToastContainer />
@@ -136,7 +140,9 @@ const AdminTransactionsPage = () => {
               key={i}
               onClick={() => handleChangeTier(i + 1)}
               className={`flex justify-center items-center hover:underline font-medium ${
-                parseInt(objectFilter.tier) === i + 1 ? 'bg-black text-NoExcuseChallenge' : ''
+                parseInt(objectFilter.tier) === i + 1
+                  ? 'bg-black text-NoExcuseChallenge'
+                  : ''
               } rounded-full py-4 px-8 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
             >
               {t('tier')} {i + 1}
@@ -145,74 +151,94 @@ const AdminTransactionsPage = () => {
         </div>
         <div className="relative overflow-x-auto p-10">
           <div className="flex items-center justify-between pb-4 bg-white">
-            <div>
-              <select
-                className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
-                onChange={onChangeStatus}
-                defaultValue={objectFilter.status}
-              >
-                <option value="ALL" key="ALL">
-                  All
-                </option>
-                <option value="REGISTER" key="REGISTER">
-                  Membership
-                </option>
-                <option value="COMPANY" key="COMPANY">
-                  Hewe
-                </option>
-                <option value="PIG" key="PIG">
-                  DreamPool
-                </option>
-                <option value="DIRECT" key="DIRECT">
-                  {t('DIRECT')}{' '}
-                </option>
-                <option value="REFERRAL" key="REFERRAL">
-                  {t('REFERRAL')}{' '}
-                </option>
-                <option value="FINE" key="FINE">
-                  {t('FINE')}{' '}
-                </option>
-                <option value="HOLD" key="HOLD">
-                  {t('HOLD')}{' '}
-                </option>
-              </select>
-            </div>
-            <label htmlFor="table-search" className="sr-only">
-              Search
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <svg
-                  className="w-5 h-5 text-gray-500"
-                  aria-hidden="true"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
+            <div className="flex items-center gap-2">
+              <div>
+                <select
+                  className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
+                  onChange={onChangeStatus}
+                  defaultValue={objectFilter.status}
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
+                  <option value="ALL" key="ALL">
+                    All
+                  </option>
+                  <option value="REGISTER" key="REGISTER">
+                    Membership
+                  </option>
+                  <option value="COMPANY" key="COMPANY">
+                    Hewe
+                  </option>
+                  <option value="PIG" key="PIG">
+                    DreamPool
+                  </option>
+                  <option value="DIRECT" key="DIRECT">
+                    {t('DIRECT')}{' '}
+                  </option>
+                  <option value="REFERRAL" key="REFERRAL">
+                    {t('REFERRAL')}{' '}
+                  </option>
+                  <option value="FINE" key="FINE">
+                    {t('FINE')}{' '}
+                  </option>
+                  <option value="HOLD" key="HOLD">
+                    {t('HOLD')}{' '}
+                  </option>
+                </select>
               </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  onChange={onSearch}
-                  className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50"
-                  placeholder={t('search with user ref code')}
-                  defaultValue={objectFilter.keyword}
-                />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg
+                    className="w-5 h-5 text-gray-500"
+                    aria-hidden="true"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                      clipRule="evenodd"
+                    ></path>
+                  </svg>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    onChange={onSearch}
+                    className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50"
+                    placeholder={t('search with user ref code')}
+                    defaultValue={objectFilter.keyword}
+                  />
+                  <button
+                    onClick={handleSearch}
+                    disabled={loading}
+                    className="h-8 flex text-xs justify-center items-center hover:underline text-black font-medium rounded-full py-1 px-4 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                  >
+                    {t('search')}
+                  </button>
+                </div>
+              </div>
+            </div>
+            {userInfo?.permissions
+              ?.find((p) => p.page.path === '/admin/transactions')
+              ?.actions.includes('export') && (
+              <div>
                 <button
-                  onClick={handleSearch}
-                  disabled={loading}
-                  className="h-8 flex text-xs justify-center items-center hover:underline text-black font-medium rounded-full py-1 px-4 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                  onClick={handleExportTrans}
+                  className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm rounded-md hover:opacity-70"
                 >
-                  {t('search')}
+                  <svg
+                    fill="currentColor"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M8.71,7.71,11,5.41V15a1,1,0,0,0,2,0V5.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42l-4-4a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-4,4A1,1,0,1,0,8.71,7.71ZM21,14a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V15a1,1,0,0,0-2,0v4a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V15A1,1,0,0,0,21,14Z" />
+                  </svg>
+                  Export Data
                 </button>
               </div>
-            </div>
+            )}
           </div>
           <table className="w-full text-sm text-left text-gray-500">
             <thead className="text-xs text-gray-700 uppercase bg-gray-50">

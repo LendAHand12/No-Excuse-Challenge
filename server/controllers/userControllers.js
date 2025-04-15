@@ -744,7 +744,6 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
   } else {
     user = await User.findOne({ _id: treeOfUser.userId }).select("userId createdAt");
   }
-  
 
   if (user) {
     if (treeOfUser.children.length === 0) {
@@ -756,7 +755,7 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
         const child = await User.findById(childId).select(
           "tier userId buyPackage countPay fine status errLahCode"
         );
-        
+
         const childTree = await Tree.findOne({
           userId: childId,
           tier: currentTier,
@@ -776,7 +775,7 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
           isRed: child.tier === 1 && child.countPay === 0 ? true : false,
           isYellow: child.errLahCode === "OVER30",
           indexOnLevel: childTree.indexOnLevel,
-          isSubId: childTree.isSubId
+          isSubId: childTree.isSubId,
         });
       }
       res.status(200).json(tree);
@@ -1233,13 +1232,12 @@ const getAllUsersForExport = asyncHandler(async (req, res) => {
       name: u.userId,
       email: u.email,
       phone: u.phone,
-      walletAddress: u.walletAddress[0],
+      walletAddress: u.walletAddress,
       memberSince: u.createdAt,
       tier: u.tier,
       "count pay": u.countPay,
       fine: u.fine,
       status: u.status,
-      countChild: u.countChild[u.tier - 1],
       refUserName: u.parent ? u.parent.userName : "",
       refUserEmail: u.parentUser ? u.parentUser.email : "",
       note: u.note ? u.note : "",

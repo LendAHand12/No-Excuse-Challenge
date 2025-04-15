@@ -6,11 +6,9 @@ import moment from 'moment';
 import { exportToExcel } from '@/utils/export';
 import { Controller, useForm } from 'react-hook-form';
 import DatePicker from 'react-datepicker';
-import { useSelector } from 'react-redux';
 import DefaultLayout from '@/layout/DefaultLayout';
 
 const ExportUsersPage = () => {
-  const { userInfo } = useSelector((state) => state.auth);
   const { t } = useTranslation();
   const {
     handleSubmit,
@@ -157,7 +155,17 @@ const ExportUsersPage = () => {
     <DefaultLayout>
       <ToastContainer />
       <div className="py-24 px-10">
-        <h1 className="text-xl font-semibold mb-10">Export users</h1>
+        <div class="mx-auto sm:container mb-10">
+          <div>
+            <h2 class="text-dark mb-2 text-2xl font-semibold dark:text-white">
+              Export User List
+            </h2>
+            <p class="text-body-color dark:text-dark-6 text-sm font-medium">
+              Download and manage the list of registered users in Excel format
+              for reporting and administrative purposes.
+            </p>
+          </div>
+        </div>
         {loading && (
           <div
             className="flex items-center gradient text-white text-sm px-4 py-3 mb-4"
@@ -174,7 +182,7 @@ const ExportUsersPage = () => {
           </div>
         )}
         <form onSubmit={handleSubmit(exportUsers)} className="">
-          <div className="flex items-center gap-10 lg:w-1/2">
+          <div className="flex items-center gap-10">
             <Controller
               control={control}
               name="fromDate"
