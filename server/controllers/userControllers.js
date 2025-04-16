@@ -938,11 +938,11 @@ const getListChildOfUser = asyncHandler(async (req, res) => {
 const getListChildNotEnoughBranchOfUser = asyncHandler(async (req, res) => {
   let result = [];
 
-  const parent = await Tree.findOne({ userId: req.user.id }).lean();
+  const parent = await Tree.findOne({ userId: req.user.id, isSubId: false }).lean();
   if (!parent) {
     result = [];
   } else {
-    result = await getAllDescendantsLte2(req.user.id);
+    result = await getAllDescendantsLte2(req.user.id, 1);
   }
 
   res.json(result);
@@ -978,11 +978,11 @@ async function getAllDescendants(targetUserId) {
   }
 }
 
-async function getAllDescendantsLte2(targetUserId) {
+async function getAllDescendantsLte2(targetUserId, tier) {
   try {
     const descendants = await Tree.aggregate([
       {
-        $match: { userId: targetUserId, tier: 1 },
+        $match: { userId: targetUserId, tier, isSubId: false },
       },
       {
         $graphLookup: {
@@ -992,6 +992,7 @@ async function getAllDescendantsLte2(targetUserId) {
           connectToField: "userId",
           as: "descendants",
           maxDepth: 100,
+          restrictSearchWithMatch: { tier },
         },
       },
       {
@@ -1000,7 +1001,13 @@ async function getAllDescendantsLte2(targetUserId) {
             $filter: {
               input: "$descendants",
               as: "descendant",
-              cond: { $lt: [{ $size: "$$descendant.children" }, 2] },
+              cond: {
+                $and: [
+                  { $lt: [{ $size: "$$descendant.children" }, 2] },
+                  // { $eq: ["$$descendant.isSubId", false] },
+                  { $eq: ["$$descendant.tier", tier] },
+                ],
+              },
             },
           },
         },
@@ -1011,6 +1018,7 @@ async function getAllDescendantsLte2(targetUserId) {
       descendants[0]?.descendants.map((descendant) => ({
         id: descendant.userId,
         userId: descendant.userName,
+        tier: descendant.tier,
       })) || [];
 
     return descendantsList;

@@ -414,17 +414,24 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
       let refUser;
       let directCommissionUser;
       const nextTierUserId = await findNextUser(user.tier + 1);
+      console.log({ nextTierUserId });
       if (user.paymentStep === 0) {
         refUser = await User.findById(nextTierUserId);
         directCommissionUser = refUser;
       } else if (user.paymentStep === 1 && user.tier === 1) {
-        refUser = await User.findById(childId);
         const treeUserTier1 = await Tree.findOne({ userId: user._id, tier: 1 });
         directCommissionUser = await User.findById(treeUserTier1.refId);
+        const refTreeUser = await Tree.findOne({
+          userId: childId,
+          createdAt: { $gt: treeUserTier1.createdAt },
+        });
+        refUser = await User.findById(refTreeUser.userId);
       } else {
         refUser = await User.findById(childId);
         directCommissionUser = refUser;
       }
+
+      console.log({ refUser: refUser.userId, directCommissionUser: directCommissionUser.userId });
 
       // giao dich hoa hong truc tiep
       if (refUser.closeLah) {
