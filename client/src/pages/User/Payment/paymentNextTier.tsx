@@ -195,7 +195,7 @@ const PaymentNextTierPage = () => {
                         <option value="">{t('No choose')}</option>
                         {listChild.length > 0 &&
                           listChild.map((ele) => (
-                            <option key={ele.id} value={ele.id}>
+                            <option key={ele.userId} value={ele.id}>
                               {ele.userId}
                             </option>
                           ))}
