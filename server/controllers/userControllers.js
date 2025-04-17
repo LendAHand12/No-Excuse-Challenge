@@ -980,50 +980,61 @@ async function getAllDescendants(targetUserId) {
 
 async function getAllDescendantsLte2(targetUserId, tier) {
   try {
-    const descendants = await Tree.aggregate([
-      {
-        $match: { userId: targetUserId, tier, isSubId: false },
-      },
-      {
-        $graphLookup: {
-          from: "trees",
-          startWith: "$children",
-          connectFromField: "children",
-          connectToField: "userId",
-          as: "descendants",
-          maxDepth: 100,
-          restrictSearchWithMatch: { tier },
+    // Tìm cây gốc
+    const root = await Tree.findOne({ userId: targetUserId, tier, isSubId: false });
+    if (!root || !Array.isArray(root.children)) return [];
+
+    let allDescendants = [];
+
+    // Duyệt từng nhánh con trực tiếp
+    for (const childId of root.children) {
+      const result = await Tree.aggregate([
+        {
+          $match: { userId: childId, tier, isSubId: false },
         },
-      },
-      {
-        $project: {
-          descendants: {
-            $filter: {
-              input: "$descendants",
-              as: "descendant",
-              cond: {
-                $and: [
-                  { $lt: [{ $size: "$$descendant.children" }, 2] },
-                  // { $eq: ["$$descendant.isSubId", false] },
-                  { $eq: ["$$descendant.tier", tier] },
-                ],
+        {
+          $graphLookup: {
+            from: "trees",
+            startWith: "$children",
+            connectFromField: "children",
+            connectToField: "userId",
+            as: "descendants",
+            maxDepth: 100,
+            restrictSearchWithMatch: { tier, isSubId: false },
+          },
+        },
+        {
+          $project: {
+            descendants: {
+              $filter: {
+                input: "$descendants",
+                as: "descendant",
+                cond: {
+                  $and: [
+                    { $lt: [{ $size: "$$descendant.children" }, 2] },
+                    { $eq: ["$$descendant.tier", tier] },
+                    { $eq: ["$$descendant.isSubId", false] },
+                  ],
+                },
               },
             },
           },
         },
-      },
-    ]);
+      ]);
 
-    const descendantsList =
-      descendants[0]?.descendants.map((descendant) => ({
-        id: descendant.userId,
-        userId: descendant.userName,
-        tier: descendant.tier,
-      })) || [];
+      const descendants =
+        result[0]?.descendants.map((descendant) => ({
+          id: descendant.userId,
+          userId: descendant.userName,
+          tier: descendant.tier,
+        })) || [];
 
-    return descendantsList;
+      allDescendants.push(...descendants);
+    }
+
+    return allDescendants;
   } catch (error) {
-    console.error("Lỗi khi lấy cấp dưới của người dùng:", error);
+    console.error("Lỗi khi lấy cấp dưới cùng nhánh:", error);
     return [];
   }
 }
