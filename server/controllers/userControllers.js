@@ -1382,7 +1382,7 @@ const adminDeleteUser = asyncHandler(async (req, res) => {
         userId: user._id,
         tier: tierIndex,
       });
-      const parentTree = await Tree.findOne({ userId: treeUser.parentId });
+      const parentTree = await Tree.findById(treeUser.parentId);
       oldParents.push(treeUser.parentId);
       if (treeUser.children.length === 0) {
         await removeIdFromChildrenOfParent(user, parentTree);
