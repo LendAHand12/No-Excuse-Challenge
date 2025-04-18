@@ -6,6 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { useCallback, useEffect, useState } from 'react';
 import User from '@/api/User';
 import DefaultLayout from '../../../layout/DefaultLayout';
+import Select from 'react-select';
 
 const ReferralPage = () => {
   const { t } = useTranslation();
@@ -70,21 +71,16 @@ const ReferralPage = () => {
           <>
             <div className="mb-3">
               <div>
-                <select
+                <Select
+                  options={listChild.map((ele) => ({
+                    value: ele.id,
+                    label: ele.userId,
+                  }))}
                   onChange={(e) => {
-                    setChildId(e.target.value);
+                    setChildId(e.value);
                   }}
-                  value={childId}
-                  className="form-select w-full px-3 py-2 mb-1 border text-black border-black rounded-md focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
-                >
-                  <option value="">{t('No choose')}</option>
-                  {listChild.length > 0 &&
-                    listChild.map((ele) => (
-                      <option key={ele.id} value={ele.id}>
-                        {ele.userId}
-                      </option>
-                    ))}
-                </select>
+                  className="w-full mb-1 border text-black border-black rounded-md focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
+                />
               </div>
             </div>
 

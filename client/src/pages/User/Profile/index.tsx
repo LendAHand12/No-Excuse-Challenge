@@ -56,6 +56,7 @@ const Profile = () => {
     claimedHewe,
     ranking,
     totalEarning,
+    totalHold,
     withdrawPending,
     chartData,
     targetSales,
@@ -458,6 +459,14 @@ const Profile = () => {
                   className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
                 >
                   {totalEarning} USD
+                </div>
+              </div>
+              <div className="flex items-center justify-between bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                <p>Total Hold</p>
+                <div
+                  className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
+                >
+                  {totalHold} USD
                 </div>
               </div>
               {/* <div className="flex justify-between py-2 px-4">

@@ -33,7 +33,6 @@ const PaymentPage = () => {
         if (message) {
           toast.success(message);
           setShowPayment(false);
-          setPaymentCompleted(true);
         } else {
           const totalPayment = paymentIds.reduce(
             (accumulator, currentValue) => accumulator + currentValue.amount,
@@ -70,7 +69,8 @@ const PaymentPage = () => {
       // if (referralTransaction) {
       //   const { transactionHash } = referralTransaction;
         await donePayment("transactionHash");
-        window.location.reload();
+        setPaymentCompleted(true);
+        // window.location.reload();
       // } else {
       //   setLoadingPayment(false);
       //   throw new Error(t('payment error'));
@@ -111,7 +111,7 @@ const PaymentPage = () => {
           </div>
         ) : (
           <>
-            {showPayment && (
+            {!paymentCompleted && showPayment && (
               <>
                 <div className="w-full max-w-203 mx-auto rounded-lg bg-white p-10 text-gray-700 mt-4">
                   <div className="mb-10">

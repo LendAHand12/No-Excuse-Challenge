@@ -370,7 +370,6 @@ const authUser = asyncHandler(async (req, res) => {
         claimedUsdt: user.claimedUsdt,
         heweWallet: user.heweWallet,
         ranking: user.ranking,
-        totalEarning: user.availableUsdt + user.claimedUsdt,
         chartData: mergeIntoThreeGroups(listDirectUser),
         targetSales: process.env[`LEVEL_${user.ranking + 1}`],
         bonusRef: user.bonusRef,

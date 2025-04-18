@@ -173,7 +173,7 @@ const PaymentNextTierPage = () => {
                 >
                   <span className="block sm:inline">{resMessage}</span>
                 </div>
-                <div className="w-full max-w-203 mx-auto rounded-lg bg-white p-10 text-gray-700 mt-4">
+                {/* <div className="w-full max-w-203 mx-auto rounded-lg bg-white p-10 text-gray-700 mt-4">
                   <div className="mb-10">
                     <h1 className="text-center font-bold text-4xl">
                       Secure payment for Tier {userInfo.tier + 1 - step}
@@ -295,7 +295,7 @@ const PaymentNextTierPage = () => {
                       )}
                     </>
                   )}
-                </div>
+                </div> */}
               </>
             )}
             {resStatus === 'DONE' && (

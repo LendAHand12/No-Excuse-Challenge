@@ -125,13 +125,22 @@ const getUserById = asyncHandler(async (req, res) => {
         );
         listDirectUser.push({
           userId: refedUser.userId,
-          isGray: refedUser.status === "LOCKED" ? (req.user.isAdmin ? true : false) : false,
+          isGray:
+            refedUser.status === "LOCKED"
+              ? req.user.isAdmin
+                ? true
+                : false
+              : false,
           isRed:
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "B" && refedUser.countPay < 7
+              : refedUser.tier === 1 &&
+                refedUser.buyPackage === "B" &&
+                refedUser.countPay < 7
               ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "A" && refedUser.countPay < 13
+              : refedUser.tier === 1 &&
+                refedUser.buyPackage === "A" &&
+                refedUser.countPay < 13
               ? true
               : false,
           isYellow: refedUser.errLahCode === "OVER30",
@@ -141,7 +150,9 @@ const getUserById = asyncHandler(async (req, res) => {
     const listOldParent = [];
     if (user.oldParents && user.oldParents.length > 0) {
       for (let parentId of user.oldParents) {
-        const oldParent = await User.findById(parentId).select("userId email walletAddress");
+        const oldParent = await User.findById(parentId).select(
+          "userId email walletAddress"
+        );
         listOldParent.push(oldParent);
       }
     }
@@ -159,9 +170,23 @@ const getUserById = asyncHandler(async (req, res) => {
 
     const withdraws = await Withdraw.find({
       userId: user._id,
-      status: "PENDING",
     });
-    const totalWithdraws = withdraws.reduce((sum, withdraw) => sum + withdraw.amount, 0);
+    const totalWithdraws = withdraws.reduce(
+      (sum, withdraw) => sum + withdraw.amount,
+      0
+    );
+    const withdrawPending = withdraws
+      .filter((ele) => ele.status === "PENDING")
+      .reduce((sum, withdraw) => sum + withdraw.amount, 0);
+
+    const listTransHold = await Transaction.find({
+      userId_to: user.id,
+      type: { $regex: "HOLD", $options: "i" },
+      status: "SUCCESS",
+      isHoldRefund: false,
+    });
+
+    const totalHold = listTransHold.reduce((sum, ele) => sum + ele.amount, 0);
 
     res.json({
       id: user._id,
@@ -214,12 +239,13 @@ const getUserById = asyncHandler(async (req, res) => {
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
-      totalEarning: user.availableUsdt + user.claimedUsdt,
-      withdrawPending: totalWithdraws,
+      totalEarning: user.availableUsdt + user.claimedUsdt + totalWithdraws,
+      withdrawPending: withdrawPending,
       chartData: mergeIntoThreeGroups(listDirectUser),
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
       bonusRef: user.bonusRef,
       walletAddressChange: user.walletAddressChange,
+      totalHold,
     });
   } else {
     res.status(404);
@@ -240,13 +266,22 @@ const getUserInfo = asyncHandler(async (req, res) => {
         );
         listDirectUser.push({
           userId: refedUser.userId,
-          isGray: refedUser.status === "LOCKED" ? (req.user.isAdmin ? true : false) : false,
+          isGray:
+            refedUser.status === "LOCKED"
+              ? req.user.isAdmin
+                ? true
+                : false
+              : false,
           isRed:
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "B" && refedUser.countPay < 7
+              : refedUser.tier === 1 &&
+                refedUser.buyPackage === "B" &&
+                refedUser.countPay < 7
               ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "A" && refedUser.countPay < 13
+              : refedUser.tier === 1 &&
+                refedUser.buyPackage === "A" &&
+                refedUser.countPay < 13
               ? true
               : false,
           isYellow: refedUser.errLahCode === "OVER30",
@@ -256,7 +291,9 @@ const getUserInfo = asyncHandler(async (req, res) => {
     const listOldParent = [];
     if (user.oldParents && user.oldParents.length > 0) {
       for (let parentId of user.oldParents) {
-        const oldParent = await User.findById(parentId).select("userId email walletAddress");
+        const oldParent = await User.findById(parentId).select(
+          "userId email walletAddress"
+        );
         listOldParent.push(oldParent);
       }
     }
@@ -267,9 +304,14 @@ const getUserInfo = asyncHandler(async (req, res) => {
 
     const withdraws = await Withdraw.find({
       userId: user._id,
-      status: "PENDING",
     });
-    const totalWithdraws = withdraws.reduce((sum, withdraw) => sum + withdraw.amount, 0);
+    const totalWithdraws = withdraws.reduce(
+      (sum, withdraw) => sum + withdraw.amount,
+      0
+    );
+    const withdrawPending = withdraws
+      .filter((ele) => ele.status === "PENDING")
+      .reduce((sum, withdraw) => sum + withdraw.amount, 0);
 
     const tree = await Tree.findOne({ userId: user._id, tier: 1 });
 
@@ -277,6 +319,15 @@ const getUserInfo = asyncHandler(async (req, res) => {
     if (tree && tree.refId) {
       refUser = await User.findById(tree.refId);
     }
+
+    const listTransHold = await Transaction.find({
+      userId_to: user.id,
+      type: { $regex: "HOLD", $options: "i" },
+      status: "SUCCESS",
+      isHoldRefund: false,
+    });
+
+    const totalHold = listTransHold.reduce((sum, ele) => sum + ele.amount, 0);
 
     res.json({
       id: user._id,
@@ -329,12 +380,13 @@ const getUserInfo = asyncHandler(async (req, res) => {
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
-      totalEarning: user.availableUsdt + user.claimedUsdt,
-      withdrawPending: totalWithdraws,
+      totalEarning: user.availableUsdt + user.claimedUsdt + totalWithdraws,
+      withdrawPending: withdrawPending,
       chartData: mergeIntoThreeGroups(listDirectUser),
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
       bonusRef: user.bonusRef,
       walletAddressChange: user.walletAddressChange,
+      totalHold,
     });
   } else {
     res.status(404);
@@ -353,7 +405,11 @@ const updateUser = asyncHandler(async (req, res) => {
   });
 
   const userHaveWalletAddress = await User.find({
-    $and: [{ walletAddress }, { email: { $ne: user.email } }, { isAdmin: false }],
+    $and: [
+      { walletAddress },
+      { email: { $ne: user.email } },
+      { isAdmin: false },
+    ],
   });
 
   if (
@@ -380,7 +436,10 @@ const updateUser = asyncHandler(async (req, res) => {
       const newBuyPackage = await Package.findOne({ name: buyPackage });
       if (newBuyPackage.status === "active") {
         user.buyPackage = buyPackage || user.buyPackage;
-        await Tree.findOneAndUpdate({ userName: user.userId }, { buyPackage: buyPackage });
+        await Tree.findOneAndUpdate(
+          { userName: user.userId },
+          { buyPackage: buyPackage }
+        );
       } else {
         res.status(400).json({ error: "Package has been disabled" });
       }
@@ -407,13 +466,22 @@ const updateUser = asyncHandler(async (req, res) => {
           );
           listDirectUser.push({
             userId: refedUser.userId,
-            isGray: refedUser.status === "LOCKED" ? (req.user.isAdmin ? true : false) : false,
+            isGray:
+              refedUser.status === "LOCKED"
+                ? req.user.isAdmin
+                  ? true
+                  : false
+                : false,
             isRed:
               refedUser.tier === 1 && refedUser.countPay === 0
                 ? true
-                : refedUser.tier === 1 && refedUser.buyPackage === "B" && refedUser.countPay < 7
+                : refedUser.tier === 1 &&
+                  refedUser.buyPackage === "B" &&
+                  refedUser.countPay < 7
                 ? true
-                : refedUser.tier === 1 && refedUser.buyPackage === "A" && refedUser.countPay < 13
+                : refedUser.tier === 1 &&
+                  refedUser.buyPackage === "A" &&
+                  refedUser.countPay < 13
                 ? true
                 : false,
             isYellow: refedUser.errLahCode === "OVER30",
@@ -424,9 +492,23 @@ const updateUser = asyncHandler(async (req, res) => {
 
       const withdraws = await Withdraw.find({
         userId: user._id,
-        status: "PENDING",
       });
-      const totalWithdraws = withdraws.reduce((sum, withdraw) => sum + withdraw.amount, 0);
+      const totalWithdraws = withdraws.reduce(
+        (sum, withdraw) => sum + withdraw.amount,
+        0
+      );
+      const withdrawPending = withdraws
+        .filter((ele) => ele.status === "PENDING")
+        .reduce((sum, withdraw) => sum + withdraw.amount, 0);
+
+      const listTransHold = await Transaction.find({
+        userId_to: user.id,
+        type: { $regex: "HOLD", $options: "i" },
+        status: "SUCCESS",
+        isHoldRefund: false,
+      });
+
+      const totalHold = listTransHold.reduce((sum, ele) => sum + ele.amount, 0);
 
       const packages = await getActivePackages();
       const permissions = await Permission.findOne({
@@ -473,12 +555,13 @@ const updateUser = asyncHandler(async (req, res) => {
           claimedUsdt: updatedUser.claimedUsdt,
           heweWallet: updatedUser.heweWallet,
           ranking: updatedUser.ranking,
-          totalEarning: updatedUser.availableUsdt + updatedUser.claimedUsdt,
-          withdrawPending: totalWithdraws,
+          totalEarning: user.availableUsdt + user.claimedUsdt + totalWithdraws,
+          withdrawPending: withdrawPending,
           chartData: mergeIntoThreeGroups(listDirectUser),
           targetSales: process.env[`LEVEL_${updatedUser.ranking + 1}`],
           bonusRef: updatedUser.bonusRef,
           walletAddressChange: updatedUser.walletAddressChange,
+          totalHold,
         },
       });
     }
@@ -615,12 +698,19 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     }
 
     const listTransSuccess = await Transaction.find({
-      $and: [{ userId: user._id }, { status: "SUCCESS" }, { type: { $ne: "REGISTER" } }],
+      $and: [
+        { userId: user._id },
+        { status: "SUCCESS" },
+        { type: { $ne: "REGISTER" } },
+      ],
     });
     if (buyPackage && buyPackage !== user.buyPackage) {
       if (listTransSuccess.length === 0) {
         user.buyPackage = buyPackage || user.buyPackage;
-        await Tree.updateMany({ $and: [{ userId: user._id }, { tier: 1 }] }, { buyPackage });
+        await Tree.updateMany(
+          { $and: [{ userId: user._id }, { tier: 1 }] },
+          { buyPackage }
+        );
       } else {
         res.status(400).json({ error: "User has generated a transaction" });
       }
@@ -735,14 +825,19 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
   const userRequest = req.user;
   let treeOfUser;
   let user;
-  treeOfUser = await Tree.findById(id).select("userId tier userName children countChild createdAt");
+  treeOfUser = await Tree.findById(id).select(
+    "userId tier userName children countChild createdAt"
+  );
   if (!treeOfUser) {
     user = await User.findOne({ _id: id }).select("userId createdAt");
-    treeOfUser = await Tree.findOne({ userId: user._id, tier: currentTier }).select(
-      "userId tier userName children countChild createdAt"
-    );
+    treeOfUser = await Tree.findOne({
+      userId: user._id,
+      tier: currentTier,
+    }).select("userId tier userName children countChild createdAt");
   } else {
-    user = await User.findOne({ _id: treeOfUser.userId }).select("userId createdAt");
+    user = await User.findOne({ _id: treeOfUser.userId }).select(
+      "userId createdAt"
+    );
   }
 
   if (user) {
@@ -750,7 +845,11 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
       res.status(404);
       throw new Error("User not have child");
     } else {
-      const tree = { key: treeOfUser._id, label: treeOfUser.userName, nodes: [] };
+      const tree = {
+        key: treeOfUser._id,
+        label: treeOfUser.userName,
+        nodes: [],
+      };
       for (const childId of treeOfUser.children) {
         const child = await User.findById(childId).select(
           "tier userId buyPackage countPay fine status errLahCode"
@@ -848,13 +947,22 @@ const getUserProfile = asyncHandler(async (req, res) => {
         );
         listDirectUser.push({
           userId: refedUser.userId,
-          isGray: refedUser.status === "LOCKED" ? (req.user.isAdmin ? true : false) : false,
+          isGray:
+            refedUser.status === "LOCKED"
+              ? req.user.isAdmin
+                ? true
+                : false
+              : false,
           isRed:
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "B" && refedUser.countPay < 7
+              : refedUser.tier === 1 &&
+                refedUser.buyPackage === "B" &&
+                refedUser.countPay < 7
               ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "A" && refedUser.countPay < 13
+              : refedUser.tier === 1 &&
+                refedUser.buyPackage === "A" &&
+                refedUser.countPay < 13
               ? true
               : false,
           isYellow: refedUser.errLahCode === "OVER30",
@@ -926,7 +1034,8 @@ const getListChildOfUser = asyncHandler(async (req, res) => {
   let result = [];
 
   const parent = await Tree.findOne({ userId: req.user.id }).lean();
-  if (!parent) {
+  const listRef = await Tree.find({ refId: req.user.id });
+  if (!parent || listRef.length < 2) {
     result = [];
   } else {
     result = await getAllDescendants(req.user.id);
@@ -938,7 +1047,11 @@ const getListChildOfUser = asyncHandler(async (req, res) => {
 const getListChildNotEnoughBranchOfUser = asyncHandler(async (req, res) => {
   let result = [];
 
-  const parent = await Tree.findOne({ userId: req.user.id, isSubId: false }).lean();
+  const parent = await Tree.findOne({
+    userId: req.user.id,
+    isSubId: false,
+    tier: 1,
+  }).lean();
   if (!parent) {
     result = [];
   } else {
@@ -992,6 +1105,7 @@ async function getAllDescendantsLte2(targetUserId, tier) {
         {
           $match: { userId: childId, tier, isSubId: false },
         },
+<<<<<<< Updated upstream
         {
           $graphLookup: {
             from: "trees",
@@ -1016,18 +1130,44 @@ async function getAllDescendantsLte2(targetUserId, tier) {
                     { $eq: ["$$descendant.isSubId", false] },
                   ],
                 },
+=======
+      },
+      {
+        $project: {
+          createdAt: 1, // Lấy parent.createdAt ra để dùng so sánh
+          descendants: {
+            $filter: {
+              input: "$descendants",
+              as: "descendant",
+              cond: {
+                $and: [
+                  { $lt: [{ $size: "$$descendant.children" }, 2] },
+                  { $eq: ["$$descendant.tier", tier] },
+                  { $gt: ["$$descendant.createdAt", "$createdAt"] },
+                ],
+>>>>>>> Stashed changes
               },
             },
           },
         },
       ]);
 
+<<<<<<< Updated upstream
       const descendants =
         result[0]?.descendants.map((descendant) => ({
           id: descendant.userId,
           userId: descendant.userName,
           tier: descendant.tier,
         })) || [];
+=======
+    const descendantsList =
+      descendants[0]?.descendants.map((descendant) => ({
+        id: descendant.userId,
+        userId: descendant.userName,
+        tier: descendant.tier,
+        createdAt: descendant.createdAt,
+      })) || [];
+>>>>>>> Stashed changes
 
       allDescendants.push(...descendants);
     }
@@ -1170,7 +1310,10 @@ const getAllUsersForExport = asyncHandler(async (req, res) => {
           {
             $match: {
               $expr: {
-                $and: [{ $eq: ["$userId", { $toString: "$$userId" }] }, { $eq: ["$tier", 1] }],
+                $and: [
+                  { $eq: ["$userId", { $toString: "$$userId" }] },
+                  { $eq: ["$tier", 1] },
+                ],
               },
             },
           },
@@ -1189,7 +1332,10 @@ const getAllUsersForExport = asyncHandler(async (req, res) => {
           {
             $match: {
               $expr: {
-                $and: [{ $eq: ["$userId", { $toString: "$$parentId" }] }, { $eq: ["$tier", 1] }],
+                $and: [
+                  { $eq: ["$userId", { $toString: "$$parentId" }] },
+                  { $eq: ["$tier", 1] },
+                ],
               },
             },
           },
@@ -1289,8 +1435,12 @@ const mailForChangeWallet = asyncHandler(async (req, res) => {
 });
 
 const changeWallet = asyncHandler(async (req, res) => {
-  const { token, newWallet1, newWallet2, newWallet3, newWallet4, newWallet5 } = req.body;
-  const decodedToken = jwt.verify(token, process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET);
+  const { token, newWallet1, newWallet2, newWallet3, newWallet4, newWallet5 } =
+    req.body;
+  const decodedToken = jwt.verify(
+    token,
+    process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET
+  );
   if (decodedToken) {
     const user = await User.findById(decodedToken.id);
 
@@ -1446,7 +1596,8 @@ const pushChildrent1ToUp = async (userTree, parentTree, tierIndex) => {
   userUp.oldParents = [childTree.parentId, ...userUp.oldParents];
   await userUp.save();
   childTree.parentId = parentTree.userId;
-  childTree.refId = childTree.refId === userTree.userId ? parentTree.userId : childTree.refId;
+  childTree.refId =
+    childTree.refId === userTree.userId ? parentTree.userId : childTree.refId;
   await childTree.save();
   parentTree.children.push(childTree.userId);
   await parentTree.save();
@@ -1557,7 +1708,10 @@ const checkCanIncreaseNextTier = async (u) => {
             }
           }
 
-          if (highestChildSales >= 0.4 * u.countChild && lowestChildSales >= 0.2 * u.countChild) {
+          if (
+            highestChildSales >= 0.4 * u.countChild &&
+            lowestChildSales >= 0.2 * u.countChild
+          ) {
             // const haveC = await doesAnyUserInHierarchyHaveBuyPackageC(u.id, 1);
             return true;
           }
@@ -1610,8 +1764,17 @@ const doesAnyUserInHierarchyHaveBuyPackageC = async (userId) => {
 };
 
 const adminCreateUser = asyncHandler(async (req, res) => {
-  const { userId, walletAddress, email, password, phone, idCode, imgFront, imgBack, tier } =
-    req.body;
+  const {
+    userId,
+    walletAddress,
+    email,
+    password,
+    phone,
+    idCode,
+    imgFront,
+    imgBack,
+    tier,
+  } = req.body;
 
   const userExistsUserId = await User.findOne({
     userId: { $regex: userId, $options: "i" },
@@ -2069,7 +2232,9 @@ const getDreamPool = asyncHandler(async (req, res) => {
 
 const adminChangeWalletUser = asyncHandler(async (req, res) => {
   const { userId } = req.body;
-  const user = await User.findOne({ _id: userId }).select("walletAddress walletAddressChange");
+  const user = await User.findOne({ _id: userId }).select(
+    "walletAddress walletAddressChange"
+  );
   if (user) {
     user.walletAddress = user.walletAddressChange;
     user.walletAddressChange = "";
