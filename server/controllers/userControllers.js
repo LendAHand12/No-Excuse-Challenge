@@ -1033,15 +1033,15 @@ const getUserProfile = asyncHandler(async (req, res) => {
 const getListChildOfUser = asyncHandler(async (req, res) => {
   let result = [];
 
-  const parent = await Tree.findOne({ userId: req.user.id }).lean();
+  const parent = await Tree.findOne({ userId: req.user.id, tier: 1 }).lean();
   const listRef = await Tree.find({ refId: req.user.id });
   if (!parent || listRef.length < 2) {
     result = [];
   } else {
-    result = await getAllDescendants(req.user.id);
+    result = await getAllDescendants(parent._id);
   }
 
-  res.json(result);
+  res.json({userTreeId: parent._id, result});
 });
 
 const getListChildNotEnoughBranchOfUser = asyncHandler(async (req, res) => {
@@ -1061,18 +1061,18 @@ const getListChildNotEnoughBranchOfUser = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
-async function getAllDescendants(targetUserId) {
+async function getAllDescendants(targetUserTreeId) {
   try {
     const descendants = await Tree.aggregate([
       {
-        $match: { userId: targetUserId, tier: 1 },
+        $match: { _id: targetUserTreeId },
       },
       {
         $graphLookup: {
           from: "trees",
           startWith: "$children",
           connectFromField: "children",
-          connectToField: "userId",
+          connectToField: "_id",
           as: "descendants",
           maxDepth: 100,
         },
@@ -1105,7 +1105,6 @@ async function getAllDescendantsLte2(targetUserId, tier) {
         {
           $match: { userId: childId, tier, isSubId: false },
         },
-<<<<<<< Updated upstream
         {
           $graphLookup: {
             from: "trees",
@@ -1130,44 +1129,18 @@ async function getAllDescendantsLte2(targetUserId, tier) {
                     { $eq: ["$$descendant.isSubId", false] },
                   ],
                 },
-=======
-      },
-      {
-        $project: {
-          createdAt: 1, // Lấy parent.createdAt ra để dùng so sánh
-          descendants: {
-            $filter: {
-              input: "$descendants",
-              as: "descendant",
-              cond: {
-                $and: [
-                  { $lt: [{ $size: "$$descendant.children" }, 2] },
-                  { $eq: ["$$descendant.tier", tier] },
-                  { $gt: ["$$descendant.createdAt", "$createdAt"] },
-                ],
->>>>>>> Stashed changes
               },
             },
           },
         },
       ]);
 
-<<<<<<< Updated upstream
       const descendants =
         result[0]?.descendants.map((descendant) => ({
           id: descendant.userId,
           userId: descendant.userName,
           tier: descendant.tier,
         })) || [];
-=======
-    const descendantsList =
-      descendants[0]?.descendants.map((descendant) => ({
-        id: descendant.userId,
-        userId: descendant.userName,
-        tier: descendant.tier,
-        createdAt: descendant.createdAt,
-      })) || [];
->>>>>>> Stashed changes
 
       allDescendants.push(...descendants);
     }

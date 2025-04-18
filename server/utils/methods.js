@@ -28,7 +28,7 @@ export const getRefParentUser = async (userId, tier) => {
     throw new Error("System not found");
   }
 
-  const parentUser = await User.findById(tree.refId);
+  const parentUser = await Tree.findById(tree.refId);
 
   if (!parentUser) {
     throw new Error("No referrer information found");

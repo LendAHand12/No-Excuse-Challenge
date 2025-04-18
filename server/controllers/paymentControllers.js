@@ -28,6 +28,8 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
   const { user } = req;
 
   if (user) {
+    const treeOfUser = await Tree.findOne({userId: user.id, tier: 1});
+
     if (user.countPay === 13) {
       if (user.currentLayer.slice(-1) < 6) {
         res.status(200).json({
@@ -75,11 +77,11 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
       } else {
         const refUser = await getRefParentUser(user.id, user.tier);
         let haveRefNotPayEnough = false;
-        let registerFee = 5 * user.tier;
-        let pigFee = 5 * user.tier;
-        let companyFee = 25 * user.tier;
-        let directCommissionFee = 15 * user.tier;
-        let referralCommissionFee = 5 * user.tier;
+        let registerFee = 5;
+        let pigFee = 5;
+        let companyFee = 25;
+        let directCommissionFee = 15;
+        let referralCommissionFee = 5;
         // giao dich dang ky
         payments.push({
           userName: "Registration Fee",
@@ -173,8 +175,8 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           userId: user.id,
           amount: directCommissionFee,
           userCountPay: user.countPay,
-          userId_to: refUser._id,
-          username_to: refUser.userId,
+          userId_to: refUser.userId,
+          username_to: refUser.userName,
           tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
@@ -186,7 +188,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           type: "DIRECT",
           id: transactionDirect._id,
           amount: directCommissionFee,
-          to: refUser.userId,
+          to: refUser.userName,
         });
         payments.push({
           userName: refUser.userId,
@@ -240,9 +242,9 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
             }
           } else {
             const listRefOfReceiver = await Tree.find({
-              refId: p.userId,
+              refId: p._id,
             });
-            if (listRefOfReceiver.length < 2) {
+            if (p.children.length === 2 && listRefOfReceiver.length < 2) {
               haveParentNotPayEnough = true;
             }
           }
@@ -618,11 +620,7 @@ const findAncestors = async (userId, limit, tier) => {
     let parentTree = null;
 
     if (treeOfUser.parentId) {
-      parentTree = await Tree.findOne({
-        userId: treeOfUser.parentId,
-        tier,
-        createdAt: { $lt: treeOfUser.createdAt },
-      }).sort({ createdAt: -1 });
+      parentTree = await Tree.findById(treeOfUser.parentId);
     }
 
     if (parentTree) {
@@ -678,13 +676,14 @@ const onDonePayment = asyncHandler(async (req, res) => {
         );
 
         if (!trans.type.includes("HOLD")) {
-          let userReceive = await User.findOne({ _id: trans.userId_to });
+          let userReceive = await User.findById(trans.userId_to);
+          console.log({userReceive, userId: trans.userId_to, countPay: trans.countPay});
           userReceive.availableUsdt = userReceive.availableUsdt + trans.amount;
           await userReceive.save();
         }
 
         if (trans.type === "DIRECT" || trans.type === "REFERRAL") {
-          let userReceive = await User.findOne({ _id: trans.userId_to });
+          let userReceive = await User.findById(trans.userId_to);
           if (trans.type === "REFERRAL") {
             await sendMailRefDc({
               senderName: user.userId,

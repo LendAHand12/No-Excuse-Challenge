@@ -73,10 +73,6 @@ const userSchema = mongoose.Schema(
       type: String,
       default: "",
     },
-    buyPackage: {
-      type: String,
-      default: "",
-    },
     errLahCode: {
       type: String,
       default: "",
@@ -101,9 +97,6 @@ const userSchema = mongoose.Schema(
       type: String,
       enum: ["ADMIN", "USER"],
       default: "USER",
-    },
-    havePaid: {
-      type: Boolean,
     },
     note: {
       type: String,
@@ -173,9 +166,6 @@ const userSchema = mongoose.Schema(
     claimedHewe: {
       type: Number,
       default: 0,
-    },
-    heweWallet: {
-      type: String,
     },
     ranking: {
       type: Number,

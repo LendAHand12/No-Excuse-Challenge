@@ -18,21 +18,11 @@ const checkLinkRef = asyncHandler(async (req, res) => {
   let message = "invalidUrl";
 
   try {
-    const userReceive = await User.findOne({
-      _id: receiveId,
-      // status: { $in: ["APPROVED", "LOCKED"] },
-    });
+    const treeUserReceive = await Tree.findById(receiveId);
 
-    const userRef = await User.findOne({
-      _id: ref,
-      // status: { $in: ["APPROVED", "LOCKED"] },
-    });
+    const treeUserRef = await Tree.findById(ref);
 
-    if (userReceive && userRef) {
-      const treeUserReceive = await Tree.findOne({
-        userId: userReceive._id,
-        tier: 1,
-      });
+    if (treeUserReceive && treeUserRef) {
 
       if (!treeUserReceive.parentId || treeUserReceive.userName === "NoExcuse 9") {
         message = "validUrl";
@@ -60,94 +50,6 @@ const checkLinkRef = asyncHandler(async (req, res) => {
     });
   }
 });
-
-// const registerUser = asyncHandler(async (req, res) => {
-//   const {
-//     userId,
-//     email,
-//     password,
-//     ref,
-//     phone,
-//     idCode,
-//     walletAddress,
-//   } = req.body;
-
-//   const userExistsUserId = await User.findOne({
-//     userId: { $regex: userId, $options: "i" },
-//     status: { $ne: "DELETED" },
-//   });
-//   const userExistsEmail = await User.findOne({
-//     email: email.toLowerCase(),
-//     status: { $ne: "DELETED" },
-//   });
-//   const userExistsPhone = await User.findOne({
-//     $and: [{ phone: { $ne: "" } }, { phone }],
-//     status: { $ne: "DELETED" },
-//   });
-//   const userExistsIdCode = await User.findOne({
-//     $and: [{ idCode: { $ne: "" } }, { idCode }],
-//     status: { $ne: "DELETED" },
-//   });
-//   const userExistsWalletAddress = await User.findOne({
-//     walletAddress,
-//     status: { $ne: "DELETED" },
-//   });
-
-//   if (userExistsUserId) {
-//     let message = "duplicateInfoUserId";
-//     res.status(400);
-//     throw new Error(message);
-//   } else if (userExistsEmail) {
-//     let message = "duplicateInfoEmail";
-//     res.status(400);
-//     throw new Error(message);
-//   } else if (userExistsPhone) {
-//     let message = "Dupplicate phone";
-//     res.status(400);
-//     throw new Error(message);
-//   } else if (userExistsIdCode) {
-//     let message = "duplicateInfoIdCode";
-//     res.status(400);
-//     throw new Error(message);
-//   } else if (userExistsWalletAddress) {
-//     let message = "duplicateWalletAddress";
-//     res.status(400);
-//     throw new Error(message);
-//   } else {
-//     const userNextRefIdBySystem = await findNextReferrer(ref);
-//     const treeReceiveUser = await Tree.findOne({ userId: userNextRefIdBySystem, tier: 1 });
-
-//     const user = await User.create({
-//       userId,
-//       email: email.toLowerCase(),
-//       phone,
-//       password,
-//       walletAddress,
-//       idCode,
-//       buyPackage: "A",
-//       role: "user",
-//     });
-
-//     const tree = await Tree.create({
-//       userName: user.userId,
-//       userId: user._id,
-//       parentId: userNextRefIdBySystem,
-//       refId: ref,
-//       children: [],
-//     });
-
-//     await sendMail(user._id, email, "email verification");
-
-//     treeReceiveUser.children.push(user._id);
-//     await treeReceiveUser.save();
-
-//     let message = "registerSuccessful";
-
-//     res.status(201).json({
-//       message,
-//     });
-//   }
-// });
 
 const registerUser = asyncHandler(async (req, res) => {
   const { userId, email, password, ref, receiveId, phone, idCode, walletAddress } = req.body;
@@ -194,7 +96,7 @@ const registerUser = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error(message);
   } else {
-    const treeReceiveUser = await Tree.findOne({ userId: receiveId, tier: 1 });
+    const treeReceiveUser = await Tree.findById(receiveId);
 
     if (treeReceiveUser.userName === "NoExcuse 9" || treeReceiveUser.children.length < 2) {
       const user = await User.create({
@@ -218,7 +120,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
       await sendMail(user._id, email, "email verification");
 
-      treeReceiveUser.children.push(user._id);
+      treeReceiveUser.children.push(tree._id);
       await treeReceiveUser.save();
 
       let message = "registerSuccessful";

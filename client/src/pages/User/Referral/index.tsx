@@ -17,21 +17,23 @@ const ReferralPage = () => {
   const defaultRef = `${import.meta.env.VITE_URL}/signup?ref=${userInfo.id}`;
   const [link, setLink] = useState(defaultRef);
   const [copied, setCopied] = useState(false);
+  const [userTreeId, setUserTreeId] = useState("");
 
   useEffect(() => {
     if (childId === '') {
-      setLink(defaultRef);
+      setLink(`${import.meta.env.VITE_URL}/signup?ref=${userTreeId}`);
     } else {
-      setLink(`${defaultRef}&receiveId=${childId}`);
+      setLink(`${import.meta.env.VITE_URL}/signup?ref=${userTreeId}&receiveId=${childId}`);
     }
-  }, [childId, defaultRef]);
+  }, [childId, defaultRef, userTreeId]);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
       await User.getListChild()
         .then((response) => {
-          setListChild([...response.data]);
+          setListChild([...response.data.result]);
+          setUserTreeId(response.data.userTreeId)
           setLoading(false);
         })
         .catch((error) => {
