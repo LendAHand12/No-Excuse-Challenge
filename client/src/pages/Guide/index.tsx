@@ -16,7 +16,7 @@ const GuidePage: React.FC = () => {
           <p className="">
             Congratulations on stepping into a world where your dreams are not
             just aspirations but achievable goals! DreamChain is more than a
-            platform, it’s a community-driven revolution empowering individuals
+            platform; it’s a community-driven revolution empowering individuals
             to turn their ambitions into reality. This guide will show you how
             to unlock your potential as a DreamChain member and make the most of
             this groundbreaking opportunity.
@@ -93,10 +93,11 @@ const GuidePage: React.FC = () => {
                   • <span className="font-semibold">Quick Start Bonus:</span>{' '}
                   Recruit{' '}
                   <span className="font-semibold">
-                    5 direct members within 30 days
+                    2 direct members within 45 days
                   </span>{' '}
                   and receive an additional{' '}
-                  <span className="font-semibold">25 USDT</span> as a bonus.
+                  <span className="font-semibold">10 USDT</span> as a bonus if
+                  member achieved 2 direct refurral within 15 days
                 </span>
               </li>
               <li className="flex items-start gap-6">
@@ -124,36 +125,68 @@ const GuidePage: React.FC = () => {
           <div className="space-y-4">
             <b className="text-xl font-bold">Step 3: DreamPool Rewards</b>
             <p className="">
-              The DreamPool is a unique feature designed to reward the
-              community. It operates through:
+              The <b>DreamPool</b> is a unique feature designed to reward and
+              energize the community. It operates through the{' '}
+              <b>Year-End Splash Party</b>, creating excitement and offering
+              members the chance to earn substantial rewards.
             </p>
             <div className="space-y-4">
-              <b>Year End Splash Party</b>
+              <b>How It Works:</b>
               <p>
-                Held every December, the DreamPool creates excitement and
-                provides members with opportunities for substantial rewards.
+                Each tier has its own DreamPool, and each pool includes a
+                different draw held every December. These drawings bring energy
+                and incentive to active members across all tiers
+              </p>
+              <p>
+                For <b>Tier 1 DreamPool</b>, members who achieve{' '}
+                <b>2 direct referrals within 15 days</b> will receive an{' '}
+                <b>extra reward of 10 USDT out of Tier 1 DreamPool.</b>
               </p>
             </div>
             <div className="space-y-4">
-              <b>Reward Distribution</b>
               <p>
-                <b>The DreamPool : </b> For each Tier will have separate draws.
+                At the <b>Year-End Splash Party</b>, the company will determine:
               </p>
               <ul className="grid gap-4 list-disc">
                 <li className="flex items-start gap-6">
-                  <span>• Tier 1 & 2 - For 5 Luckiest Members.</span>
+                  <span>• The number of draws</span>
                 </li>
                 <li className="flex items-start gap-6">
-                  • Tier 3 and beyond – For 10 Luckiest Members.
+                  • The number of winners
+                </li>
+                <li className="flex items-start gap-6">
+                  • Both are based on the remaining balance in each tier’s
+                  DreamPool
                 </li>
               </ul>
             </div>
             <div className="space-y-4">
-              <b>Qualification Requirements</b>
+              <b>DreamPool Rewards – Tier 2 and Above</b>
               <p>
-                To qualify for the DreamPool draw, members must achieve the rank
-                of Mentor or above at least 3 days prior to the drawing date in
-                December, Year End Splash Party.
+                Rewards from Tier 2 and higher DreamPools are distributed as
+                follows
+              </p>
+              <ul className="grid gap-4 list-disc">
+                <li className="flex items-start gap-6">
+                  <span>
+                    • <b>50%</b> shared among the <b>top 4 members</b> with the
+                    most active team members in Tier 2
+                  </span>
+                </li>
+                <li className="flex items-start gap-6">
+                  • <b>25%</b> awarded through a <b>lucky draw</b> to the{' '}
+                  <b>25 luckiest members</b>
+                </li>
+                <li className="flex items-start gap-6">
+                  • <b>25%</b> awarded through a <b>lucky draw</b> to{' '}
+                  <b>50 additional lucky members</b>
+                </li>
+              </ul>
+              <p>
+                <b>Note:</b> These percentages apply{' '}
+                <b>only when a tier is completely filled</b>. If the tier is not
+                full, the company will adjust the number of draws and winners
+                accordingly, based on the remaining balance in the pool
               </p>
             </div>
           </div>
@@ -162,8 +195,8 @@ const GuidePage: React.FC = () => {
           <div className="space-y-4">
             <b className="text-xl font-bold">Step 4: Building Your Community</b>
             <p className="">
-              NoExcuseChallenge thrives on the collective strength of its
-              members. Here’s how you can actively grow your community:
+              DreamChain thrives on the collective strength of its members.
+              Here’s how you can actively grow your community:
             </p>
             <ul className="grid gap-4 list-disc">
               <li className="flex items-start gap-6">
