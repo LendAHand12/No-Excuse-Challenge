@@ -29,11 +29,7 @@ export const transferUserToTree = async () => {
 export const getParentWithCount = async (id) => {
   const user = await User.findById(id);
 
-  const parentWithCount = await getParentWithCountPay(
-    id,
-    user.countPay,
-    user.tier
-  );
+  const parentWithCount = await getParentWithCountPay(id, user.countPay, user.tier);
 
   console.log({ parentWithCount });
 };
@@ -127,10 +123,7 @@ export const addBuyPackageToTree = async () => {
   const listUser = await User.find({ isAdmin: false });
 
   for (let user of listUser) {
-    await Tree.updateMany(
-      { userName: user.userId },
-      { $set: { buyPackage: user.buyPackage } }
-    );
+    await Tree.updateMany({ userName: user.userId }, { $set: { buyPackage: user.buyPackage } });
   }
 
   console.log("addBuyPackageToTree done");
@@ -235,11 +228,7 @@ export const countIndexTree = async () => {
       console.log({ name: treeOfUser.userName });
       let level, listUserOfLevel;
       level = await findLevelById(treeOfUser.userId, 2);
-      listUserOfLevel = await findUsersAtLevel(
-        "6494e9101e2f152a593b66f2",
-        level + 1,
-        2
-      );
+      listUserOfLevel = await findUsersAtLevel("6494e9101e2f152a593b66f2", level + 1, 2);
       listUserOfLevel.sort((a, b) => {
         return new Date(a.createdAt) - new Date(b.createdAt);
       });
@@ -248,8 +237,7 @@ export const countIndexTree = async () => {
           { userId: childId, tier: 2 },
           {
             $set: {
-              indexOnLevel:
-                listUserOfLevel.findIndex((ele) => ele.userId === childId) + 1,
+              indexOnLevel: listUserOfLevel.findIndex((ele) => ele.userId === childId) + 1,
             },
           }
         );
@@ -273,4 +261,39 @@ export const changeWalletAddress = async () => {
   }
 
   console.log("changeWalletAddress done");
+};
+
+export const convertOldData = async () => {
+  const listUser = await User.find({ isAdmin: false, status: { $ne: "DELETED" } });
+
+  for (let user of listUser) {
+    const treeOfUser = await Tree.findOne({ userId: user._id });
+    if (treeOfUser && treeOfUser.parentId !== "" && treeOfUser.refId !== "") {
+      const treeOfParent = await Tree.findOne({ userId: treeOfUser.parentId });
+      if (!treeOfParent) {
+        console.log({ parentNull: user.userId });
+        return;
+      }
+      const treeOfRef = await Tree.findOne({ userId: treeOfUser.refId });
+      if (!treeOfRef) {
+        console.log({ refNull: user.userId });
+        return;
+      }
+
+      let childs = treeOfParent.children;
+      let newChilds = childs.filter((item) => {
+        if (item.toString() !== user._id.toString()) return item;
+      });
+      treeOfParent.children = [...newChilds, treeOfUser._id];
+      await treeOfParent.save();
+
+      treeOfUser.parentId = treeOfParent._id;
+      treeOfUser.refId = treeOfRef._id;
+      await treeOfUser.save();
+    } else {
+      console.log({ userId: user.userId });
+    }
+  }
+
+  console.log("convertOldData done");
 };

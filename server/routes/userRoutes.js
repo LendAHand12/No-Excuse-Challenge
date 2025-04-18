@@ -32,7 +32,7 @@ import {
   getAdminById,
   getUserInfo,
   adminChangeWalletUser,
-  getListChildNotEnoughBranchOfUser
+  getListChildNotEnoughBranchOfUser,
 } from "../controllers/userControllers.js";
 import { protectRoute, isAdmin, isSuperAdmin } from "../middleware/authMiddleware.js";
 import uploadCCCD from "../middleware/uploadCCCD.js";

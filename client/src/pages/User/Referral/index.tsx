@@ -17,13 +17,17 @@ const ReferralPage = () => {
   const defaultRef = `${import.meta.env.VITE_URL}/signup?ref=${userInfo.id}`;
   const [link, setLink] = useState(defaultRef);
   const [copied, setCopied] = useState(false);
-  const [userTreeId, setUserTreeId] = useState("");
+  const [userTreeId, setUserTreeId] = useState('');
 
   useEffect(() => {
     if (childId === '') {
       setLink(`${import.meta.env.VITE_URL}/signup?ref=${userTreeId}`);
     } else {
-      setLink(`${import.meta.env.VITE_URL}/signup?ref=${userTreeId}&receiveId=${childId}`);
+      setLink(
+        `${
+          import.meta.env.VITE_URL
+        }/signup?ref=${userTreeId}&receiveId=${childId}`,
+      );
     }
   }, [childId, defaultRef, userTreeId]);
 
@@ -33,7 +37,7 @@ const ReferralPage = () => {
       await User.getListChild()
         .then((response) => {
           setListChild([...response.data.result]);
-          setUserTreeId(response.data.userTreeId)
+          setUserTreeId(response.data.userTreeId);
           setLoading(false);
         })
         .catch((error) => {
@@ -76,7 +80,7 @@ const ReferralPage = () => {
                 <Select
                   options={listChild.map((ele) => ({
                     value: ele.id,
-                    label: ele.userId,
+                    label: ele.userName,
                   }))}
                   onChange={(e) => {
                     setChildId(e.value);

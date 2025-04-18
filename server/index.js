@@ -42,22 +42,7 @@ import {
   rankingCalc,
   checkUserRegisteredOver6Month,
 } from "./cronJob/index.js";
-import {
-  transferUserToTree,
-  transferLayerToArray,
-  getUnknowChild,
-  addBuyPackage,
-  changeDefaultContinue,
-  transferCountChildToArray,
-  addBuyPackageToTree,
-  listTier,
-  nextUserWithTier,
-  addLockTime,
-  addTierTime,
-  countIndexTree,
-  changeWalletAddress,
-} from "./common.js";
-import { findHighestIndexOfLevel, findNextUserByIndex, findNextReferrer } from "./utils/methods.js";
+import { convertOldData } from "./common.js";
 
 const app = express();
 
@@ -67,17 +52,7 @@ if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 // connect to the mongoDB database
 connectDB();
 
-// await changeWalletAddress();
-// await listTier(2);
-// await nextUserWithTier(2);
-// await checkUnPayUserOnTierUser(2);
-// await addLockTime();
-// await addTierTime();
-// await countIndexTree();
-// const usersAtLevel = await findNextUserByIndex(2);
-// console.log({ usersAtLevel });
-// const nextRef = await findNextReferrer("67de506aec9630a7c650415f")
-// console.log({ nextRef });
+// await convertOldData();
 
 app.use(express.json({ limit: "50mb", extended: true }));
 app.use(express.urlencoded({ extended: true, limit: "2gb" }));

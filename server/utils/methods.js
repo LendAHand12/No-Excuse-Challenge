@@ -42,46 +42,21 @@ export const findNextUser = async (tier) => {
   if (nextUserInDB) return nextUserInDB.userId;
   const admin = await User.findById("6494e9101e2f152a593b66f2");
   if (!admin) throw "Unknow admin";
-  const listUserLevel = await findUsersAtLevel(
-    admin._id,
-    admin.currentLayer[tier - 1],
-    2,
-    1
-  );
+  const listUserLevel = await findUsersAtLevel(admin._id, admin.currentLayer[tier - 1], 2, 1);
 
-  const sortedData = listUserLevel.sort(
-    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-  );
-  // for (let user of sortedData) {
-  //   console.log({
-  //     userName: user.userName,
-  //     length: user.children.length,
-  //     createdAt: user.createdAt,
-  //   });
-  // }
+  const sortedData = listUserLevel.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
   const itemWithMinLength = sortedData.reduce((minItem, currentItem) => {
-    return currentItem.children.length < minItem.children.length
-      ? currentItem
-      : minItem;
+    return currentItem.children.length < minItem.children.length ? currentItem : minItem;
   }, sortedData[0]);
-  return itemWithMinLength
-    ? itemWithMinLength.userId
-    : "6494e9101e2f152a593b66f2";
+  return itemWithMinLength ? itemWithMinLength.userId : "6494e9101e2f152a593b66f2";
 };
 
 export const findNextUserNotIncludeNextUserTier = async (tier) => {
   const admin = await User.findById("6494e9101e2f152a593b66f2");
   if (!admin) throw "Unknow admin";
-  const listUserLevel = await findUsersAtLevel(
-    admin._id,
-    admin.currentLayer[tier - 1],
-    2,
-    1
-  );
-  const sortedData = listUserLevel.sort(
-    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-  );
+  const listUserLevel = await findUsersAtLevel(admin._id, admin.currentLayer[tier - 1], 2, 1);
+  const sortedData = listUserLevel.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
   // for (let user of sortedData) {
   //   console.log({
   //     userName: user.userName,
@@ -91,28 +66,17 @@ export const findNextUserNotIncludeNextUserTier = async (tier) => {
   // }
 
   const itemWithMinLength = sortedData.reduce((minItem, currentItem) => {
-    return currentItem.children.length < minItem.children.length
-      ? currentItem
-      : minItem;
+    return currentItem.children.length < minItem.children.length ? currentItem : minItem;
   }, sortedData[0]);
-  return itemWithMinLength
-    ? itemWithMinLength.userId
-    : "6494e9101e2f152a593b66f2";
+  return itemWithMinLength ? itemWithMinLength.userId : "6494e9101e2f152a593b66f2";
 };
 
-export const findUsersAtLevel = async (
-  rootUserId,
-  targetLevel,
-  tier,
-  currentLevel = 1
-) => {
+export const findUsersAtLevel = async (rootUserId, targetLevel, tier, currentLevel = 1) => {
   if (currentLevel > targetLevel) {
     return [];
   }
 
-  const root = await Tree.findOne({ userId: rootUserId, tier }).populate(
-    "children"
-  );
+  const root = await Tree.findOne({ userId: rootUserId, tier }).populate("children");
   if (!root) {
     return [];
   }
@@ -126,12 +90,7 @@ export const findUsersAtLevel = async (
 
   let usersAtLevel = [];
   for (const child of root.children) {
-    const usersInChildren = await findUsersAtLevel(
-      child,
-      targetLevel,
-      tier,
-      currentLevel + 1
-    );
+    const usersInChildren = await findUsersAtLevel(child, targetLevel, tier, currentLevel + 1);
     usersAtLevel = usersAtLevel.concat(usersInChildren);
   }
 
@@ -313,9 +272,7 @@ export const findHighestIndexOfLevel = async (tier) => {
   if (highestLevelUsers.length === 0) {
     return 1;
   } else {
-    const maxIndexOfLevel = Math.max(
-      ...highestLevelUsers.map((o) => o.indexOnLevel)
-    );
+    const maxIndexOfLevel = Math.max(...highestLevelUsers.map((o) => o.indexOnLevel));
     return maxIndexOfLevel + 1;
   }
 };
@@ -368,15 +325,15 @@ export const findNextReferrer = async (referrerId) => {
   while (queue.length > 0) {
     const currentId = queue.shift();
     const currentUser = await Tree.findOne({ userId: currentId });
-    
+
     if (!currentUser) continue;
-    
+
     if (currentUser.children.length < 2) {
       return currentUser.userId;
     }
-    
+
     queue.push(...currentUser.children);
   }
-  
+
   return null; // Không tìm thấy vị trí hợp lệ
-}
+};

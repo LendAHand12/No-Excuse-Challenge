@@ -10,6 +10,7 @@ import Modal from 'react-modal';
 import DefaultLayout from '../../../layout/DefaultLayout';
 import { transfer } from '../../../utils/smartContract';
 import { useSelector } from 'react-redux';
+import Select from 'react-select';
 
 Modal.setAppElement('#root');
 
@@ -112,7 +113,7 @@ const PaymentNextTierPage = () => {
       });
       setLoadingPayment(false);
       setStep(step + 1);
-      
+
       // } else {
       //   setLoadingPayment(false);
       //   throw new Error(t('payment error'));
@@ -132,8 +133,8 @@ const PaymentNextTierPage = () => {
       })
         .then((response) => {
           toast.success(t(response.data.message));
-          if(response.data.message === "Payment successful") {
-            setResStatus("DONE");
+          if (response.data.message === 'Payment successful') {
+            setResStatus('DONE');
           }
         })
         .catch((error) => {
@@ -173,7 +174,7 @@ const PaymentNextTierPage = () => {
                 >
                   <span className="block sm:inline">{resMessage}</span>
                 </div>
-                {/* <div className="w-full max-w-203 mx-auto rounded-lg bg-white p-10 text-gray-700 mt-4">
+                <div className="w-full max-w-203 mx-auto rounded-lg bg-white p-10 text-gray-700 mt-4">
                   <div className="mb-10">
                     <h1 className="text-center font-bold text-4xl">
                       Secure payment for Tier {userInfo.tier + 1 - step}
@@ -184,22 +185,16 @@ const PaymentNextTierPage = () => {
                       <h1 className="text-lg font-semibold">
                         Please select the subordinate to assign a sub ID :
                       </h1>
-                      <select
+                      <Select
+                        options={listChild.map((ele) => ({
+                          value: ele.id,
+                          label: ele.userName,
+                        }))}
                         onChange={(e) => {
-                          setChildId(e.target.value);
-                          setErrSubId(false);
+                          setChildId(e.value);
                         }}
-                        value={childId}
-                        className="form-select w-full px-3 py-2 border text-black border-black rounded-md focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
-                      >
-                        <option value="">{t('No choose')}</option>
-                        {listChild.length > 0 &&
-                          listChild.map((ele) => (
-                            <option key={ele.userId} value={ele.id}>
-                              {ele.userId}
-                            </option>
-                          ))}
-                      </select>
+                        className="w-full mb-1 border text-black border-black rounded-md focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
+                      />
                       {errSubId && (
                         <p className="text-red-500 mt-1 text-sm">
                           Please select a subordinate
@@ -295,7 +290,7 @@ const PaymentNextTierPage = () => {
                       )}
                     </>
                   )}
-                </div> */}
+                </div>
               </>
             )}
             {resStatus === 'DONE' && (
