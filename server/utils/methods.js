@@ -100,7 +100,8 @@ export const findUsersAtLevel = async (rootUserId, targetLevel, tier, currentLev
 export const findRootLayer = async (id, tier) => {
   // Tìm người dùng root đầu tiên (có parentId null)
   const root = await User.findById(id);
-  if (!root) {
+  const treeRoot = await Tree.findOne({userId: root._id, tier});
+  if (!root || !treeRoot) {
     return 0; // Nếu không tìm thấy root, trả về 0
   }
 
@@ -109,7 +110,7 @@ export const findRootLayer = async (id, tier) => {
 
   while (true) {
     const nextLayerCount = currentLayerCount * 2; // Số lượng node hoàn chỉnh trong tầng tiếp theo
-    const totalDescendants = await countDescendants(root._id, layer, tier); // Tính tổng số con (bao gồm cả node hoàn chỉnh và node chưa đủ 3 cấp dưới)
+    const totalDescendants = await countDescendants(treeRoot._id, layer, tier); // Tính tổng số con (bao gồm cả node hoàn chỉnh và node chưa đủ 3 cấp dưới)
 
     if (totalDescendants < nextLayerCount) {
       break;
@@ -123,7 +124,7 @@ export const findRootLayer = async (id, tier) => {
 };
 
 export const countDescendants = async (userId, layer, tier) => {
-  const tree = await Tree.findOne({ userId, tier });
+  const tree = await Tree.findById(userId);
 
   if (!tree) {
     return 0;
@@ -136,7 +137,7 @@ export const countDescendants = async (userId, layer, tier) => {
   let count = 0;
 
   for (const childId of tree.children) {
-    const child = await User.findById(childId);
+    const child = await Tree.findById(childId);
     if (child && child.countPay !== 0) {
       count += await countDescendants(childId, layer - 1, tier);
     }
