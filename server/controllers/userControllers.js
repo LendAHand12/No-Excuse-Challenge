@@ -625,9 +625,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     user.availableUsdt = availableUsdt || user.availableUsdt;
     user.walletAddress = walletAddress || user.walletAddress;
     user.hewePerDay = hewePerDay || user.hewePerDay;
-    if (rewardHewe) {
-      user.totalHewe = rewardHewe - user.availableHewe - user.claimedHewe;
-    }
+    user.totalHewe = rewardHewe || user.totalHewe;
     if (user.status === "LOCKED" && newStatus !== "LOCKED") {
       user.lockedTime = null;
     }
