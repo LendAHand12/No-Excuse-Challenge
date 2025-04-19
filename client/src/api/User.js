@@ -76,7 +76,9 @@ const User = {
   },
 
   createUser: (body) => {
-    return API.post(`${URL_API_USER}/create`, body);
+    return API.post(`${URL_API_USER}/create`, body, {
+      customContentType: 'multipart/form-data',
+    });
   },
 
   getListNextUserTier: (body) => {

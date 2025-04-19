@@ -98,6 +98,15 @@ const UserProfile = () => {
       const { imgBack } = values;
       const [fileObjectImgBack] = imgBack;
 
+      if (
+        values.rewardHewe !==
+        data.totalHewe - data.claimedHewe - data.availableHewe
+      ) {
+        formData.append('rewardHewe', values.rewardHewe);
+      }
+      if (values.hewePerDay !== data.hewePerDay) {
+        formData.append('hewePerDay', values.hewePerDay);
+      }
       if (values.userId !== data.userId) {
         formData.append('userId', values.userId);
       }
@@ -989,9 +998,41 @@ const UserProfile = () => {
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">Reward HEWE</div>
-                      <div className="px-4 py-2">
-                        {data.totalHewe - data.claimedHewe - data.availableHewe}
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('rewardHewe')}
+                            defaultValue={
+                              data.totalHewe -
+                              data.claimedHewe -
+                              data.availableHewe
+                            }
+                          />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">
+                          {data.totalHewe -
+                            data.claimedHewe -
+                            data.availableHewe}
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        HEWE Per Day
                       </div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('hewePerDay')}
+                            defaultValue={data.hewePerDay}
+                          />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">{data.hewePerDay}</div>
+                      )}
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">
@@ -1008,14 +1049,18 @@ const UserProfile = () => {
                           />
                         </div>
                       ) : (
-                        <div className="px-4 py-2">{data.availableUsdt} USDT</div>
+                        <div className="px-4 py-2">
+                          {data.availableUsdt} USDT
+                        </div>
                       )}
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">
                         Processing USDT
                       </div>
-                      <div className="px-4 py-2">{data.withdrawPending} USDT</div>
+                      <div className="px-4 py-2">
+                        {data.withdrawPending} USDT
+                      </div>
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">
@@ -1024,9 +1069,7 @@ const UserProfile = () => {
                       <div className="px-4 py-2">{data.totalEarning} USDT</div>
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        Total Hold
-                      </div>
+                      <div className="px-4 py-2 font-semibold">Total Hold</div>
                       <div className="px-4 py-2">{data.totalHold} USDT</div>
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">

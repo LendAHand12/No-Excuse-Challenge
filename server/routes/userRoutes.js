@@ -95,7 +95,15 @@ router.route("/update/:id").post(
 
 router.route("/tier/increase").post(protectRoute, onAcceptIncreaseTier);
 
-router.route("/create").post(protectRoute, isAdmin, adminCreateUser);
+router.route("/create").post(
+  uploadCCCD.fields([
+    { name: "imgFront", maxCount: 1 },
+    { name: "imgBack", maxCount: 1 },
+  ]),
+  protectRoute,
+  isAdmin,
+  adminCreateUser
+);
 
 router.route("/listNextUserTier").post(protectRoute, isAdmin, getListNextUserWithTier);
 
