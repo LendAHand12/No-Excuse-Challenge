@@ -56,6 +56,7 @@ import AdminCreatePage from './pages/Admin/Admin/Create';
 import IncomePage from './pages/User/Income';
 import ExportUsersPage from './pages/Admin/Export/ExportUsers';
 import ExportPaymentsPage from './pages/Admin/Export/ExportPayments';
+import CreateUserPage from './pages/Admin/CreateUser';
 import { useSelector } from 'react-redux';
 
 function App() {
@@ -442,6 +443,19 @@ function App() {
               <>
                 <PageTitle title="Admin Export User | NoExcuseChallenge" />
                 <ExportUsersPage />
+              </>
+            }
+          />
+        )}
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/users')
+          ?.actions.includes('create') && (
+          <Route
+            path="/admin/users/create"
+            element={
+              <>
+                <PageTitle title="Admin Create User | NoExcuseChallenge" />
+                <CreateUserPage />
               </>
             }
           />

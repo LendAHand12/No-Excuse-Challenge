@@ -406,27 +406,55 @@ const AdminUserPages = () => {
               </div>
             </div>
           </div>
-          {userInfo?.permissions
-            ?.find((p) => p.page.path === '/admin/users')
-            ?.actions.includes('export') && (
-            <div>
-              <button
-                onClick={handleExportUsers}
-                className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm rounded-md hover:opacity-70"
-              >
-                <svg
-                  fill="currentColor"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+          <div className="flex items-center gap-2">
+            {userInfo?.permissions
+              ?.find((p) => p.page.path === '/admin/users')
+              ?.actions.includes('export') && (
+              <div>
+                <button
+                  onClick={handleExportUsers}
+                  className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm rounded-md hover:opacity-70"
                 >
-                  <path d="M8.71,7.71,11,5.41V15a1,1,0,0,0,2,0V5.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42l-4-4a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-4,4A1,1,0,1,0,8.71,7.71ZM21,14a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V15a1,1,0,0,0-2,0v4a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V15A1,1,0,0,0,21,14Z" />
-                </svg>
-                Export Data
-              </button>
-            </div>
-          )}
+                  <svg
+                    fill="currentColor"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M8.71,7.71,11,5.41V15a1,1,0,0,0,2,0V5.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42l-4-4a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-4,4A1,1,0,1,0,8.71,7.71ZM21,14a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V15a1,1,0,0,0-2,0v4a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V15A1,1,0,0,0,21,14Z" />
+                  </svg>
+                  Export Data
+                </button>
+              </div>
+            )}
+            {userInfo?.permissions
+              ?.find((p) => p.page.path === '/admin/users')
+              ?.actions.includes('create') && (
+              <div>
+                <button
+                  onClick={() => navigate('/admin/users/create')}
+                  className="flex items-center gap-2 px-6 py-2 bg-blue-500 text-white text-sm rounded-md hover:opacity-70"
+                >
+                  <svg
+                    fill="currentColor"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    id="plus"
+                    data-name="Flat Color"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      id="primary"
+                      d="M12,20a1,1,0,0,1-1-1V13H5a1,1,0,0,1,0-2h6V5a1,1,0,0,1,2,0v6h6a1,1,0,0,1,0,2H13v6A1,1,0,0,1,12,20Z"
+                    ></path>
+                  </svg>
+                  Create user
+                </button>
+              </div>
+            )}
+          </div>
         </div>
         <table className="w-full text-sm text-left text-gray-500">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">

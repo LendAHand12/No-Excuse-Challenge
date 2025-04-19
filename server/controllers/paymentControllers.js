@@ -657,25 +657,24 @@ const onDonePayment = asyncHandler(async (req, res) => {
 
         if (!trans.type.includes("HOLD")) {
           let userReceive = await User.findById(trans.userId_to);
-          console.log({ userReceive, userId: trans.userId_to, countPay: trans.countPay });
           userReceive.availableUsdt = userReceive.availableUsdt + trans.amount;
           await userReceive.save();
         }
 
-        if (trans.type === "DIRECT" || trans.type === "REFERRAL") {
-          let userReceive = await User.findById(trans.userId_to);
-          if (trans.type === "REFERRAL") {
-            await sendMailRefDc({
-              senderName: user.userId,
-              email: userReceive.email,
-            });
-          } else {
-            await sendMailReceiveCommission({
-              senderName: user.userId,
-              email: userReceive.email,
-            });
-          }
-        }
+        // if (trans.type === "DIRECT" || trans.type === "REFERRAL") {
+        //   let userReceive = await User.findById(trans.userId_to);
+        //   if (trans.type === "REFERRAL") {
+        //     await sendMailRefDc({
+        //       senderName: user.userId,
+        //       email: userReceive.email,
+        //     });
+        //   } else {
+        //     await sendMailReceiveCommission({
+        //       senderName: user.userId,
+        //       email: userReceive.email,
+        //     });
+        //   }
+        // }
       }
 
       if (user.countPay === 0 && user.tier === 1) {
@@ -727,20 +726,20 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
           await userReceive.save();
         }
 
-        if (trans.type === "DIRECT" || trans.type === "REFERRAL") {
-          let userReceive = await User.findOne({ _id: trans.userId_to });
-          if (trans.type === "REFERRAL") {
-            // await sendMailRefDc({
-            //   senderName: user.userId,
-            //   email: userReceive.email,
-            // });
-          } else {
-            // await sendMailReceiveCommission({
-            //   senderName: user.userId,
-            //   email: userReceive.email,
-            // });
-          }
-        }
+        // if (trans.type === "DIRECT" || trans.type === "REFERRAL") {
+        //   let userReceive = await User.findOne({ _id: trans.userId_to });
+        //   if (trans.type === "REFERRAL") {
+        //     // await sendMailRefDc({
+        //     //   senderName: user.userId,
+        //     //   email: userReceive.email,
+        //     // });
+        //   } else {
+        //     // await sendMailReceiveCommission({
+        //     //   senderName: user.userId,
+        //     //   email: userReceive.email,
+        //     // });
+        //   }
+        // }
       }
 
       let message = "";
