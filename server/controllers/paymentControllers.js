@@ -1159,17 +1159,17 @@ const onAdminDoneRefund = asyncHandler(async (req, res) => {
     receiveUser.availableUsdt = receiveUser.availableUsdt + trans.amount;
     await receiveUser.save();
 
-    if (trans.type === "REFERRAL") {
-      await sendMailRefDc({
-        senderName: user.userId,
-        email: receiveUser.email,
-      });
-    } else {
-      await sendMailReceiveCommission({
-        senderName: user.userId,
-        email: receiveUser.email,
-      });
-    }
+    // if (trans.type === "REFERRAL") {
+    //   await sendMailRefDc({
+    //     senderName: user.userId,
+    //     email: receiveUser.email,
+    //   });
+    // } else {
+    //   await sendMailReceiveCommission({
+    //     senderName: user.userId,
+    //     email: receiveUser.email,
+    //   });
+    // }
 
     res.json({
       message: "Refund successful",

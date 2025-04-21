@@ -1028,7 +1028,6 @@ async function getAllDescendants(targetUserTreeId, currentTier) {
 }
 
 const changeSystem = asyncHandler(async (req, res) => {
-  console.log({ req: req.body });
   const { moveId, receiveId, withChild } = req.body;
 
   const movePerson = await User.findById(moveId);
@@ -1598,23 +1597,28 @@ const doesAnyUserInHierarchyHaveBuyPackageC = async (userId) => {
 };
 
 const adminCreateUser = asyncHandler(async (req, res) => {
-  const { userId, walletAddress, email, password, phone, idCode, imgFront, imgBack, tier } =
+  const { userId, walletAddress, email, password, phone, idCode, tier, parentTier1, parentTier2 } =
     req.body;
 
   const userExistsUserId = await User.findOne({
-    userId: { $regex: userId, $options: "i" },
+    userId,
+    status: { $ne: "DELETED" },
   });
   const userExistsEmail = await User.findOne({
-    email: { $regex: email, $options: "i" },
+    email,
+    status: { $ne: "DELETED" },
   });
   const userExistsPhone = await User.findOne({
     $and: [{ phone: { $ne: "" } }, { phone }],
+    status: { $ne: "DELETED" },
   });
   const userExistsWalletAddress = await User.findOne({
     walletAddress: walletAddress,
+    status: { $ne: "DELETED" },
   });
   const userExistsIdCode = await User.findOne({
     $and: [{ idCode: { $ne: "" } }, { idCode }],
+    status: { $ne: "DELETED" },
   });
 
   if (userExistsUserId) {
@@ -1638,15 +1642,13 @@ const adminCreateUser = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error(message);
   } else {
-    const user = await User.create({
+    const newUser = new User({
       userId,
       email,
       phone,
       password,
       walletAddress,
       idCode,
-      imgBack,
-      imgFront,
       tier: 2,
       createBy: "ADMIN",
       currentLayer: Array.from({ length: tier }, () => 0),
@@ -1655,30 +1657,46 @@ const adminCreateUser = asyncHandler(async (req, res) => {
       role: "user",
     });
 
-    const highestIndexOfLevel = await findHighestIndexOfLevel(tier);
+    if (req.files && req.files.imgFront && req.files.imgFront[0]) {
+      newUser.imgFront = req.files.imgFront[0].filename;
+    }
 
-    await checkUnPayUserOnTierUser(tier);
-    const newParentId = await findNextUser(tier);
-    const newParent = await Tree.findOne({
-      userId: newParentId,
-      tier,
-    });
+    if (req.files && req.files.imgBack && req.files?.imgBack[0]) {
+      newUser.imgBack = req.files.imgBack[0].filename;
+    }
 
-    const treeOfUser = await Tree.create({
-      userName: user.userId,
-      userId: user._id,
-      parentId: newParent._id,
-      refId: newParent._id,
-      tier,
+    await newUser.save();
+
+    const parentTreeTier1 = await Tree.findById(parentTier1);
+    const parentTreeTier2 = await Tree.findById(parentTier2);
+
+    const treeOfUserTier1 = await Tree.create({
+      userName: newUser.userId,
+      userId: newUser._id,
+      parentId: parentTier1,
+      refId: "64cd449ec75ae7bc7ebbab03",
+      tier: 1,
       children: [],
-      indexOnLevel: highestIndexOfLevel,
+      indexOnLevel: 0,
     });
 
-    let childs = [...newParent.children];
-    newParent.children = [...childs, treeOfUser._id];
-    await newParent.save();
+    const treeOfUserTier2 = await Tree.create({
+      userName: newUser.userId,
+      userId: newUser._id,
+      parentId: parentTier2,
+      refId: parentTier2,
+      tier: 2,
+      children: [],
+      indexOnLevel: 0,
+    });
 
-    await NextUserTier.deleteMany({ tier });
+    let childs1 = [...parentTreeTier1.children];
+    parentTreeTier1.children = [...childs1, treeOfUserTier1._id];
+    await parentTreeTier1.save();
+
+    let childs2 = [...parentTreeTier2.children];
+    parentTreeTier2.children = [...childs2, treeOfUserTier2._id];
+    await parentTreeTier2.save();
 
     let message = "createUserSuccessful";
 
@@ -2062,6 +2080,19 @@ const adminChangeWalletUser = asyncHandler(async (req, res) => {
   }
 });
 
+const getListUserForCreateAdmin = asyncHandler(async (req, res) => {
+  let resultTier1 = [];
+  let resultTier2 = [];
+
+  const treeOfUser1 = await Tree.findOne({ userId: "6494e9101e2f152a593b66f2", tier: 1 });
+  const treeOfUser2 = await Tree.findOne({ userId: "6494e9101e2f152a593b66f2", tier: 2 });
+
+  resultTier1 = await getAllDescendants(treeOfUser1._id, 1);
+  resultTier2 = await getAllDescendants(treeOfUser2._id, 2);
+
+  res.json({ resultTier1, resultTier2 });
+});
+
 export {
   getUserProfile,
   getAllUsers,
@@ -2100,4 +2131,5 @@ export {
   getDreamPool,
   adminChangeWalletUser,
   getListChildNotEnoughBranchOfUser,
+  getListUserForCreateAdmin,
 };

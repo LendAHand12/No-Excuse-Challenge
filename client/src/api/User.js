@@ -84,7 +84,6 @@ const User = {
   getListNextUserTier: (body) => {
     return API.post(`${URL_API_USER}/listNextUserTier`, body);
   },
-
   getUsersWithTier: (body) => {
     return API.post(`${URL_API_USER}/getUsersWithTier`, body);
   },
@@ -93,6 +92,9 @@ const User = {
   },
   getLastUserInTier: (body) => {
     return API.post(`${URL_API_USER}/getLastUserInTier`, body);
+  },
+  getListChildForCreateAdmin: () => {
+    return API.get(`${URL_API_USER}/listChildForCreateAdmin`);
   },
   removeLastUserInTier: (body) => {
     return API.post(`${URL_API_USER}/removeLastUserInTier`, body);
