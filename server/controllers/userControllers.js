@@ -2047,22 +2047,6 @@ const getAdminById = asyncHandler(async (req, res) => {
   }
 });
 
-const getDreamPool = asyncHandler(async (req, res) => {
-  const count = await Transaction.countDocuments({
-    type: "PIG",
-    status: "SUCCESS",
-  });
-
-  const allBreakers = await Honor.find({})
-    .populate("userId", "_id userId email")
-    .sort("-createdAt");
-
-  res.json({
-    dreampool: count * 5 - process.env.PIG,
-    allBreakers,
-  });
-});
-
 const adminChangeWalletUser = asyncHandler(async (req, res) => {
   const { userId } = req.body;
   const user = await User.findOne({ _id: userId }).select("walletAddress walletAddressChange");
@@ -2128,7 +2112,6 @@ export {
   deleteAdmin,
   getAdminById,
   getUserInfo,
-  getDreamPool,
   adminChangeWalletUser,
   getListChildNotEnoughBranchOfUser,
   getListUserForCreateAdmin,
