@@ -1655,6 +1655,7 @@ const adminCreateUser = asyncHandler(async (req, res) => {
       status: "APPROVED",
       isConfirmed: true,
       role: "user",
+      countPay: 13,
     });
 
     if (req.files && req.files.imgFront && req.files.imgFront[0]) {
