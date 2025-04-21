@@ -17,7 +17,7 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
   for (let u of listUser) {
     const treeOfUser = await Tree.findOne({ userId: u._id });
     const listRefId = await Tree.find({ refId: treeOfUser._id });
-    if (listRefId.length === 0) {
+    if (listRefId.length === 0 && treeOfUser.children.length === 0) {
       let parent = await Tree.findById(treeOfUser.parentId);
       if (parent) {
         let childs = parent.children;
