@@ -98,10 +98,7 @@ const UserProfile = () => {
       const { imgBack } = values;
       const [fileObjectImgBack] = imgBack;
 
-      if (
-        values.rewardHewe !==
-        data.totalHewe - data.claimedHewe - data.availableHewe
-      ) {
+      if (values.rewardHewe !== data.totalHewe) {
         formData.append('rewardHewe', values.rewardHewe);
       }
       if (values.hewePerDay !== data.hewePerDay) {
@@ -1003,15 +1000,11 @@ const UserProfile = () => {
                           <input
                             className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                             {...register('rewardHewe')}
-                            defaultValue={
-                              data.totalHewe
-                            }
+                            defaultValue={data.totalHewe}
                           />
                         </div>
                       ) : (
-                        <div className="px-4 py-2">
-                          {data.totalHewe}
-                        </div>
+                        <div className="px-4 py-2">{data.totalHewe}</div>
                       )}
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
