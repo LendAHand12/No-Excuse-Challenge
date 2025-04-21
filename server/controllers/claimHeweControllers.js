@@ -5,6 +5,7 @@ import sendHewe from "../services/sendHewe.js";
 import sendUsdt from "../services/sendUsdt.js";
 import Withdraw from "../models/withdrawModel.js";
 import { sendTelegramMessage } from "../utils/sendTelegram.js";
+import { removeAccents } from "../utils/methods.js";
 
 const processingHeweUserIds = [];
 
@@ -151,27 +152,124 @@ const claimUsdt = asyncHandler(async (req, res) => {
 });
 
 const getAllClaims = asyncHandler(async (req, res) => {
-  let { pageNumber, coin } = req.query;
+  let { pageNumber, coin, keyword } = req.query;
   const page = Number(pageNumber) || 1;
-
   const pageSize = 10;
 
-  const count = await Claim.countDocuments({
-    $and: [coin === "HEWE" || coin === "USDT" ? { coin } : {}],
-  });
+  const matchStage = {};
 
-  const allClaims = await Claim.find({
-    $and: [coin === "HEWE" || coin === "USDT" ? { coin } : {}],
-  })
-    .populate("userId", "_id userId email walletAddress")
-    .limit(pageSize)
-    .skip(pageSize * (page - 1))
-    .sort("-createdAt");
+  if (coin === "HEWE" || coin === "USDT") {
+    matchStage.coin = coin;
+  }
 
+  const keywordRegex = keyword ? { $regex: removeAccents(keyword), $options: "i" } : null;
+
+  const aggregationPipeline = [
+    { $match: matchStage },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "userInfo",
+      },
+    },
+    { $unwind: "$userInfo" },
+  ];
+
+  if (keywordRegex) {
+    aggregationPipeline.push({
+      $match: {
+        "userInfo.userId": keywordRegex,
+      },
+    });
+  }
+
+  // Đếm số bản ghi sau khi lọc
+  const countAggregation = await Claim.aggregate([...aggregationPipeline, { $count: "total" }]);
+  const count = countAggregation[0]?.total || 0;
+
+  // Thêm phân trang và sắp xếp
+  aggregationPipeline.push(
+    { $sort: { createdAt: -1 } },
+    { $skip: pageSize * (page - 1) },
+    { $limit: pageSize },
+    {
+      $project: {
+        _id: 1,
+        coin: 1,
+        amount: 1,
+        hash: 1,
+        createdAt: 1,
+        userInfo: {
+          _id: 1,
+          userId: 1,
+          email: 1,
+          walletAddress: 1,
+        },
+      },
+    }
+  );
+
+  const claims = await Claim.aggregate(aggregationPipeline);
+
+  console.log({ claims: claims[0] });
   res.json({
-    claims: allClaims,
+    claims,
     pages: Math.ceil(count / pageSize),
   });
 });
 
-export { claimHewe, claimUsdt, getAllClaims };
+const getAllClaimsForExport = asyncHandler(async (req, res) => {
+  let fromDate, toDate;
+  let match = {};
+
+  if (req.body.fromDate) {
+    fromDate = req.body.fromDate.split("T")[0];
+    match.createdAt = {
+      $gte: new Date(new Date(fromDate).valueOf() + 1000 * 3600 * 24),
+    };
+  }
+  if (req.body.toDate) {
+    toDate = req.body.toDate.split("T")[0];
+    match.createdAt = {
+      ...match.createdAt,
+      $lte: new Date(new Date(toDate).valueOf() + 1000 * 3600 * 24),
+    };
+  }
+
+  const claims = await Claim.aggregate([
+    { $match: match },
+    {
+      $lookup: {
+        from: "users", // tên collection User (nên viết thường và dạng số nhiều)
+        localField: "userId", // field trong Claim
+        foreignField: "_id", // field trong User
+        as: "userInfo", // tên field chứa dữ liệu join
+      },
+    },
+    {
+      $unwind: "$userInfo", // biến mảng userInfo thành object
+    },
+    { $sort: { createdAt: -1 } },
+  ]);
+
+  const totalCount = await Claim.countDocuments(match);
+
+  const result = [];
+
+  for (let claim of claims) {
+    result.push({
+      user: claim.userInfo?.userId,
+      email: claim.userInfo?.email,
+      amount: claim.amount,
+      coin: claim.coin,
+      hash: claim.hash,
+      createdAt: claim.createdAt,
+    });
+  }
+
+  res.json({ totalCount, result });
+});
+
+export { claimHewe, claimUsdt, getAllClaims, getAllClaimsForExport };

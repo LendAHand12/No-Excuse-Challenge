@@ -45,6 +45,7 @@ import AdminCreateNewsPage from './pages/Admin/News/Create';
 import AdminEditNewsPage from './pages/Admin/News/Edit';
 import NewsDetailPage from './pages/News/Detail';
 import AdminClaimsPage from './pages/Admin/Claims';
+import AdminExportClaimsPage from './pages/Admin/Export/ExportClaims';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import PermissionsPage from './pages/Admin/Permissions';
@@ -311,6 +312,19 @@ function App() {
               <>
                 <PageTitle title="Claims | NoExcuseChallenge" />
                 <AdminClaimsPage />
+              </>
+            }
+          />
+        )}
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/claims')
+          ?.actions.includes('export') && (
+          <Route
+            path="/admin/claims/export"
+            element={
+              <>
+                <PageTitle title="Export Claims | NoExcuseChallenge" />
+                <AdminExportClaimsPage />
               </>
             }
           />

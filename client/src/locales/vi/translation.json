@@ -164,6 +164,7 @@
   "order": "STT",
   "usersListFileName": "Danh_sach_nguoi_dung",
   "transListFileName": "Danh_sach_giao_dich",
+  "claimsListFileName": "Danh_sach_claims",
   "senderName": "Người gửi",
   "receiverName": "Người nhận",
   "address_from": "Ví gửi",

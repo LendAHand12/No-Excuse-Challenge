@@ -8,10 +8,13 @@ const Claim = {
   usdt: () => {
     return API.post(`${URL_API_CLAIM}/usdt`);
   },
-  list: (pageNumber, coin) => {
+  list: (pageNumber, coin, keyword) => {
     return API.get(
-      `${URL_API_CLAIM}/list/?pageNumber=${pageNumber}&coin=${coin}`
+      `${URL_API_CLAIM}/list/?pageNumber=${pageNumber}&coin=${coin}&keyword=${keyword}`,
     );
+  },
+  export: (body) => {
+    return API.post(`${URL_API_CLAIM}/export`, body);
   },
 };
 
