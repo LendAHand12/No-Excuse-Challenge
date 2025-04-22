@@ -374,7 +374,8 @@ export const rankingCalc = asyncHandler(async () => {
   for (let u of listUser) {
     try {
       if (u.ranking === 0) {
-        let refChild = await Tree.find({ refId: u._id, tier: 1 });
+        const treeOfUser = await Tree.findOne({userId: u._id, tier: 1});
+        let refChild = await Tree.find({ refId: treeOfUser._id, tier: 1 });
         let refLength = 0;
         for (let child of refChild) {
           let childData = await User.findById(child.userId);
@@ -389,6 +390,7 @@ export const rankingCalc = asyncHandler(async () => {
             let currentDay = moment();
             const diffDays = currentDay.diff(u.createdAt, "days");
             if (diffDays < 15) {
+              console.log({userId: u.userId});
               u.availableUsdt = u.availableUsdt + 10;
               u.bonusRef = true;
               await Honor.create({
