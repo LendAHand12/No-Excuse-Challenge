@@ -211,15 +211,18 @@ const authUser = asyncHandler(async (req, res) => {
 
     const tree = await Tree.findOne({ userId: user._id, tier: 1 });
     const listDirectUser = [];
-    const listRefIdOfUser = await Tree.find({ refId: tree._id, tier: 1 });
-    if (listRefIdOfUser && listRefIdOfUser.length > 0) {
-      for (let refId of listRefIdOfUser) {
-        const refedUser = await User.findById(refId.userId).select("userId email countChild");
-        listDirectUser.push({
-          ...refedUser,
-        });
+    if(tree) {
+      const listRefIdOfUser = await Tree.find({ refId: tree._id, tier: 1 });
+      if (listRefIdOfUser && listRefIdOfUser.length > 0) {
+        for (let refId of listRefIdOfUser) {
+          const refedUser = await User.findById(refId.userId).select("userId email countChild");
+          listDirectUser.push({
+            ...refedUser,
+          });
+        }
       }
     }
+    
 
     const packages = await getActivePackages();
 
@@ -271,8 +274,8 @@ const authUser = asyncHandler(async (req, res) => {
         targetSales: process.env[`LEVEL_${user.ranking + 1}`],
         bonusRef: user.bonusRef,
         walletAddressChange: user.walletAddressChange,
-        totalChild: tree.countChild,
-        income: tree.income,
+        totalChild: tree ? tree.countChild : 0,
+        income: tree ? tree.income : 0,
       },
       accessToken,
       refreshToken,
