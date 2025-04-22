@@ -1025,6 +1025,10 @@ const checkCanRefundPayment = asyncHandler(async (req, res) => {
     const userReceive = await User.findById(userId_to);
     // const isSerepayWallet = await checkSerepayWallet(userReceive.walletAddress);
     if (userReceive) {
+      const treeOfReceiveUser = await Tree.findOne({userId: userId_to, tier: 1 });
+      const listRefOfReceiver = await Tree.find({
+        refId: treeOfReceiveUser._id,
+      });
       if (userReceive.status === "LOCKED") {
         res.status(404);
         throw new Error(`User parent locked`);
@@ -1032,9 +1036,6 @@ const checkCanRefundPayment = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error(`User is being blocked from trading`);
       }
-      //  else if (!isSerepayWallet) {
-      //   throw new Error(`The wallet received is not a Serepay wallet`);
-      // }
       else if (userReceive.countPay - 1 < userCountPay) {
         res.status(404);
         throw new Error(
@@ -1045,71 +1046,9 @@ const checkCanRefundPayment = asyncHandler(async (req, res) => {
               } time but user pay = ${userCountPay} time`
         );
       } else if (trans.type === "REFERRALHOLD" && userReceive.errLahCode === "OVER30") {
-        throw new Error(`User has not had 3 child within 30 days`);
-      } else if (trans.type === "REFERRALHOLD" && userReceive.errLahCode === "OVER60") {
-        throw new Error(`User has not had 3 child within 60 days`);
-      } else if (
-        userReceive.buyPackage === "A" &&
-        userReceive.tier === 1 &&
-        userReceive.countPay < 13
-      ) {
-        throw new Error(
-          `User is ${trans.buyPackage} package but pay ${
-            userReceive.countPay === 0 ? 0 : userReceive.countPay - 1
-          } times`
-        );
-      } else if (
-        userReceive.buyPackage === "B" &&
-        userReceive.tier === 1 &&
-        userReceive.countPay < 7
-      ) {
-        throw new Error(
-          `User is ${trans.buyPackage} package but pay ${
-            userReceive.countPay === 0 ? 0 : userReceive.countPay - 1
-          } times`
-        );
-      } else if (
-        trans.type === "DIRECTHOLD" &&
-        trans.buyPackage === "B" &&
-        trans.amount === 35 &&
-        trans.refBuyPackage === "C"
-      ) {
-        res.json({
-          amount: 5,
-          message: `User is ${trans.buyPackage} package Parent is ${trans.refBuyPackage} package (refund 5 USDT)`,
-        });
-      } else if (
-        trans.type === "DIRECTHOLD" &&
-        trans.buyPackage === "A" &&
-        trans.refBuyPackage === "C"
-      ) {
-        res.json({
-          amount: 5,
-          message: `User is ${trans.buyPackage} package Parent is ${trans.refBuyPackage} package (refund 5 USDT)`,
-        });
-      } else if (
-        trans.type === "DIRECTHOLD" &&
-        trans.buyPackage === "A" &&
-        trans.refBuyPackage === "B"
-      ) {
-        res.json({
-          amount: 35,
-          message: `User is ${trans.buyPackage} package Parent is ${trans.refBuyPackage} package (refund 35 USDT)`,
-        });
-      } else if (trans.type === "DIRECTHOLD" && trans.amount === 30) {
-        const receiveParent = await User.findOne({
-          walletAddress: { $in: [trans.address_ref] },
-        });
-
-        if (receiveParent.buyPackage !== "A") {
-          res.json({
-            message: `parent has not paid enough to upgrade to package A`,
-          });
-        } else {
-          res.json({
-            message: "User is OK for a refund",
-          });
-        }
+        throw new Error(`User has not had 2 child within 45 days`);
+      } else if(treeOfReceiveUser.children.length === 2 && listRefOfReceiver.length < 2) {
+          throw new Error(`Payment blocked because there are not enough 2 redirect user`)
       } else {
         res.json({
           message: "User is OK for a refund",

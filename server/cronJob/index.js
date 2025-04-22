@@ -33,6 +33,13 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
         await u.save();
 
         await Tree.deleteOne({ userId: u._id });
+      } else {
+        u.status = "DELETED";
+        u.deletedTime = new Date();
+        u.oldParents = [parent.userId, ...u.oldParents];
+        await u.save();
+
+        await Tree.deleteOne({ userId: u._id });
       }
     }
   }
