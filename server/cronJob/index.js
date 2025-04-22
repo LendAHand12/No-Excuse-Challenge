@@ -4,7 +4,7 @@ import moment from "moment";
 import User from "../models/userModel.js";
 import sendMail from "../utils/sendMail.js";
 import { sendMailUpdateLayerForAdmin } from "../utils/sendMailCustom.js";
-import { getCountAllChildren } from "../controllers/userControllers.js";
+import { getCountAllChildren, getCountIncome } from "../controllers/userControllers.js";
 import { findRootLayer, getUserClosestToNow } from "../utils/methods.js";
 import Tree from "../models/treeModel.js";
 import Transaction from "../models/transactionModel.js";
@@ -223,7 +223,9 @@ export const countChildToData = asyncHandler(async () => {
   for (let t of listTrees) {
     try {
       const countChild = await getCountAllChildren(t._id, t.tier);
+      const income = await getCountIncome(t._id, t.tier);
       t.countChild = countChild;
+      t.income = income;
       await t.save();
     } catch (error) {
       console.log({ error });

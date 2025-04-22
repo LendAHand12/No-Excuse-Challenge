@@ -23,7 +23,6 @@ const checkLinkRef = asyncHandler(async (req, res) => {
     const treeUserRef = await Tree.findById(ref);
 
     if (treeUserReceive && treeUserRef) {
-
       if (!treeUserReceive.parentId || treeUserReceive.userName === "NoExcuse 9") {
         message = "validUrl";
         res.status(200).json({
@@ -210,8 +209,9 @@ const authUser = asyncHandler(async (req, res) => {
       existingToken.save();
     }
 
+    const tree = await Tree.findOne({ userId: user._id, tier: 1 });
     const listDirectUser = [];
-    const listRefIdOfUser = await Tree.find({ refId: user._id, tier: 1 });
+    const listRefIdOfUser = await Tree.find({ refId: tree._id, tier: 1 });
     if (listRefIdOfUser && listRefIdOfUser.length > 0) {
       for (let refId of listRefIdOfUser) {
         const refedUser = await User.findById(refId.userId).select("userId email countChild");
@@ -237,11 +237,6 @@ const authUser = asyncHandler(async (req, res) => {
         isConfirmed: user.isConfirmed,
         avatar: user.avatar,
         walletAddress: user.walletAddress,
-        walletAddress1: user.walletAddress1,
-        walletAddress2: user.walletAddress2,
-        walletAddress3: user.walletAddress3,
-        walletAddress4: user.walletAddress4,
-        walletAddress5: user.walletAddress5,
         tier: user.tier,
         createdAt: user.createdAt,
         fine: user.fine,
@@ -276,6 +271,8 @@ const authUser = asyncHandler(async (req, res) => {
         targetSales: process.env[`LEVEL_${user.ranking + 1}`],
         bonusRef: user.bonusRef,
         walletAddressChange: user.walletAddressChange,
+        totalChild: tree.countChild,
+        income: tree.income,
       },
       accessToken,
       refreshToken,

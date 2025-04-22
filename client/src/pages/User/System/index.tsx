@@ -39,7 +39,16 @@ const SystemPage = () => {
   const [currentTier, setCurrentTier] = useState(1);
 
   const StyledNode = useCallback(
-    ({ children, onClick, layer, isRed, isYellow, isGray, totalChild }) => {
+    ({
+      children,
+      onClick,
+      layer,
+      isRed,
+      isYellow,
+      isGray,
+      totalChild,
+      income,
+    }) => {
       return (
         <div
           onClick={onClick}
@@ -58,7 +67,9 @@ const SystemPage = () => {
         >
           <div className="flex flex-col items-center">
             <span>{children}</span>
-            <span>{totalChild}</span>
+            <span>
+              ({totalChild} - {income})
+            </span>
             {/* <svg
               className="w-10 h-auto text-red-500"
               viewBox="0 0 24 24"
@@ -105,6 +116,7 @@ const SystemPage = () => {
             isGray={node.isGray}
             isYellow={node.isYellow}
             totalChild={node.totalChild}
+            income={node.income}
           >
             {node.label}
           </StyledNode>
@@ -203,7 +215,9 @@ const SystemPage = () => {
                   key={i}
                   onClick={() => setCurrentTier(i + 1)}
                   className={`flex justify-center items-center hover:underline font-medium ${
-                    currentTier === i + 1 ? 'bg-black text-NoExcuseChallenge' : ''
+                    currentTier === i + 1
+                      ? 'bg-black text-NoExcuseChallenge'
+                      : ''
                   } rounded-full my-6 py-4 px-8 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
                 >
                   {t('tier')} {i + 1}
@@ -265,7 +279,11 @@ const SystemPage = () => {
                   lineColor={'brown'}
                   lineBorderRadius={'10px'}
                   label={
-                    <StyledNode layer={userInfo.currentLayer}>
+                    <StyledNode
+                      layer={userInfo.currentLayer}
+                      income={userInfo.income}
+                      totalChild={userInfo.totalChild}
+                    >
                       {treeData.label}
                     </StyledNode>
                   }

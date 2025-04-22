@@ -68,6 +68,7 @@ const AdminSystemPage = () => {
       isGray,
       indexOnLevel,
       totalChild,
+      income,
     }) => {
       return (
         <div
@@ -87,7 +88,9 @@ const AdminSystemPage = () => {
         >
           <div className="flex flex-col items-center">
             <span>{children}</span>
-            <span>{totalChild}</span>
+            <span>
+              ({totalChild} - {income})
+            </span>
           </div>
         </div>
       );
@@ -107,6 +110,7 @@ const AdminSystemPage = () => {
             isYellow={node.isYellow}
             indexOnLevel={node.indexOnLevel}
             totalChild={node.totalChild}
+            income={node.income}
           >
             {node.label}
           </StyledNode>
@@ -262,7 +266,11 @@ const AdminSystemPage = () => {
                   lineColor={'brown'}
                   lineBorderRadius={'10px'}
                   label={
-                    <StyledNode layer={userInfo.currentLayer}>
+                    <StyledNode
+                      layer={userInfo.currentLayer}
+                      income={userInfo.income}
+                      totalChild={userInfo.totalChild}
+                    >
                       {treeData.label}
                     </StyledNode>
                   }

@@ -234,6 +234,8 @@ const getUserById = asyncHandler(async (req, res) => {
       bonusRef: user.bonusRef,
       walletAddressChange: user.walletAddressChange,
       totalHold,
+      totalChild: tree.countChild,
+      income: tree.income,
     });
   } else {
     res.status(404);
@@ -361,6 +363,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
       bonusRef: user.bonusRef,
       walletAddressChange: user.walletAddressChange,
       totalHold,
+      totalChild: tree.countChild,
+      income: tree.income,
     });
   } else {
     res.status(404);
@@ -801,6 +805,7 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
         key: childTree._id,
         label: `${childTree.userName}`,
         totalChild: childTree.countChild,
+        income: childTree.income,
         isGray:
           child.status === "LOCKED"
             ? currentTier === 1 || userRequest.isAdmin
@@ -857,6 +862,27 @@ const getCountAllChildren = async (treeId, tier) => {
   for (const childId of tree.children) {
     const treeOfChild = await Tree.findById(childId);
     const count = await getCountAllChildren(treeOfChild._id, tier);
+    result += count;
+  }
+
+  return result;
+};
+
+const getCountIncome = async (treeId, tier) => {
+  const tree = await Tree.findById(treeId).select("userId children createdAt");
+
+  if (!tree) {
+    return 0;
+  }
+
+  let result = tree.children.length;
+  for (const childId of tree.children) {
+    const treeOfChild = await Tree.findById(childId);
+    const child = await User.findById(treeOfChild.userId);
+    if (child.countPay === 0) {
+      result = result - 1;
+    }
+    const count = await getCountIncome(treeOfChild._id, tier);
     result += count;
   }
 
@@ -1390,7 +1416,7 @@ const adminDeleteUser = asyncHandler(async (req, res) => {
         await removeIdFromChildrenOfParent(treeUser, parentTree);
         await deleteTreeOfUserWithTier(user, tierIndex);
       } else if (treeUser.children.length === 1) {
-        await removeIdFromChildrenOfParent(user, parentTree);
+        await removeIdFromChildrenOfParent(treeUser, parentTree);
         await deleteTreeOfUserWithTier(user, tierIndex);
         await pushChildrent1ToUp(treeUser, parentTree, tierIndex);
       }
@@ -2116,4 +2142,5 @@ export {
   adminChangeWalletUser,
   getListChildNotEnoughBranchOfUser,
   getListUserForCreateAdmin,
+  getCountIncome,
 };
