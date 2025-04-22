@@ -213,7 +213,6 @@ const getAllClaims = asyncHandler(async (req, res) => {
 
   const claims = await Claim.aggregate(aggregationPipeline);
 
-  console.log({ claims: claims[0] });
   res.json({
     claims,
     pages: Math.ceil(count / pageSize),

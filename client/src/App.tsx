@@ -58,6 +58,7 @@ import IncomePage from './pages/User/Income';
 import ExportUsersPage from './pages/Admin/Export/ExportUsers';
 import ExportPaymentsPage from './pages/Admin/Export/ExportPayments';
 import CreateUserPage from './pages/Admin/CreateUser';
+import ExportWithdrawPage from './pages/Admin/Export/ExportWithdraw';
 import { useSelector } from 'react-redux';
 
 function App() {
@@ -291,6 +292,19 @@ function App() {
           />
         )}
         {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/withdraw')
+          ?.actions.includes('export') && (
+          <Route
+            path="/admin/withdraw/export"
+            element={
+              <>
+                <PageTitle title="Admin Export Withdraw | NoExcuseChallenge" />
+                <ExportWithdrawPage />
+              </>
+            }
+          />
+        )}
+        {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/news')
           ?.actions.includes('read') && (
           <Route
@@ -475,6 +489,7 @@ function App() {
           />
         )}
       </Route>
+      
       <Route element={<PrivateRoute />}>
         <Route
           path="/user/profile"

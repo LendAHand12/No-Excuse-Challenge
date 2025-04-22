@@ -25,27 +25,34 @@ const AdminWithdrawPages = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   const [refresh, setRefresh] = useState(false);
+  const key = searchParams.get('keyword') || '';
   const [objectFilter, setObjectFilter] = useState({
     pageNumber: page,
     status,
+    keyword: key,
   });
   const [showModal, setShowModal] = useState(false);
   const [currentApproveRequest, setCurrentApproveRequest] = useState(null);
   const [currentCancelRequest, setCurrentCancelRequest] = useState(null);
   const [loadingPayment, setLoadingPayment] = useState(false);
   const [currentRequestStatus, setCurrentRequestStatus] = useState(null);
+  const [keyword, setKeyword] = useState(key);
+
+  const onSearch = (e) => {
+    setKeyword(e.target.value);
+  };
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const { pageNumber, status } = objectFilter;
+      const { pageNumber, status, keyword } = objectFilter;
       await Admin.getAllWithdraws(objectFilter)
         .then((response) => {
           const { withdraws, pages } = response.data;
           setData(withdraws);
           setTotalPage(pages);
           setLoading(false);
-          pushParamsToUrl(pageNumber, status);
+          pushParamsToUrl(pageNumber, status, keyword);
         })
         .catch((error) => {
           let message =
@@ -66,13 +73,16 @@ const AdminWithdrawPages = () => {
     setShowModal(false);
   };
 
-  const pushParamsToUrl = (pageNumber, searchStatus) => {
+  const pushParamsToUrl = (pageNumber, searchStatus, keyword) => {
     const searchParams = new URLSearchParams();
     if (pageNumber) {
       searchParams.set('page', pageNumber);
     }
     if (searchStatus) {
       searchParams.set('status', searchStatus);
+    }
+    if (keyword) {
+      searchParams.set('keyword', keyword);
     }
     const queryString = searchParams.toString();
     const url = queryString
@@ -172,6 +182,14 @@ const AdminWithdrawPages = () => {
       });
   }, [currentCancelRequest]);
 
+  const handleExportWithdraw = async () => {
+    navigate('/admin/withdraw/export');
+  };
+
+  const handleSearch = useCallback(() => {
+    setObjectFilter({ ...objectFilter, keyword, pageNumber: 1 });
+  }, [keyword, objectFilter]);
+
   return (
     <DefaultLayout>
       <ToastContainer />
@@ -256,41 +274,78 @@ const AdminWithdrawPages = () => {
       </Modal>
       <div className="relative overflow-x-auto py-24 px-10">
         <div className="flex items-center justify-between pb-4 bg-white">
-          <div>
-            <select
-              className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
-              onChange={onChangeStatus}
-              defaultValue={objectFilter.status}
-              disabled={loading}
-            >
-              <option value="all">All</option>
-              {withdrawStatus.map((status) => (
-                <option value={status.status} key={status.status}>
-                  {status.status}
-                </option>
-              ))}
-            </select>
-          </div>
-          <label htmlFor="table-search" className="sr-only">
-            Search
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <svg
-                className="w-5 h-5 text-gray-500"
-                aria-hidden="true"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
+          <div className="flex items-center gap-4">
+            <div>
+              <select
+                className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
+                onChange={onChangeStatus}
+                defaultValue={objectFilter.status}
+                disabled={loading}
               >
-                <path
-                  fillRule="evenodd"
-                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                  clipRule="evenodd"
-                ></path>
-              </svg>
+                <option value="all">All</option>
+                {withdrawStatus.map((status) => (
+                  <option value={status.status} key={status.status}>
+                    {status.status}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg
+                  className="w-5 h-5 text-gray-500"
+                  aria-hidden="true"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  onChange={onSearch}
+                  className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50"
+                  placeholder={t('search with user name or email')}
+                  defaultValue={objectFilter.keyword}
+                />
+                <button
+                  onClick={handleSearch}
+                  disabled={loading}
+                  className="h-8 flex text-xs justify-center items-center hover:underline bg-black text-NoExcuseChallenge font-bold rounded-full py-1 px-4 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                >
+                  {t('search')}
+                </button>
+              </div>
             </div>
           </div>
+
+          {userInfo?.permissions
+            ?.find((p) => p.page.path === '/admin/withdraw')
+            ?.actions.includes('export') && (
+            <div>
+              <button
+                onClick={handleExportWithdraw}
+                className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm rounded-md hover:opacity-70"
+              >
+                <svg
+                  fill="currentColor"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M8.71,7.71,11,5.41V15a1,1,0,0,0,2,0V5.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42l-4-4a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-4,4A1,1,0,1,0,8.71,7.71ZM21,14a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V15a1,1,0,0,0-2,0v4a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V15A1,1,0,0,0,21,14Z" />
+                </svg>
+                Export Data
+              </button>
+            </div>
+          )}
         </div>
         <table className="w-full text-sm text-left text-gray-500">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
@@ -298,7 +353,6 @@ const AdminWithdrawPages = () => {
               <th scope="col" className="px-6 py-3">
                 Username
               </th>
-
               <th scope="col" className="px-6 py-3">
                 Wallet Address
               </th>
@@ -330,15 +384,15 @@ const AdminWithdrawPages = () => {
                   >
                     <div className="">
                       <div className="text-base font-semibold">
-                        {ele.userId.userId}
+                        {ele.userInfo.userId}
                       </div>
                       <div className="font-normal text-gray-500">
-                        {ele.userId.email}
+                        {ele.userInfo.email}
                       </div>
                     </div>
                   </th>
                   <td className="px-6 py-4">
-                    {shortenWalletAddress(ele.userId.walletAddress, 12)}
+                    {shortenWalletAddress(ele.userInfo.walletAddress, 12)}
                   </td>
                   <td className="px-6 py-4">
                     <b>{ele.amount}</b> USDT
@@ -392,27 +446,27 @@ const AdminWithdrawPages = () => {
                         )}
                       {userInfo?.permissions
                         .find((p) => p.page.pageName === 'admin-withdraw')
-                        ?.actions.includes('approve') && ele.status === 'PENDING' && (
-                        <button
-                          onClick={() => handleCancel(ele)}
-                          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-200 font-medium text-red-700"
-                        >
-                          <svg
-                            width="24"
-                            height="24"
-                            viewBox="0 0 1024 1024"
-                            class="icon"
-                            version="1.1"
-                            xmlns="http://www.w3.org/2000/svg"
+                        ?.actions.includes('approve') &&
+                        ele.status === 'PENDING' && (
+                          <button
+                            onClick={() => handleCancel(ele)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-200 font-medium text-red-700"
                           >
-                            <path
-                              d="M512 128C300.8 128 128 300.8 128 512s172.8 384 384 384 384-172.8 384-384S723.2 128 512 128z m0 85.333333c66.133333 0 128 23.466667 179.2 59.733334L273.066667 691.2C236.8 640 213.333333 578.133333 213.333333 512c0-164.266667 134.4-298.666667 298.666667-298.666667z m0 597.333334c-66.133333 0-128-23.466667-179.2-59.733334l418.133333-418.133333C787.2 384 810.666667 445.866667 810.666667 512c0 164.266667-134.4 298.666667-298.666667 298.666667z"
-                              fill="#D50000"
-                            />
-                          </svg>
-                          Cancel
-                        </button>
-                      )}
+                            <svg
+                              width="24"
+                              height="24"
+                              viewBox="0 0 1024 1024"
+                              version="1.1"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M512 128C300.8 128 128 300.8 128 512s172.8 384 384 384 384-172.8 384-384S723.2 128 512 128z m0 85.333333c66.133333 0 128 23.466667 179.2 59.733334L273.066667 691.2C236.8 640 213.333333 578.133333 213.333333 512c0-164.266667 134.4-298.666667 298.666667-298.666667z m0 597.333334c-66.133333 0-128-23.466667-179.2-59.733334l418.133333-418.133333C787.2 384 810.666667 445.866667 810.666667 512c0 164.266667-134.4 298.666667-298.666667 298.666667z"
+                                fill="#D50000"
+                              />
+                            </svg>
+                            Cancel
+                          </button>
+                        )}
                     </div>
                   </td>
                 </tr>

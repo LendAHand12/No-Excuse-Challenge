@@ -25,10 +25,13 @@ const Admin = {
   getProfileAdmin: (id) => {
     return API.get(`${URL_API_USER}/admin/${id}`);
   },
-  getAllWithdraws: ({ status, pageNumber }) => {
+  getAllWithdraws: ({ status, pageNumber, keyword }) => {
     return API.get(
-      `${URL_API_WITHDRAW}/?pageNumber=${pageNumber}&status=${status}`,
+      `${URL_API_WITHDRAW}/?pageNumber=${pageNumber}&status=${status}&keyword=${keyword}`,
     );
+  },
+  exportWithdraw: (body) => {
+    return API.post(`${URL_API_WITHDRAW}/export`, body);
   },
   updateWithdraw: ({ id, hash, status }) => {
     return API.put(`${URL_API_WITHDRAW}/${id}`, {
