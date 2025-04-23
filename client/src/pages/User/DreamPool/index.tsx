@@ -10,14 +10,20 @@ import { Sparkles } from 'lucide-react';
 import { shortenWalletAddress } from '../../../utils';
 import Modal from 'react-modal';
 import { useSelector } from 'react-redux';
+import Select from 'react-select';
+import { useNavigate } from 'react-router-dom';
 
 const DreamPoolPage: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [dreamPool, setDreamPool] = useState(0);
   const [iceBreakers, setIceBreakers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEditDreampool, setShowEditDreampool] = useState(false);
   const { userInfo } = useSelector((state) => state.auth);
+  const [notHonors, setNotHonors] = useState([]);
+  const [newHonors, setNewHonors] = useState([]);
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -35,14 +41,31 @@ const DreamPoolPage: React.FC = () => {
           toast.error(t(message));
         });
     })();
-  }, []);
+
+    (async () => {
+      userInfo.isAdmin &&
+        (await User.getNotHonorUsers()
+          .then((response) => {
+            setNotHonors(response.data.usersNotYetHonored);
+            setLoading(false);
+          })
+          .catch((error) => {
+            let message =
+              error.response && error.response.data.message
+                ? error.response.data.message
+                : error.message;
+            toast.error(t(message));
+          }));
+    })();
+  }, [refresh]);
 
   const handleUpdateDreampool = useCallback(async () => {
-    await User.updateDreamPool({ totalDreampool: dreamPool })
+    await User.updateDreamPool({ totalDreampool: dreamPool, newHonors })
       .then((response) => {
         const { message } = response.data;
         toast.success(t(message));
         setShowEditDreampool(false);
+        setRefresh(!refresh);
       })
       .catch((error) => {
         let message =
@@ -51,7 +74,11 @@ const DreamPoolPage: React.FC = () => {
             : error.message;
         toast.error(t(message));
       });
-  }, [dreamPool]);
+  }, [dreamPool, newHonors]);
+
+  const handleExportDreampool = async () => {
+    navigate('/admin/dreampool/export');
+  };
 
   return (
     <DefaultLayout>
@@ -95,10 +122,24 @@ const DreamPoolPage: React.FC = () => {
                   </svg>
                   <span className="sr-only">Close modal</span>
                 </button>
-                <p className="mb-4 pt-10 text-gray-500 text-lg font-semibold">
-                  Please input new dreampool fund number
-                </p>
+                <div className="pt-10 mb-4">
+                  <p className="mb-4 text-gray-500 text-lg font-semibold">
+                    Please select a reward recipient
+                  </p>
+                  <Select
+                    options={notHonors.map((ele) => ({
+                      value: ele._id,
+                      label: ele.userId,
+                    }))}
+                    onChange={(e) => setNewHonors(e)}
+                    isMulti
+                    className="w-full mb-1 text-black rounded-xl focus:outline-none cursor-pointer"
+                  />
+                </div>
                 <div className="space-y-4">
+                  <p className="mb-4 text-gray-500 text-lg font-semibold">
+                    Please input new dreampool fund number
+                  </p>
                   <div>
                     <input
                       onChange={(e) => setDreamPool(e.target.value)}
@@ -186,6 +227,29 @@ const DreamPoolPage: React.FC = () => {
             </div>
           </div>
         </div>
+        <div className='flex justify-end mt-10'>
+          {userInfo?.permissions
+            ?.find((p) => p.page.path === '/admin/users')
+            ?.actions.includes('export') && (
+            <div>
+              <button
+                onClick={handleExportDreampool}
+                className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm rounded-md hover:opacity-70"
+              >
+                <svg
+                  fill="currentColor"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M8.71,7.71,11,5.41V15a1,1,0,0,0,2,0V5.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42l-4-4a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-4,4A1,1,0,1,0,8.71,7.71ZM21,14a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V15a1,1,0,0,0-2,0v4a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V15A1,1,0,0,0,21,14Z" />
+                </svg>
+                Export Data
+              </button>
+            </div>
+          )}
+        </div>
         <div className="bg-black py-10">
           <table className="w-full bg-black text-left text-gray-300">
             <thead className="text-lg text-gray-200 uppercase ">
@@ -205,7 +269,7 @@ const DreamPoolPage: React.FC = () => {
               {iceBreakers.length > 0 &&
                 !loading &&
                 iceBreakers.map((ele) => (
-                  <tr className="border-b" key={ele.userId}>
+                  <tr className="border-b" key={ele._id}>
                     <td className="px-6 py-4">{ele.userId.userId}</td>
                     <td className="px-6 py-4">
                       {shortenWalletAddress(ele.userId.email, 16)}

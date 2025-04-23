@@ -275,7 +275,6 @@ export const resetTransTierUnPay = asyncHandler(async () => {
   });
 
   for (let u of listUser) {
-    console.log({ name: u.userId });
     const listTrans = await Transaction.find({
       userId: u._id,
       tier: u.tier,
@@ -392,7 +391,6 @@ export const rankingCalc = asyncHandler(async () => {
             let currentDay = moment();
             const diffDays = currentDay.diff(u.createdAt, "days");
             if (diffDays < 15) {
-              console.log({userId: u.userId});
               u.availableUsdt = u.availableUsdt + 10;
               u.bonusRef = true;
               await Honor.create({

@@ -102,8 +102,14 @@ const User = {
   getDreamPool: () => {
     return API.get(`${URL_API_DREAMPOOL}`);
   },
+  getNotHonorUsers: () => {
+    return API.get(`${URL_API_DREAMPOOL}/notHonors`);
+  },
   updateDreamPool: (body) => {
     return API.post(`${URL_API_DREAMPOOL}`, body);
+  },
+  exportDreamPool: (body) => {
+    return API.post(`${URL_API_DREAMPOOL}/export`, body);
   },
   adminChangeWalletUser: (body) => {
     return API.put(`${URL_API_USER}/change-wallet`, body);

@@ -60,6 +60,7 @@ import ExportPaymentsPage from './pages/Admin/Export/ExportPayments';
 import CreateUserPage from './pages/Admin/CreateUser';
 import ExportWithdrawPage from './pages/Admin/Export/ExportWithdraw';
 import WithdrawsPage from './pages/User/Withdraws';
+import ExportDreampoolPage from './pages/Admin/Export/ExportDreampool';
 import { useSelector } from 'react-redux';
 
 function App() {
@@ -381,6 +382,19 @@ function App() {
               <>
                 <PageTitle title="DreamPool | NoExcuseChallenge" />
                 <DreamPoolPage />
+              </>
+            }
+          />
+        )}
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/dreampool')
+          ?.actions.includes('export') && (
+          <Route
+            path="/admin/dreampool/export"
+            element={
+              <>
+                <PageTitle title="Export DreamPool | NoExcuseChallenge" />
+                <ExportDreampoolPage />
               </>
             }
           />
