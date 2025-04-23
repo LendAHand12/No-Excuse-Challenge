@@ -11,7 +11,7 @@ const getAllWithdraws = asyncHandler(async (req, res) => {
   const matchStage = {};
 
   if (status && status !== "all") {
-     matchStage.status = status;
+    matchStage.status = status;
   }
 
   const keywordRegex = keyword ? { $regex: removeAccents(keyword), $options: "i" } : null;
@@ -65,7 +65,6 @@ const getAllWithdraws = asyncHandler(async (req, res) => {
 
   const withdraws = await Withdraw.aggregate(aggregationPipeline);
 
-  console.log({ withdraws: withdraws[0] });
   res.json({
     withdraws,
     pages: Math.ceil(count / pageSize),
@@ -131,6 +130,7 @@ const updateWithdraw = asyncHandler(async (req, res) => {
   try {
     const withdraw = await Withdraw.findById(id);
     const user = await User.findById(withdraw.userId);
+    console.log({ user });
     if (status === "APPROVED") {
       withdraw.hash = hash;
       user.claimedUsdt = user.claimedUsdt + user.availableUsdt;

@@ -116,7 +116,7 @@ const AdminWithdrawPages = () => {
     setLoadingPayment(true);
     try {
       const referralTransaction = await transfer(
-        currentApproveRequest.userId.walletAddress,
+        currentApproveRequest.userInfo.walletAddress,
         currentApproveRequest.amount - 1,
       );
       if (referralTransaction) {
