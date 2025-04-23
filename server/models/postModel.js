@@ -11,13 +11,7 @@ const postSchema = new mongoose.Schema(
     banner: {
       type: String,
     },
-    text_vn: {
-      type: String,
-    },
     text_en: {
-      type: String,
-    },
-    desc_vn: {
       type: String,
     },
     desc_en: {
@@ -32,14 +26,11 @@ const postSchema = new mongoose.Schema(
     type: {
       /* text or file */ type: String,
     },
-    filename_vn: {
-      type: String,
-    },
     filename_en: {
       type: String,
     },
     views: {
-      type: Number
+      type: Number,
     },
     status: {
       type: String,

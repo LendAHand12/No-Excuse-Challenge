@@ -9,58 +9,7 @@ import LOGO_ICON from '@/images/logo/logo-icon.svg';
 import NoContent from '@/components/NoContent';
 
 const NewsPage: React.FC = () => {
-  const news = [
-    {
-      title: 'What is Lorem Ipsum?',
-      desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-      img: 'https://picsum.photos/300/400',
-      author: 'Victor',
-      views: 10,
-      time: '21 Feb',
-    },
-    {
-      title: 'What is Lorem Ipsum?',
-      desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-      img: 'https://picsum.photos/300/400',
-      author: 'Victor',
-      views: 20,
-      time: '21 Feb',
-    },
-    {
-      title: 'What is Lorem Ipsum?',
-      desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-      img: 'https://picsum.photos/300/400',
-      author: 'Victor',
-      views: 50,
-      time: '21 Feb',
-    },
-    {
-      title: 'What is Lorem Ipsum?',
-      desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-      img: 'https://picsum.photos/300/400',
-      author: 'Victor',
-      views: 40,
-      time: '21 Feb',
-    },
-    {
-      title: 'What is Lorem Ipsum?',
-      desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-      img: 'https://picsum.photos/300/400',
-      author: 'Victor',
-      views: 100,
-      time: '21 Feb',
-    },
-    {
-      title: 'What is Lorem Ipsum?',
-      desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-      img: 'https://picsum.photos/300/400',
-      author: 'Victor',
-      views: 90,
-      time: '21 Feb',
-    },
-  ];
-
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [totalPage, setTotalPage] = useState(0);
@@ -115,10 +64,12 @@ const NewsPage: React.FC = () => {
               <p className="text-md text-gray-500">{ele.desc_en}</p>
               <div className="flex justify-between font-thin">
                 <div className="flex gap-2">
-                  <img src={LOGO_ICON} className='w-6' />
+                  <img src={LOGO_ICON} className="w-6" />
                   <p>NoExcuseChallenge</p>
                   <p className="text-NoExcuseChallenge">.</p>
-                  <p className="text-NoExcuseChallenge">{formatDateDDMM(ele.createdAt)}</p>
+                  <p className="text-NoExcuseChallenge">
+                    {formatDateDDMM(ele.createdAt)}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <svg
@@ -144,72 +95,70 @@ const NewsPage: React.FC = () => {
           ))}
         </div>
         {!loading && data.length === 0 && <NoContent />}
-          {data.length > 0 && (
-            <nav
-              className="flex items-center justify-between pt-4"
-              aria-label="Table navigation"
-            >
-              <span className="text-sm font-normal text-gray-500">
-                Showing{" "}
-                <span className="font-semibold text-gray-900">
-                  {pageNumber}
-                </span>{" "}
-                of{" "}
-                <span className="font-semibold text-gray-900">{totalPage}</span>{" "}
-                page
-              </span>
-              <ul className="inline-flex items-center -space-x-px">
-                <li>
-                  <button
-                    disabled={pageNumber === 1}
-                    onClick={handlePrevPage}
-                    className={`block px-3 py-2 ml-0 leading-tight text-gray-500 ${
-                      pageNumber === 1 ? "bg-gray-100" : "bg-white"
-                    } border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700`}
+        {data.length > 0 && (
+          <nav
+            className="flex items-center justify-between pt-4"
+            aria-label="Table navigation"
+          >
+            <span className="text-sm font-normal text-gray-500">
+              Showing{' '}
+              <span className="font-semibold text-gray-900">{pageNumber}</span>{' '}
+              of{' '}
+              <span className="font-semibold text-gray-900">{totalPage}</span>{' '}
+              page
+            </span>
+            <ul className="inline-flex items-center -space-x-px">
+              <li>
+                <button
+                  disabled={pageNumber === 1}
+                  onClick={handlePrevPage}
+                  className={`block px-3 py-2 ml-0 leading-tight text-gray-500 ${
+                    pageNumber === 1 ? 'bg-gray-100' : 'bg-white'
+                  } border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700`}
+                >
+                  <span className="sr-only">Previous</span>
+                  <svg
+                    className="w-5 h-5"
+                    aria-hidden="true"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <span className="sr-only">Previous</span>
-                    <svg
-                      className="w-5 h-5"
-                      aria-hidden="true"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      ></path>
-                    </svg>
-                  </button>
-                </li>
-                <li>
-                  <button
-                    disabled={pageNumber === totalPage}
-                    onClick={handleNextPage}
-                    className={`block px-3 py-2 leading-tight text-gray-500 ${
-                      pageNumber === totalPage ? "bg-gray-100" : "bg-white"
-                    } border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700`}
+                    <path
+                      fillRule="evenodd"
+                      d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    ></path>
+                  </svg>
+                </button>
+              </li>
+              <li>
+                <button
+                  disabled={pageNumber === totalPage}
+                  onClick={handleNextPage}
+                  className={`block px-3 py-2 leading-tight text-gray-500 ${
+                    pageNumber === totalPage ? 'bg-gray-100' : 'bg-white'
+                  } border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700`}
+                >
+                  <span className="sr-only">Next</span>
+                  <svg
+                    className="w-5 h-5"
+                    aria-hidden="true"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <span className="sr-only">Next</span>
-                    <svg
-                      className="w-5 h-5"
-                      aria-hidden="true"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                        clipRule="evenodd"
-                      ></path>
-                    </svg>
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          )}
+                    <path
+                      fillRule="evenodd"
+                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                      clipRule="evenodd"
+                    ></path>
+                  </svg>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        )}
       </div>
     </DefaultLayout>
   );

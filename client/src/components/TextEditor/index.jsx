@@ -1,12 +1,14 @@
-import { useRef } from "react";
-import SunEditor from "suneditor-react";
-import "suneditor/dist/css/suneditor.min.css";
-import fontSize from "suneditor/src/plugins/submenu/fontSize";
-import font from "suneditor/src/plugins/submenu/font";
-import formatBlock from "suneditor/src/plugins/submenu/formatBlock";
-import image from "suneditor/src/plugins/dialog/image";
-import table from "suneditor/src/plugins/submenu/table";
-import template from "suneditor/src/plugins/submenu/template";
+import { useRef } from 'react';
+import SunEditor from 'suneditor-react';
+import fontSize from 'suneditor/src/plugins/submenu/fontSize';
+import font from 'suneditor/src/plugins/submenu/font';
+import formatBlock from 'suneditor/src/plugins/submenu/formatBlock';
+import image from 'suneditor/src/plugins/dialog/image';
+import table from 'suneditor/src/plugins/submenu/table';
+import template from 'suneditor/src/plugins/submenu/template';
+import link from 'suneditor/src/plugins/dialog/link';
+import video from 'suneditor/src/plugins/dialog/video';
+import 'suneditor/dist/css/suneditor.min.css';
 
 const TextEditor = (props) => {
   const editor = useRef();
@@ -25,14 +27,14 @@ const TextEditor = (props) => {
 
   function resizeImage(files, uploadHandler) {
     const uploadFile = files[0];
-    const img = document.createElement("img");
-    const canvas = document.createElement("canvas");
+    const img = document.createElement('img');
+    const canvas = document.createElement('canvas');
     const reader = new FileReader();
 
     reader.onload = function (e) {
       img.src = e.target.result;
       img.onload = function () {
-        let ctx = canvas.getContext("2d");
+        let ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
 
         const MAX_WIDTH = 1000;
@@ -55,13 +57,13 @@ const TextEditor = (props) => {
         canvas.width = width;
         canvas.height = height;
 
-        ctx = canvas.getContext("2d");
+        ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
         canvas.toBlob(
           async function (blob) {
             let res = await addPhoto(
-              [new File([blob], uploadFile.name)]
+              [new File([blob], uploadFile.name)],
               // loggedUser.institute._id,
               // loggedUser._id
             );
@@ -73,7 +75,7 @@ const TextEditor = (props) => {
             }
           },
           uploadFile.type,
-          1
+          1,
         );
       };
     };
@@ -83,11 +85,11 @@ const TextEditor = (props) => {
 
   function addPhoto(files) {
     if (!files.length) {
-      return alert("Please choose a file to upload first.");
+      return alert('Please choose a file to upload first.');
     }
     var file = files[0];
     var photoKey =
-      "uploads/" + file.name.split(".")[0] + file.name.split(".")[1];
+      'uploads/' + file.name.split('.')[0] + file.name.split('.')[1];
     // var upload = new AWS.S3.ManagedUpload({
     //   params: {
     //     // Bucket: bucketName,
@@ -127,59 +129,68 @@ const TextEditor = (props) => {
       getSunEditorInstance={getSunEditorInstance}
       height="100%"
       setOptions={{
-        plugins: [fontSize, font, formatBlock, image, table, template],
+        plugins: [
+          fontSize,
+          font,
+          formatBlock,
+          image,
+          table,
+          template,
+          link,
+          video,
+        ],
         font: [
-          "Arial",
-          "Comic Sans MS",
-          "Courier New",
-          "Impact",
-          "Georgia",
-          "Tahoma",
-          "Trebuchet MS",
-          "Verdana",
-          "Logical",
-          "Salesforce Sans",
-          "Garamond",
-          "Sans-Serif",
-          "Serif",
-          "Times New Roman",
-          "Helvetica",
+          'Arial',
+          'Comic Sans MS',
+          'Courier New',
+          'Impact',
+          'Georgia',
+          'Tahoma',
+          'Trebuchet MS',
+          'Verdana',
+          'Logical',
+          'Salesforce Sans',
+          'Garamond',
+          'Sans-Serif',
+          'Serif',
+          'Times New Roman',
+          'Helvetica',
         ],
         fontSize: [
           8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 36, 42, 55, 60,
         ],
         buttonList: [
-          ["undo", "redo", "font", "fontSize", "formatBlock"],
+          ['undo', 'redo', 'font', 'fontSize', 'formatBlock'],
           [
-            "bold",
-            "underline",
-            "italic",
-            "strike",
-            "subscript",
-            "superscript",
-            "removeFormat",
+            'bold',
+            'underline',
+            'italic',
+            'strike',
+            'subscript',
+            'superscript',
+            'removeFormat',
           ],
           [
-            ("fontColor",
-            "hiliteColor",
-            "outdent",
-            "indent",
-            "align",
-            "horizontalRule",
-            "list",
-            "table"),
+            ('fontColor',
+            'hiliteColor',
+            'outdent',
+            'indent',
+            'align',
+            'horizontalRule',
+            'list',
+            'table'),
           ],
           [
-            "template",
-            "link",
-            "image",
-            "video",
-            "fullScreen",
-            "showBlocks",
-            "codeView",
-            "preview",
-            "print",
-            "save",
+            'template',
+            'link',
+            'image',
+            'video',
+            'fullScreen',
+            'showBlocks',
+            'codeView',
+            'preview',
+            'print',
+            'save',
           ],
         ],
       }}

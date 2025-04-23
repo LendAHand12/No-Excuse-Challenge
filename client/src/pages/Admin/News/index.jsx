@@ -70,8 +70,6 @@ const AdminNewsPage = () => {
     })();
   }, [searchKey]);
 
-  // const onChangeStatus = (e) => setSearchStatus(e.target.value);
-
   const onSearch = (e) => {
     setKeyword(e.target.value);
   };
@@ -150,9 +148,6 @@ const AdminNewsPage = () => {
                 Title EN
               </th>
               <th scope="col" className="px-6 py-3">
-                Title VI
-              </th>
-              <th scope="col" className="px-6 py-3">
                 Type
               </th>
               <th scope="col" className="px-6 py-3">
@@ -177,8 +172,6 @@ const AdminNewsPage = () => {
                   >
                     {ele.title_en}
                   </td>
-                  <td className="px-6 py-4">{ele.title_vn}</td>
-
                   <td className="px-6 py-4">
                     <div
                       className={`px-2 py-1 rounded-md text-white font-semibold text-sm ${

@@ -7,7 +7,6 @@ import Loading from '@/components/Loading';
 import UploadFile from '@/components/UploadFile';
 import Posts from '@/api/Posts';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import DefaultLayout from '@/layout/DefaultLayout';
 
 const CreatePostPage = () => {
@@ -31,13 +30,9 @@ const CreatePostPage = () => {
     var formData = new FormData();
 
     formData.append('type', values.type);
-    formData.append('title_vn', values.title_vn);
     formData.append('title_en', values.title_en);
-    formData.append('text_vn', values.text_vn ? values.text_vn : '');
     formData.append('text_en', values.text_en ? values.text_en : '');
-    formData.append('desc_vn', values.desc_vn ? values.desc_vn : '');
     formData.append('desc_en', values.desc_en ? values.desc_en : '');
-    formData.append('file_vn', values.file_vn);
     formData.append('file_en', values.file_en);
     setLoading(true);
     await Posts.createPost(formData)
@@ -64,12 +59,6 @@ const CreatePostPage = () => {
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold">Create a new news</h1>
             <div className="flex items-center gap-6">
-              {/* <button
-              onClick={handleSubmit((values) => onSubmit(values, "preview"))}
-              className="w-64 flex justify-center items-center hover:underline font-bold rounded-full my-6 py-4 px-8 border shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
-            >
-              {t("saveDrap")}
-            </button> */}
               <button
                 className="w-64 flex justify-center gap-2 items-center hover:underline text-NoExcuseChallenge bg-black rounded-full py-2 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
                 onClick={(e) => {
@@ -98,24 +87,7 @@ const CreatePostPage = () => {
           <div className="mt-10">
             <div className="mb-10">
               <span className="mb-2 block font-semibold text-gray-900">
-                Vietnamese title :
-              </span>
-              <div>
-                <input
-                  id="title_vn"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                  {...register('title_vn', {
-                    required: t('required'),
-                  })}
-                ></input>
-                <p className="text-sm text-red-500">
-                  {errors.title_vn?.message}
-                </p>
-              </div>
-            </div>
-            <div className="mb-10">
-              <span className="mb-2 block font-semibold text-gray-900">
-                English title :
+                Title :
               </span>
               <div>
                 <input
@@ -152,15 +124,7 @@ const CreatePostPage = () => {
               <>
                 <div className="mb-10">
                   <span className="mb-2 block font-semibold text-gray-900">
-                    Vietnamese file :
-                  </span>
-                  <UploadFile
-                    onFileChange={(files) => setValue('file_vn', files[0])}
-                  />
-                </div>
-                <div className="mb-10">
-                  <span className="mb-2 block font-semibold text-gray-900">
-                    English files :
+                    Files :
                   </span>
                   <UploadFile
                     onFileChange={(files) => setValue('file_en', files[0])}
@@ -171,24 +135,7 @@ const CreatePostPage = () => {
               <>
                 <div className="mb-10">
                   <span className="mb-2 block font-semibold text-gray-900">
-                  Vietnamese description :
-                  </span>
-                  <div>
-                    <input
-                      id="desc_vn"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                      {...register('desc_vn', {
-                        required: t('required'),
-                      })}
-                    ></input>
-                    <p className="text-sm text-red-500">
-                      {errors.desc_vn?.message}
-                    </p>
-                  </div>
-                </div>
-                <div className="mb-10">
-                  <span className="mb-2 block font-semibold text-gray-900">
-                    English description :
+                    Description :
                   </span>
                   <div>
                     <input
@@ -205,20 +152,7 @@ const CreatePostPage = () => {
                 </div>
                 <div className="mb-10">
                   <span className="mb-2 block font-semibold text-gray-900">
-                    Vietnamese content :
-                  </span>
-                  <TextEditor
-                    onChange={(content) => {
-                      setValue('text_vn', content);
-                    }}
-                  />
-                  <p className="text-sm text-red-500">
-                    {errors.text_vn?.message}
-                  </p>
-                </div>
-                <div className="mb-10">
-                  <span className="mb-2 block font-semibold text-gray-900">
-                    English content :
+                    Content :
                   </span>
                   <TextEditor
                     onChange={(content) => {
