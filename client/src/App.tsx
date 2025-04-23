@@ -59,6 +59,7 @@ import ExportUsersPage from './pages/Admin/Export/ExportUsers';
 import ExportPaymentsPage from './pages/Admin/Export/ExportPayments';
 import CreateUserPage from './pages/Admin/CreateUser';
 import ExportWithdrawPage from './pages/Admin/Export/ExportWithdraw';
+import WithdrawsPage from './pages/User/Withdraws';
 import { useSelector } from 'react-redux';
 
 function App() {
@@ -489,7 +490,7 @@ function App() {
           />
         )}
       </Route>
-      
+
       <Route element={<PrivateRoute />}>
         <Route
           path="/user/profile"
@@ -560,6 +561,15 @@ function App() {
             <>
               <PageTitle title="Income | NoExcuseChallenge" />
               <IncomePage />
+            </>
+          }
+        />
+        <Route
+          path="/user/withdraws"
+          element={
+            <>
+              <PageTitle title="Withdraws | NoExcuseChallenge" />
+              <WithdrawsPage />
             </>
           }
         />

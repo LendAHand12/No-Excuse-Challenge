@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import Withdraw from "../models/withdrawModel.js";
 import User from "../models/userModel.js";
 import { removeAccents } from "../utils/methods.js";
+import mongoose from "mongoose";
 
 const getAllWithdraws = asyncHandler(async (req, res) => {
   let { pageNumber, status, keyword } = req.query;
@@ -148,4 +149,41 @@ const updateWithdraw = asyncHandler(async (req, res) => {
   }
 });
 
-export { getAllWithdraws, updateWithdraw, getAllWithdrawsForExport };
+const getWithdrawsOfUser = asyncHandler(async (req, res) => {
+  const userId = new mongoose.Types.ObjectId(req.user.id);
+
+  const aggregationPipeline = [
+    { $match: { userId } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "userInfo",
+      },
+    },
+    { $unwind: "$userInfo" },
+    { $sort: { createdAt: -1 } },
+    {
+      $project: {
+        _id: 1,
+        status: 1,
+        amount: 1,
+        hash: 1,
+        createdAt: 1,
+        userInfo: {
+          _id: 1,
+          userId: 1,
+          email: 1,
+          walletAddress: 1,
+        },
+      },
+    },
+  ];
+
+  const withdraws = await Withdraw.aggregate(aggregationPipeline);
+
+  res.json({ withdraws });
+});
+
+export { getAllWithdraws, updateWithdraw, getAllWithdrawsForExport, getWithdrawsOfUser };

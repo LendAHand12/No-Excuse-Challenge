@@ -40,7 +40,7 @@ const routes = [
         <path d="M16 3.13a4 4 0 010 7.75" />
       </svg>
     ),
-    component: AdminUserPages
+    component: AdminUserPages,
   },
   {
     title: 'Transactions',
@@ -109,23 +109,14 @@ const routes = [
       <svg
         width="24"
         height="24"
-        viewBox="0 0 16 16"
-        version="1.1"
+        viewBox="0 0 15 15"
+        fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <path fill="currentColor" d="M8 0l2 3h-1v2h-2v-2h-1l2-3z"></path>
         <path
-          fill="currentColor"
-          d="M15 7v8h-14v-8h14zM16 6h-16v10h16v-10z"
-        ></path>
-        <path
-          fill="currentColor"
-          d="M8 8c1.657 0 3 1.343 3 3s-1.343 3-3 3h5v-1h1v-4h-1v-1h-5z"
-        ></path>
-        <path
-          fill="currentColor"
-          d="M5 11c0-1.657 1.343-3 3-3h-5v1h-1v4h1v1h5c-1.657 0-3-1.343-3-3z"
-        ></path>
+          d="M11 10.5H12.5V9M11 4.5H12.5V6M4 4.5H2.5V6M2.5 9V10.5H4M7.5 9.5C6.39543 9.5 5.5 8.60457 5.5 7.5C5.5 6.39543 6.39543 5.5 7.5 5.5C8.60457 5.5 9.5 6.39543 9.5 7.5C9.5 8.60457 8.60457 9.5 7.5 9.5ZM1.5 2.5H13.5C14.0523 2.5 14.5 2.94772 14.5 3.5V11.5C14.5 12.0523 14.0523 12.5 13.5 12.5H1.5C0.947716 12.5 0.5 12.0523 0.5 11.5V3.5C0.5 2.94772 0.947715 2.5 1.5 2.5Z"
+          stroke="currentColor"
+        />
       </svg>
     ),
   },

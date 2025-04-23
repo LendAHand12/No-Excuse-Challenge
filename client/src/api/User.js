@@ -1,5 +1,5 @@
 import API from './API';
-import { URL_API_USER, URL_API_DREAMPOOL } from './URL';
+import { URL_API_USER, URL_API_DREAMPOOL, URL_API_WITHDRAW } from './URL';
 
 const User = {
   update: (userId, body) => {
@@ -107,6 +107,9 @@ const User = {
   },
   adminChangeWalletUser: (body) => {
     return API.put(`${URL_API_USER}/change-wallet`, body);
+  },
+  withdraws: () => {
+    return API.get(`${URL_API_WITHDRAW}/user`);
   },
 };
 
