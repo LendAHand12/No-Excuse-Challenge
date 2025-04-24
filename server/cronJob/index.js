@@ -130,7 +130,10 @@ export const distributionHewe = asyncHandler(async () => {
 
   for (let u of listUser) {
     try {
-      if (u.totalHewe > u.claimedHewe) {
+      if(u.level >= 4) {
+        u.availableHewe = u.availableHewe + u.totalHewe;
+        u.totalHewe = 0;
+      } else if (u.totalHewe > u.claimedHewe) {
         u.availableHewe = u.availableHewe + u.hewePerDay;
       }
       await u.save();
