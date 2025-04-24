@@ -58,29 +58,29 @@ const routes = [
       </svg>
     ),
   },
-  {
-    title: 'Wallets',
-    link: '/admin/wallets',
-    icon: (
-      <svg
-        fill="currentColor
-        "
-        version="1.1"
-        id="Layer_1"
-        xmlns="http://www.w3.org/2000/svg"
-        width="23"
-        height="21"
-        viewBox="0 0 20 20"
-        enableBackground="new 0 0 20 20"
-      >
-        <path
-          d="M19,4h-3V1c0-0.6-0.4-1-1-1H3C1.3,0,0,1.3,0,3v14c0,1.7,1.3,3,3,3h16c0.6,0,1-0.4,1-1V5C20,4.4,19.6,4,19,4z M2,3
-	c0-0.6,0.4-1,1-1h11v2H2V3z M18,18H3c-0.6,0-1-0.4-1-1V6h16V18z"
-        />
-        <circle cx="14" cy="12" r="2" />
-      </svg>
-    ),
-  },
+  // {
+  //   title: 'Wallets',
+  //   link: '/admin/wallets',
+  //   icon: (
+  //     <svg
+  //       fill="currentColor
+  //       "
+  //       version="1.1"
+  //       id="Layer_1"
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       width="23"
+  //       height="21"
+  //       viewBox="0 0 20 20"
+  //       enableBackground="new 0 0 20 20"
+  //     >
+  //       <path
+  //         d="M19,4h-3V1c0-0.6-0.4-1-1-1H3C1.3,0,0,1.3,0,3v14c0,1.7,1.3,3,3,3h16c0.6,0,1-0.4,1-1V5C20,4.4,19.6,4,19,4z M2,3
+  // c0-0.6,0.4-1,1-1h11v2H2V3z M18,18H3c-0.6,0-1-0.4-1-1V6h16V18z"
+  //       />
+  //       <circle cx="14" cy="12" r="2" />
+  //     </svg>
+  //   ),
+  // },
   {
     title: 'Get link active',
     link: '/admin/linkVerify',
@@ -178,6 +178,24 @@ const routes = [
         xmlns="http://www.w3.org/2000/svg"
       >
         <path d="M17,9V7A5,5,0,0,0,7,7V9a3,3,0,0,0-3,3v7a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V12A3,3,0,0,0,17,9ZM9,7a3,3,0,0,1,6,0V9H9Zm9,12a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V12a1,1,0,0,1,1-1H17a1,1,0,0,1,1,1Z" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Cronjob',
+    link: '/admin/cronjob',
+    icon: (
+      <svg
+        fill="currentColor"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          fillRule="evenodd"
+          d="M3,3 L21,3 C22.1045695,3 23,3.8954305 23,5 L23,19 C23,20.1045695 22.1045695,21 21,21 L3,21 C1.8954305,21 1,20.1045695 1,19 L1,5 C1,3.8954305 1.8954305,3 3,3 Z M3,5 L3,19 L21,19 L21,5 L3,5 Z M8.33333333,12 L5.4,9.8 L6.6,8.2 L11.6666667,12 L6.6,15.8 L5.4,14.2 L8.33333333,12 Z M12,16 L12,14 L17,14 L17,16 L12,16 Z"
+        />
       </svg>
     ),
   },

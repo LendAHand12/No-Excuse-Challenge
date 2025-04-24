@@ -23,3 +23,4 @@ export const URL_API_DREAMPOOL = '/api/dreampool';
 export const URL_API_WITHDRAW = '/api/withdraw';
 export const URL_API_ICE_BREAKER = '/api/ice-breaker';
 export const URL_API_INCOME = "/api/income";
+export const URL_API_CRONJOB = "/api/cronjob";

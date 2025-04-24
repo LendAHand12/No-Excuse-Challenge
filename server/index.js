@@ -28,21 +28,15 @@ import dreampoolRoutes from "./routes/dreampoolRoutes.js";
 import withdrawRoutes from "./routes/withdrawRoutes.js";
 import iceBreakerRoutes from "./routes/iceBreakerRoutes.js";
 import incomeRoutes from "./routes/incomeRoutes.js";
+import cronjobRoutes from "./routes/cronjobRoutes.js";
 
 import {
   countChildToData,
   countLayerToData,
-  checkBPackage,
-  checkCPackage,
-  checkAPackage,
   deleteUser24hUnPay,
-  resetTransTierUnPay,
-  checkBlockChildren,
   distributionHewe,
   rankingCalc,
-  checkUserRegisteredOver6Month,
 } from "./cronJob/index.js";
-import { convertOldData } from "./common.js";
 
 const app = express();
 
@@ -86,6 +80,7 @@ app.use("/api/dreampool", dreampoolRoutes);
 app.use("/api/withdraw", withdrawRoutes);
 app.use("/api/ice-breaker", iceBreakerRoutes);
 app.use("/api/income", incomeRoutes);
+app.use("/api/cronjob", cronjobRoutes);
 
 app.use(notFound);
 
@@ -106,80 +101,32 @@ const cron1 = new CronJob("00 01 * * *", async () => {
   console.log("Delete user done");
 });
 
-const cron2 = new CronJob("30 01 * * *", async () => {
-  // 1h30
-  console.log("Check A Package start");
-  await checkAPackage();
-  console.log("Check A Package done");
-});
-
-const cron3 = new CronJob("00 02 * * *", async () => {
+const cron2 = new CronJob("00 02 * * *", async () => {
   // 2h
-  console.log("Check B Package start");
-  await checkBPackage();
-  console.log("Check B Package done");
-});
-
-const cron4 = new CronJob("00 03 * * *", async () => {
-  // 3h
-  console.log("Check C Package start");
-  await checkCPackage();
-  console.log("Check C Package done");
-});
-
-const cron5 = new CronJob("00 04 * * *", async () => {
-  // 4h
   console.log("Count child start");
   await countChildToData();
   console.log("Count child done");
 });
 
-const cron6 = new CronJob("00 05 * * *", async () => {
-  // 5h
+const cron3 = new CronJob("00 03 * * *", async () => {
+  // 3h
   console.log("Refresh layer start");
   await countLayerToData();
   console.log("Refresh layer done");
 });
 
-const cron7 = new CronJob("00 06 * * *", async () => {
-  // 6h
-  console.log("Reset trans unpay tier start");
-  await resetTransTierUnPay();
-  console.log("Reset trans unpay tier done");
-});
-
-const cron8 = new CronJob("30 06 * * *", async () => {
-  // 6h
-  console.log("Check block children start");
-  await checkBlockChildren();
-  console.log("Check block children done");
-});
-
-const cron9 = new CronJob("00 07 * * *", async () => {
-  // 7h
+const cron4 = new CronJob("00 04 * * *", async () => {
+  // 4h
   console.log("Ranking calc start");
   await rankingCalc();
   console.log("Ranking calc done");
 });
 
-const cron10 = new CronJob("00 07 * * *", async () => {
-  // 7h
-  console.log("Over 6 month calc start");
-  await checkUserRegisteredOver6Month();
-  console.log("Over 6 month calc done");
-});
-
 cron0.start();
 cron1.start();
-// cron2.start();
-// cron3.start();
-// cron4.start();
-cron5.start();
-cron6.start();
-// cron7.start();
-// cron8.start();
-cron9.start();
-// cron10.start();
+cron2.start();
+cron3.start();
+cron4.start();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>

@@ -61,6 +61,7 @@ import CreateUserPage from './pages/Admin/CreateUser';
 import ExportWithdrawPage from './pages/Admin/Export/ExportWithdraw';
 import WithdrawsPage from './pages/User/Withdraws';
 import ExportDreampoolPage from './pages/Admin/Export/ExportDreampool';
+import AdminCronjobPage from './pages/Admin/Cronjob';
 import { useSelector } from 'react-redux';
 
 function App() {
@@ -499,6 +500,19 @@ function App() {
               <>
                 <PageTitle title="Admin Create User | NoExcuseChallenge" />
                 <CreateUserPage />
+              </>
+            }
+          />
+        )}
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/cronjob')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/cronjob"
+            element={
+              <>
+                <PageTitle title="Cronjob | NoExcuseChallenge" />
+                <AdminCronjobPage />
               </>
             }
           />
