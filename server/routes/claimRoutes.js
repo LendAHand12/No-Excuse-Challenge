@@ -4,6 +4,7 @@ import {
   claimUsdt,
   getAllClaims,
   getAllClaimsForExport,
+  getAllClaimsOfUser,
 } from "../controllers/claimHeweControllers.js";
 import { protectRoute, isAdmin } from "../middleware/authMiddleware.js";
 
@@ -13,5 +14,6 @@ router.route("/hewe").post(protectRoute, claimHewe);
 router.route("/usdt").post(protectRoute, claimUsdt);
 router.route("/list").get(protectRoute, isAdmin, getAllClaims);
 router.route("/export").post(protectRoute, isAdmin, getAllClaimsForExport);
+router.route("/user").get(protectRoute, getAllClaimsOfUser);
 
 export default router;

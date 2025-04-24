@@ -63,6 +63,7 @@ import WithdrawsPage from './pages/User/Withdraws';
 import ExportDreampoolPage from './pages/Admin/Export/ExportDreampool';
 import AdminCronjobPage from './pages/Admin/Cronjob';
 import { useSelector } from 'react-redux';
+import ClaimsPage from './pages/User/Claims';
 
 function App() {
   const { pathname } = useLocation();
@@ -598,6 +599,15 @@ function App() {
             <>
               <PageTitle title="News | NoExcuseChallenge" />
               <NewsDetailPage />
+            </>
+          }
+        />
+        <Route
+          path="/user/claims"
+          element={
+            <>
+              <PageTitle title="Claims | NoExcuseChallenge" />
+              <ClaimsPage />
             </>
           }
         />

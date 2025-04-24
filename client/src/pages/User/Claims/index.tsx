@@ -12,15 +12,13 @@ import DefaultLayout from '../../../layout/DefaultLayout';
 import { shortenWalletAddress } from '../../../utils';
 import { useSelector } from 'react-redux';
 
-const AdminClaimsPage = () => {
+const ClaimsPage = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const key = searchParams.get('keyword') || '';
   const page = searchParams.get('page') || 1;
-  const [keyword, setKeyword] = useState(key);
   const coin = searchParams.get('coin') || '';
   const [totalPage, setTotalPage] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -28,18 +26,13 @@ const AdminClaimsPage = () => {
   const [objectFilter, setObjectFilter] = useState({
     pageNumber: page,
     coin,
-    keyword: key,
   });
-
-  const onSearch = (e) => {
-    setKeyword(e.target.value);
-  };
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const { pageNumber, coin, keyword } = objectFilter;
-      await Claim.list(pageNumber, coin, keyword)
+      const { pageNumber, coin } = objectFilter;
+      await Claim.user(pageNumber, coin)
         .then((response) => {
           const { claims, pages } = response.data;
           setData(claims);
@@ -67,7 +60,7 @@ const AdminClaimsPage = () => {
       searchParams.set('coin', coin);
     }
     const queryString = searchParams.toString();
-    const url = queryString ? `/admin/claims?${queryString}` : '/admin/claims';
+    const url = queryString ? `/user/claims?${queryString}` : '/user/claims';
     navigate(url);
   };
 
@@ -89,14 +82,6 @@ const AdminClaimsPage = () => {
       }),
     [objectFilter],
   );
-
-  const handleExportClaims = async () => {
-    navigate('/admin/claims/export');
-  };
-
-  const handleSearch = useCallback(() => {
-    setObjectFilter({ ...objectFilter, keyword, pageNumber: 1 });
-  }, [keyword, objectFilter]);
 
   return (
     <DefaultLayout>
@@ -122,62 +107,7 @@ const AdminClaimsPage = () => {
                   </option>
                 </select>
               </div>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg
-                    className="w-5 h-5 text-gray-500"
-                    aria-hidden="true"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    onChange={onSearch}
-                    className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50"
-                    placeholder={t('search with user name or email')}
-                    defaultValue={objectFilter.keyword}
-                  />
-                  <button
-                    onClick={handleSearch}
-                    disabled={loading}
-                    className="h-8 flex text-xs justify-center items-center hover:underline bg-black text-NoExcuseChallenge font-bold rounded-full py-1 px-4 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
-                  >
-                    {t('search')}
-                  </button>
-                </div>
-              </div>
             </div>
-
-            {userInfo?.permissions
-              ?.find((p) => p.page.path === '/admin/claims')
-              ?.actions.includes('export') && (
-              <div>
-                <button
-                  onClick={handleExportClaims}
-                  className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm rounded-md hover:opacity-70"
-                >
-                  <svg
-                    fill="currentColor"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M8.71,7.71,11,5.41V15a1,1,0,0,0,2,0V5.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42l-4-4a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-4,4A1,1,0,1,0,8.71,7.71ZM21,14a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V15a1,1,0,0,0-2,0v4a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V15A1,1,0,0,0,21,14Z" />
-                  </svg>
-                  Export Data
-                </button>
-              </div>
-            )}
           </div>
           <table className="w-full text-sm text-left text-gray-500">
             <thead className="text-xs text-gray-700 uppercase bg-gray-50">
@@ -264,12 +194,14 @@ const AdminClaimsPage = () => {
               <ul className="inline-flex items-center -space-x-px">
                 <li>
                   <button
-                    disabled={objectFilter.pageNumber === 1}
+                    disabled={parseInt(objectFilter.pageNumber) === 1}
                     onClick={() =>
                       handleChangePage(parseInt(objectFilter.pageNumber) - 1)
                     }
                     className={`block px-3 py-2 ml-0 leading-tight text-gray-500 ${
-                      objectFilter.pageNumber === 1 ? 'bg-gray-100' : 'bg-white'
+                      parseInt(objectFilter.pageNumber) === 1
+                        ? 'bg-gray-100'
+                        : 'bg-white'
                     } border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700`}
                   >
                     <span className="sr-only">Previous</span>
@@ -290,12 +222,12 @@ const AdminClaimsPage = () => {
                 </li>
                 <li>
                   <button
-                    disabled={objectFilter.pageNumber === totalPage}
+                    disabled={parseInt(objectFilter.pageNumber) === totalPage}
                     onClick={() =>
                       handleChangePage(parseInt(objectFilter.pageNumber) + 1)
                     }
                     className={`block px-3 py-2 leading-tight text-gray-500 ${
-                      objectFilter.pageNumber === totalPage
+                      parseInt(objectFilter.pageNumber) === totalPage
                         ? 'bg-gray-100'
                         : 'bg-white'
                     } border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700`}
@@ -325,4 +257,4 @@ const AdminClaimsPage = () => {
   );
 };
 
-export default AdminClaimsPage;
+export default ClaimsPage;

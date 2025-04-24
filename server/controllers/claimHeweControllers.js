@@ -6,6 +6,7 @@ import sendUsdt from "../services/sendUsdt.js";
 import Withdraw from "../models/withdrawModel.js";
 import { sendTelegramMessage } from "../utils/sendTelegram.js";
 import { removeAccents } from "../utils/methods.js";
+import mongoose from "mongoose";
 
 const processingHeweUserIds = [];
 
@@ -271,4 +272,70 @@ const getAllClaimsForExport = asyncHandler(async (req, res) => {
   res.json({ totalCount, result });
 });
 
-export { claimHewe, claimUsdt, getAllClaims, getAllClaimsForExport };
+const getAllClaimsOfUser = asyncHandler(async (req, res) => {
+  const { user } = req;
+  let { pageNumber, coin } = req.query;
+  const page = Number(pageNumber) || 1;
+  const pageSize = 10;
+
+  const matchStage = {};
+
+  // ✅ Ép kiểu ObjectId
+  if (!mongoose.Types.ObjectId.isValid(user.id)) {
+    return res.status(400).json({ message: "Invalid user ID" });
+  }
+
+  matchStage.userId = new mongoose.Types.ObjectId(user.id);
+
+  if (coin === "HEWE" || coin === "USDT") {
+    matchStage.coin = coin;
+  }
+
+  const aggregationPipeline = [
+    { $match: matchStage },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "userInfo",
+      },
+    },
+    { $unwind: "$userInfo" },
+  ];
+
+  // Đếm số bản ghi sau khi lọc
+  const countAggregation = await Claim.aggregate([...aggregationPipeline, { $count: "total" }]);
+  const count = countAggregation[0]?.total || 0;
+
+  // Thêm phân trang và sắp xếp
+  aggregationPipeline.push(
+    { $sort: { createdAt: -1 } },
+    { $skip: pageSize * (page - 1) },
+    { $limit: pageSize },
+    {
+      $project: {
+        _id: 1,
+        coin: 1,
+        amount: 1,
+        hash: 1,
+        createdAt: 1,
+        userInfo: {
+          _id: 1,
+          userId: 1,
+          email: 1,
+          walletAddress: 1,
+        },
+      },
+    }
+  );
+
+  const claims = await Claim.aggregate(aggregationPipeline);
+
+  res.json({
+    claims,
+    pages: Math.ceil(count / pageSize),
+  });
+});
+
+export { claimHewe, claimUsdt, getAllClaims, getAllClaimsForExport, getAllClaimsOfUser };

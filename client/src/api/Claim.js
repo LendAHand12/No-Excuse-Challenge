@@ -16,6 +16,11 @@ const Claim = {
   export: (body) => {
     return API.post(`${URL_API_CLAIM}/export`, body);
   },
+  user: (pageNumber, coin) => {
+    return API.get(
+      `${URL_API_CLAIM}/user/?pageNumber=${pageNumber}&coin=${coin}`,
+    );
+  },
 };
 
 export default Claim;
