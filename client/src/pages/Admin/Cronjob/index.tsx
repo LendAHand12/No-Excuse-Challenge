@@ -5,17 +5,17 @@ import Cronjob from '@/api/Cronjob';
 import { toast, ToastContainer } from 'react-toastify';
 import { useState } from 'react';
 
-const ChoosePackagePage = () => {
+const CronjobPage = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(null);
   const { userInfo } = useSelector((state) => state.auth);
 
   const handleSubmitCronjob = async (cronjob) => {
     setLoading(cronjob.id);
-    console.log({ cronjob });
-    await Cronjob.run({cronjob, userId: userInfo.id})
+    await Cronjob.run({ cronjob, userId: userInfo.id })
       .then((response) => {
         toast.success(t(response.data.message));
+        setLoading(false);
       })
       .catch((error) => {
         let message =
@@ -37,36 +37,33 @@ const ChoosePackagePage = () => {
       ],
     },
     {
-        id: 1,
-        title: 'Delete unpaid user',
-        descs: [
-          'Delete users who do not pay within 24 hours',
-          'Automatically run every day at 01:00',
-        ],
+      id: 1,
+      title: 'Delete unpaid user',
+      descs: [
+        'Delete users who do not pay within 24 hours',
+        'Automatically run every day at 01:00',
+      ],
     },
     {
-        id: 2,
-        title: 'Count subordinates',
-        descs: [
-          'Count the number of subordinates and income',
-          'Automatically run every day at 02:00',
-        ],
+      id: 2,
+      title: 'Count subordinates',
+      descs: [
+        'Count the number of subordinates and income',
+        'Automatically run every day at 02:00',
+      ],
     },
     {
-        id: 3,
-        title: 'Count level',
-        descs: [
-          'Count level of user',
-          'Automatically run every day at 03:00',
-        ],
+      id: 3,
+      title: 'Count level',
+      descs: ['Count level of user', 'Automatically run every day at 03:00'],
     },
     {
-        id: 4,
-        title: 'Dreampool reward',
-        descs: [
-          '10 USDT reward for users with 2 subordinates under 15 days',
-          'Automatically run every day at 04:00',
-        ],
+      id: 4,
+      title: 'Dreampool reward',
+      descs: [
+        '10 USDT reward for users with 2 subordinates under 15 days',
+        'Automatically run every day at 04:00',
+      ],
     },
   ];
 
@@ -144,4 +141,4 @@ const ChoosePackagePage = () => {
   );
 };
 
-export default ChoosePackagePage;
+export default CronjobPage;

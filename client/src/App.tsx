@@ -139,24 +139,6 @@ function App() {
             </>
           }
         />
-        <Route
-          path="/news"
-          element={
-            <>
-              <PageTitle title="News | NoExcuseChallenge" />
-              <NewsPage />
-            </>
-          }
-        />
-        <Route
-          path="/news/:id"
-          element={
-            <>
-              <PageTitle title="News | NoExcuseChallenge" />
-              <NewsDetailPage />
-            </>
-          }
-        />
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/confirm" element={<ConfirmPage />} />
@@ -598,6 +580,24 @@ function App() {
             <>
               <PageTitle title="Withdraws | NoExcuseChallenge" />
               <WithdrawsPage />
+            </>
+          }
+        />
+        <Route
+          path="/news"
+          element={
+            <>
+              <PageTitle title="News | NoExcuseChallenge" />
+              <NewsPage />
+            </>
+          }
+        />
+        <Route
+          path="/news/:id"
+          element={
+            <>
+              <PageTitle title="News | NoExcuseChallenge" />
+              <NewsDetailPage />
             </>
           }
         />

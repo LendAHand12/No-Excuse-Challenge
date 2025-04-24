@@ -982,7 +982,9 @@ const getListChildOfUser = asyncHandler(async (req, res) => {
   const listRef = await Tree.find({ refId: parent._id });
   if (parent.children.length === 2 && listRef.length === 1) {
     result = await getAllDescendants(parent.children[0], 1);
-    const firstChild = await Tree.findById(parent.children[0]);
+    const firstChildId =
+      parent.children[0] === listRef[0]._id ? parent.children[1] : parent.children[0];
+    const firstChild = await Tree.findById(firstChildId);
     if (firstChild.children.length < 2) {
       result.unshift({
         id: firstChild._id,
@@ -1451,8 +1453,7 @@ const removeIdFromChildrenOfParent = async (treeUser, parentTree) => {
 };
 
 const pushChildrent1ToUp = async (userTree, parentTree) => {
-  const childTree = await Tree.findById(userTree.children[0]
-  );
+  const childTree = await Tree.findById(userTree.children[0]);
   const userUp = await User.findById(childTree.userId);
   userUp.oldParents = [childTree.parentId, ...userUp.oldParents];
   await userUp.save();

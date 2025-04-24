@@ -153,7 +153,7 @@ export const rankingCalc = asyncHandler(async () => {
   for (let u of listUser) {
     try {
       if (u.ranking === 0) {
-        const treeOfUser = await Tree.findOne({userId: u._id, tier: 1});
+        const treeOfUser = await Tree.findOne({ userId: u._id, tier: 1 });
         let refChild = await Tree.find({ refId: treeOfUser._id, tier: 1 });
         let refLength = 0;
         for (let child of refChild) {
