@@ -126,16 +126,17 @@ export const areArraysEqual = (arr1, arr2) => {
 export const distributionHewe = asyncHandler(async () => {
   const listUser = await User.find({
     $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }, { countPay: 13 }],
-  }).select("userId totalHewe availableHewe hewePerDay claimedHewe");
+  }).select("userId totalHewe availableHewe hewePerDay claimedHewe currentLayer");
 
   for (let u of listUser) {
     try {
-      if(u.level >= 4) {
+      if(u.currentLayer[0] >= 4) {
         u.availableHewe = u.availableHewe + u.totalHewe;
         u.totalHewe = 0;
-      } else if (u.totalHewe > u.claimedHewe) {
-        u.availableHewe = u.availableHewe + u.hewePerDay;
-      }
+      } 
+      // else if (u.totalHewe > u.claimedHewe) {
+      //   u.availableHewe = u.availableHewe + u.hewePerDay;
+      // }
       await u.save();
     } catch (error) {
       console.log({ error });
