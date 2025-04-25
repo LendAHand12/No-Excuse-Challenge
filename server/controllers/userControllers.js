@@ -1423,8 +1423,9 @@ const adminDeleteUser = asyncHandler(async (req, res) => {
         await deleteTreeOfUserWithTier(user, tierIndex);
         await pushChildrent1ToUp(treeUser, parentTree, tierIndex);
       }
+      await replaceRefId(treeUser._id);
     }
-    await replaceRefId(treeUser._id);
+    
     await addDeleteUserToData(user, oldParents);
     res.json({
       message: "Delete user successfull",
