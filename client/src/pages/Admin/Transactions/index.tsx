@@ -149,7 +149,7 @@ const AdminTransactionsPage = () => {
             </button>
           ))}
         </div>
-        <div className="relative overflow-x-auto p-10">
+        <div className="relative overflow-x-auto py-10">
           <div className="flex items-center justify-between pb-4 bg-white">
             <div className="flex items-center gap-2">
               <div>

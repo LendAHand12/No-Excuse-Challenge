@@ -994,6 +994,7 @@ const getPaymentDetail = asyncHandler(async (req, res) => {
       });
     } else if (trans.type === "DIRECTHOLD" || trans.type === "REFERRALHOLD") {
       const userRef = await User.findById(trans.userId_to);
+      const refundTrans = await Refund.findOne({transId: trans._id});
       res.json({
         _id: trans._id,
         address_from: user.walletAddress,
@@ -1009,6 +1010,7 @@ const getPaymentDetail = asyncHandler(async (req, res) => {
         userCountPay: trans.userCountPay,
         createdAt: trans.createdAt,
         isHoldRefund: trans.isHoldRefund,
+        isPaid: refundTrans ? true : false
       });
     }
   } else {

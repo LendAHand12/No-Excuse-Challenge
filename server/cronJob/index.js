@@ -4,7 +4,10 @@ import moment from "moment";
 import User from "../models/userModel.js";
 import sendMail from "../utils/sendMail.js";
 import { sendMailUpdateLayerForAdmin } from "../utils/sendMailCustom.js";
-import { getCountAllChildren, getCountIncome } from "../controllers/userControllers.js";
+import {
+  getCountAllChildren,
+  getCountIncome,
+} from "../controllers/userControllers.js";
 import { findRootLayer, getUserClosestToNow } from "../utils/methods.js";
 import Tree from "../models/treeModel.js";
 import Transaction from "../models/transactionModel.js";
@@ -12,7 +15,12 @@ import Honor from "../models/honorModel.js";
 
 export const deleteUser24hUnPay = asyncHandler(async () => {
   const listUser = await User.find({
-    $and: [{ tier: 1 }, { countPay: 0 }, { isAdmin: false }, { status: { $ne: "DELETED" } }],
+    $and: [
+      { tier: 1 },
+      { countPay: 0 },
+      { isAdmin: false },
+      { status: { $ne: "DELETED" } },
+    ],
   });
   for (let u of listUser) {
     const treeOfUser = await Tree.findOne({ userId: u._id });
@@ -93,7 +101,7 @@ export const countLayerToData = asyncHandler(async () => {
       }
     }
   }
-  // await sendMailUpdateLayerForAdmin(result);
+  await sendMailUpdateLayerForAdmin(result);
   console.log("updated layer");
 });
 
@@ -126,11 +134,13 @@ export const areArraysEqual = (arr1, arr2) => {
 export const distributionHewe = asyncHandler(async () => {
   const listUser = await User.find({
     $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }, { countPay: 13 }],
-  }).select("userId totalHewe availableHewe hewePerDay claimedHewe currentLayer");
+  }).select(
+    "userId totalHewe availableHewe hewePerDay claimedHewe currentLayer"
+  );
 
   for (let u of listUser) {
     try {
-      if(u.currentLayer[0] >= 4) {
+      if (u.currentLayer[0] >= 4) {
         u.availableHewe = u.availableHewe + u.totalHewe;
         u.totalHewe = 0;
       } else if (u.totalHewe > u.claimedHewe) {
@@ -155,73 +165,31 @@ export const rankingCalc = asyncHandler(async () => {
 
   for (let u of listUser) {
     try {
-      if (u.ranking === 0) {
-        const treeOfUser = await Tree.findOne({ userId: u._id, tier: 1 });
-        let refChild = await Tree.find({ refId: treeOfUser._id, tier: 1 });
-        let refLength = 0;
-        for (let child of refChild) {
-          let childData = await User.findById(child.userId);
-          if (childData.status === "APPROVED" && childData.countPay === 13) {
-            refLength += 1;
-          }
+      const treeOfUser = await Tree.findOne({ userId: u._id, tier: 1 });
+      let refChild = await Tree.find({ refId: treeOfUser._id, tier: 1 });
+      let refLength = 0;
+      for (let child of refChild) {
+        let childData = await User.findById(child.userId);
+        if (childData.status === "APPROVED" && childData.countPay === 13) {
+          refLength += 1;
         }
+      }
 
-        if (refLength >= 2) {
-          const checkInHonor = await Honor.findOne({ userId: u._id });
-          if (!checkInHonor) {
-            let currentDay = moment();
-            const diffDays = currentDay.diff(u.createdAt, "days");
-            if (diffDays < 15) {
-              u.availableUsdt = u.availableUsdt + 10;
-              u.bonusRef = true;
-              await Honor.create({
-                userId: u._id,
-              });
-            }
+      if (refLength >= 2) {
+        const checkInHonor = await Honor.findOne({ userId: u._id });
+        if (!checkInHonor) {
+          let currentDay = moment();
+          const diffDays = currentDay.diff(u.createdAt, "days");
+          if (diffDays < 15) {
+            u.availableUsdt = u.availableUsdt + 10;
+            u.bonusRef = true;
+            await Honor.create({
+              userId: u._id,
+            });
           }
-          u.ranking = 1;
-          u.tier1Time = new Date();
         }
-      } else if (u.ranking === 1) {
-        if (u.countChild > 30) {
-          u.ranking = 2;
-          u.tier2Time = new Date();
-        }
-      } else if (u.ranking === 2) {
-        if (u.countChild > 155) {
-          u.ranking = 3;
-          u.tier3Time = new Date();
-        }
-      } else if (u.ranking === 3) {
-        if (u.countChild > 780) {
-          u.ranking = 4;
-          u.tier4Time = new Date();
-        }
-      } else if (u.ranking === 4) {
-        if (u.countChild > 3905) {
-          u.ranking = 5;
-          u.tier5Time = new Date();
-        }
-      } else if (u.ranking === 5) {
-        if (u.countChild > 19530) {
-          u.ranking = 6;
-          u.tier6Time = new Date();
-        }
-      } else if (u.ranking === 6) {
-        if (u.countChild > 89843) {
-          u.ranking = 7;
-          u.tier7Time = new Date();
-        }
-      } else if (u.ranking === 7) {
-        if (u.countChild > 441406) {
-          u.ranking = 8;
-          u.tier8Time = new Date();
-        }
-      } else if (u.ranking === 8) {
-        if (u.countChild > 2199219) {
-          u.ranking = 9;
-          u.tier9Time = new Date();
-        }
+        u.ranking = 1;
+        u.tier1Time = new Date();
       }
 
       await u.save();

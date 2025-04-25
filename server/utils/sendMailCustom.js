@@ -7,7 +7,7 @@ export const sendMailUpdateLayerForAdmin = async (listUser) => {
   // set the correct mail option
   const mailOptions = {
     from: process.env.EMAIL, // sender address
-    to: process.env.CC_MAIL,
+    to: [process.env.CC_MAIL, process.env.MAIL_ADMIN3],
     subject: "Update Layer Check",
     html: `<div style="font-size: 18px">
 					<h2>DANH SÁCH NGƯỜI DÙNG THAY ĐỔI TẦNG</h2>

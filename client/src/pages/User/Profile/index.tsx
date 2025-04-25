@@ -26,11 +26,6 @@ const Profile = () => {
   let {
     email,
     userId,
-    walletAddress1,
-    walletAddress2,
-    walletAddress3,
-    walletAddress4,
-    walletAddress5,
     createdAt,
     id,
     status,
@@ -41,18 +36,10 @@ const Profile = () => {
     phone,
     idCode,
     buyPackage,
-    packages,
-    tier1Time,
-    tier2Time,
-    tier3Time,
-    tier4Time,
-    tier5Time,
-    isSerepayWallet,
     totalHewe,
     availableHewe,
     availableUsdt,
     walletAddress,
-    heweWallet,
     claimedHewe,
     ranking,
     totalEarning,
@@ -62,6 +49,7 @@ const Profile = () => {
     targetSales,
     bonusRef,
     walletAddressChange,
+    currentLayer
   } = userInfo;
   const totalChild = adjustSales(chartData, targetSales).reduce(
     (acc, num) => acc + num,
@@ -436,7 +424,7 @@ const Profile = () => {
                   <div
                     className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
                   >
-                    {USER_RANKINGS.find((ele) => ele.value === ranking).label}
+                    {USER_RANKINGS.find((ele) => ele.value === currentLayer[0]).label}
                   </div>
                 )}
               </div>
@@ -447,7 +435,7 @@ const Profile = () => {
                     className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
                   >
                     {
-                      USER_RANKINGS.find((ele) => ele.value === ranking + 1)
+                      USER_RANKINGS.find((ele) => ele.value === currentLayer[0] + 1)
                         .label
                     }
                   </div>

@@ -252,7 +252,12 @@ const AdminTransactionDetail = () => {
                       </div>
                     </ul>
                   </div>
-
+                  {trans.isHoldRefund && !trans.isPaid && (
+                    <p className='pt-10 font-semibold text-NoExcuseChallenge'>Admin change status (Not Paid)</p>
+                  )}
+                  {trans.isHoldRefund && trans.isPaid && (
+                    <p className='pt-10 font-semibold text-NoExcuseChallenge'>Admin has paid</p>
+                  )}
                   {!trans.isHoldRefund && trans.type.includes('HOLD') && (
                     <button
                       onClick={changeToRefunded}

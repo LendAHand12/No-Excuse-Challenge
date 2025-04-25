@@ -968,7 +968,7 @@ const UserProfile = () => {
                           >
                             {
                               USER_RANKINGS.find(
-                                (ele) => ele.value === data.ranking,
+                                (ele) => ele.value === data.currentLayer[0],
                               ).label
                             }
                           </div>

@@ -43,8 +43,6 @@ const runCronjob = asyncHandler(async (req, res) => {
     throw new Error("Cronjob not found");
   }
 
-  console.log({ cron });
-
   await Cronjob.create({
     userId: user.id,
     title: cronjob.title,
