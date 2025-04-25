@@ -133,10 +133,9 @@ export const distributionHewe = asyncHandler(async () => {
       if(u.currentLayer[0] >= 4) {
         u.availableHewe = u.availableHewe + u.totalHewe;
         u.totalHewe = 0;
-      } 
-      // else if (u.totalHewe > u.claimedHewe) {
-      //   u.availableHewe = u.availableHewe + u.hewePerDay;
-      // }
+      } else if (u.totalHewe > u.claimedHewe) {
+        u.availableHewe = u.availableHewe + u.hewePerDay;
+      }
       await u.save();
     } catch (error) {
       console.log({ error });

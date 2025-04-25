@@ -1424,8 +1424,8 @@ const adminDeleteUser = asyncHandler(async (req, res) => {
         await pushChildrent1ToUp(treeUser, parentTree, tierIndex);
       }
     }
-    // await replaceRefId(user._id);
-    // await addDeleteUserToData(user, oldParents);
+    await replaceRefId(treeUser._id);
+    await addDeleteUserToData(user, oldParents);
     res.json({
       message: "Delete user successfull",
     });
@@ -1465,8 +1465,8 @@ const pushChildrent1ToUp = async (userTree, parentTree) => {
   await parentTree.save();
 };
 
-const replaceRefId = async (deleteUserId) => {
-  const listTreeHaveRefId = await Tree.find({ refId: deleteUserId });
+const replaceRefId = async (deleteUserTreeId) => {
+  const listTreeHaveRefId = await Tree.find({ refId: deleteUserTreeId });
 
   for (let treeUser of listTreeHaveRefId) {
     treeUser.refId = treeUser.parentId;
