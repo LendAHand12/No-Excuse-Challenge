@@ -542,7 +542,7 @@ const AdminUserPages = () => {
                           </button>
                         )}
 
-                      {userInfo?.permissions
+                      {ele.status !== "DELETED" && userInfo?.permissions
                         .find((p) => p.page.pageName === 'admin-users-details')
                         ?.actions.includes('read') && (
                         <button
@@ -560,7 +560,7 @@ const AdminUserPages = () => {
                         </button>
                       )}
 
-                      {userInfo?.permissions
+                      {ele.status !== "DELETED" && userInfo?.permissions
                         .find((p) => p.page.pageName === 'admin-system')
                         ?.actions.includes('read') && (
                         <button
@@ -660,10 +660,10 @@ const AdminUserPages = () => {
             <ul className="inline-flex items-center -space-x-px">
               <li>
                 <button
-                  disabled={objectFilter.pageNumber === 1}
-                  onClick={() => handleChangePage(objectFilter.pageNumber - 1)}
+                  disabled={parseInt(objectFilter.pageNumber) === 1}
+                  onClick={() => handleChangePage(parseInt(objectFilter.pageNumber) - 1)}
                   className={`block px-3 py-2 ml-0 leading-tight text-gray-500 ${
-                    objectFilter.pageNumber === 1 ? 'bg-gray-100' : 'bg-white'
+                    parseInt(objectFilter.pageNumber) === 1 ? 'bg-gray-100' : 'bg-white'
                   } border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700`}
                 >
                   <span className="sr-only">Previous</span>
@@ -684,10 +684,10 @@ const AdminUserPages = () => {
               </li>
               <li>
                 <button
-                  disabled={objectFilter.pageNumber === totalPage}
-                  onClick={() => handleChangePage(objectFilter.pageNumber + 1)}
+                  disabled={parseInt(objectFilter.pageNumber) === totalPage}
+                  onClick={() => handleChangePage(parseInt(objectFilter.pageNumber) + 1)}
                   className={`block px-3 py-2 leading-tight text-gray-500 ${
-                    objectFilter.pageNumber === totalPage
+                    parseInt(objectFilter.pageNumber) === totalPage
                       ? 'bg-gray-100'
                       : 'bg-white'
                   } border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700`}

@@ -49,7 +49,7 @@ const Profile = () => {
     targetSales,
     bonusRef,
     walletAddressChange,
-    currentLayer
+    currentLayer,
   } = userInfo;
   const totalChild = adjustSales(chartData, targetSales).reduce(
     (acc, num) => acc + num,
@@ -198,6 +198,13 @@ const Profile = () => {
     setShowModal(false);
   };
 
+  const findNextRank = (level) => {
+    const currentRankIndex = USER_RANKINGS.findIndex(
+      (ele) => level <= ele.value,
+    );
+    return USER_RANKINGS[currentRankIndex + 1]?.label || "PIONEER";
+  };
+
   return (
     <DefaultLayout>
       <ToastContainer />
@@ -342,7 +349,11 @@ const Profile = () => {
             <input
               className="bg-black rounded-xl text-NoExcuseChallenge p-2 flex-1"
               readOnly
-              value={totalHewe > 0 ? totalHewe  - claimedHewe - availableHewe : availableHewe}
+              value={
+                totalHewe > 0
+                  ? totalHewe - claimedHewe - availableHewe
+                  : availableHewe
+              }
             />
           </div>
           <button
@@ -424,7 +435,10 @@ const Profile = () => {
                   <div
                     className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
                   >
-                    {USER_RANKINGS.find((ele) => ele.value === currentLayer[0]).label}
+                    {
+                      USER_RANKINGS.find((ele) => currentLayer[0] <= ele.value)
+                        .label
+                    }
                   </div>
                 )}
               </div>
@@ -434,10 +448,7 @@ const Profile = () => {
                   <div
                     className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
                   >
-                    {
-                      USER_RANKINGS.find((ele) => ele.value === currentLayer[0] + 1)
-                        .label
-                    }
+                    {findNextRank(currentLayer[0])}
                   </div>
                 )}
               </div>
