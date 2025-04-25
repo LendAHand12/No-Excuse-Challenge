@@ -202,7 +202,11 @@ const Profile = () => {
     const currentRankIndex = USER_RANKINGS.findIndex(
       (ele) => level <= ele.value,
     );
-    return USER_RANKINGS[currentRankIndex + 1]?.label || "PIONEER";
+    return USER_RANKINGS[currentRankIndex + 1]?.label || 'PIONEER';
+  };
+
+  const renderRank = (level) => {
+    return USER_RANKINGS.find((ele) => level <= ele.value).label;
   };
 
   return (
@@ -435,10 +439,7 @@ const Profile = () => {
                   <div
                     className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
                   >
-                    {
-                      USER_RANKINGS.find((ele) => currentLayer[0] <= ele.value)
-                        .label
-                    }
+                    {renderRank(currentLayer[0] ? currentLayer[0] : 0)}
                   </div>
                 )}
               </div>
@@ -448,7 +449,7 @@ const Profile = () => {
                   <div
                     className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
                   >
-                    {findNextRank(currentLayer[0])}
+                    {findNextRank(currentLayer[0] ? currentLayer[0] : 0)}
                   </div>
                 )}
               </div>

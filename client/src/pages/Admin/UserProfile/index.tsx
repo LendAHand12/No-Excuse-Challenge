@@ -386,6 +386,10 @@ const UserProfile = () => {
     [currentCloseLah],
   );
 
+  const renderRank = (level) => {
+    return USER_RANKINGS.find((ele) => level <= ele.value)?.label;
+  };
+
   return (
     <DefaultLayout>
       <ToastContainer />
@@ -966,11 +970,9 @@ const UserProfile = () => {
                           <div
                             className={`p-2 max-w-fit text-sm bg-green-600 text-white rounded-[50px]`}
                           >
-                            {
-                              USER_RANKINGS.find(
-                                (ele) => data.currentLayer[0] <= ele.value,
-                              ).label
-                            }
+                            {renderRank(
+                              data.currentLayer[0] ? data.currentLayer[0] : 0,
+                            )}
                           </div>
                         )}
                       </div>
