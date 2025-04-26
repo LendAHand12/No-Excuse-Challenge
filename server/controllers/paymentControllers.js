@@ -487,13 +487,14 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
 
       const ancestorsData = await findAncestors(
         treeOfRefUser._id,
-        user.paymentStep === 1 && user.tier === 1 ? 9 : 10,
+        // user.paymentStep === 1 && user.tier === 1 ? 9 : 10,
+        9,
         user.tier + 1 - user.paymentStep
       );
 
-      if (user.paymentStep === 1 && user.tier === 1) {
+      // if (user.paymentStep === 1 && user.tier === 1) {
         ancestorsData.unshift(treeOfRefUser);
-      }
+      // }
       let ancestors = ancestorsData.map((data, index) => {
         if (index === 0) {
           data.isFirst = true;
