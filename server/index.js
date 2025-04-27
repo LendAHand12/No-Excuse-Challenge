@@ -46,8 +46,6 @@ if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 // connect to the mongoDB database
 connectDB();
 
-// await convertOldData();
-
 app.use(express.json({ limit: "50mb", extended: true }));
 app.use(express.urlencoded({ extended: true, limit: "2gb" }));
 app.use(cors()); // to avoid CORS errors

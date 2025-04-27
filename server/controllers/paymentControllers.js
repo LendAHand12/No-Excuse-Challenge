@@ -8,7 +8,7 @@ import {
   sendMailReceiveCommission,
   sendMailRefDc,
 } from "../utils/sendMailCustom.js";
-import { getRefParentUser, findNextUser } from "../utils/methods.js";
+import { getRefParentUser, findNextUser, findHighestIndexOfLevel } from "../utils/methods.js";
 import Wallet from "../models/walletModel.js";
 import Tree from "../models/treeModel.js";
 import { getPriceHewe } from "../utils/getPriceHewe.js";
@@ -423,6 +423,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
         directCommissionUser = refUser;
       } else if (user.paymentStep === 1 && user.tier === 1) {
         const treeUserTier1 = await Tree.findOne({ userId: user._id, tier: 1 });
+        console.log({ treeUserTier1 });
         const treeOfUserRefTier1 = await Tree.findById(treeUserTier1.refId);
         directCommissionUser = await User.findById(treeOfUserRefTier1.userId);
 
@@ -493,7 +494,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
       );
 
       // if (user.paymentStep === 1 && user.tier === 1) {
-        ancestorsData.unshift(treeOfRefUser);
+      ancestorsData.unshift(treeOfRefUser);
       // }
       let ancestors = ancestorsData.map((data, index) => {
         if (index === 0) {
@@ -726,21 +727,6 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
           userReceive.availableUsdt = userReceive.availableUsdt + trans.amount;
           await userReceive.save();
         }
-
-        // if (trans.type === "DIRECT" || trans.type === "REFERRAL") {
-        //   let userReceive = await User.findOne({ _id: trans.userId_to });
-        //   if (trans.type === "REFERRAL") {
-        //     // await sendMailRefDc({
-        //     //   senderName: user.userId,
-        //     //   email: userReceive.email,
-        //     // });
-        //   } else {
-        //     // await sendMailReceiveCommission({
-        //     //   senderName: user.userId,
-        //     //   email: userReceive.email,
-        //     // });
-        //   }
-        // }
       }
 
       let message = "";
@@ -783,6 +769,7 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
           tier: user.tier + 1,
         });
 
+        const highestIndexOfLevel = await findHighestIndexOfLevel(user.tier + 1);
         const treeOfUserTier2 = await Tree.create({
           userName: user.userId,
           userId: user._id,
@@ -790,6 +777,7 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
           refId: newParent._id,
           tier: user.tier + 1,
           children: [],
+          indexOnLevel: highestIndexOfLevel + 1,
         });
 
         let childs = [...newParent.children];
@@ -995,7 +983,7 @@ const getPaymentDetail = asyncHandler(async (req, res) => {
       });
     } else if (trans.type === "DIRECTHOLD" || trans.type === "REFERRALHOLD") {
       const userRef = await User.findById(trans.userId_to);
-      const refundTrans = await Refund.findOne({transId: trans._id});
+      const refundTrans = await Refund.findOne({ transId: trans._id });
       res.json({
         _id: trans._id,
         address_from: user.walletAddress,
@@ -1011,7 +999,7 @@ const getPaymentDetail = asyncHandler(async (req, res) => {
         userCountPay: trans.userCountPay,
         createdAt: trans.createdAt,
         isHoldRefund: trans.isHoldRefund,
-        isPaid: refundTrans ? true : false
+        isPaid: refundTrans ? true : false,
       });
     }
   } else {
@@ -1028,7 +1016,7 @@ const checkCanRefundPayment = asyncHandler(async (req, res) => {
     const userReceive = await User.findById(userId_to);
     // const isSerepayWallet = await checkSerepayWallet(userReceive.walletAddress);
     if (userReceive) {
-      const treeOfReceiveUser = await Tree.findOne({userId: userId_to, tier: 1 });
+      const treeOfReceiveUser = await Tree.findOne({ userId: userId_to, tier: 1 });
       const listRefOfReceiver = await Tree.find({
         refId: treeOfReceiveUser._id,
       });
@@ -1038,8 +1026,7 @@ const checkCanRefundPayment = asyncHandler(async (req, res) => {
       } else if (userReceive.closeLah) {
         res.status(404);
         throw new Error(`User is being blocked from trading`);
-      }
-      else if (userReceive.countPay - 1 < userCountPay) {
+      } else if (userReceive.countPay - 1 < userCountPay) {
         res.status(404);
         throw new Error(
           userReceive.countPay === 0
@@ -1050,8 +1037,8 @@ const checkCanRefundPayment = asyncHandler(async (req, res) => {
         );
       } else if (trans.type === "REFERRALHOLD" && userReceive.errLahCode === "OVER30") {
         throw new Error(`User has not had 2 child within 45 days`);
-      } else if(treeOfReceiveUser.children.length === 2 && listRefOfReceiver.length < 2) {
-          throw new Error(`Payment blocked because there are not enough 2 redirect user`)
+      } else if (treeOfReceiveUser.children.length === 2 && listRefOfReceiver.length < 2) {
+        throw new Error(`Payment blocked because there are not enough 2 redirect user`);
       } else {
         res.json({
           message: "User is OK for a refund",

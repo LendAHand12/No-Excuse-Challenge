@@ -91,6 +91,11 @@ const AdminSystemPage = () => {
             <span>
               ({totalChild} - {income})
             </span>
+            {indexOnLevel && (
+              <div className="mt-2 bg-white border border-gray-900 rounded-full text-black w-8 h-8 flex justify-center items-center">
+                {indexOnLevel}
+              </div>
+            )}
           </div>
         </div>
       );

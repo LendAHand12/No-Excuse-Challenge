@@ -4,6 +4,7 @@ import Tree from "../models/treeModel.js";
 import User from "../models/userModel.js";
 import axios from "axios";
 import ADMIN_ID from "../constants/AdminId.js";
+import { areArraysEqual } from "../cronJob/index.js";
 
 export const getParentUser = async (userId, tier) => {
   const tree = await Tree.findOne({ userId, tier });
@@ -38,44 +39,25 @@ export const getRefParentUser = async (userId, tier) => {
 };
 
 export const findNextUser = async (tier) => {
-  const nextUserInDB = await NextUserTier.findOne({ tier });
-  if (nextUserInDB) return nextUserInDB.userId;
+  await countLayerOfAdmin();
   const admin = await User.findById("6494e9101e2f152a593b66f2");
   if (!admin) throw "Unknow admin";
   const adminTree = await Tree.findOne({ userId: admin._id, tier });
-  const listUserLevel = await findUsersAtLevel(
-    adminTree._id,
-    admin.currentLayer[tier - 1],
-    2,
-    1
-  );
+  const listUserLevel = await findUsersAtLevel(adminTree._id, admin.currentLayer[tier - 1], 2, 1);
 
-  const sortedData = listUserLevel.sort(
-    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-  );
+  const sortedData = listUserLevel.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
   const itemWithMinLength = sortedData.reduce((minItem, currentItem) => {
-    return currentItem.children.length < minItem.children.length
-      ? currentItem
-      : minItem;
+    return currentItem.children.length < minItem.children.length ? currentItem : minItem;
   }, sortedData[0]);
-  return itemWithMinLength
-    ? itemWithMinLength.userId
-    : "6494e9101e2f152a593b66f2";
+  return itemWithMinLength ? itemWithMinLength.userId : "6494e9101e2f152a593b66f2";
 };
 
 export const findNextUserNotIncludeNextUserTier = async (tier) => {
   const admin = await User.findById("6494e9101e2f152a593b66f2");
   if (!admin) throw "Unknow admin";
-  const listUserLevel = await findUsersAtLevel(
-    admin._id,
-    admin.currentLayer[tier - 1],
-    2,
-    1
-  );
-  const sortedData = listUserLevel.sort(
-    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-  );
+  const listUserLevel = await findUsersAtLevel(admin._id, admin.currentLayer[tier - 1], 2, 1);
+  const sortedData = listUserLevel.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
   // for (let user of sortedData) {
   //   console.log({
   //     userName: user.userName,
@@ -85,13 +67,9 @@ export const findNextUserNotIncludeNextUserTier = async (tier) => {
   // }
 
   const itemWithMinLength = sortedData.reduce((minItem, currentItem) => {
-    return currentItem.children.length < minItem.children.length
-      ? currentItem
-      : minItem;
+    return currentItem.children.length < minItem.children.length ? currentItem : minItem;
   }, sortedData[0]);
-  return itemWithMinLength
-    ? itemWithMinLength.userId
-    : "6494e9101e2f152a593b66f2";
+  return itemWithMinLength ? itemWithMinLength.userId : "6494e9101e2f152a593b66f2";
 };
 
 // export const findUsersAtLevel = async (
@@ -127,13 +105,7 @@ export const findNextUserNotIncludeNextUserTier = async (tier) => {
 //   return usersAtLevel;
 // };
 
-
-export const findUsersAtLevel = async (
-  rootTreeId,
-  targetLevel,
-  tier,
-  currentLevel = 1
-) => {
+export const findUsersAtLevel = async (rootTreeId, targetLevel, tier, currentLevel = 1) => {
   if (currentLevel > targetLevel) {
     return [];
   }
@@ -155,18 +127,12 @@ export const findUsersAtLevel = async (
   let treesAtTargetLevel = [];
 
   for (const childId of rootTree.children) {
-    const treesFromChild = await findUsersAtLevel(
-      childId,
-      targetLevel,
-      tier,
-      currentLevel + 1
-    );
+    const treesFromChild = await findUsersAtLevel(childId, targetLevel, tier, currentLevel + 1);
     treesAtTargetLevel = treesAtTargetLevel.concat(treesFromChild);
   }
 
   return treesAtTargetLevel;
 };
-
 
 export const findRootLayer = async (id, tier) => {
   // Tìm người dùng root đầu tiên (có parentId null)
@@ -340,15 +306,9 @@ export const findHighestLevelUsers = async (tier) => {
 };
 
 export const findHighestIndexOfLevel = async (tier) => {
-  const highestLevelUsers = await findHighestLevelUsers(tier);
-  if (highestLevelUsers.length === 0) {
-    return 1;
-  } else {
-    const maxIndexOfLevel = Math.max(
-      ...highestLevelUsers.map((o) => o.indexOnLevel)
-    );
-    return maxIndexOfLevel + 1;
-  }
+  const lastUserTier = await Tree.findOne({ tier }).sort({ createdAt: -1 });
+
+  return lastUserTier.indexOnLevel;
 };
 
 export const findNextUserByIndex = async (tier) => {
@@ -375,9 +335,7 @@ export const mergeIntoThreeGroups = (A) => {
   // Assign groups
   const group1 = sorted[0].countChild;
   const group2 = sorted[1]?.countChild || 0;
-  const group3 = sorted
-    .slice(2)
-    .reduce((sum, item) => sum + item.countChild, 0);
+  const group3 = sorted.slice(2).reduce((sum, item) => sum + item.countChild, 0);
 
   return [group1, group2, group3];
 };
@@ -412,4 +370,22 @@ export const findNextReferrer = async (referrerId) => {
   }
 
   return null; // Không tìm thấy vị trí hợp lệ
+};
+
+export const countLayerOfAdmin = async () => {
+  let newLayer = [];
+  const u = await User.findById("6494e9101e2f152a593b66f2");
+  for (let i = 1; i <= u.tier; i++) {
+    const layer = await findRootLayer(u._id, i);
+    newLayer.push(layer);
+  }
+
+  if (areArraysEqual(newLayer, u.currentLayer)) {
+    u.oldLayer = u.currentLayer;
+    await u.save();
+  } else {
+    u.oldLayer = u.currentLayer;
+    u.currentLayer = newLayer;
+    await u.save();
+  }
 };
