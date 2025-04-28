@@ -273,8 +273,8 @@ const AdminSystemPage = () => {
                   label={
                     <StyledNode
                       layer={userInfo.currentLayer}
-                      income={userInfo.income}
-                      totalChild={userInfo.totalChild}
+                      income={treeData.income}
+                      totalChild={treeData.totalChild}
                     >
                       {treeData.label}
                     </StyledNode>
