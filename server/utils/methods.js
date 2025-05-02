@@ -5,6 +5,7 @@ import User from "../models/userModel.js";
 import axios from "axios";
 import ADMIN_ID from "../constants/AdminId.js";
 import { areArraysEqual } from "../cronJob/index.js";
+import jwt from "jsonwebtoken";
 
 export const getParentUser = async (userId, tier) => {
   const tree = await Tree.findOne({ userId, tier });
@@ -388,4 +389,15 @@ export const countLayerOfAdmin = async () => {
     u.currentLayer = newLayer;
     await u.save();
   }
+};
+
+export const createCallbackToken = (userId) => {
+  const payload = {
+    userId,
+    purpose: "kyc",
+  };
+
+  return jwt.sign(payload, process.env.JWT_REFRESH_TOKEN_SECRET, {
+    expiresIn: "10m", // thời gian hết hạn token
+  });
 };
