@@ -5,34 +5,40 @@ import Config from "../models/configModel.js";
 import User from "../models/userModel.js";
 
 const getDreamPool = expressAsyncHandler(async (req, res) => {
+  const { tier } = req.query;
+
   const count = await Transaction.countDocuments({
     type: "PIG",
     status: "SUCCESS",
+    tier: parseInt(tier),
   });
 
   const allBreakers = await Honor.find({})
     .populate("userId", "_id userId email")
     .sort("-createdAt");
 
-  const pigConfig = await Config.findOne({ label: "PIG" });
+  const pigConfig = await Config.findOne({ label: `PIG${tier}` });
 
   res.json({
-    dreampool: count * 5 + parseInt(pigConfig.value),
+    dreampool: count * process.env[`DREAMPOOL_AMOUNT_TIER${tier}`] + parseInt(pigConfig.value),
     allBreakers,
+    dreampool_fee: process.env[`DREAMPOOL_AMOUNT_TIER${tier}`],
   });
 });
 
 const updateDreamPool = expressAsyncHandler(async (req, res) => {
-  const { totalDreampool, newHonors } = req.body;
-  const pigConfig = await Config.findOne({ label: "PIG" });
+  const { totalDreampool, newHonors, tier } = req.body;
+  const pigConfig = await Config.findOne({ label: `PIG${tier}` });
 
   if (totalDreampool !== pigConfig.value) {
     const count = await Transaction.countDocuments({
       type: "PIG",
       status: "SUCCESS",
+      tier,
     });
 
-    const newPigConfigNumber = parseInt(totalDreampool) - count * 5;
+    const newPigConfigNumber =
+      parseInt(totalDreampool) - count * process.env[`DREAMPOOL_AMOUNT_TIER${tier}`];
     pigConfig.value = newPigConfigNumber;
   }
 
@@ -116,9 +122,4 @@ const getAllDreampoolForExport = expressAsyncHandler(async (req, res) => {
   res.json({ totalCount, result });
 });
 
-export {
-  getDreamPool,
-  updateDreamPool,
-  getUserForUpdateDreampool,
-  getAllDreampoolForExport,
-};
+export { getDreamPool, updateDreamPool, getUserForUpdateDreampool, getAllDreampoolForExport };
