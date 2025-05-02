@@ -8,7 +8,7 @@ import { sendTelegramMessage } from "../utils/sendTelegram.js";
 import { removeAccents } from "../utils/methods.js";
 import mongoose from "mongoose";
 
-const processingHeweUserIds = [];
+var processingHeweUserIds = [];
 
 const claimHewe = asyncHandler(async (req, res) => {
   const user = req.user;
@@ -36,8 +36,6 @@ const claimHewe = asyncHandler(async (req, res) => {
         receiverAddress: user.walletAddress,
       });
 
-      console.log({ receipt });
-
       const claimed = await Claim.create({
         userId: user.id,
         amount: user.availableHewe,
@@ -49,7 +47,7 @@ const claimHewe = asyncHandler(async (req, res) => {
       user.availableHewe = 0;
       await user.save();
 
-      const index = processingHeweUserIds.indexOf(user._id);
+      const index = processingHeweUserIds.indexOf(user.id);
       if (index !== -1) {
         processingHeweUserIds.splice(index, 1);
       }
@@ -74,7 +72,7 @@ const claimHewe = asyncHandler(async (req, res) => {
   }
 });
 
-const processingUserIds = [];
+var processingUserIds = [];
 
 const claimUsdt = asyncHandler(async (req, res) => {
   const user = req.user;
@@ -113,7 +111,7 @@ const claimUsdt = asyncHandler(async (req, res) => {
         user.availableUsdt = 0;
         await user.save();
 
-        const index = processingUserIds.indexOf(user._id);
+        const index = processingUserIds.indexOf(user.id);
         if (index !== -1) {
           processingUserIds.splice(index, 1);
         }
@@ -340,4 +338,20 @@ const getAllClaimsOfUser = asyncHandler(async (req, res) => {
   });
 });
 
-export { claimHewe, claimUsdt, getAllClaims, getAllClaimsForExport, getAllClaimsOfUser };
+const resetProcessing = asyncHandler(async (req, res) => {
+  processingHeweUserIds = [];
+  processingUserIds = [];
+
+  res.json({
+    message: "Reset black list successfully",
+  });
+});
+
+export {
+  claimHewe,
+  claimUsdt,
+  getAllClaims,
+  getAllClaimsForExport,
+  getAllClaimsOfUser,
+  resetProcessing,
+};

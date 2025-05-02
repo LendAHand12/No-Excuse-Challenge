@@ -99,8 +99,8 @@ const User = {
   removeLastUserInTier: (body) => {
     return API.post(`${URL_API_USER}/removeLastUserInTier`, body);
   },
-  getDreamPool: () => {
-    return API.get(`${URL_API_DREAMPOOL}`);
+  getDreamPool: ({ tier }) => {
+    return API.get(`${URL_API_DREAMPOOL}?tier=${tier}`);
   },
   getNotHonorUsers: () => {
     return API.get(`${URL_API_DREAMPOOL}/notHonors`);

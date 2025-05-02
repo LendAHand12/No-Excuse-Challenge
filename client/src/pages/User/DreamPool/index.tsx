@@ -24,24 +24,10 @@ const DreamPoolPage: React.FC = () => {
   const [notHonors, setNotHonors] = useState([]);
   const [newHonors, setNewHonors] = useState([]);
   const [refresh, setRefresh] = useState(false);
+  const [currentTier, setCurrentTier] = useState(1);
+  const [dreampoolFee, setDreampoolFee] = useState(0);
 
   useEffect(() => {
-    (async () => {
-      await User.getDreamPool()
-        .then((response) => {
-          setDreamPool(response.data.dreampool);
-          setIceBreakers(response.data.allBreakers);
-          setLoading(false);
-        })
-        .catch((error) => {
-          let message =
-            error.response && error.response.data.message
-              ? error.response.data.message
-              : error.message;
-          toast.error(t(message));
-        });
-    })();
-
     (async () => {
       userInfo.isAdmin &&
         (await User.getNotHonorUsers()
@@ -59,8 +45,31 @@ const DreamPoolPage: React.FC = () => {
     })();
   }, [refresh]);
 
+  useEffect(() => {
+    (async () => {
+      await User.getDreamPool({ tier: currentTier })
+        .then((response) => {
+          setDreamPool(response.data.dreampool);
+          setDreampoolFee(response.data.dreampool_fee);
+          setIceBreakers(response.data.allBreakers);
+          setLoading(false);
+        })
+        .catch((error) => {
+          let message =
+            error.response && error.response.data.message
+              ? error.response.data.message
+              : error.message;
+          toast.error(t(message));
+        });
+    })();
+  }, [refresh, currentTier]);
+
   const handleUpdateDreampool = useCallback(async () => {
-    await User.updateDreamPool({ totalDreampool: dreamPool, newHonors })
+    await User.updateDreamPool({
+      totalDreampool: dreamPool,
+      newHonors,
+      tier: currentTier,
+    })
       .then((response) => {
         const { message } = response.data;
         toast.success(t(message));
@@ -74,7 +83,7 @@ const DreamPoolPage: React.FC = () => {
             : error.message;
         toast.error(t(message));
       });
-  }, [dreamPool, newHonors]);
+  }, [dreamPool, newHonors, currentTier]);
 
   const handleExportDreampool = async () => {
     navigate('/admin/dreampool/export');
@@ -122,21 +131,24 @@ const DreamPoolPage: React.FC = () => {
                   </svg>
                   <span className="sr-only">Close modal</span>
                 </button>
-                <div className="pt-10 mb-4">
-                  <p className="mb-4 text-gray-500 text-lg font-semibold">
-                    Please select a reward recipient
-                  </p>
-                  <Select
-                    options={notHonors.map((ele) => ({
-                      value: ele._id,
-                      label: ele.userId,
-                    }))}
-                    onChange={(e) => setNewHonors(e)}
-                    isMulti
-                    className="w-full mb-1 text-black rounded-xl focus:outline-none cursor-pointer"
-                  />
-                </div>
-                <div className="space-y-4">
+                {currentTier === 1 && (
+                  <div className="pt-10 mb-4">
+                    <p className="mb-4 text-gray-500 text-lg font-semibold">
+                      Please select a reward recipient
+                    </p>
+                    <Select
+                      options={notHonors.map((ele) => ({
+                        value: ele._id,
+                        label: ele.userId,
+                      }))}
+                      onChange={(e) => setNewHonors(e)}
+                      isMulti
+                      className="w-full mb-1 text-black rounded-xl focus:outline-none cursor-pointer"
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-4 pt-10">
                   <p className="mb-4 text-gray-500 text-lg font-semibold">
                     Please input new dreampool fund number
                   </p>
@@ -166,12 +178,27 @@ const DreamPoolPage: React.FC = () => {
         <h1 className="text-4xl font-bold mb-12 flex items-center justify-center gap-2 text-white relative z-10">
           <Sparkles className="text-yellow-300" /> DreamPool
         </h1>
+        <div className="grid grid-cols-3 md:grid-cols-5 mb-10 items-center gap-4">
+          {[...Array(5)].map((item, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentTier(i + 1)}
+              className={`flex justify-center items-center hover:underline font-medium ${
+                currentTier === i + 1
+                  ? 'bg-black text-NoExcuseChallenge border-NoExcuseChallenge'
+                  : 'text-gray-200'
+              } rounded-full py-4 px-8 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
+            >
+              {t('tier')} {i + 1}
+            </button>
+          ))}
+        </div>
         <div className="grid xl:grid-cols-3 gap-4">
           <div className="flex flex-col gap-4">
             <div className="relative flex items-center gap-2 text-xl text-white">
               <p>
-                DreamPool Fund <span className="text-sm italic">(5 USDT)</span>{' '}
-                :
+                DreamPool Fund{' '}
+                <span className="text-sm italic">({dreampoolFee} USDT)</span> :
               </p>
               {userInfo?.permissions
                 ?.find((p) => p.page.path === '/admin/dreampool')
@@ -202,17 +229,20 @@ const DreamPoolPage: React.FC = () => {
               </p>
             </div>
           </div>
-          <div className="flex flex-col gap-4">
-            <p className="text-xl text-white">
-              Ice Breakers <span className="text-sm italic">(10 USDT)</span> :
-            </p>
-            <div className="relative w-full sm:w-64">
-              <img src={FRAME_PIG} className="sm:w-64 h-full" />
-              <p className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-[#F4E096]">
-                {loading ? <Loading /> : `${iceBreakers.length * 10} USD`}
+          {currentTier === 1 && (
+            <div className="flex flex-col gap-4">
+              <p className="text-xl text-white">
+                Ice Breakers <span className="text-sm italic">(10 USDT)</span> :
               </p>
+              <div className="relative w-full sm:w-64">
+                <img src={FRAME_PIG} className="sm:w-64 h-full" />
+                <p className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-[#F4E096]">
+                  {loading ? <Loading /> : `${iceBreakers.length * 10} USD`}
+                </p>
+              </div>
             </div>
-          </div>
+          )}
+
           <div className="flex flex-col gap-4">
             <p className="text-xl text-NoExcuseChallenge">DreamPool Total :</p>
             <div className="relative w-full sm:w-64">
@@ -221,67 +251,75 @@ const DreamPoolPage: React.FC = () => {
                 {loading ? (
                   <Loading />
                 ) : (
-                  `${dreamPool - iceBreakers.length * 10} USD`
+                  `${
+                    currentTier === 1
+                      ? dreamPool - iceBreakers.length * 10
+                      : dreamPool
+                  } USD`
                 )}
               </p>
             </div>
           </div>
         </div>
-        <div className='flex justify-end mt-10'>
-          {userInfo?.permissions
-            ?.find((p) => p.page.path === '/admin/users')
-            ?.actions.includes('export') && (
-            <div>
-              <button
-                onClick={handleExportDreampool}
-                className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm rounded-md hover:opacity-70"
-              >
-                <svg
-                  fill="currentColor"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M8.71,7.71,11,5.41V15a1,1,0,0,0,2,0V5.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42l-4-4a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-4,4A1,1,0,1,0,8.71,7.71ZM21,14a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V15a1,1,0,0,0-2,0v4a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V15A1,1,0,0,0,21,14Z" />
-                </svg>
-                Export Data
-              </button>
+        {currentTier === 1 && (
+          <>
+            <div className="flex justify-end mt-10">
+              {userInfo?.permissions
+                ?.find((p) => p.page.path === '/admin/users')
+                ?.actions.includes('export') && (
+                <div>
+                  <button
+                    onClick={handleExportDreampool}
+                    className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm rounded-md hover:opacity-70"
+                  >
+                    <svg
+                      fill="currentColor"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M8.71,7.71,11,5.41V15a1,1,0,0,0,2,0V5.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42l-4-4a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-4,4A1,1,0,1,0,8.71,7.71ZM21,14a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V15a1,1,0,0,0-2,0v4a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V15A1,1,0,0,0,21,14Z" />
+                    </svg>
+                    Export Data
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <div className="bg-black py-10">
-          <table className="w-full bg-black text-left text-gray-300">
-            <thead className="text-lg text-gray-200 uppercase ">
-              <tr>
-                <th scope="col" className="px-6 py-3">
-                  UserName
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Email
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Time
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {iceBreakers.length > 0 &&
-                !loading &&
-                iceBreakers.map((ele) => (
-                  <tr className="border-b" key={ele._id}>
-                    <td className="px-6 py-4">{ele.userId.userId}</td>
-                    <td className="px-6 py-4">
-                      {shortenWalletAddress(ele.userId.email, 16)}
-                    </td>
-                    <td className="px-6 py-4">
-                      {new Date(ele.createdAt).toLocaleDateString('vi')}
-                    </td>
+            <div className="bg-black py-10">
+              <table className="w-full bg-black text-left text-gray-300">
+                <thead className="text-lg text-gray-200 uppercase ">
+                  <tr>
+                    <th scope="col" className="px-6 py-3">
+                      UserName
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      Email
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      Time
+                    </th>
                   </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody>
+                  {iceBreakers.length > 0 &&
+                    !loading &&
+                    iceBreakers.map((ele) => (
+                      <tr className="border-b" key={ele._id}>
+                        <td className="px-6 py-4">{ele.userId.userId}</td>
+                        <td className="px-6 py-4">
+                          {shortenWalletAddress(ele.userId.email, 16)}
+                        </td>
+                        <td className="px-6 py-4">
+                          {new Date(ele.createdAt).toLocaleDateString('vi')}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
     </DefaultLayout>
   );

@@ -3,7 +3,6 @@ const configSchema = mongoose.Schema(
   {
     label: {
       type: String,
-      enum: ["PIG", ""],
       default: "",
     },
     value: {
