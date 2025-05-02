@@ -771,7 +771,9 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
   const userRequest = req.user;
   let treeOfUser;
   let user;
-  treeOfUser = await Tree.findById(id).select("userId tier userName children countChild createdAt countChild income");
+  treeOfUser = await Tree.findById(id).select(
+    "userId tier userName children countChild createdAt countChild income"
+  );
   if (!treeOfUser) {
     user = await User.findOne({ _id: id }).select("userId createdAt");
     treeOfUser = await Tree.findOne({
@@ -980,12 +982,14 @@ const getUserProfile = asyncHandler(async (req, res) => {
 const getListChildOfUser = asyncHandler(async (req, res) => {
   let result = [];
 
-  const parent = await Tree.findOne({ userId: req.user.id, tier: 1 }).lean();
+  const parent = await Tree.findOne({ userId: req.user.id, tier: 1, isSubId: false }).lean();
   const listRef = await Tree.find({ refId: parent._id });
   if (parent.children.length === 2 && listRef.length === 1) {
+    const branchFirstChildId = await findParentTreePath(listRef[0]._id, parent._id);
     const firstChildId =
-      parent.children[0] === listRef[0]._id.toString() ? parent.children[1] : parent.children[0];
-    console.log({ childId: parent.children[0], refId: listRef[0]._id.toString(), firstChildId });
+      parent.children[0] === branchFirstChildId.toString()
+        ? parent.children[1]
+        : parent.children[0];
     result = await getAllDescendants(firstChildId, 1);
     const firstChild = await Tree.findById(firstChildId);
     if (firstChild.children.length < 2) {
@@ -1001,6 +1005,30 @@ const getListChildOfUser = asyncHandler(async (req, res) => {
 
   res.json({ userTreeId: parent._id, result });
 });
+
+async function findParentTreePath(treeId, targetTreeId) {
+  const startTree = await Tree.findById(treeId);
+
+  if (!startTree) return undefined;
+
+  let previousTree = null;
+  let currentTree = startTree;
+
+  while (currentTree) {
+    if (currentTree._id.equals(targetTreeId)) {
+      return previousTree?._id;
+    }
+
+    previousTree = currentTree;
+
+    const parent = await Tree.findById(currentTree.parentId);
+    if (!parent) break;
+
+    currentTree = parent;
+  }
+
+  return undefined;
+}
 
 const getListChildNotEnoughBranchOfUser = asyncHandler(async (req, res) => {
   let result = [];
@@ -1427,7 +1455,7 @@ const adminDeleteUser = asyncHandler(async (req, res) => {
       }
       await replaceRefId(treeUser._id);
     }
-    
+
     await addDeleteUserToData(user, oldParents);
     res.json({
       message: "Delete user successfull",
