@@ -21,6 +21,9 @@ const Claim = {
       `${URL_API_CLAIM}/user/?pageNumber=${pageNumber}&coin=${coin}`,
     );
   },
+  reset: () => {
+    return API.get(`${URL_API_CLAIM}/reset`);
+  },
 };
 
 export default Claim;
