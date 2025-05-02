@@ -354,7 +354,9 @@ const Profile = () => {
               className="bg-black rounded-xl text-NoExcuseChallenge p-2 flex-1"
               readOnly
               value={
-                totalHewe > 0
+                tier > 1
+                  ? 0
+                  : totalHewe > 0
                   ? totalHewe - claimedHewe - availableHewe
                   : availableHewe
               }
