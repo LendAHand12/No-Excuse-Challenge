@@ -36,10 +36,12 @@ const claimHewe = asyncHandler(async (req, res) => {
         receiverAddress: user.walletAddress,
       });
 
+      console.log({ receipt });
+
       const claimed = await Claim.create({
         userId: user.id,
         amount: user.availableHewe,
-        hash: receipt.blockHash,
+        hash: receipt.hash,
         coin: "HEWE",
       });
 
@@ -103,7 +105,7 @@ const claimUsdt = asyncHandler(async (req, res) => {
         const claimed = await Claim.create({
           userId: user.id,
           amount: user.availableUsdt,
-          hash: receipt.blockHash,
+          hash: receipt.hash,
           coin: "USDT",
         });
 
