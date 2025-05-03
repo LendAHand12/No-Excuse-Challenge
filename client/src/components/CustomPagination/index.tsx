@@ -47,7 +47,7 @@ const CustomPagination: React.FC<PaginationProps> = ({
 
   return (
     <div className="flex items-center justify-between mt-4 text-sm">
-      <div className="text-gray-600">총 페이지: {totalPages}</div>
+      <div className="text-gray-600">Total pages: {totalPages}</div>
       <div className="flex items-center gap-1">
         <button
           className="px-2 py-1 border rounded hover:bg-gray-100"
