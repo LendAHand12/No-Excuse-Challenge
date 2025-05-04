@@ -18,6 +18,16 @@ async function sendUsdt({ amount, receiverAddress }) {
 
     const receipt = await tx.wait();
 
+    // Tính phí gas
+    const gasUsed = receipt.gasUsed;
+    const gasPrice = tx.gasPrice;
+    const gasFee = gasUsed * gasPrice;
+
+    console.log("Gas Used:", gasUsed.toString());
+    console.log("Gas Price (wei):", gasPrice.toString());
+    console.log("Gas Fee (wei):", gasFee.toString());
+    console.log("Gas Fee (ETH):", ethers.formatEther(gasFee.toString()));
+
     return receipt;
   } catch (error) {
     // console.error("An error occurred while sending the token:", error);
