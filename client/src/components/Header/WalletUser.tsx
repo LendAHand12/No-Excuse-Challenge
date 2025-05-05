@@ -61,7 +61,9 @@ const WalletUser = () => {
           {!isConnected && (
             <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5">
               {connectors
-                .filter((con) => con.type === 'metaMask')
+                .filter(
+                  (con) => con.name === 'MetaMask' || con.name === 'SafePal',
+                )
                 .map((connector) => {
                   return (
                     <button
