@@ -401,7 +401,7 @@ const Profile = () => {
           </button>
         </div>
         <div className={`grid gap-10 font-semibold`}>
-          <div className={`grid grid-cols-2 gap-2`}>
+          <div className={`grid lg:grid-cols-2 gap-2`}>
             <div className="bg-[#FAFBFC] p-4 rounded-2xl">
               <div className="flex justify-between items-center py-2 px-4">
                 <p>Status</p>
