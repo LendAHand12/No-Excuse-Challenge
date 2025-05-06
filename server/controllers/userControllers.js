@@ -49,6 +49,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
         $or: [
           { userId: { $regex: keyword, $options: "i" } }, // Tìm theo userId
           { email: { $regex: keyword, $options: "i" } }, // Tìm theo email
+          { walletAddress: { $regex: keyword, $options: "i" } }, // Tìm theo email
         ],
       },
       {
@@ -65,6 +66,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
         $or: [
           { userId: { $regex: keyword, $options: "i" } }, // Tìm theo userId
           { email: { $regex: keyword, $options: "i" } }, // Tìm theo email
+          { walletAddress: { $regex: keyword, $options: "i" } }, // Tìm theo email
         ],
       },
       {

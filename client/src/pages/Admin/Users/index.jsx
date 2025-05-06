@@ -394,7 +394,7 @@ const AdminUserPages = () => {
                   type="text"
                   onChange={onSearch}
                   className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50"
-                  placeholder={t('search with user name or email')}
+                  placeholder={t('search with user name or email or wallet')}
                   defaultValue={objectFilter.keyword}
                 />
                 <button
