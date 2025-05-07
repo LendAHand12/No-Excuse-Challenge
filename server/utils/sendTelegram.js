@@ -17,11 +17,17 @@ export const sendTelegramMessage = async ({ userName }) => {
       <b>Chi tiết:</b> <a href="${process.env.FRONTEND_BASE_URL}/admin/withdraw">Xem chi tiết</a>
       `;
   try {
+    const agent = new https.Agent({
+      rejectUnauthorized: false, // thử bỏ verify TLS (debug)
+      keepAlive: true,           // giữ kết nối
+      timeout: 5000              // set timeout rõ ràng
+    });
+
     const response = await axios.post(url, {
       chat_id: TELEGRAM_CHAT_ID,
       text: message,
       parse_mode: "HTML", // Markdown
-    });
+    }, { httpsAgent: agent });
     console.log("✅ Message sent to Telegram", response.data);
   } catch (error) {
     if (error.response) {
