@@ -24,6 +24,6 @@ export const sendTelegramMessage = async ({ userName }) => {
     });
     console.log("✅ Message sent to Telegram");
   } catch (error) {
-    console.error("❌ Error sending message:", error.message);
+    console.error("❌ Error sending message:", error);
   }
 };
