@@ -17,14 +17,24 @@ export const sendTelegramMessage = async ({ userName }) => {
       <b>Chi tiết:</b> <a href="${process.env.FRONTEND_BASE_URL}/admin/withdraw">Xem chi tiết</a>
       `;
   try {
-    await axios.post(url, {
+    const response = await axios.post(url, {
       chat_id: TELEGRAM_CHAT_ID,
       text: message,
       parse_mode: "HTML", // Markdown
     });
-    console.log("✅ Message sent to Telegram");
+    console.log("✅ Message sent to Telegram", response.data);
   } catch (error) {
-    console.error("❌ Error sending message:", error.message);
-    console.error("🔍 Telegram response:", error.response?.data);
+    if (error.response) {
+      // Lỗi trả về từ server (Telegram API)
+      console.error("❌ Telegram API error:");
+      console.error("Status:", error.response.status);
+      console.error("Data:", error.response.data);
+    } else if (error.request) {
+      // Request đã gửi nhưng không nhận được response
+      console.error("❌ No response from Telegram API. Request:", error.request);
+    } else {
+      // Lỗi khác (có thể là lỗi cấu hình)
+      console.error("❌ Unknown error:", error.message);
+    }
   }
 };
