@@ -11,11 +11,11 @@ export const sendTelegramMessage = async ({ userName }) => {
   const formatted = moment(now).format("YYYY-MM-DD HH:mm");
 
   const message = `
-<b>🔔 Thông báo có yêu cầu rút tiền</b>\n
-<b>Tên người dùng:</b> ${userName}\n
-<b>Thời gian:</b> ${formatted}\n
-<b>Chi tiết:</b> <a href="${process.env.FRONTEND_BASE_URL}/admin/withdraw">Xem chi tiết</a>
-`;
+      <b>🔔 Thông báo có yêu cầu rút tiền</b>\n
+      <b>Tên người dùng:</b> ${userName}\n
+      <b>Thời gian:</b> ${formatted}\n
+      <b>Chi tiết:</b> <a href="${process.env.FRONTEND_BASE_URL}/admin/withdraw">Xem chi tiết</a>
+      `;
   try {
     await axios.post(url, {
       chat_id: TELEGRAM_CHAT_ID,
@@ -24,6 +24,6 @@ export const sendTelegramMessage = async ({ userName }) => {
     });
     console.log("✅ Message sent to Telegram");
   } catch (error) {
-    console.error("❌ Error sending message:", error);
+    console.error("❌ Error sending message:", error.message);
   }
 };
