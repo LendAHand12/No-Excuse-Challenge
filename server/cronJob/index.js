@@ -131,9 +131,10 @@ export const distributionHewe = asyncHandler(async () => {
 
   for (let u of listUser) {
     try {
-      if (u.currentLayer[0] >= 4) {
+      if (u.currentLayer[0] >= 4 && u.totalHewe > 0) {
         u.availableHewe = u.availableHewe + u.totalHewe;
         u.totalHewe = 0;
+        console.log({ name: u.userId });
       } else if (u.totalHewe > u.claimedHewe) {
         u.availableHewe = u.availableHewe + u.hewePerDay;
       }
