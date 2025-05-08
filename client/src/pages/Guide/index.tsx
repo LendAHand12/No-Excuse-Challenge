@@ -174,12 +174,16 @@ const GuidePage: React.FC = () => {
                   </span>
                 </li>
                 <li className="flex items-start gap-6">
-                  • <b>25%</b> awarded through a <b>lucky draw</b> to the{' '}
-                  <b>25 luckiest members</b>
+                  <span>
+                    • <b>25%</b> awarded through a <b>lucky draw</b> to the
+                    <b>25 luckiest members</b>
+                  </span>
                 </li>
                 <li className="flex items-start gap-6">
-                  • <b>25%</b> awarded through a <b>lucky draw</b> to{' '}
-                  <b>50 additional lucky members</b>
+                  <span>
+                    • <b>25%</b> awarded through a <b>lucky draw</b> to
+                    <b>50 additional lucky members</b>
+                  </span>
                 </li>
               </ul>
               <p>

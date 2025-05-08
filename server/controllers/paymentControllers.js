@@ -735,7 +735,7 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
         message = "Please pay next step";
       } else {
         let responseHewe = await getPriceHewe();
-        const hewePrice = responseHewe.data.ticker.latest;
+        const hewePrice = responseHewe?.data?.ticker?.latest || 0.0005287;
         const totalHewe = Math.round(
           (parseInt(process.env[`HEWE_AMOUNT_TIER${user.tier + 1}`]) + 25) / hewePrice
         );
