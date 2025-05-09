@@ -688,7 +688,9 @@ const onDonePayment = asyncHandler(async (req, res) => {
       }
 
       let responseHewe = await getPriceHewe();
+      console.log({ responseHewe: responseHewe.data });
       const hewePrice = responseHewe?.data?.ticker?.latest || 0.0005287;
+      console.log({ hewePrice });
       const totalHewe = Math.round(100 / hewePrice);
       const hewePerDay = Math.round(totalHewe / 540);
 
