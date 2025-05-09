@@ -62,6 +62,7 @@ import ExportWithdrawPage from './pages/Admin/Export/ExportWithdraw';
 import WithdrawsPage from './pages/User/Withdraws';
 import ExportDreampoolPage from './pages/Admin/Export/ExportDreampool';
 import AdminCronjobPage from './pages/Admin/Cronjob';
+import RulesPage from './pages/Rules';
 import { useSelector } from 'react-redux';
 import ClaimsPage from './pages/User/Claims';
 
@@ -128,6 +129,15 @@ function App() {
             <>
               <PageTitle title="News | NoExcuseChallenge" />
               <NewsPage />
+            </>
+          }
+        />
+        <Route
+          path="/rules"
+          element={
+            <>
+              <PageTitle title="Rules | NoExcuseChallenge" />
+              <RulesPage />
             </>
           }
         />
