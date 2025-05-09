@@ -389,3 +389,11 @@ export const countLayerOfAdmin = async () => {
     await u.save();
   }
 };
+
+export const updateValueAtIndex = (arr, index, newValue) => {
+  if (index >= 0 && index < arr.length) {
+    arr[index] = newValue;
+  } else {
+    console.error('Index is out of bounds');
+  }
+}

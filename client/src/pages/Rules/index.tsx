@@ -82,7 +82,7 @@ const RulesPage: React.FC = () => {
                   <li className="ml-6">
                     Failure to comply will result in{' '}
                     <b>account disqualification</b>
-                    and loss of all benefits from the Lend A Hand community.
+                    and loss of all benefits from the No Excuse Challenge community.
                   </li>
                 </ul>
               </li>
