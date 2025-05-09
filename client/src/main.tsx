@@ -13,13 +13,14 @@ import store from './store';
 import FallbackLoading from './components/FallbackLoading';
 import { http, createConfig, WagmiProvider } from 'wagmi';
 import { bsc } from 'wagmi/chains';
-import { metaMask } from 'wagmi/connectors';
-import { safe } from '@wagmi/connectors';
+import { metaMask, walletConnect, safe } from 'wagmi/connectors';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const projectId = '4e33da07c03760a57c04483a79dccc0b';
 
 const config = createConfig({
   chains: [bsc],
-  connectors: [metaMask(), safe()],
+  connectors: [metaMask(), safe(), walletConnect({ projectId })],
   transports: {
     [bsc.id]: http(),
   },

@@ -20,6 +20,7 @@ const WalletUser = () => {
         setDropdownOpen(!dropdownOpen);
       }
     } catch (error: any) {
+      console.log({ error });
       toast.error('Failed to connect to wallet!');
     }
   };
@@ -61,9 +62,9 @@ const WalletUser = () => {
           {!isConnected && (
             <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5">
               {connectors
-                .filter(
-                  (con) => con.name === 'MetaMask' || con.name === 'SafePal',
-                )
+                // .filter(
+                //   (con) => con.name === 'MetaMask' || con.name === 'SafePal',
+                // )
                 .map((connector) => {
                   return (
                     <button
