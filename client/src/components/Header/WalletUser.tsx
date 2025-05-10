@@ -62,7 +62,7 @@ const WalletUser = () => {
           {!isConnected && (
             <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5">
               {connectors
-                .filter((con) => con.name === 'WalletConnect')
+                .filter((con) => con.name === 'WalletConnect' || con.name === "MetaMask")
                 .map((connector) => {
                   return (
                     <button
