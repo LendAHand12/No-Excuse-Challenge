@@ -292,7 +292,7 @@ const AdminTransactionsPage = () => {
                     >
                       <div className="">
                         <div className="text-base font-semibold">
-                          {ele.userId}
+                          {ele.userId}{' '}
                         </div>
                         <div className="font-normal text-gray-500">
                           {ele.email}
@@ -311,8 +311,10 @@ const AdminTransactionsPage = () => {
                               'Purchase HEWE'
                             ) : (
                               <div className="">
-                                <div className="text-base font-semibold">
-                                  {ele.userReceiveId}
+                                <div className="text-base flex items-center gap-2 font-semibold">
+                                  {ele.userReceiveId}{' '}
+                                   <div className={`w-4 h-4 rounded-full ${ele.isOk ? "bg-green-500" : "bg-red-500"}`}></div>
+                                  
                                 </div>
                                 <div className="font-normal text-gray-500">
                                   {ele.userReceiveEmail}
