@@ -141,15 +141,12 @@ const getUserById = asyncHandler(async (req, res) => {
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
               : refedUser.tier === 1 &&
-                refedUser.buyPackage === "B" &&
-                refedUser.countPay < 7
-              ? true
-              : refedUser.tier === 1 &&
                 refedUser.buyPackage === "A" &&
                 refedUser.countPay < 13
               ? true
               : false,
-          isYellow: refedUser.errLahCode === "OVER30",
+          isYellow: refedUser.errLahCode === "OVER35",
+          isBlue: refedUser.errLahCode === "OVER45",
         });
       }
     }
@@ -284,15 +281,11 @@ const getUserInfo = asyncHandler(async (req, res) => {
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
               : refedUser.tier === 1 &&
-                refedUser.buyPackage === "B" &&
-                refedUser.countPay < 7
-              ? true
-              : refedUser.tier === 1 &&
-                refedUser.buyPackage === "A" &&
                 refedUser.countPay < 13
               ? true
               : false,
-          isYellow: refedUser.errLahCode === "OVER30",
+          isYellow: refedUser.errLahCode === "OVER35",
+          isBlue: refedUser.errLahCode === "OVER45",
         });
       }
     }
@@ -882,7 +875,8 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
               : false
             : false,
         isRed: child.tier === 1 && child.countPay === 0 ? true : false,
-        isYellow: child.errLahCode === "OVER30",
+        isYellow: child.errLahCode === "OVER35",
+        isBlue: child.errLahCode === "OVER45",
         indexOnLevel: childTree.indexOnLevel,
         isSubId: childTree.isSubId,
       });

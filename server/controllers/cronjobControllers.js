@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Cronjob from "../models/cronjobModel.js";
 import {
+  checkRefWithTime,
   countChildToData,
   countLayerToData,
   deleteUser24hUnPay,
@@ -28,6 +29,10 @@ const cronjobs = [
   {
     title: "Dreampool reward",
     func: rankingCalc,
+  },
+  {
+    title: "Check referral list",
+    func: checkRefWithTime,
   },
 ];
 

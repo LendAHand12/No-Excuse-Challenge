@@ -83,6 +83,14 @@ const CronjobPage = () => {
         'Automatically run every day at 04:00',
       ],
     },
+    {
+      id: 5,
+      title: 'Check referral list',
+      descs: [
+        'Check user with referral list less than 2 people over 35 and 45 days',
+        'Automatically run every day at 05:00',
+      ],
+    },
   ];
 
   return (

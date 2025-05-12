@@ -66,6 +66,7 @@ const AdminSystemPage = () => {
       isRed,
       isYellow,
       isGray,
+      isBlue,
       indexOnLevel,
       totalChild,
       income,
@@ -75,10 +76,10 @@ const AdminSystemPage = () => {
           onClick={onClick}
           className={`relative cursor-pointer p-3 text-white text-sm rounded-md inline-block`}
           style={{
-            backgroundColor: isGray
-              ? '#8c8c8c'
-              : isRed
+            backgroundColor: isRed
               ? '#b91c1c'
+              : isBlue
+              ? '#0000ff'
               : isYellow
               ? '#F4B400'
               : layer <= userInfo.currentLayer[currentTier - 1]
@@ -113,6 +114,7 @@ const AdminSystemPage = () => {
             isRed={node.isRed}
             isGray={node.isGray}
             isYellow={node.isYellow}
+            isBlue={node.isBlue}
             indexOnLevel={node.indexOnLevel}
             totalChild={node.totalChild}
             income={node.income}

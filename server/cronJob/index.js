@@ -191,3 +191,28 @@ export const rankingCalc = asyncHandler(async () => {
     }
   }
 });
+
+export const checkRefWithTime = asyncHandler(async () => {
+  const currentDay = moment();
+  const listTreeUser = await Tree.find({
+    $and: [{ isSubId: false }, { tier: 1 }],
+  });
+
+  for (let tree of listTreeUser) {
+    const diffDays = currentDay.diff(tree.createdAt, "days");
+    const u = await User.findById(tree.userId);
+
+    const listRefId = await Tree.find({ refId: tree._id });
+    if (listRefId.length < 2) {
+      if (diffDays > 45) {
+        u.errLahCode = "OVER45";
+      } else if(diffDays > 35) {
+        u.errLahCode = "OVER35";
+      }
+    } else {
+      u.errLahCode = "";
+    }
+    
+    await u.save();
+  }
+});

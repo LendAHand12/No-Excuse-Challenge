@@ -146,7 +146,8 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           if (
             refUser.status === "LOCKED" ||
             refUser.tier < user.tier ||
-            (refUser.tier === user.tier && refUser.countPay < 13)
+            (refUser.tier === user.tier && refUser.countPay < 13) ||
+            refUser.errLahCode === "OVER45"
           ) {
             haveRefNotPayEnough = true;
           } else {
@@ -207,7 +208,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           } else {
             if (
               receiveUser.status === "LOCKED" ||
-              (receiveUser.errLahCode !== "" && indexFor > 6) ||
+              (receiveUser.errLahCode === "OVER45" && indexFor > 6) ||
               receiveUser.tier < user.tier ||
               (receiveUser.tier === user.tier && receiveUser.countPay < user.countPay + 1)
             ) {
@@ -231,10 +232,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
               haveParentNotPayEnough = true;
             }
           }
-          //  else if (user.tier >= 2 && user.countPay >= 3 && receiveUser.countChild[0] >= 300) {
-          //   const checkRatioCountChild = await checkRatioCountChildOfUser(receiveUser._id);
-          //   if (!checkRatioCountChild) haveParentNotPayEnough = true;
-          // }
+          
           payments.push({
             userName: receiveUser.userId,
             amount: referralCommissionFee,
