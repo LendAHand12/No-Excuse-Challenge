@@ -37,6 +37,7 @@ import {
   deleteUser24hUnPay,
   distributionHewe,
   rankingCalc,
+  checkRefWithTime
 } from "./cronJob/index.js";
 
 const app = express();
@@ -122,11 +123,19 @@ const cron4 = new CronJob("00 04 * * *", async () => {
   console.log("Ranking calc done");
 });
 
+const cron5 = new CronJob("00 05 * * *", async () => {
+  // 4h
+  console.log("Check ref with time start");
+  await checkRefWithTime();
+  console.log("Check ref with time done");
+});
+
 cron0.start();
 cron1.start();
 cron2.start();
 cron3.start();
 cron4.start();
+cron5.start();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>

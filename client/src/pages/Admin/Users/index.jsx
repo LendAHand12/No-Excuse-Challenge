@@ -6,6 +6,7 @@ import User from '@/api/User';
 import { ToastContainer, toast } from 'react-toastify';
 import NoContent from '@/components/NoContent';
 import Loading from '@/components/Loading';
+import CustomPagination from '@/components/CustomPagination';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DefaultLayout from '@/layout/DefaultLayout';
 import Modal from 'react-modal';
@@ -393,7 +394,7 @@ const AdminUserPages = () => {
                   type="text"
                   onChange={onSearch}
                   className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50"
-                  placeholder={t('search with user name or email')}
+                  placeholder={t('search with user name or email or wallet')}
                   defaultValue={objectFilter.keyword}
                 />
                 <button
@@ -542,74 +543,78 @@ const AdminUserPages = () => {
                           </button>
                         )}
 
-                      {ele.status !== "DELETED" && userInfo?.permissions
-                        .find((p) => p.page.pageName === 'admin-users-details')
-                        ?.actions.includes('read') && (
-                        <button
-                          onClick={() => handleDetail(ele._id)}
-                          className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
-                        >
-                          <svg
-                            fill="currentColor"
-                            className="w-6 h-auto"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
+                      {ele.status !== 'DELETED' &&
+                        userInfo?.permissions
+                          .find(
+                            (p) => p.page.pageName === 'admin-users-details',
+                          )
+                          ?.actions.includes('read') && (
+                          <button
+                            onClick={() => handleDetail(ele._id)}
+                            className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
                           >
-                            <path d="M21.92,11.6C19.9,6.91,16.1,4,12,4S4.1,6.91,2.08,11.6a1,1,0,0,0,0,.8C4.1,17.09,7.9,20,12,20s7.9-2.91,9.92-7.6A1,1,0,0,0,21.92,11.6ZM12,18c-3.17,0-6.17-2.29-7.9-6C5.83,8.29,8.83,6,12,6s6.17,2.29,7.9,6C18.17,15.71,15.17,18,12,18ZM12,8a4,4,0,1,0,4,4A4,4,0,0,0,12,8Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,14Z" />
-                          </svg>
-                        </button>
-                      )}
+                            <svg
+                              fill="currentColor"
+                              className="w-6 h-auto"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M21.92,11.6C19.9,6.91,16.1,4,12,4S4.1,6.91,2.08,11.6a1,1,0,0,0,0,.8C4.1,17.09,7.9,20,12,20s7.9-2.91,9.92-7.6A1,1,0,0,0,21.92,11.6ZM12,18c-3.17,0-6.17-2.29-7.9-6C5.83,8.29,8.83,6,12,6s6.17,2.29,7.9,6C18.17,15.71,15.17,18,12,18ZM12,8a4,4,0,1,0,4,4A4,4,0,0,0,12,8Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,14Z" />
+                            </svg>
+                          </button>
+                        )}
 
-                      {ele.status !== "DELETED" && userInfo?.permissions
-                        .find((p) => p.page.pageName === 'admin-system')
-                        ?.actions.includes('read') && (
-                        <button
-                          onClick={() => handleTree(ele._id)}
-                          className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
-                        >
-                          <svg
-                            className="w-6 h-auto"
-                            viewBox="0 0 48 48"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
+                      {ele.status !== 'DELETED' &&
+                        userInfo?.permissions
+                          .find((p) => p.page.pageName === 'admin-system')
+                          ?.actions.includes('read') && (
+                          <button
+                            onClick={() => handleTree(ele._id)}
+                            className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
                           >
-                            <rect
-                              width="48"
-                              height="48"
-                              fill="white"
-                              fillOpacity="0.01"
-                            />
-                            <path
-                              d="M13.0448 14C13.5501 8.3935 18.262 4 24 4C29.738 4 34.4499 8.3935 34.9552 14H35C39.9706 14 44 18.0294 44 23C44 27.9706 39.9706 32 35 32H13C8.02944 32 4 27.9706 4 23C4 18.0294 8.02944 14 13 14H13.0448Z"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <path
-                              d="M24 28L29 23"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <path
-                              d="M24 25L18 19"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <path
-                              d="M24 44V18"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </button>
-                      )}
+                            <svg
+                              className="w-6 h-auto"
+                              viewBox="0 0 48 48"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <rect
+                                width="48"
+                                height="48"
+                                fill="white"
+                                fillOpacity="0.01"
+                              />
+                              <path
+                                d="M13.0448 14C13.5501 8.3935 18.262 4 24 4C29.738 4 34.4499 8.3935 34.9552 14H35C39.9706 14 44 18.0294 44 23C44 27.9706 39.9706 32 35 32H13C8.02944 32 4 27.9706 4 23C4 18.0294 8.02944 14 13 14H13.0448Z"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M24 28L29 23"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M24 25L18 19"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M24 44V18"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </button>
+                        )}
 
                       {userInfo?.permissions
                         .find((p) => p.page.pageName === 'admin-users-details')
@@ -644,72 +649,11 @@ const AdminUserPages = () => {
         )}
         {!loading && data.length === 0 && <NoContent />}
         {!loading && data.length > 0 && (
-          <nav
-            className="flex items-center justify-between pt-4"
-            aria-label="Table navigation"
-          >
-            <span className="text-sm font-normal text-gray-500">
-              Showing{' '}
-              <span className="font-semibold text-gray-900">
-                {objectFilter.pageNumber}
-              </span>{' '}
-              of{' '}
-              <span className="font-semibold text-gray-900">{totalPage}</span>{' '}
-              page
-            </span>
-            <ul className="inline-flex items-center -space-x-px">
-              <li>
-                <button
-                  disabled={parseInt(objectFilter.pageNumber) === 1}
-                  onClick={() => handleChangePage(parseInt(objectFilter.pageNumber) - 1)}
-                  className={`block px-3 py-2 ml-0 leading-tight text-gray-500 ${
-                    parseInt(objectFilter.pageNumber) === 1 ? 'bg-gray-100' : 'bg-white'
-                  } border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700`}
-                >
-                  <span className="sr-only">Previous</span>
-                  <svg
-                    className="w-5 h-5"
-                    aria-hidden="true"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                </button>
-              </li>
-              <li>
-                <button
-                  disabled={parseInt(objectFilter.pageNumber) === totalPage}
-                  onClick={() => handleChangePage(parseInt(objectFilter.pageNumber) + 1)}
-                  className={`block px-3 py-2 leading-tight text-gray-500 ${
-                    parseInt(objectFilter.pageNumber) === totalPage
-                      ? 'bg-gray-100'
-                      : 'bg-white'
-                  } border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700`}
-                >
-                  <span className="sr-only">Next</span>
-                  <svg
-                    className="w-5 h-5"
-                    aria-hidden="true"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                </button>
-              </li>
-            </ul>
-          </nav>
+          <CustomPagination
+            currentPage={objectFilter.pageNumber}
+            totalPages={totalPage}
+            onPageChange={handleChangePage}
+          />
         )}
       </div>
     </DefaultLayout>

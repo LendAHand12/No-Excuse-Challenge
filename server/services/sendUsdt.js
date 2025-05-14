@@ -16,7 +16,20 @@ async function sendUsdt({ amount, receiverAddress }) {
 
     const tx = await tokenContract.transfer(receiverAddress, amountToSend);
 
+    const gasPrice = tx.gasPrice;
+    console.log("Gas Price (wei):", gasPrice.toString());
+
     const receipt = await tx.wait();
+
+    // Tính phí gas
+    const gasUsed = receipt.gasUsed;
+
+    const gasFee = gasUsed * gasPrice;
+
+    console.log("Gas Used:", gasUsed.toString());
+
+    console.log("Gas Fee (wei):", gasFee.toString());
+    console.log("Gas Fee (ETH):", ethers.formatEther(gasFee.toString()));
 
     return receipt;
   } catch (error) {

@@ -160,6 +160,10 @@ const UserProfile = () => {
         formData.append('holdLevel', values.holdLevel);
       }
 
+      if (values.level !== data.level) {
+        formData.append('level', values.level);
+      }
+
       formData.append('isRegistered', values.isRegistered);
 
       setLoadingUpdate(true);
@@ -650,6 +654,8 @@ const UserProfile = () => {
                                   ? 'bg-[#8c8c8c]'
                                   : ele.isRed
                                   ? 'bg-[#b91c1c]'
+                                  : ele.isBlue
+                                  ? 'bg-[#0000ff]'
                                   : ele.isYellow
                                   ? 'bg-[#F4B400]'
                                   : 'bg-[#16a34a]'
@@ -1077,6 +1083,22 @@ const UserProfile = () => {
                         </div>
                       ) : (
                         <div className="px-4 py-2">{data.fine}</div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">Level</div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('level', {
+                              required: 'Level is required',
+                            })}
+                            defaultValue={data.currentLayer[parseInt(data.tier) - 1]}
+                          />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">{data.currentLayer[parseInt(data.tier) - 1]}</div>
                       )}
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">

@@ -411,7 +411,7 @@ const Profile = () => {
           </button>
         </div>
         <div className={`grid gap-10 font-semibold`}>
-          <div className={`grid grid-cols-2 gap-2`}>
+          <div className={`grid lg:grid-cols-2 gap-2`}>
             <div className="bg-[#FAFBFC] p-4 rounded-2xl">
               <div className="flex justify-between items-center py-2 px-4">
                 <p>Status</p>
@@ -485,8 +485,8 @@ const Profile = () => {
             <div className="bg-[#FAFBFC] p-4 rounded-2xl">
               <div className="py-2 px-4">
                 <p className="uppercase mt-2 font-bold">{t('children')}</p>
-                <div className="py-2">
-                  <ul className="flex gap-4">
+                <div className="lg:py-2">
+                  <ul className="flex flex-col lg:flex-row lg:gap-4">
                     {listDirectUser.map((ele) => (
                       <li className="" key={ele.userId}>
                         <div className="py-2">
@@ -497,6 +497,8 @@ const Profile = () => {
                                   ? 'bg-[#8c8c8c]'
                                   : ele.isRed
                                   ? 'bg-[#b91c1c]'
+                                  : ele.isBlue
+                                  ? 'bg-[#0000ff]'
                                   : ele.isYellow
                                   ? 'bg-[#F4B400]'
                                   : 'bg-[#16a34a]'

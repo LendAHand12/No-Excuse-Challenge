@@ -16,11 +16,12 @@ const WalletUser = () => {
     try {
       const result = await connectAsync({ connector });
       if (result?.accounts.length > 0) {
-        toast.success('Connected to MetaMask successfully!');
+        toast.success('Connected to wallet successfully!');
         setDropdownOpen(!dropdownOpen);
       }
     } catch (error: any) {
-      toast.error('Failed to connect to MetaMask!');
+      console.log({ error });
+      toast.error('Failed to connect to wallet!');
     }
   };
 
@@ -61,7 +62,7 @@ const WalletUser = () => {
           {!isConnected && (
             <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5">
               {connectors
-                .filter((con) => con.type === 'metaMask')
+                .filter((con) => con.name === 'WalletConnect' || con.name === "MetaMask")
                 .map((connector) => {
                   return (
                     <button

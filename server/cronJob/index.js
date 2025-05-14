@@ -131,13 +131,15 @@ export const distributionHewe = asyncHandler(async () => {
 
   for (let u of listUser) {
     try {
-      if (u.currentLayer[0] >= 4) {
+      if (u.currentLayer[0] >= 4 && u.totalHewe > 0) {
         u.availableHewe = u.availableHewe + u.totalHewe;
         u.totalHewe = 0;
+        console.log({ name: u.userId });
       } else if (u.totalHewe > u.claimedHewe) {
         u.availableHewe = u.availableHewe + u.hewePerDay;
       }
       await u.save();
+      ygf;
     } catch (error) {
       console.log({ error });
     }
@@ -187,5 +189,30 @@ export const rankingCalc = asyncHandler(async () => {
     } catch (error) {
       console.log({ error });
     }
+  }
+});
+
+export const checkRefWithTime = asyncHandler(async () => {
+  const currentDay = moment();
+  const listTreeUser = await Tree.find({
+    $and: [{ isSubId: false }, { tier: 1 }],
+  });
+
+  for (let tree of listTreeUser) {
+    const diffDays = currentDay.diff(tree.createdAt, "days");
+    const u = await User.findById(tree.userId);
+
+    const listRefId = await Tree.find({ refId: tree._id });
+    if (listRefId.length < 2) {
+      if (diffDays > 45) {
+        u.errLahCode = "OVER45";
+      } else if(diffDays > 35) {
+        u.errLahCode = "OVER35";
+      }
+    } else {
+      u.errLahCode = "";
+    }
+    
+    await u.save();
   }
 });

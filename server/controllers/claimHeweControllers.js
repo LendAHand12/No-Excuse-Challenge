@@ -127,7 +127,7 @@ const claimUsdt = asyncHandler(async (req, res) => {
         user.availableUsdt = 0;
         await user.save();
 
-        // await sendTelegramMessage({ userName: user.userId });
+        await sendTelegramMessage({ userName: user.userId });
 
         const index = processingUserIds.indexOf(user._id);
         if (index !== -1) {

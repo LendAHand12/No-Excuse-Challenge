@@ -401,3 +401,11 @@ export const createCallbackToken = (userId) => {
     expiresIn: "10m", // thời gian hết hạn token
   });
 };
+
+export const updateValueAtIndex = (arr, index, newValue) => {
+  if (index >= 0 && index < arr.length) {
+    arr[index] = newValue;
+  } else {
+    console.error("Index is out of bounds");
+  }
+};

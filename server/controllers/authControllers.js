@@ -211,7 +211,7 @@ const authUser = asyncHandler(async (req, res) => {
 
     const tree = await Tree.findOne({ userId: user._id, tier: 1 });
     const listDirectUser = [];
-    if(tree) {
+    if (tree) {
       const listRefIdOfUser = await Tree.find({ refId: tree._id, tier: 1 });
       if (listRefIdOfUser && listRefIdOfUser.length > 0) {
         for (let refId of listRefIdOfUser) {
@@ -222,7 +222,6 @@ const authUser = asyncHandler(async (req, res) => {
         }
       }
     }
-    
 
     const packages = await getActivePackages();
 
@@ -289,6 +288,7 @@ const resetUserPassword = asyncHandler(async (req, res) => {
   try {
     // update the user password if the jwt is verified successfully
     const { token, password } = req.body;
+    console.log({ password });
     const decodedToken = jwt.verify(token, process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET);
     const user = await User.findById(decodedToken.id);
 
@@ -296,6 +296,7 @@ const resetUserPassword = asyncHandler(async (req, res) => {
       user.password = password;
       const updatedUser = await user.save();
 
+      console.log({ updatedUser });
       if (updatedUser) {
         res.status(200).json({
           message: "Password updated. Please login with new password",

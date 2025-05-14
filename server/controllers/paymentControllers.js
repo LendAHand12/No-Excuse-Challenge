@@ -8,7 +8,11 @@ import {
   sendMailReceiveCommission,
   sendMailRefDc,
 } from "../utils/sendMailCustom.js";
-import { getRefParentUser, findNextUser, findHighestIndexOfLevel } from "../utils/methods.js";
+import {
+  getRefParentUser,
+  findNextUser,
+  findHighestIndexOfLevel,
+} from "../utils/methods.js";
 import Wallet from "../models/walletModel.js";
 import Tree from "../models/treeModel.js";
 import { getPriceHewe } from "../utils/getPriceHewe.js";
@@ -21,7 +25,8 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
       if (user.currentLayer.slice(-1) < 6) {
         res.status(200).json({
           status: "PENDING",
-          message: "Your current level is insufficient to upgrade to the next tier",
+          message:
+            "Your current level is insufficient to upgrade to the next tier",
         });
       }
     } else {
@@ -140,13 +145,18 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         // giao dich hoa hong truc tiep
         if (refUser.closeLah) {
           haveRefNotPayEnough = true;
-        } else if (refUser.openLah || refUser.adminChangeTier || refUser.createBy === "ADMIN") {
+        } else if (
+          refUser.openLah ||
+          refUser.adminChangeTier ||
+          refUser.createBy === "ADMIN"
+        ) {
           haveRefNotPayEnough = false;
         } else {
           if (
             refUser.status === "LOCKED" ||
             refUser.tier < user.tier ||
-            (refUser.tier === user.tier && refUser.countPay < 13)
+            (refUser.tier === user.tier && refUser.countPay < 13) ||
+            refUser.errLahCode === "OVER45"
           ) {
             haveRefNotPayEnough = true;
           } else {
@@ -184,7 +194,11 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         // );
 
         const treeOfUser = await Tree.findOne({ userId: user.id, tier: 1 });
-        const ancestorsData = await findAncestors(treeOfUser._id, 10, user.tier);
+        const ancestorsData = await findAncestors(
+          treeOfUser._id,
+          10,
+          user.tier
+        );
         let ancestors = ancestorsData.map((data, index) => {
           if (index === 0) {
             data.isFirst = true;
@@ -207,9 +221,10 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           } else {
             if (
               receiveUser.status === "LOCKED" ||
-              (receiveUser.errLahCode !== "" && indexFor > 6) ||
+              (receiveUser.errLahCode === "OVER45" && indexFor > 6) ||
               receiveUser.tier < user.tier ||
-              (receiveUser.tier === user.tier && receiveUser.countPay < user.countPay + 1)
+              (receiveUser.tier === user.tier &&
+                receiveUser.countPay < user.countPay + 1)
             ) {
               haveParentNotPayEnough = true;
             } else {
@@ -231,10 +246,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
               haveParentNotPayEnough = true;
             }
           }
-          //  else if (user.tier >= 2 && user.countPay >= 3 && receiveUser.countChild[0] >= 300) {
-          //   const checkRatioCountChild = await checkRatioCountChildOfUser(receiveUser._id);
-          //   if (!checkRatioCountChild) haveParentNotPayEnough = true;
-          // }
+
           payments.push({
             userName: receiveUser.userId,
             amount: referralCommissionFee,
@@ -288,7 +300,9 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
   } else if (user.currentLayer.slice(-1) < 6) {
     res.status(200).json({
       status: "PENDING",
-      message: `Your current level is insufficient to upgrade to the tier ${user.tier + 1}`,
+      message: `Your current level is insufficient to upgrade to the tier ${
+        user.tier + 1
+      }`,
     });
   } else {
     await Transaction.deleteMany({
@@ -334,7 +348,9 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
       let pigFee = parseInt(
         process.env[`DREAMPOOL_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
       );
-      let companyFee = parseInt(process.env[`HEWE_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]);
+      let companyFee = parseInt(
+        process.env[`HEWE_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
+      );
       let directCommissionFee = parseInt(
         process.env[`DIRECT_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
       );
@@ -419,7 +435,10 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
       const nextTierUserId = await findNextUser(user.tier + 1);
       if (user.paymentStep === 0) {
         refUser = await User.findById(nextTierUserId);
-        treeOfRefUser = await Tree.findOne({ userId: nextTierUserId, tier: user.tier + 1 });
+        treeOfRefUser = await Tree.findOne({
+          userId: nextTierUserId,
+          tier: user.tier + 1,
+        });
         directCommissionUser = refUser;
       } else if (user.paymentStep === 1 && user.tier === 1) {
         const treeUserTier1 = await Tree.findOne({ userId: user._id, tier: 1 });
@@ -443,7 +462,11 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
       // giao dich hoa hong truc tiep
       if (refUser.closeLah) {
         haveRefNotPayEnough = true;
-      } else if (refUser.openLah || refUser.adminChangeTier || refUser.createBy === "ADMIN") {
+      } else if (
+        refUser.openLah ||
+        refUser.adminChangeTier ||
+        refUser.createBy === "ADMIN"
+      ) {
         haveRefNotPayEnough = false;
       } else {
         if (
@@ -521,7 +544,8 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
             receiveUser.status === "LOCKED" ||
             (receiveUser.errLahCode !== "" && indexFor > 6) ||
             receiveUser.tier < user.tier ||
-            (receiveUser.tier === user.tier && receiveUser.countPay < user.countPay + 1)
+            (receiveUser.tier === user.tier &&
+              receiveUser.countPay < user.countPay + 1)
           ) {
             haveParentNotPayEnough = true;
           } else {
@@ -688,7 +712,9 @@ const onDonePayment = asyncHandler(async (req, res) => {
       }
 
       let responseHewe = await getPriceHewe();
-      const hewePrice = responseHewe.data.ticker.latest;
+      console.log({ responseHewe: responseHewe.data });
+      const hewePrice = responseHewe?.data?.ticker?.latest || 0.0005287;
+      console.log({ hewePrice });
       const totalHewe = Math.round(100 / hewePrice);
       const hewePerDay = Math.round(totalHewe / 540);
 
@@ -735,9 +761,10 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
         message = "Please pay next step";
       } else {
         let responseHewe = await getPriceHewe();
-        const hewePrice = responseHewe.data.ticker.latest;
+        const hewePrice = responseHewe?.data?.ticker?.latest || 0.0005287;
         const totalHewe = Math.round(
-          (parseInt(process.env[`HEWE_AMOUNT_TIER${user.tier + 1}`]) + 25) / hewePrice
+          (parseInt(process.env[`HEWE_AMOUNT_TIER${user.tier + 1}`]) + 25) /
+            hewePrice
         );
 
         user.availableHewe = user.totalHewe + user.availableHewe + totalHewe;
@@ -770,7 +797,9 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
           tier: user.tier + 1,
         });
 
-        const highestIndexOfLevel = await findHighestIndexOfLevel(user.tier + 1);
+        const highestIndexOfLevel = await findHighestIndexOfLevel(
+          user.tier + 1
+        );
         const treeOfUserTier2 = await Tree.create({
           userName: user.userId,
           userId: user._id,
@@ -899,22 +928,40 @@ const getAllPayments = asyncHandler(async (req, res) => {
         createdAt: pay.createdAt,
       });
     } else if (status === "HOLD") {
-      const userRef = await User.findById(pay.userId_to);
-      result.push({
-        _id: pay._id,
-        address_from: pay.address_from,
-        tier: pay.tier,
-        // hash: pay.hash,
-        amount: pay.amount,
-        userId: user.userId,
-        email: user.email,
-        userReceiveId: userRef ? userRef.userId : "Unknow",
-        userReceiveEmail: userRef ? userRef.email : "Unknow",
-        type: pay.type,
-        userCountPay: pay.userCountPay,
-        createdAt: pay.createdAt,
-        isHoldRefund: pay.isHoldRefund,
-      });
+      const userReceive = await User.findById(pay.userId_to);
+      if (userReceive) {
+        const treeOfReceiveUser = await Tree.findOne({
+          userId: pay.userId_to,
+          tier: 1,
+        });
+        const listRefOfReceiver = await Tree.find({
+          refId: treeOfReceiveUser._id,
+        });
+        const checkResult = await checkCanRefund({
+          userReceive,
+          listRefOfReceiver,
+          userCountPay: pay.userCountPay,
+          trans: pay,
+          treeOfReceiveUser,
+        });
+
+        result.push({
+          _id: pay._id,
+          address_from: pay.address_from,
+          tier: pay.tier,
+          // hash: pay.hash,
+          amount: pay.amount,
+          userId: user.userId,
+          email: user.email,
+          userReceiveId: userReceive ? userReceive.userId : "Unknow",
+          userReceiveEmail: userReceive ? userReceive.email : "Unknow",
+          type: pay.type,
+          userCountPay: pay.userCountPay,
+          createdAt: pay.createdAt,
+          isHoldRefund: pay.isHoldRefund,
+          isOk: checkResult === "" ? true : false
+        });
+      }
     }
   }
 
@@ -932,11 +979,19 @@ const getPaymentsOfUser = asyncHandler(async (req, res) => {
   const pageSize = 20;
 
   const count = await Transaction.countDocuments({
-    $and: [{ userId: user.id }, { status: "SUCCESS" }, { type: { $ne: "PACKAGE" } }],
+    $and: [
+      { userId: user.id },
+      { status: "SUCCESS" },
+      { type: { $ne: "PACKAGE" } },
+    ],
   });
 
   const allPayments = await Transaction.find({
-    $and: [{ userId: user.id }, { status: "SUCCESS" }, { type: { $ne: "PACKAGE" } }],
+    $and: [
+      { userId: user.id },
+      { status: "SUCCESS" },
+      { type: { $ne: "PACKAGE" } },
+    ],
   })
     .limit(pageSize)
     .skip(pageSize * (page - 1))
@@ -1017,33 +1072,26 @@ const checkCanRefundPayment = asyncHandler(async (req, res) => {
     const userReceive = await User.findById(userId_to);
     // const isSerepayWallet = await checkSerepayWallet(userReceive.walletAddress);
     if (userReceive) {
-      const treeOfReceiveUser = await Tree.findOne({ userId: userId_to, tier: 1 });
+      const treeOfReceiveUser = await Tree.findOne({
+        userId: userId_to,
+        tier: 1,
+      });
       const listRefOfReceiver = await Tree.find({
         refId: treeOfReceiveUser._id,
       });
-      if (userReceive.status === "LOCKED") {
-        res.status(404);
-        throw new Error(`User parent locked`);
-      } else if (userReceive.closeLah) {
-        res.status(404);
-        throw new Error(`User is being blocked from trading`);
-      } else if (userReceive.countPay - 1 < userCountPay) {
-        res.status(404);
-        throw new Error(
-          userReceive.countPay === 0
-            ? `User parent NOT FINISHED REGISTER`
-            : `User parent pay = ${
-                userReceive.countPay - 1
-              } time but user pay = ${userCountPay} time`
-        );
-      } else if (trans.type === "REFERRALHOLD" && userReceive.errLahCode === "OVER30") {
-        throw new Error(`User has not had 2 child within 45 days`);
-      } else if (treeOfReceiveUser.children.length === 2 && listRefOfReceiver.length < 2) {
-        throw new Error(`Payment blocked because there are not enough 2 redirect user`);
-      } else {
+      const checkResult = await checkCanRefund({
+        userReceive,
+        listRefOfReceiver,
+        userCountPay,
+        trans,
+        treeOfReceiveUser,
+      });
+      if (checkResult === "") {
         res.json({
           message: "User is OK for a refund",
         });
+      } else {
+        throw new Error(checkResult);
       }
     } else {
       res.status(404);
@@ -1054,6 +1102,41 @@ const checkCanRefundPayment = asyncHandler(async (req, res) => {
     throw new Error("Transaction does not exist");
   }
 });
+
+const checkCanRefund = async ({
+  userReceive,
+  listRefOfReceiver,
+  userCountPay,
+  trans,
+  treeOfReceiveUser,
+}) => {
+  if (userReceive.status === "LOCKED") {
+    res.status(404);
+    return `User parent locked`;
+  } else if (userReceive.closeLah) {
+    res.status(404);
+    return `User is being blocked from trading`;
+  } else if (userReceive.countPay - 1 < userCountPay) {
+    res.status(404);
+    return userReceive.countPay === 0
+      ? `User parent NOT FINISHED REGISTER`
+      : `User parent pay = ${
+          userReceive.countPay - 1
+        } time but user pay = ${userCountPay} time`;
+  } else if (
+    trans.type === "REFERRALHOLD" &&
+    userReceive.errLahCode === "OVER30"
+  ) {
+    return `User has not had 2 child within 45 days`;
+  } else if (
+    treeOfReceiveUser.children.length === 2 &&
+    listRefOfReceiver.length < 2
+  ) {
+    return `Payment blocked because there are not enough 2 redirect user`;
+  } else {
+    return "";
+  }
+};
 
 const changeToRefunded = asyncHandler(async (req, res) => {
   const { id } = req.body;
@@ -1181,7 +1264,11 @@ const getAllTransForExport = asyncHandler(async (req, res) => {
       address_ref: tran.address_ref,
       senderName: sender ? sender.userId : "unknown",
       senderEmail: sender ? sender.email : "unknown",
-      senderStatus: sender ? (sender.status === "DELETED" ? "TK đã xoá" : "") : "unknow",
+      senderStatus: sender
+        ? sender.status === "DELETED"
+          ? "TK đã xoá"
+          : ""
+        : "unknow",
       receiverName: receiver ? receiver.userId : "unknown",
       receiverEmail: receiver ? receiver.email : "unknown",
     });
