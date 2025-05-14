@@ -65,6 +65,7 @@ import AdminCronjobPage from './pages/Admin/Cronjob';
 import RulesPage from './pages/Rules';
 import { useSelector } from 'react-redux';
 import ClaimsPage from './pages/User/Claims';
+import RegisterKYCPage from './pages/User/RegisterKYC';
 
 function App() {
   const { pathname } = useLocation();
@@ -621,6 +622,17 @@ function App() {
             </>
           }
         />
+        {userInfo?.facetecTid === '' && (
+          <Route
+            path="/user/kyc"
+            element={
+              <>
+                <PageTitle title="Register KYC | NoExcuseChallenge" />
+                <RegisterKYCPage />
+              </>
+            }
+          />
+        )}
       </Route>
       <Route path="*" element={<NotFoundPage />}></Route>
     </Routes>

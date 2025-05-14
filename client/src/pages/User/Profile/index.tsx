@@ -46,6 +46,7 @@ const Profile = () => {
     bonusRef,
     walletAddressChange,
     currentLayer,
+    facetecTid,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -55,6 +56,7 @@ const Profile = () => {
   const [loadingClaimHewe, setLoadingClaimHewe] = useState(false);
   const [loadingClaimUsdt, setLoadingClaimUsdt] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showFaceId, setShowFaceId] = useState(facetecTid === "" ? true : false);
 
   const {
     register,
@@ -144,6 +146,11 @@ const Profile = () => {
     (async () => {
       await User.getUserInfo()
         .then((response) => {
+          if(response.data.facetecTid === "") {
+            setShowFaceId(true);
+          } else {
+            setShowFaceId(false);
+          }
           dispatch(UPDATE_USER_INFO(response.data));
         })
         .catch((error) => {
@@ -267,6 +274,85 @@ const Profile = () => {
           </div>
         </div>
       </Modal>
+
+      <Modal
+        isOpen={showFaceId}
+        onRequestClose={() => setShowFaceId(false)}
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+          },
+        }}
+      >
+        <div className="overflow-y-auto overflow-x-hidden justify-center items-center w-full md:inset-0 h-modal md:h-full">
+          <div className="relative w-full max-w-md h-full md:h-auto">
+            <div className="relative text-center bg-white rounded-lg sm:p-5">
+              <button
+                onClick={() => setShowFaceId(false)}
+                className="text-gray-400 absolute top-2.5 right-2.5 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+                <span className="sr-only">Close modal</span>
+              </button>
+              <div className="pr-6 flex flex-col items-center">
+                <div
+                  className="text-left text-red-700 rounded relative mb-5"
+                  role="alert"
+                >
+                  <span className="block sm:inline">
+                    <b>Attention:</b> To withdraw your assets, please ensure you
+                    complete the KYC (Know Your Customer) diligence process.
+                  </span>
+                  <span>
+                    Failure to complete the KYC process will result in your
+                    account being <b>blocked</b> at 00:00.
+                  </span>
+                </div>
+                <div>
+                  <button
+                    onClick={handleStartKYC}
+                    className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:opacity-70"
+                  >
+                    <svg
+                      width="26"
+                      height="26"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12.5 11V12.5L11.5 13M15 8V10M9 8V10M9 20H5C4.44772 20 4 19.5523 4 19V15M20 15V19C20 19.5523 19.5523 20 19 20H15M20 9V5C20 4.44772 19.5523 4 19 4H15M4 9V5C4 4.44772 4.44772 4 5 4H9M9 16C9 16 10 17 12 17C14 17 15 16 15 16"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    Set Up Face ID
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
       <div className="px-2 lg:px-24 py-24 space-y-6 lg:space-y-8">
         {bonusRef && (
           <div
@@ -290,59 +376,9 @@ const Profile = () => {
           </div>
         )}
 
-        {status === 'UNVERIFY' && (
-          <>
-            <div
-              className="bg-red-100 flex flex-col border border-red-400 text-red-700 px-4 py-3 rounded relative mb-5"
-              role="alert"
-            >
-              <span className="block sm:inline">
-                <b>Attention:</b> To withdraw your assets, please ensure you
-                complete the KYC (Know Your Customer) diligence process.
-              </span>
-              <span>
-                Failure to complete the KYC process will result in your account
-                being <b>blocked</b> at 00:00.
-              </span>
-            </div>
-            <div>
-              <button
-                onClick={handleStartKYC}
-                className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:opacity-70"
-              >
-                <svg
-                  width="26"
-                  height="26"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12.5 11V12.5L11.5 13M15 8V10M9 8V10M9 20H5C4.44772 20 4 19.5523 4 19V15M20 15V19C20 19.5523 19.5523 20 19 20H15M20 9V5C20 4.44772 19.5523 4 19 4H15M4 9V5C4 4.44772 4.44772 4 5 4H9M9 16C9 16 10 17 12 17C14 17 15 16 15 16"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                Set Up Face ID
-              </button>
-            </div>
-          </>
-        )}
-
         {(phone === '' || idCode === '') && (
           <div
             className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-5"
-            role="alert"
-          >
-            <span className="block sm:inline">{t('infoAccountAlert')}</span>
-          </div>
-        )}
-
-        {(phone === '' || idCode === '') && (
-          <div
-            className="relative px-4 py-3 mb-5 text-red-700 bg-red-100 border border-red-400 rounded"
             role="alert"
           >
             <span className="block sm:inline">{t('infoAccountAlert')}</span>
