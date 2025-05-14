@@ -7,7 +7,7 @@ const startKYC = expressAsyncHandler(async (req, res) => {
   const token = createCallbackToken(user._id);
   const callbackUrl = `${process.env.FRONTEND_BASE_URL}/kyc/result?token=${token}`;
 
-  const redirectToKYC = `${process.env.KYC_URL}/enroll?callback=${encodeURIComponent(callbackUrl)}`;
+  const redirectToKYC = `${process.env.KYC_URL}/enroll.html?callback=${encodeURIComponent(callbackUrl)}&user_id=${user.id}`;
 
   res.json({ url: redirectToKYC });
 });
