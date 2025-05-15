@@ -14,6 +14,20 @@ const startKYC = expressAsyncHandler(async (req, res) => {
   res.json({ url: redirectToKYC });
 });
 
+const claimKYC = expressAsyncHandler(async (req, res) => {
+  const { coin } = req.body;
+  const { user } = req;
+
+  const token = createCallbackToken(user._id);
+  const callbackUrl = `${process.env.FRONTEND_BASE_URL}/user/claim?coin=${coin}&token=${token}`;
+
+  const redirectToKYC = `${
+    process.env.KYC_URL
+  }/verify.html?callback=${encodeURIComponent(callbackUrl)}&user_id=${user.id}`;
+
+  res.json({ url: redirectToKYC });
+});
+
 const register = expressAsyncHandler(async (req, res) => {
   const { facetect_tid, user_id } = req.body; // dữ liệu do KYC trả về
   const { user } = req;
@@ -35,4 +49,4 @@ const register = expressAsyncHandler(async (req, res) => {
   }
 });
 
-export { startKYC, register };
+export { startKYC, register, claimKYC };

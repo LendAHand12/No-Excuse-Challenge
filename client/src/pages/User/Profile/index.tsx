@@ -56,7 +56,9 @@ const Profile = () => {
   const [loadingClaimHewe, setLoadingClaimHewe] = useState(false);
   const [loadingClaimUsdt, setLoadingClaimUsdt] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [showFaceId, setShowFaceId] = useState(facetecTid === "" ? true : false);
+  const [showFaceId, setShowFaceId] = useState(
+    facetecTid === '' ? true : false,
+  );
 
   const {
     register,
@@ -107,11 +109,11 @@ const Profile = () => {
 
   const claimHewe = async () => {
     setLoadingClaimHewe(true);
-    await Claim.hewe()
+    await KYC.claim({ coin: 'hewe' })
       .then((response) => {
-        toast.success(t(response.data.message));
-        setLoadingClaimHewe(false);
-        setRefresh(!refresh);
+        if (response.data.url) {
+          window.location.href = response.data.url;
+        }
       })
       .catch((error) => {
         let message =
@@ -125,12 +127,11 @@ const Profile = () => {
 
   const claimUsdt = async () => {
     setLoadingClaimUsdt(true);
-    await Claim.usdt()
+    await KYC.claim({ coin: 'usdt' })
       .then((response) => {
-        toast.success(t(response.data.message));
-        setLoadingClaimUsdt(false);
-        setShowModal(false);
-        setRefresh(!refresh);
+        if (response.data.url) {
+          window.location.href = response.data.url;
+        }
       })
       .catch((error) => {
         let message =
@@ -138,7 +139,7 @@ const Profile = () => {
             ? error.response.data.error
             : error.message;
         toast.error(t(message));
-        setLoadingClaimUsdt(false);
+        setLoadingClaimHewe(false);
       });
   };
 
@@ -146,7 +147,7 @@ const Profile = () => {
     (async () => {
       await User.getUserInfo()
         .then((response) => {
-          if(response.data.facetecTid === "") {
+          if (response.data.facetecTid === '') {
             setShowFaceId(true);
           } else {
             setShowFaceId(false);

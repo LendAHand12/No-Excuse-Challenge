@@ -8,6 +8,9 @@ const Page = {
   register: (body) => {
     return API.post(`${URL_API_KYC}/register`, body);
   },
+  claim: (body) => {
+    return API.post(`${URL_API_KYC}/claim`, body);
+  },
 };
 
 export default Page;
