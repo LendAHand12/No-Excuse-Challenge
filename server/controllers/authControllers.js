@@ -275,6 +275,7 @@ const authUser = asyncHandler(async (req, res) => {
         walletAddressChange: user.walletAddressChange,
         totalChild: tree ? tree.countChild : 0,
         income: tree ? tree.income : 0,
+        facetecTid: user.facetecTid
       },
       accessToken,
       refreshToken,

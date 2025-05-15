@@ -1,10 +1,10 @@
 import express from "express";
-import { startKYC, callback } from "../controllers/kycControllers.js";
+import { startKYC, register } from "../controllers/kycControllers.js";
 import { protectRoute } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 router.route("/start").get(protectRoute, startKYC);
-router.route("/callback").get(protectRoute, callback);
+router.route("/register").post(protectRoute, register);
 
 export default router;

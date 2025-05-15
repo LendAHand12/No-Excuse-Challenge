@@ -187,9 +187,9 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
-    isKyc: {
-      type: Boolean,
-      default: false,
+    facetecTid: {
+      type: String,
+      default: ""
     },
   },
   {
