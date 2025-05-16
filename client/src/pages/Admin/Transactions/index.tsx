@@ -313,8 +313,15 @@ const AdminTransactionsPage = () => {
                               <div className="">
                                 <div className="text-base flex items-center gap-2 font-semibold">
                                   {ele.userReceiveId}{' '}
-                                   <div className={`w-4 h-4 rounded-full ${ele.isOk ? "bg-green-500" : "bg-red-500"}`}></div>
-                                  
+                                  <div
+                                    className={`w-4 h-4 rounded-full ${
+                                      ele.isOk && ele.isOk === true
+                                        ? 'bg-green-500'
+                                        : ele.isOk && ele.isOk === false
+                                        ? 'bg-red-500'
+                                        : ''
+                                    }`}
+                                  ></div>
                                 </div>
                                 <div className="font-normal text-gray-500">
                                   {ele.userReceiveEmail}
