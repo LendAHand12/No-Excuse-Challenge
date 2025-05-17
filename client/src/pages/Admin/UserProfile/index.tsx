@@ -92,12 +92,6 @@ const UserProfile = () => {
       }
       var formData = new FormData();
 
-      const { imgFront } = values;
-      const [fileObjectImgFront] = imgFront;
-
-      const { imgBack } = values;
-      const [fileObjectImgBack] = imgBack;
-
       if (values.rewardHewe !== data.totalHewe) {
         formData.append('rewardHewe', values.rewardHewe);
       }
@@ -130,12 +124,6 @@ const UserProfile = () => {
       }
       if (currentCloseLah !== data.closeLah) {
         formData.append('closeLah', currentCloseLah);
-      }
-      if (imgFront) {
-        formData.append('imgFront', fileObjectImgFront);
-      }
-      if (imgBack) {
-        formData.append('imgBack', fileObjectImgBack);
       }
       if (values.newStatus !== data.status) {
         formData.append('newStatus', values.newStatus);
