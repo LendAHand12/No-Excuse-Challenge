@@ -13,16 +13,24 @@ const RegisterKYCPage = () => {
   const location = useLocation();
   const parsed = queryString.parse(location.search);
   let { token, user_id, facetect_tid, status } = parsed;
-  if (status !== "success" || !token || !user_id || !facetect_tid) {
+  if (status !== 'success' || !token || !user_id || !facetect_tid) {
     toast.error(t('invalidUrl'));
   }
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      if (status === "success" && token && user_id && facetect_tid) {
+      if (status === 'success' && token && user_id && facetect_tid) {
         await KYC.register({ token, user_id, facetect_tid })
-          .then(() => setLoading(false))
+          .then((res) => {
+            const { success, message } = res.data;
+            if (success) {
+              toast.success(message);
+              setLoading(false);
+            } else {
+              toast.error(message);
+            }
+          })
           .catch((error) => {
             let message =
               error.response && error.response.data.error

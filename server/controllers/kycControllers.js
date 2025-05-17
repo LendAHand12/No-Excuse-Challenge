@@ -1,5 +1,6 @@
 import expressAsyncHandler from "express-async-handler";
-import { createCallbackToken } from "../utils/methods.js";
+import { createCallbackToken, getFaceTecData } from "../utils/methods.js";
+import User from "../models/userModel.js";
 
 const startKYC = expressAsyncHandler(async (req, res) => {
   const { user } = req;
@@ -34,15 +35,41 @@ const register = expressAsyncHandler(async (req, res) => {
 
   try {
     if (user_id !== user.id) {
-      return res.status(400).json({ message: "Invalid token" });
+      return res.status(400).json({ message: "Unknow user" });
     }
 
+    const faceTecDataRes = await getFaceTecData(`ID_${user.id}`);
+    const faceTecData = faceTecDataRes.data[0];
+    const { isLikelyDuplicate, allUserEnrollmentsListSearchResult } =
+      faceTecData;
+    console.log({ isLikelyDuplicate, allUserEnrollmentsListSearchResult });
+
+    if (
+      isLikelyDuplicate &&
+      allUserEnrollmentsListSearchResult?.searchResults &&
+      allUserEnrollmentsListSearchResult.searchResults.length > 0
+    ) {
+      for (let enroll of allUserEnrollmentsListSearchResult.searchResults) {
+        let externalRefID = enroll.externalDatabaseRefID;
+        let userId = externalRefID.split("_")[1];
+        let dupUser = await User.findOne({
+          _id: userId,
+          status: { $ne: "DELETED" },
+        });
+        if (dupUser) {
+          res.status(200).json({
+            success: false,
+            message: "Your face has been registered to another account.",
+          });
+        }
+      }
+    }
     user.facetecTid = facetect_tid;
     user.status = "PENDING";
 
     await user.save();
 
-    return res.json({ message: "Setup Face ID successfully" });
+    return res.json({ success: true, message: "Setup Face ID successfully" });
   } catch (error) {
     // return res.status(401).json({ message: "Invalid or expired token" });
     throw new Error("Invalid token");
