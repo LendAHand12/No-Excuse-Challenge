@@ -1,6 +1,7 @@
 import expressAsyncHandler from "express-async-handler";
 import { createCallbackToken, getFaceTecData } from "../utils/methods.js";
 import User from "../models/userModel.js";
+import mongoose from "mongoose";
 
 const startKYC = expressAsyncHandler(async (req, res) => {
   const { user } = req;
@@ -30,19 +31,17 @@ const claimKYC = expressAsyncHandler(async (req, res) => {
 });
 
 const register = expressAsyncHandler(async (req, res) => {
-  const { facetect_tid, user_id } = req.body; // dữ liệu do KYC trả về
+  const { facetect_tid, user_id } = req.body;
   const { user } = req;
 
   try {
     if (user_id !== user.id) {
-      return res.status(400).json({ message: "Unknow user" });
+      return res.status(400).json({ message: "Unknown user" });
     }
 
     const faceTecDataRes = await getFaceTecData(`ID_${user.id}`);
     const faceTecData = faceTecDataRes.data[0];
-    const { isLikelyDuplicate, allUserEnrollmentsListSearchResult } =
-      faceTecData;
-    console.log({ isLikelyDuplicate, allUserEnrollmentsListSearchResult });
+    const { isLikelyDuplicate, allUserEnrollmentsListSearchResult } = faceTecData;
 
     if (
       isLikelyDuplicate &&
@@ -52,28 +51,41 @@ const register = expressAsyncHandler(async (req, res) => {
       for (let enroll of allUserEnrollmentsListSearchResult.searchResults) {
         let externalRefID = enroll.externalDatabaseRefID;
         let userId = externalRefID.split("_")[1];
-        let dupUser = await User.findOne({
-          _id: userId,
-          status: { $ne: "DELETED" },
-        });
-        if (dupUser) {
-          res.status(200).json({
-            success: false,
-            message: "Your face has been registered to another account.",
+
+        if (isValidObjectId(userId)) {
+          let dupUser = await User.findOne({
+            _id: userId,
+            status: { $ne: "DELETED" },
           });
+
+          if (dupUser) {
+            return res.status(200).json({
+              success: false,
+              message: "Your face has been registered to another account.",
+            });
+          }
         }
       }
     }
+
+    // Nếu không duplicate hoặc không trùng user nào
     user.facetecTid = facetect_tid;
     user.status = "PENDING";
-
     await user.save();
 
-    return res.json({ success: true, message: "Setup Face ID successfully" });
+    return res.json({
+      success: true,
+      message: "Setup Face ID successfully",
+    });
   } catch (error) {
-    // return res.status(401).json({ message: "Invalid or expired token" });
+    console.log({ error });
     throw new Error("Invalid token");
   }
 });
+
+
+const isValidObjectId = (id) => {
+  return mongoose.Types.ObjectId.isValid(id);
+};
 
 export { startKYC, register, claimKYC };
