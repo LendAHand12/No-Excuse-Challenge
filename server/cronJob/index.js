@@ -139,7 +139,6 @@ export const distributionHewe = asyncHandler(async () => {
         u.availableHewe = u.availableHewe + u.hewePerDay;
       }
       await u.save();
-      ygf;
     } catch (error) {
       console.log({ error });
     }

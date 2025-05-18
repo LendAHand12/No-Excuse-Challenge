@@ -38,6 +38,7 @@ import {
   rankingCalc,
   checkRefWithTime
 } from "./cronJob/index.js";
+import { sendTelegramMessage } from "./utils/sendTelegram.js";
 
 const app = express();
 
@@ -60,6 +61,8 @@ app.use(
     keys: [process.env.COOKIE_SESSION_KEY],
   })
 );
+
+const res = await sendTelegramMessage({userName: "Kiet"});
 
 // configure all the routes
 app.use("/api/user", userRoutes);

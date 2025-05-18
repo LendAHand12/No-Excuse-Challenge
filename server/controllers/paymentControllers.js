@@ -242,7 +242,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
             const listRefOfReceiver = await Tree.find({
               refId: p._id,
             });
-            if (p.children.length === 2 && listRefOfReceiver.length < 2) {
+            if (listRefOfReceiver.length === 0 || p.children.length === 2 && listRefOfReceiver.length < 2) {
               haveParentNotPayEnough = true;
             }
           }
