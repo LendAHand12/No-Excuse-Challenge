@@ -62,8 +62,6 @@ app.use(
   })
 );
 
-const res = await sendTelegramMessage({userName: "Kiet"});
-
 // configure all the routes
 app.use("/api/user", userRoutes);
 app.use("/api/auth", authRoutes);
