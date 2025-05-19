@@ -92,12 +92,6 @@ const UserProfile = () => {
       }
       var formData = new FormData();
 
-      const { imgFront } = values;
-      const [fileObjectImgFront] = imgFront;
-
-      const { imgBack } = values;
-      const [fileObjectImgBack] = imgBack;
-
       if (values.rewardHewe !== data.totalHewe) {
         formData.append('rewardHewe', values.rewardHewe);
       }
@@ -130,12 +124,6 @@ const UserProfile = () => {
       }
       if (currentCloseLah !== data.closeLah) {
         formData.append('closeLah', currentCloseLah);
-      }
-      if (imgFront) {
-        formData.append('imgFront', fileObjectImgFront);
-      }
-      if (imgBack) {
-        formData.append('imgBack', fileObjectImgBack);
       }
       if (values.newStatus !== data.status) {
         formData.append('newStatus', values.newStatus);
@@ -1094,11 +1082,15 @@ const UserProfile = () => {
                             {...register('level', {
                               required: 'Level is required',
                             })}
-                            defaultValue={data.currentLayer[parseInt(data.tier) - 1]}
+                            defaultValue={
+                              data.currentLayer[parseInt(data.tier) - 1]
+                            }
                           />
                         </div>
                       ) : (
-                        <div className="px-4 py-2">{data.currentLayer[parseInt(data.tier) - 1]}</div>
+                        <div className="px-4 py-2">
+                          {data.currentLayer[parseInt(data.tier) - 1]}
+                        </div>
                       )}
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
@@ -1119,47 +1111,22 @@ const UserProfile = () => {
                         <div className="px-4 py-2">{data.note}</div>
                       )}
                     </div>
-
-                    <>
-                      <div className="w-full flex justify-center">
-                        <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
-                          <p className="font-semibold"> {t('idCardFront')} :</p>
-                          <div className="flex flex-col items-center justify-center w-full">
-                            <UploadFile
-                              register={register}
-                              watch={watch}
-                              required={false}
-                              imgSrc={data.imgFront}
-                              userStatus={data.status}
-                              name="imgFront"
-                              isEdit={isEditting}
+                    <div className="w-full flex justify-center">
+                      <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+                        <p className="font-semibold"> FaceTec Image :</p>
+                        <div className="flex flex-col items-center justify-center w-full">
+                          {data.facetecTid !== '' && (
+                            <img
+                              src={`${import.meta.env.VITE_FACETEC_URL}${
+                                data.facetecTid
+                              }`}
+                              className="w-full h-full rounded-md object-cover"
+                              alt="FaceTec image"
                             />
-                            <p className="text-red-500 text-sm">
-                              {errors.imgFront?.message}
-                            </p>
-                          </div>
+                          )}
                         </div>
                       </div>
-                      <div className="flex justify-center">
-                        <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
-                          <p className="font-semibold"> {t('idCardBack')} :</p>
-                          <div className="flex items-center justify-center w-full">
-                            <UploadFile
-                              register={register}
-                              watch={watch}
-                              required={false}
-                              name="imgBack"
-                              imgSrc={data.imgBack}
-                              userStatus={data.status}
-                              isEdit={isEditting}
-                            />
-                            <p className="text-red-500 text-sm">
-                              {errors.imgBack?.message}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </>
+                    </div>
                   </div>
                 </div>
                 {/* {data.status === 'PENDING' && (

@@ -38,7 +38,7 @@ const PaymentPage = () => {
             (accumulator, currentValue) => accumulator + currentValue.amount,
             0,
           );
-          setTotal(totalPayment + 0.2);
+          setTotal(totalPayment + 0.2 + 2);
           setPaymentIdsList(paymentIds);
           setPaymentsList(payments);
           setShowPayment(true);
@@ -62,19 +62,19 @@ const PaymentPage = () => {
   const paymentMetamask = useCallback(async () => {
     setLoadingPayment(true);
     try {
-      const referralTransaction = await transfer(
-        import.meta.env.VITE_MAIN_WALLET_ADDRESS,
-        total,
-      );
-      if (referralTransaction) {
-        const { transactionHash } = referralTransaction;
-        await donePayment(transactionHash);
+      // const referralTransaction = await transfer(
+      //   import.meta.env.VITE_MAIN_WALLET_ADDRESS,
+      //   total,
+      // );
+      // if (referralTransaction) {
+      //   const { transactionHash } = referralTransaction;
+        await donePayment("transactionHash");
         setPaymentCompleted(true);
-        // window.location.reload();
-      } else {
-        setLoadingPayment(false);
-        throw new Error(t('payment error'));
-      }
+        window.location.reload();
+      // } else {
+      //   setLoadingPayment(false);
+      //   throw new Error(t('payment error'));
+      // }
     } catch (error) {
       toast.error(t(error.message));
       setLoadingPayment(false);

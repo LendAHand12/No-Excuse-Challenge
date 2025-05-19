@@ -173,11 +173,11 @@ const userSchema = mongoose.Schema(
     },
     bonusRef: {
       type: Boolean,
-      default: false
+      default: false,
     },
     walletAddressChange: {
       type: String,
-      default: ""
+      default: "",
     },
     role: {
       type: String,
@@ -185,8 +185,12 @@ const userSchema = mongoose.Schema(
     },
     paymentStep: {
       type: Number,
-      default: 0
-    }
+      default: 0,
+    },
+    facetecTid: {
+      type: String,
+      default: ""
+    },
   },
   {
     timestamps: true,

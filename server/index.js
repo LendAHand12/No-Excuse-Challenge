@@ -29,6 +29,7 @@ import withdrawRoutes from "./routes/withdrawRoutes.js";
 import iceBreakerRoutes from "./routes/iceBreakerRoutes.js";
 import incomeRoutes from "./routes/incomeRoutes.js";
 import cronjobRoutes from "./routes/cronjobRoutes.js";
+import kycRoutes from "./routes/kycRoutes.js";
 
 import {
   countChildToData,
@@ -81,6 +82,7 @@ app.use("/api/withdraw", withdrawRoutes);
 app.use("/api/ice-breaker", iceBreakerRoutes);
 app.use("/api/income", incomeRoutes);
 app.use("/api/cronjob", cronjobRoutes);
+app.use("/api/kyc", kycRoutes);
 
 app.use(notFound);
 

@@ -250,6 +250,7 @@ const getUserById = asyncHandler(async (req, res) => {
       totalHold,
       totalChild: tree.countChild,
       income: tree.income,
+      facetecTid: user.facetecTid
     });
   } else {
     res.status(404);
@@ -389,6 +390,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       totalHold,
       totalChild: tree.countChild,
       income: tree.income,
+      facetecTid: user.facetecTid
     });
   } else {
     res.status(404);
@@ -564,6 +566,7 @@ const updateUser = asyncHandler(async (req, res) => {
           bonusRef: updatedUser.bonusRef,
           walletAddressChange: updatedUser.walletAddressChange,
           totalHold,
+          facetecTid: updatedUser.facetecTid
         },
       });
     }

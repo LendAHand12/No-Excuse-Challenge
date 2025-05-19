@@ -31,15 +31,15 @@ const claimHewe = asyncHandler(async (req, res) => {
     // });
 
     if (user.availableHewe > 0) {
-      const receipt = await sendHewe({
-        amount: user.availableHewe,
-        receiverAddress: user.walletAddress,
-      });
+      // const receipt = await sendHewe({
+      //   amount: user.availableHewe,
+      //   receiverAddress: user.walletAddress,
+      // });
 
       const claimed = await Claim.create({
         userId: user.id,
         amount: user.availableHewe,
-        hash: receipt.hash,
+        hash: "receipt.hash",
         coin: "HEWE",
       });
 
@@ -96,14 +96,14 @@ const claimUsdt = asyncHandler(async (req, res) => {
 
     if (user.availableUsdt > 0) {
       if (user.availableUsdt < 100) {
-        const receipt = await sendUsdt({
-          amount: user.availableUsdt - 1,
-          receiverAddress: user.walletAddress,
-        });
+        // const receipt = await sendUsdt({
+        //   amount: user.availableUsdt - 1,
+        //   receiverAddress: user.walletAddress,
+        // });
         const claimed = await Claim.create({
           userId: user.id,
           amount: user.availableUsdt,
-          hash: receipt.hash,
+          hash: "receipt.hash",
           coin: "USDT",
         });
 
