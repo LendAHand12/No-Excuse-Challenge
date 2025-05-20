@@ -1117,9 +1117,6 @@ const UserProfile = () => {
                         <div className="flex flex-col items-center justify-center w-full">
                           {data.facetecTid !== '' && (
                             <img
-                              // src={`${import.meta.env.VITE_FACETEC_URL}${
-                              //   data.facetecTid
-                              // }`}
                               src={`${import.meta.env.VITE_FACETEC_URL}/api/liveness/image?tid=${data.facetecTid}`}
                               className="w-full h-full rounded-md object-cover"
                               alt="FaceTec image"
