@@ -95,7 +95,7 @@ const claimUsdt = asyncHandler(async (req, res) => {
     }
 
     if (user.availableUsdt > 0) {
-      if (user.availableUsdt < 100) {
+      if (user.availableUsdt < 200) {
         const receipt = await sendUsdt({
           amount: user.availableUsdt - 1,
           receiverAddress: user.walletAddress,
