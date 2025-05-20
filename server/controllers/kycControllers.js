@@ -9,9 +9,9 @@ const startKYC = expressAsyncHandler(async (req, res) => {
   const token = createCallbackToken(user._id);
   const callbackUrl = `${process.env.FRONTEND_BASE_URL}/user/kyc?token=${token}`;
 
-  const redirectToKYC = `${
-    process.env.KYC_URL
-  }/enroll.html?callback=${encodeURIComponent(callbackUrl)}&user_id=${user.id}`;
+  const redirectToKYC = `${process.env.KYC_URL}/enroll.html?callback=${encodeURIComponent(
+    callbackUrl
+  )}&user_id=${user.id}`;
 
   res.json({ url: redirectToKYC });
 });
@@ -23,9 +23,9 @@ const claimKYC = expressAsyncHandler(async (req, res) => {
   const token = createCallbackToken(user._id);
   const callbackUrl = `${process.env.FRONTEND_BASE_URL}/user/claim?coin=${coin}&token=${token}`;
 
-  const redirectToKYC = `${
-    process.env.KYC_URL
-  }/verify.html?callback=${encodeURIComponent(callbackUrl)}&user_id=${user.id}`;
+  const redirectToKYC = `${process.env.KYC_URL}/verify.html?callback=${encodeURIComponent(
+    callbackUrl
+  )}&user_id=${user.id}`;
 
   res.json({ url: redirectToKYC });
 });
@@ -56,6 +56,7 @@ const register = expressAsyncHandler(async (req, res) => {
           let dupUser = await User.findOne({
             _id: userId,
             status: { $ne: "DELETED" },
+            status: { $ne: "REJECTED" },
           });
 
           if (dupUser) {
@@ -82,7 +83,6 @@ const register = expressAsyncHandler(async (req, res) => {
     throw new Error("Invalid token");
   }
 });
-
 
 const isValidObjectId = (id) => {
   return mongoose.Types.ObjectId.isValid(id);
