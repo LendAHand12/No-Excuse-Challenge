@@ -189,7 +189,11 @@ const userSchema = mongoose.Schema(
     },
     facetecTid: {
       type: String,
-      default: ""
+      default: "",
+    },
+    kycFee: {
+      type: Boolean,
+      default: false,
     },
   },
   {

@@ -204,13 +204,33 @@ export const checkRefWithTime = asyncHandler(async () => {
     if (listRefId.length < 2) {
       if (diffDays > 45) {
         u.errLahCode = "OVER45";
-      } else if(diffDays > 35) {
+      } else if (diffDays > 35) {
         u.errLahCode = "OVER35";
       }
     } else {
       u.errLahCode = "";
     }
-    
+
+    await u.save();
+  }
+});
+
+export const sendMailKycFee = asyncHandler(async () => {
+  const currentDay = moment();
+  const listUsers = await User.find({
+    $and: [{ isAdmin: false }, { status: "APPROVED" }, { tier: 1 }, { facetecTid: { $ne: "" } }],
+  });
+
+  for (let u of listUsers) {
+    const diffDays = currentDay.diff(u.createdAt, "days");
+
+    if (diffDays > 1) {
+      u.availableUsdt = u.availableUsdt - 2;
+      u.kycFee = true;
+    } else {
+      u.kycFee = true;
+    }
+
     await u.save();
   }
 });

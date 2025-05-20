@@ -47,6 +47,7 @@ const Profile = () => {
     walletAddressChange,
     currentLayer,
     facetecTid,
+    kycFee,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -377,6 +378,19 @@ const Profile = () => {
           </div>
         )}
 
+        {kycFee && (
+          <div
+            className="w-full bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded mb-5"
+            role="alert"
+          >
+            <span className="block sm:inline">
+              {t(
+                'To enhance security, facial recognition verification and a 2 USDT/year fee will be applied. The fee will be auto-deducted annually. Thank you for your support!',
+              )}
+            </span>
+          </div>
+        )}
+
         {(phone === '' || idCode === '') && (
           <div
             className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-5"
@@ -411,9 +425,13 @@ const Profile = () => {
           </div>
           <button
             className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
-              availableHewe === 0 || status !== 'APPROVED' || facetecTid === "" ? 'opacity-30' : ''
+              availableHewe === 0 || status !== 'APPROVED' || facetecTid === ''
+                ? 'opacity-30'
+                : ''
             }`}
-            disabled={availableHewe === 0 || status !== 'APPROVED' || facetecTid === ""}
+            disabled={
+              availableHewe === 0 || status !== 'APPROVED' || facetecTid === ''
+            }
             onClick={claimHewe}
           >
             {loadingClaimHewe && <Loading />}
@@ -439,9 +457,13 @@ const Profile = () => {
           </div>
           <button
             className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
-              availableUsdt === 0 || status !== 'APPROVED' || facetecTid === "" ? 'opacity-30' : ''
+              availableUsdt === 0 || status !== 'APPROVED' || facetecTid === ''
+                ? 'opacity-30'
+                : ''
             }`}
-            disabled={availableUsdt === 0 || status !== 'APPROVED' || facetecTid === ""}
+            disabled={
+              availableUsdt === 0 || status !== 'APPROVED' || facetecTid === ''
+            }
             onClick={() => setShowModal(true)}
           >
             WITHDRAW USDT

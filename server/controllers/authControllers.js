@@ -107,6 +107,7 @@ const registerUser = asyncHandler(async (req, res) => {
         idCode,
         buyPackage: "A",
         role: "user",
+        kycFee: true,
       });
 
       const tree = await Tree.create({
@@ -275,7 +276,8 @@ const authUser = asyncHandler(async (req, res) => {
         walletAddressChange: user.walletAddressChange,
         totalChild: tree ? tree.countChild : 0,
         income: tree ? tree.income : 0,
-        facetecTid: user.facetecTid
+        facetecTid: user.facetecTid,
+        kycFee: user.kycFee,
       },
       accessToken,
       refreshToken,
@@ -289,7 +291,6 @@ const resetUserPassword = asyncHandler(async (req, res) => {
   try {
     // update the user password if the jwt is verified successfully
     const { token, password } = req.body;
-    console.log({ password });
     const decodedToken = jwt.verify(token, process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET);
     const user = await User.findById(decodedToken.id);
 

@@ -34,6 +34,7 @@ const UserProfile = () => {
   const [phone, setPhone] = useState('');
   const [errorPhone, setErrPhone] = useState(false);
   const [isBonusRef, setIsBonusRef] = useState(false);
+  const [kycFee, setKycFee] = useState(false);
   const [walletChange, setWalletChange] = useState('');
   const [loadingChangeWallet, setLoadingChangeWallet] = useState(false);
 
@@ -61,6 +62,7 @@ const UserProfile = () => {
             openLah,
             closeLah,
             bonusRef,
+            kycFee,
             walletAddressChange,
           } = response.data;
           setValue('userId', userId);
@@ -72,6 +74,7 @@ const UserProfile = () => {
           setCurrentOpenLah(openLah);
           setCurrentCloseLah(closeLah);
           setIsBonusRef(bonusRef);
+          setKycFee(kycFee);
           setWalletChange(walletAddressChange);
         })
         .catch((error) => {
@@ -353,17 +356,6 @@ const UserProfile = () => {
     if (data.countPay === 0) {
       setPackageOptions(['A', 'B', 'C']);
     } else {
-      // if (data.buyPackage === "A") {
-      //   setPackageOptions([]);
-      // } else if (data.buyPackage === "B") {
-      //   if (data.countPay === 7) {
-      //     setPackageOptions(["B", "C"]);
-      //   }
-      // } else if (data.buyPackage === "C") {
-      //   if (data.countPay === 7) {
-      //     setPackageOptions(["B", "C"]);
-      //   }
-      // }
       setPackageOptions([data.buyPackage]);
     }
   }, [data]);
@@ -405,6 +397,19 @@ const UserProfile = () => {
             >
               <span className="block sm:inline">
                 {t('Wallet information update is pending admin approval')}
+              </span>
+            </div>
+          )}
+
+          {kycFee && (
+            <div
+              className="w-full bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded mb-5"
+              role="alert"
+            >
+              <span className="block sm:inline">
+                {t(
+                  'To enhance security, facial recognition verification and a 2 USDT/year fee will be applied. The fee will be auto-deducted annually. Thank you for your support!',
+                )}
               </span>
             </div>
           )}
@@ -1117,7 +1122,9 @@ const UserProfile = () => {
                         <div className="flex flex-col items-center justify-center w-full">
                           {data.facetecTid !== '' && (
                             <img
-                              src={`${import.meta.env.VITE_FACETEC_URL}/api/liveness/image?tid=${data.facetecTid}`}
+                              src={`${
+                                import.meta.env.VITE_FACETEC_URL
+                              }/api/liveness/image?tid=${data.facetecTid}`}
                               className="w-full h-full rounded-md object-cover"
                               alt="FaceTec image"
                             />
