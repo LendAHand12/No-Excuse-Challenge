@@ -22,7 +22,7 @@ const claimHewe = asyncHandler(async (req, res) => {
   processingHeweUserIds.push(user.id);
 
   try {
-    if (user.status !== "APPROVED") {
+    if (user.status !== "APPROVED" || user.facetecTid === "") {
       throw new Error("Please verify your account");
     }
     // const response = await axios.post("https://serepay.net/api/payment/claimHewe", {
@@ -90,7 +90,7 @@ const claimUsdt = asyncHandler(async (req, res) => {
   //     "This withdrawal function is under maintenance, please come back later",
   // });
   try {
-    if (user.status !== "APPROVED") {
+    if (user.status !== "APPROVED" || user.facetecTid === "") {
       throw new Error("Please verify your account");
     }
 

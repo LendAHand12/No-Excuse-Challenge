@@ -411,9 +411,9 @@ const Profile = () => {
           </div>
           <button
             className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
-              availableHewe === 0 || status !== 'APPROVED' ? 'opacity-30' : ''
+              availableHewe === 0 || status !== 'APPROVED' || facetecTid === "" ? 'opacity-30' : ''
             }`}
-            disabled={availableHewe === 0 || status !== 'APPROVED'}
+            disabled={availableHewe === 0 || status !== 'APPROVED' || facetecTid === ""}
             onClick={claimHewe}
           >
             {loadingClaimHewe && <Loading />}
@@ -439,9 +439,9 @@ const Profile = () => {
           </div>
           <button
             className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
-              availableUsdt === 0 || status !== 'APPROVED' ? 'opacity-30' : ''
+              availableUsdt === 0 || status !== 'APPROVED' || facetecTid === "" ? 'opacity-30' : ''
             }`}
-            disabled={availableUsdt === 0 || status !== 'APPROVED'}
+            disabled={availableUsdt === 0 || status !== 'APPROVED' || facetecTid === ""}
             onClick={() => setShowModal(true)}
           >
             WITHDRAW USDT
