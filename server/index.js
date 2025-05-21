@@ -38,7 +38,7 @@ import {
   distributionHewe,
   rankingCalc,
   checkRefWithTime,
-  sendMailKycFee,
+  deleteUser
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 
@@ -104,13 +104,6 @@ const cron1 = new CronJob("00 01 * * *", async () => {
   console.log("Delete user done");
 });
 
-const cron12 = new CronJob("30 01 * * *", async () => {
-  // 1h30
-  console.log("Send kyc fee user start");
-  await sendMailKycFee();
-  console.log("Send kyc fee done");
-});
-
 const cron2 = new CronJob("00 02 * * *", async () => {
   // 2h
   console.log("Count child start");
@@ -137,6 +130,13 @@ const cron5 = new CronJob("00 05 * * *", async () => {
   console.log("Check ref with time start");
   await checkRefWithTime();
   console.log("Check ref with time done");
+});
+
+const cron6 = new CronJob("00 05 * * *", async () => {
+  // 4h
+  console.log("Delete user start");
+  await deleteUser();
+  console.log("Delete user done");
 });
 
 cron0.start();

@@ -234,3 +234,17 @@ export const sendMailKycFee = asyncHandler(async () => {
     await u.save();
   }
 });
+
+export const deleteUser = asyncHandler(async () => {
+  const listUser = await User.find({
+    $and: [{ isAdmin: false }],
+  });
+  for (let u of listUser) {
+    console.log({ userId: u.userId });
+    const treeOfUser = await Tree.findOne({ userId: u._id });
+    if(!treeOfUser) {
+      await User.deleteMany({_id: u._id});
+    }
+
+  }
+});
