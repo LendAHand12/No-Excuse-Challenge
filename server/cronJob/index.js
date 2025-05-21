@@ -4,7 +4,10 @@ import moment from "moment";
 import User from "../models/userModel.js";
 import sendMail from "../utils/sendMail.js";
 import { sendMailUpdateLayerForAdmin } from "../utils/sendMailCustom.js";
-import { getCountAllChildren, getCountIncome } from "../controllers/userControllers.js";
+import {
+  getCountAllChildren,
+  getCountIncome,
+} from "../controllers/userControllers.js";
 import { findRootLayer, getUserClosestToNow } from "../utils/methods.js";
 import Tree from "../models/treeModel.js";
 import Transaction from "../models/transactionModel.js";
@@ -12,7 +15,12 @@ import Honor from "../models/honorModel.js";
 
 export const deleteUser24hUnPay = asyncHandler(async () => {
   const listUser = await User.find({
-    $and: [{ tier: 1 }, { countPay: 0 }, { isAdmin: false }, { status: { $ne: "DELETED" } }],
+    $and: [
+      { tier: 1 },
+      { countPay: 0 },
+      { isAdmin: false },
+      { status: { $ne: "DELETED" } },
+    ],
   });
   for (let u of listUser) {
     console.log({ userId: u.userId });
@@ -127,7 +135,9 @@ export const areArraysEqual = (arr1, arr2) => {
 export const distributionHewe = asyncHandler(async () => {
   const listUser = await User.find({
     $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }, { countPay: 13 }],
-  }).select("userId totalHewe availableHewe hewePerDay claimedHewe currentLayer");
+  }).select(
+    "userId totalHewe availableHewe hewePerDay claimedHewe currentLayer"
+  );
 
   for (let u of listUser) {
     try {
@@ -215,36 +225,31 @@ export const checkRefWithTime = asyncHandler(async () => {
   }
 });
 
-export const sendMailKycFee = asyncHandler(async () => {
-  const currentDay = moment();
-  const listUsers = await User.find({
-    $and: [{ isAdmin: false }, { status: "APPROVED" }, { tier: 1 }, { facetecTid: { $ne: "" } }],
-  });
-
-  for (let u of listUsers) {
-    const diffDays = currentDay.diff(u.createdAt, "days");
-
-    if (diffDays > 1) {
-      u.availableUsdt = u.availableUsdt - 2;
-      u.kycFee = true;
-    } else {
-      u.kycFee = true;
-    }
-
-    await u.save();
-  }
-});
-
-export const deleteUser = asyncHandler(async () => {
+export const blockUserNotKYC = asyncHandler(async () => {
   const listUser = await User.find({
-    $and: [{ isAdmin: false }],
+    $and: [{ isAdmin: false }, { status: "UNVERIFY" }],
   });
-  for (let u of listUser) {
-    console.log({ userId: u.userId });
-    const treeOfUser = await Tree.findOne({ userId: u._id });
-    if(!treeOfUser) {
-      await User.deleteMany({_id: u._id});
-    }
 
+  const currentDay = moment("2025-05-23 00:00:00");
+  const fromDate = moment("2025-05-20");
+  for (let u of listUser) {
+    if (u.createdAt >= fromDate) {
+      if (u.facetecTid === "") {
+        const diffHours = currentDay.diff(u.createdAt, "hours", true);
+        // console.log({ name: u.userId, diffHours });
+        if (diffHours > 48) {
+          u.status = "LOCKED";
+        }
+      }
+    } else {
+      if (u.facetecTid === "") {
+        const diffDays = currentDay.diff(fromDate, "days");
+        // console.log({ name: u.userId, diffDays });
+        if (diffDays > 20) {
+          u.status = "LOCKED";
+        }
+      }
+    }
+    await u.save();
   }
 });

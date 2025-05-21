@@ -467,6 +467,9 @@ const AdminUserPages = () => {
                 Email
               </th>
               <th scope="col" className="px-6 py-3">
+                Age
+              </th>
+              <th scope="col" className="px-6 py-3">
                 Wallet Address
               </th>
               <th scope="col" className="px-6 py-3">
@@ -497,6 +500,36 @@ const AdminUserPages = () => {
                     </div>
                   </th>
                   <td className="px-6 py-4">{ele.email}</td>
+                  <td className="px-6 py-4">
+                    {ele.ageEstimate && (
+                      <a
+                        className={`hover:underline ${
+                          ele.ageEstimate && ele.ageEstimate < 5
+                            ? 'text-red-500'
+                            : 'text-blue-500'
+                        }`}
+                        href={`http://3.107.26.68:3002/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${ele._id}`}
+                        target="_blank"
+                      >
+                        {ele.ageEstimate === 2
+                          ? '8+'
+                          : ele.ageEstimate === 3
+                          ? '13+'
+                          : ele.ageEstimate === 4
+                          ? '16+'
+                          : ele.ageEstimate === 5
+                          ? '18+'
+                          : ele.ageEstimate === 6
+                          ? '21+'
+                          : ele.ageEstimate === 7
+                          ? '25+'
+                          : ele.ageEstimate === 8
+                          ? '30+'
+                          : ''}
+                      </a>
+                    )}
+                    {!ele.ageEstimate && <p>N/A</p>}
+                  </td>
                   <td className="px-6 py-4">
                     {shortenWalletAddress(ele.walletAddress, 12)}
                   </td>

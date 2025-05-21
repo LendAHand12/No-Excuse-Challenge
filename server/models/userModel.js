@@ -195,6 +195,9 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    ageEstimate: {
+      type: Number,
+    }
   },
   {
     timestamps: true,

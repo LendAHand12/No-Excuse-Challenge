@@ -2,6 +2,7 @@ import expressAsyncHandler from "express-async-handler";
 import { createCallbackToken, getFaceTecData } from "../utils/methods.js";
 import User from "../models/userModel.js";
 import mongoose from "mongoose";
+import DoubleKyc from "../models/doubleKycModel.js";
 
 const startKYC = expressAsyncHandler(async (req, res) => {
   const { user } = req;
@@ -41,7 +42,8 @@ const register = expressAsyncHandler(async (req, res) => {
 
     const faceTecDataRes = await getFaceTecData(`ID_${user.id}`);
     const faceTecData = faceTecDataRes.data[0];
-    const { isLikelyDuplicate, allUserEnrollmentsListSearchResult } = faceTecData;
+    const { isLikelyDuplicate, allUserEnrollmentsListSearchResult, ageV2GroupEnumInt } = faceTecData;
+    console.log({isLikelyDuplicate, allUserEnrollmentsListSearchResult, ageV2GroupEnumInt});
 
     if (
       isLikelyDuplicate &&
@@ -60,6 +62,12 @@ const register = expressAsyncHandler(async (req, res) => {
           });
 
           if (dupUser) {
+
+            await DoubleKyc.create({
+              userIdFrom: user._id,
+              userIdTo: userId
+            });
+
             return res.status(200).json({
               success: false,
               message: "Your face has been registered to another account.",
@@ -72,6 +80,7 @@ const register = expressAsyncHandler(async (req, res) => {
     // Nếu không duplicate hoặc không trùng user nào
     user.facetecTid = facetect_tid;
     user.status = "PENDING";
+    user.ageEstimate = ageV2GroupEnumInt;
     await user.save();
 
     return res.json({
