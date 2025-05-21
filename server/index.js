@@ -141,7 +141,7 @@ const cron5 = new CronJob("00 05 * * *", async () => {
 
 cron0.start();
 cron1.start();
-cron12.start();
+// cron12.start();
 cron2.start();
 cron3.start();
 cron4.start();
