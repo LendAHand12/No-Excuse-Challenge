@@ -306,9 +306,15 @@ const DreamPoolPage: React.FC = () => {
                     !loading &&
                     iceBreakers.map((ele) => (
                       <tr className="border-b" key={ele._id}>
-                        <td className="px-6 py-4">{ele.userId.userId}</td>
                         <td className="px-6 py-4">
-                          {shortenWalletAddress(ele.userId.email, 16)}
+                          {ele.userId && ele.userId.userId
+                            ? ele.userId.userId
+                            : 'Unknow'}
+                        </td>
+                        <td className="px-6 py-4">
+                          {ele.userId && ele.userId.email
+                            ? shortenWalletAddress(ele.userId.email, 16)
+                            : 'Unknow'}
                         </td>
                         <td className="px-6 py-4">
                           {new Date(ele.createdAt).toLocaleDateString('vi')}
