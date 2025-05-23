@@ -637,26 +637,24 @@ function App() {
             </>
           }
         />
-        {userInfo?.facetecTid === '' && (
-          <Route
-            path="/user/kyc"
-            element={
-              <>
-                <PageTitle title="Register KYC | NoExcuseChallenge" />
-                <RegisterKYCPage />
-              </>
-            }
-          />
-        )}
         <Route
-            path="/user/claim"
-            element={
-              <>
-                <PageTitle title="Claim KYC | NoExcuseChallenge" />
-                <ClaimKYCPage />
-              </>
-            }
-          />
+          path="/user/kyc"
+          element={
+            <>
+              <PageTitle title="Register KYC | NoExcuseChallenge" />
+              <RegisterKYCPage />
+            </>
+          }
+        />
+        <Route
+          path="/user/claim"
+          element={
+            <>
+              <PageTitle title="Claim KYC | NoExcuseChallenge" />
+              <ClaimKYCPage />
+            </>
+          }
+        />
       </Route>
       <Route path="*" element={<NotFoundPage />}></Route>
     </Routes>
