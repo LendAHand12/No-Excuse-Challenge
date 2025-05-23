@@ -38,7 +38,8 @@ import {
   distributionHewe,
   rankingCalc,
   checkRefWithTime,
-  blockUserNotKYC
+  blockUserNotKYC,
+  test1,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 
@@ -139,9 +140,11 @@ const cron5 = new CronJob("00 05 * * *", async () => {
   console.log("Check ref with time done");
 });
 
+// await test1();
+
 cron0.start();
 cron1.start();
-// cron12.start();
+cron12.start();
 cron2.start();
 cron3.start();
 cron4.start();
