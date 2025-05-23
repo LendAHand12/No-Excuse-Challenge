@@ -8,5 +8,6 @@ export default [
   { title: "Withdraw", name: "withdraw" },
   { title: "Export", name: "export" },
   { title: "ADMIN", name: "admin" },
+  { title: "KYC", name: "kyc" },
   { title: "Other", name: "other" },
 ];

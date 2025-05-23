@@ -3,12 +3,14 @@ import mongoose from "mongoose";
 const doubleKycSchema = mongoose.Schema(
   {
     userIdFrom: {
-      type: String,
-      require: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     userIdTo: {
-      type: String,
-      require: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
   },
   {

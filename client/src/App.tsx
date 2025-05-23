@@ -67,6 +67,7 @@ import { useSelector } from 'react-redux';
 import ClaimsPage from './pages/User/Claims';
 import RegisterKYCPage from './pages/User/RegisterKYC';
 import ClaimKYCPage from './pages/User/ClaimKYC';
+import AdminDoubleKycPage from './pages/Admin/DoubleKyc';
 
 function App() {
   const { pathname } = useLocation();
@@ -526,6 +527,19 @@ function App() {
               <>
                 <PageTitle title="Cronjob | NoExcuseChallenge" />
                 <AdminCronjobPage />
+              </>
+            }
+          />
+        )}
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/double-kyc')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/double-kyc"
+            element={
+              <>
+                <PageTitle title="Double KYC | NoExcuseChallenge" />
+                <AdminDoubleKycPage />
               </>
             }
           />
