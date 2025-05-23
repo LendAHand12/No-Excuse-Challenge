@@ -104,7 +104,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, routes }: SidebarProps) => {
       </div>
       {/* <!-- SIDEBAR HEADER --> */}
 
-      <div className="no-scrollbar z-1 flex flex-col lg:overflow-y-hidden duration-300 ease-linear">
+      <div className="no-scrollbar z-1 flex flex-col lg:overflow-y-auto duration-300 ease-linear">
         {/* <!-- Sidebar Menu --> */}
         <nav className="mt-5 py-4 pl-4 lg:mt-9 lg:pl-6">
           {/* <!-- Menu Group --> */}
