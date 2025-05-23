@@ -42,8 +42,9 @@ const register = expressAsyncHandler(async (req, res) => {
 
     const faceTecDataRes = await getFaceTecData(`ID_${user.id}`);
     const faceTecData = faceTecDataRes.data[0];
-    const { isLikelyDuplicate, allUserEnrollmentsListSearchResult, ageV2GroupEnumInt } = faceTecData;
-    console.log({isLikelyDuplicate, allUserEnrollmentsListSearchResult, ageV2GroupEnumInt});
+    const { isLikelyDuplicate, allUserEnrollmentsListSearchResult, ageV2GroupEnumInt } =
+      faceTecData;
+    console.log({ isLikelyDuplicate, allUserEnrollmentsListSearchResult, ageV2GroupEnumInt });
 
     if (
       isLikelyDuplicate &&
@@ -62,10 +63,9 @@ const register = expressAsyncHandler(async (req, res) => {
           });
 
           if (dupUser) {
-
             await DoubleKyc.create({
               userIdFrom: user._id,
-              userIdTo: userId
+              userIdTo: userId,
             });
 
             return res.status(200).json({
@@ -81,6 +81,10 @@ const register = expressAsyncHandler(async (req, res) => {
     user.facetecTid = facetect_tid;
     user.status = "PENDING";
     user.ageEstimate = ageV2GroupEnumInt;
+    if (!user.kycFee) {
+      user.availableUsdt = user.availableUsdt - 2;
+      user.kycFee = true;
+    }
     await user.save();
 
     return res.json({
