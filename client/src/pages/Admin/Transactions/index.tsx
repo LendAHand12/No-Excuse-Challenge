@@ -171,6 +171,9 @@ const AdminTransactionsPage = () => {
                   <option value="PIG" key="PIG">
                     DreamPool
                   </option>
+                  <option value="KYC" key="KYC">
+                    KYC Fee
+                  </option>
                   <option value="DIRECT" key="DIRECT">
                     {t('DIRECT')}{' '}
                   </option>

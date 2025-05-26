@@ -66,6 +66,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         let registerFee = 5;
         let pigFee = 5;
         let companyFee = 25;
+        let kycFee = 2;
         let directCommissionFee = 15;
         let referralCommissionFee = 5;
         // giao dich dang ky
@@ -137,6 +138,30 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           amount: companyFee,
           to: "Purchased HEWE",
         });
+        // KYC
+        payments.push({
+          userName: "KYC Fee",
+          amount: kycFee,
+        });
+        const transactionKYC = await Transaction.create({
+          userId: user.id,
+          amount: kycFee,
+          userCountPay: user.countPay,
+          userId_to: admin._id,
+          username_to: "KYC Fee",
+          tier: user.tier,
+          buyPackage: user.buyPackage,
+          hash: "",
+          type: "KYC",
+          status: "PENDING",
+        });
+        paymentIds.push({
+          type: "KYC",
+          id: transactionKYC._id,
+          amount: kycFee,
+          to: "KYC Fee",
+        });
+
         // giao dich hoa hong truc tiep
         if (refUser.closeLah) {
           haveRefNotPayEnough = true;
@@ -817,6 +842,7 @@ const getAllPayments = asyncHandler(async (req, res) => {
     status === "REGISTER" ||
     status === "FINE" ||
     status === "PIG" ||
+    status === "KYC" ||
     status === "COMPANY"
   ) {
     searchType = { type: status };
@@ -887,6 +913,7 @@ const getAllPayments = asyncHandler(async (req, res) => {
       status === "REFERRAL" ||
       status === "ALL" ||
       status === "PIG" ||
+      status === "KYC" ||
       status === "COMPANY"
     ) {
       const userRef = await User.findById(pay.userId_to);

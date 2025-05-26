@@ -38,7 +38,7 @@ const PaymentPage = () => {
             (accumulator, currentValue) => accumulator + currentValue.amount,
             0,
           );
-          setTotal(totalPayment + 0.2 + 2);
+          setTotal(totalPayment + 0.2);
           setPaymentIdsList(paymentIds);
           setPaymentsList(payments);
           setShowPayment(true);
@@ -148,6 +148,8 @@ const PaymentPage = () => {
                             ? 'bg-pink-100'
                             : payment.type === 'COMPANY'
                             ? 'bg-purple-100'
+                            : payment.type === 'KYC'
+                            ? 'bg-teal-100'
                             : 'bg-blue-50 text-blue-800'
                         }`}
                         role="alert"
@@ -176,6 +178,8 @@ const PaymentPage = () => {
                                 ? 'Dream Pool'
                                 : payment.type === 'COMPANY'
                                 ? 'HEWE'
+                                : payment.type === 'KYC'
+                                ? 'KYC Fee'
                                 : t('Foundation Contribution')}
                               <span> : </span>
                             </span>
