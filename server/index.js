@@ -30,6 +30,7 @@ import iceBreakerRoutes from "./routes/iceBreakerRoutes.js";
 import incomeRoutes from "./routes/incomeRoutes.js";
 import cronjobRoutes from "./routes/cronjobRoutes.js";
 import kycRoutes from "./routes/kycRoutes.js";
+import configRoutes from "./routes/configRoutes.js";
 
 import {
   countChildToData,
@@ -85,6 +86,7 @@ app.use("/api/ice-breaker", iceBreakerRoutes);
 app.use("/api/income", incomeRoutes);
 app.use("/api/cronjob", cronjobRoutes);
 app.use("/api/kyc", kycRoutes);
+app.use("/api/config", configRoutes);
 
 app.use(notFound);
 

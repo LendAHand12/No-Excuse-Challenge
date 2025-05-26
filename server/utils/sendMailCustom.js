@@ -271,7 +271,7 @@ export const sendMailChangeWalletToAdmin = async (mailInfo) => {
     </p>
     </div>
 			`,
-    cc: [process.env.MAIL_ADMIN1, process.env.MAIL_ADMIN2]
+    cc: [process.env.MAIL_ADMIN1, process.env.MAIL_ADMIN2],
   };
 
   const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
@@ -391,6 +391,29 @@ export const sendMailReject = async (mailInfo) => {
       DreamChain
       <br></br>
       www.noexcuse.live
+			`,
+    cc: process.env.CC_MAIL,
+  };
+
+  const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(info);
+    }
+  });
+
+  // send a promise since nodemailer is async
+  if (mailSent) return Promise.resolve(1);
+};
+
+export const sendMailGetHewePrice = async () => {
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: process.env.CC_MAIL,
+    subject: "Please check connect API get HEWE price",
+    html: `
+    <h1>Warning: Please check connect API get HEWE price</h1>
 			`,
     cc: process.env.CC_MAIL,
   };

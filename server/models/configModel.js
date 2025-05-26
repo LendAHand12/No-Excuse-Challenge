@@ -6,8 +6,12 @@ const configSchema = mongoose.Schema(
       default: "",
     },
     value: {
-      type: Number,
+      type: mongoose.Schema.Types.Mixed,
     },
+    type: {
+      type: String,
+      default: "string"
+    }
   },
   { timestamps: true }
 );

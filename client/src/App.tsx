@@ -68,6 +68,7 @@ import ClaimsPage from './pages/User/Claims';
 import RegisterKYCPage from './pages/User/RegisterKYC';
 import ClaimKYCPage from './pages/User/ClaimKYC';
 import AdminDoubleKycPage from './pages/Admin/DoubleKyc';
+import AdminConfigPage from './pages/Admin/Config';
 
 function App() {
   const { pathname } = useLocation();
@@ -540,6 +541,19 @@ function App() {
               <>
                 <PageTitle title="Double KYC | NoExcuseChallenge" />
                 <AdminDoubleKycPage />
+              </>
+            }
+          />
+        )}
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/config')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/config"
+            element={
+              <>
+                <PageTitle title="Config | NoExcuseChallenge" />
+                <AdminConfigPage />
               </>
             }
           />
