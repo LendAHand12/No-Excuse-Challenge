@@ -239,6 +239,7 @@ export const blockUserNotKYC = asyncHandler(async () => {
         // console.log({ name: u.userId, diffHours });
         if (diffHours > 48) {
           u.status = "LOCKED";
+          u.lockedTime = new Date();
         }
       }
     } else {
@@ -260,7 +261,7 @@ export const test1 = asyncHandler(async () => {
       { isAdmin: false },
       { facetecTid: { $ne: "" } },
       { kycFee: true },
-      { status: "APPROVED" }
+      { status: "APPROVED" },
     ],
   });
   const admin = await User.findOne({ email: "admin2@gmail.com" });
