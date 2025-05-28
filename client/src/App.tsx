@@ -69,6 +69,7 @@ import RegisterKYCPage from './pages/User/RegisterKYC';
 import ClaimKYCPage from './pages/User/ClaimKYC';
 import AdminDoubleKycPage from './pages/Admin/DoubleKyc';
 import AdminConfigPage from './pages/Admin/Config';
+import UserHistoryPage from './pages/Admin/UserHistory';
 
 function App() {
   const { pathname } = useLocation();
@@ -554,6 +555,19 @@ function App() {
               <>
                 <PageTitle title="Config | NoExcuseChallenge" />
                 <AdminConfigPage />
+              </>
+            }
+          />
+        )}
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/user-history')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/user-history"
+            element={
+              <>
+                <PageTitle title="User History | NoExcuseChallenge" />
+                <UserHistoryPage />
               </>
             }
           />

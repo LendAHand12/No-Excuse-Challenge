@@ -1,0 +1,42 @@
+.PhoneInput {
+  width: 100%;
+  padding: 4px;
+  margin-top: -1;
+  margin-left: -3px;
+  border-radius: 6px;
+  background-color: #ffffff !important;
+  color: black;
+}
+
+.PhoneInputInput {
+  background-color: #ffffff !important;
+  font-size: 14px;
+  outline: none;
+  border: none;
+}
+
+.PhoneInputInput::placeholder {
+  color: #ccc;
+}
+
+.PhoneInputInput:-ms-input-placeholder {
+  /* Internet Explorer 10-11 */
+  color: #ccc;
+}
+
+.PhoneInputInput::-ms-input-placeholder {
+  /* Microsoft Edge */
+  color: #ccc;
+}
+
+.PhoneInputCountry {
+  margin-right: 10px;
+  border: none;
+}
+
+.PhoneInputCountryIconImg {
+  border-radius: 100%;
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+}

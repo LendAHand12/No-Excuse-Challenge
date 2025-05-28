@@ -7,12 +7,13 @@ import { UPDATE_USER_INFO } from '@/slices/auth';
 import { useForm } from 'react-hook-form';
 import User from '@/api/User';
 import KYC from '@/api/KYC';
-import Claim from '@/api/Claim';
 import { useCallback, useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import USER_RANKINGS from '@/constants/userRankings';
 import Modal from 'react-modal';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import PhoneInput from 'react-phone-number-input';
+import './index.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -69,6 +70,7 @@ const Profile = () => {
     defaultValues: {
       idCode: status !== 'REJECTED' ? idCode : null,
       phone,
+      email,
       walletAddress,
       imgBackData: '',
       imgFrontData: '',
@@ -77,7 +79,7 @@ const Profile = () => {
 
   const onSubmit = useCallback(
     async (data) => {
-      const { idCode, walletAddress } = data;
+      const { walletAddress, email } = data;
       if (!phoneNumber || phoneNumber === '') {
         setErrPhone(true);
       } else {
@@ -85,8 +87,9 @@ const Profile = () => {
         setLoading(true);
         var formData = new FormData();
 
-        formData.append('idCode', idCode.trim());
+        formData.append('phone', phoneNumber.trim());
         formData.append('walletAddress', walletAddress.trim());
+        formData.append('email', email.trim());
 
         await User.update(id, formData)
           .then((response) => {
@@ -575,7 +578,7 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        {!isEdit && (
+        {!isEdit && status === 'APPROVED' && (
           <div className="flex justify-end">
             <button
               onClick={() => setIsEdit(true)}
@@ -634,11 +637,41 @@ const Profile = () => {
             </div>
             <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
               <p>Email :</p>
-              <p>{email}</p>
+              {isEdit ? (
+                <div className="">
+                  <input
+                    className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                    {...register('email', {
+                      required: t('email is required'),
+                    })}
+                    autoComplete="off"
+                  />
+                  <p className="text-sm text-red-500">
+                    {errors.email?.message}
+                  </p>
+                </div>
+              ) : (
+                <p>{email}</p>
+              )}
             </div>
             <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
               <p>Phone number :</p>
-              <p>{phone}</p>
+              {isEdit ? (
+                <div className="">
+                  <PhoneInput
+                    defaultCountry="VN"
+                    placeholder={t('phone')}
+                    value={phoneNumber}
+                    onChange={setPhoneNumber}
+                    className="-my-1 ml-4 w-full"
+                  />
+                  <p className="text-red-500 text-sm">
+                    {errorPhone && t('Phone is required')}
+                  </p>
+                </div>
+              ) : (
+                <p>{phone}</p>
+              )}
             </div>
             <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
               <p>ID/DL/Passport number :</p>

@@ -31,6 +31,7 @@ import incomeRoutes from "./routes/incomeRoutes.js";
 import cronjobRoutes from "./routes/cronjobRoutes.js";
 import kycRoutes from "./routes/kycRoutes.js";
 import configRoutes from "./routes/configRoutes.js";
+import userHistoryRoutes from "./routes/userHistoryRoutes.js";
 
 import {
   countChildToData,
@@ -87,6 +88,7 @@ app.use("/api/income", incomeRoutes);
 app.use("/api/cronjob", cronjobRoutes);
 app.use("/api/kyc", kycRoutes);
 app.use("/api/config", configRoutes);
+app.use("/api/user-history", userHistoryRoutes);
 
 app.use(notFound);
 

@@ -252,20 +252,14 @@ export const sendMailChangeWalletToAdmin = async (mailInfo) => {
   const mailOptions = {
     from: process.env.EMAIL,
     to: process.env.CC_MAIL,
-    subject: "THÔNG TIN NGƯỜI DÙNG CẦN DUYỆT ĐỔI VÍ",
+    subject: "THÔNG TIN NGƯỜI DÙNG CẦN DUYỆT ĐỔI THÔNG TIN",
     html: `
     <div>
     <h1>
-     Thông tin người cần duyệt đổi ví
+     Thông tin người cần duyệt đổi thông tin
     </h1>
     <p>
     <strong>Họ và tên :</strong> ${userName}
-    </p><p>
-    <strong>Số điện thoại :</strong> ${phone}
-    </p>
-    <p>
-    <strong>Email :</strong> ${email}
-    </p>
     <p>
     <strong>Link profile :</strong> <a href="${process.env.FRONTEND_BASE_URL}/admin/users/${userId}" target="_blank">${process.env.FRONTEND_BASE_URL}/admin/users/${userId}</a>
     </p>

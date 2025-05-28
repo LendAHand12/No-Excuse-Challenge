@@ -1,7 +1,6 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
 import Transaction from "../models/transactionModel.js";
-import Package from "../models/packageModel.js";
 import DeleteUser from "../models/deleteUserModel.js";
 import ChangeUser from "../models/changeUserModel.js";
 import NextUserTier from "../models/nextUserTierModel.js";
@@ -15,14 +14,10 @@ import {
   findNextUser,
   findNextUserNotIncludeNextUserTier,
   findRootLayer,
-  findLevelById,
-  findUsersAtLevel,
   findHighestIndexOfLevel,
-  findNextUserByIndex,
   mergeIntoThreeGroups,
   updateValueAtIndex,
 } from "../utils/methods.js";
-import generateGravatar from "../utils/generateGravatar.js";
 import { areArraysEqual } from "../cronJob/index.js";
 import {
   sendMailChangeWalletToAdmin,
@@ -31,9 +26,9 @@ import {
 } from "../utils/sendMailCustom.js";
 import Permission from "../models/permissionModel.js";
 import Withdraw from "../models/withdrawModel.js";
-import Honor from "../models/honorModel.js";
-import mongoose, { Types } from "mongoose";
-import { isAdmin } from "../middleware/authMiddleware.js";
+import Config from "../models/configModel.js";
+import UserHistory from "../models/userHistoryModel.js";
+import { Types } from "mongoose";
 
 dotenv.config();
 
@@ -378,59 +373,58 @@ const getUserInfo = asyncHandler(async (req, res) => {
 });
 
 const updateUser = asyncHandler(async (req, res) => {
-  const { phone, idCode, buyPackage, walletAddress } = req.body;
+  const { phone, walletAddress, email } = req.body;
+
   const user = await User.findOne({ _id: req.params.id }).select("-password");
   const userHavePhone = await User.find({
-    $and: [{ phone }, { email: { $ne: user.email } }, { isAdmin: false }],
+    $and: [{ phone }, { userId: { $ne: user.userId } }, { isAdmin: false }],
   });
-  const userHaveIdCode = await User.find({
-    $and: [{ idCode }, { email: { $ne: user.email } }, { isAdmin: false }],
-  });
-
   const userHaveWalletAddress = await User.find({
-    $and: [{ walletAddress }, { email: { $ne: user.email } }, { isAdmin: false }],
+    $and: [{ walletAddress }, { userId: { $ne: user.userId } }, { isAdmin: false }],
+  });
+  const userHaveEmail = await User.find({
+    $and: [{ email }, { userId: { $ne: user.userId } }, { isAdmin: false }],
   });
 
-  if (
-    userHavePhone.length >= 1 ||
-    userHaveIdCode.length >= 1 ||
-    userHaveWalletAddress.length >= 1
-  ) {
+  if (userHavePhone.length >= 1 || userHaveWalletAddress.length >= 1 || userHaveEmail.length >= 1) {
     res.status(400).json({ error: "duplicateInfo" });
   }
   if (user) {
-    user.phone = phone || user.phone;
-    user.idCode = idCode || user.idCode;
-    if (walletAddress && walletAddress !== user.walletAddress) {
+    const kycConfig = await Config.findOne({ label: "AUTO_KYC_USER_INFO" });
+
+    const changes = [];
+    for (const field of ["email", "phone", "walletAddress"]) {
+      if (req.body[field] && user[field] !== req.body[field]) {
+        changes.push({
+          userId: user._id,
+          field,
+          oldValue: user[field],
+          newValue: req.body[field],
+          status: kycConfig.value === true ? "approved" : "pending",
+          reviewedBy: kycConfig.value === true ? "AUTO" : "",
+        });
+
+        if (kycConfig.value) {
+          user[field] = req.body[field];
+        }
+
+        await UserHistory.deleteMany({ userId: user._id, field, status: "pending" });
+      }
+    }
+
+    if (changes.length > 0) {
+      await UserHistory.insertMany(changes);
+    }
+
+    if (kycConfig.value === false) {
       await sendMailChangeWalletToAdmin({
         userId: user._id,
         userName: user.userId,
         phone: user.phone,
         email: user.email,
       });
-      user.walletAddressChange = walletAddress;
     }
 
-    if (buyPackage) {
-      const newBuyPackage = await Package.findOne({ name: buyPackage });
-      if (newBuyPackage.status === "active") {
-        user.buyPackage = buyPackage || user.buyPackage;
-        await Tree.findOneAndUpdate({ userName: user.userId }, { buyPackage: buyPackage });
-      } else {
-        res.status(400).json({ error: "Package has been disabled" });
-      }
-    }
-    if (
-      req.files &&
-      req.files.imgFront &&
-      req.files.imgBack &&
-      req.files.imgFront[0] &&
-      req.files?.imgBack[0]
-    ) {
-      user.status = "PENDING";
-      user.imgFront = req.files.imgFront[0].filename || user.imgFront;
-      user.imgBack = req.files.imgBack[0].filename || user.imgBack;
-    }
     const updatedUser = await user.save();
     if (updatedUser) {
       const listDirectUser = [];
@@ -443,14 +437,7 @@ const updateUser = asyncHandler(async (req, res) => {
           listDirectUser.push({
             userId: refedUser.userId,
             isGray: refedUser.status === "LOCKED" ? (req.user.isAdmin ? true : false) : false,
-            isRed:
-              refedUser.tier === 1 && refedUser.countPay === 0
-                ? true
-                : refedUser.tier === 1 && refedUser.buyPackage === "B" && refedUser.countPay < 7
-                ? true
-                : refedUser.tier === 1 && refedUser.buyPackage === "A" && refedUser.countPay < 13
-                ? true
-                : false,
+            isRed: refedUser.tier === 1 && refedUser.countPay === 0 ? true : false,
             isYellow: refedUser.errLahCode === "OVER30",
             countChild: refedUser.countChild[0] + 1,
           });
@@ -479,7 +466,7 @@ const updateUser = asyncHandler(async (req, res) => {
         role: user.role,
       }).populate("pagePermissions.page");
       res.status(200).json({
-        message: "Update successful",
+        message: "Change request submitted for approval",
         data: {
           id: updatedUser._id,
           email: updatedUser.email,
