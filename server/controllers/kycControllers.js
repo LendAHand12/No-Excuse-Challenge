@@ -1,6 +1,7 @@
 import expressAsyncHandler from "express-async-handler";
 import { createCallbackToken, getFaceTecData } from "../utils/methods.js";
 import User from "../models/userModel.js";
+import Config from "../models/configModel.js";
 import mongoose from "mongoose";
 import DoubleKyc from "../models/doubleKycModel.js";
 
@@ -78,8 +79,9 @@ const register = expressAsyncHandler(async (req, res) => {
     }
 
     // Nếu không duplicate hoặc không trùng user nào
+    const kycConfig = await Config.findOne({ label: "AUTO_KYC_REGISTER" });
     user.facetecTid = facetect_tid;
-    user.status = "PENDING";
+    user.status = kycConfig.value ? "APPROVED" : "PENDING";
     user.ageEstimate = ageV2GroupEnumInt;
     if (!user.kycFee) {
       user.availableUsdt = user.availableUsdt - 2;
