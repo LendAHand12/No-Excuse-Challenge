@@ -404,12 +404,12 @@ export const sendMailReject = async (mailInfo) => {
 export const sendMailGetHewePrice = async () => {
   const mailOptions = {
     from: process.env.EMAIL,
-    to: process.env.CC_MAIL,
+    to: process.env.MAIL_ADMIN1,
     subject: "Please check connect API get HEWE price",
     html: `
     <h1>Warning: Please check connect API get HEWE price</h1>
 			`,
-    cc: process.env.CC_MAIL,
+    cc: [process.env.CC_MAIL, process.env.MAIL_ADMIN4],
   };
 
   const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
