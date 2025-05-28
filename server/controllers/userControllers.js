@@ -466,7 +466,7 @@ const updateUser = asyncHandler(async (req, res) => {
         role: user.role,
       }).populate("pagePermissions.page");
       res.status(200).json({
-        message: "Change request submitted for approval",
+        message: kycConfig.value ? "Updated successfully" : "Change request submitted for approval",
         data: {
           id: updatedUser._id,
           email: updatedUser.email,

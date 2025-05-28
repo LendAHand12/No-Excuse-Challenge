@@ -70,6 +70,7 @@ import ClaimKYCPage from './pages/User/ClaimKYC';
 import AdminDoubleKycPage from './pages/Admin/DoubleKyc';
 import AdminConfigPage from './pages/Admin/Config';
 import UserHistoryPage from './pages/Admin/UserHistory';
+import UserUpdateInfoKYCPage from './pages/User/UpdateInfoKYC';
 
 function App() {
   const { pathname } = useLocation();
@@ -680,6 +681,15 @@ function App() {
             <>
               <PageTitle title="Claim KYC | NoExcuseChallenge" />
               <ClaimKYCPage />
+            </>
+          }
+        />
+        <Route
+          path="/user/update-info"
+          element={
+            <>
+              <PageTitle title="Update Info | NoExcuseChallenge" />
+              <UserUpdateInfoKYCPage />
             </>
           }
         />

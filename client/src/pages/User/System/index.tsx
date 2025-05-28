@@ -46,6 +46,7 @@ const SystemPage = () => {
       isRed,
       isYellow,
       isGray,
+      isBlue,
       totalChild,
       income,
     }) => {
@@ -56,6 +57,8 @@ const SystemPage = () => {
           style={{
             backgroundColor: isGray
               ? '#8c8c8c'
+              : isBlue
+              ? '#0000ff'
               : isRed
               ? '#b91c1c'
               : isYellow
@@ -115,6 +118,7 @@ const SystemPage = () => {
             isRed={node.isRed}
             isGray={node.isGray}
             isYellow={node.isYellow}
+            isBlue={node.isBlue}
             totalChild={node.totalChild}
             income={node.income}
           >

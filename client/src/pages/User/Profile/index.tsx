@@ -84,28 +84,12 @@ const Profile = () => {
         setErrPhone(true);
       } else {
         setErrPhone(false);
-        setLoading(true);
-        var formData = new FormData();
-
-        formData.append('phone', phoneNumber.trim());
-        formData.append('walletAddress', walletAddress.trim());
-        formData.append('email', email.trim());
-
-        await User.update(id, formData)
-          .then((response) => {
-            setLoading(false);
-            toast.success(t(response.data.message));
-            dispatch(UPDATE_USER_INFO(response.data.data));
-            setIsEdit(false);
-          })
-          .catch((error) => {
-            let message =
-              error.response && error.response.data.error
-                ? error.response.data.error
-                : error.message;
-            toast.error(t(message));
-            setLoading(false);
-          });
+        const callbackUrl = `${import.meta.env.VITE_URL}/user/update-info?walletAddress=${walletAddress}&phone=${phoneNumber}&email=${email}`;
+        window.location.href = `${
+          import.meta.env.VITE_FACETEC_URL
+        }/verify.html?callback=${encodeURIComponent(
+          callbackUrl,
+        )}&user_id=${id}`;
       }
     },
     [phoneNumber],

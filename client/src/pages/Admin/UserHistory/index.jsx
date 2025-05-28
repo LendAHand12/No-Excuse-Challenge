@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import withdrawStatus from '@/constants/withdrawStatus';
+import userHistoryStatus from '@/constants/userHistoryStatus';
 import { useTranslation } from 'react-i18next';
 import { ToastContainer, toast } from 'react-toastify';
 import NoContent from '@/components/NoContent';
@@ -114,14 +114,13 @@ const UserHistoryPage = () => {
 
   const handleCancel = async (request) => {
     setShowModal(true);
-    setCurrentRequestStatus('cancel');
+    setCurrentRequestStatus('reject');
     setCurrentCancelRequest(request);
   };
 
-  const cancelWithdraw = useCallback(async () => {
+  const rejectChange = useCallback(async () => {
     await UserHistory.update({
-      hash: '',
-      status: 'CANCEL',
+      status: 'reject',
       id: currentCancelRequest._id,
     })
       .then((response) => {
@@ -137,6 +136,26 @@ const UserHistoryPage = () => {
         toast.error(t(message));
       });
   }, [currentCancelRequest]);
+
+  const handleApproveChange = useCallback(async () => {
+    console.log({currentApproveRequest});
+    await UserHistory.update({
+      status: 'approve',
+      id: currentApproveRequest._id,
+    })
+      .then((response) => {
+        toast.success(t(response.data.message));
+        setShowModal(false);
+        setRefresh(!refresh);
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message;
+        toast.error(t(message));
+      });
+  }, [currentApproveRequest]);
 
   const handleSearch = useCallback(() => {
     setObjectFilter({ ...objectFilter, keyword, pageNumber: 1 });
@@ -211,8 +230,8 @@ const UserHistoryPage = () => {
                 <button
                   onClick={
                     currentRequestStatus === 'approve'
-                      ? paymentMetamask
-                      : cancelWithdraw
+                      ? handleApproveChange
+                      : rejectChange
                   }
                   className="flex items-center py-2 px-3 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900"
                 >
@@ -235,7 +254,7 @@ const UserHistoryPage = () => {
                 disabled={loading}
               >
                 <option value="all">All</option>
-                {withdrawStatus.map((status) => (
+                {userHistoryStatus.map((status) => (
                   <option value={status.status} key={status.status}>
                     {status.status}
                   </option>
@@ -284,10 +303,10 @@ const UserHistoryPage = () => {
                 Username
               </th>
               <th scope="col" className="px-6 py-3">
-                Wallet Address
+                Old Value
               </th>
               <th scope="col" className="px-6 py-3">
-                Amount
+                New Value
               </th>
               <th scope="col" className="px-6 py-3">
                 {t('time')}
@@ -321,19 +340,15 @@ const UserHistoryPage = () => {
                       </div>
                     </div>
                   </th>
+                  <td className="px-6 py-4">{ele.field === "walletAddress" ? shortenWalletAddress(ele.oldValue, 12) : ele.oldValue}</td>
+                  <td className="px-6 py-4">{ele.field === "walletAddress" ? shortenWalletAddress(ele.newValue, 12) : ele.newValue}</td>
                   <td className="px-6 py-4">
-                    {shortenWalletAddress(ele.userInfo.walletAddress, 12)}
-                  </td>
-                  <td className="px-6 py-4">
-                    <b>{ele.amount}</b> USDT
-                  </td>
-                  <td className="px-6 py-4">
-                    {new Date(ele.createdAt).toLocaleString('vi')}
+                    {new Date(ele.changedAt).toLocaleString('vi')}
                   </td>
                   <td className="px-6 py-4">
                     <div
                       className={`max-w-fit text-white rounded-sm py-1 px-2 text-sm ${
-                        withdrawStatus.find(
+                        userHistoryStatus.find(
                           (item) => item.status === ele.status.toUpperCase(),
                         ).color
                       } mr-2`}
@@ -344,9 +359,9 @@ const UserHistoryPage = () => {
                   <td className="px-6 py-4">
                     <div className="flex gap-6">
                       {userInfo?.permissions
-                        .find((p) => p.page.pageName === 'admin-withdraw')
-                        ?.actions.includes('approve') &&
-                        ele.status === 'PENDING' && (
+                        .find((p) => p.page.pageName === 'admin-user-history')
+                        ?.actions.includes('update') &&
+                        ele.status === 'pending' && (
                           <button
                             onClick={() => handleApprove(ele)}
                             className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-green-700 text-white"
@@ -375,9 +390,9 @@ const UserHistoryPage = () => {
                           </button>
                         )}
                       {userInfo?.permissions
-                        .find((p) => p.page.pageName === 'admin-withdraw')
-                        ?.actions.includes('approve') &&
-                        ele.status === 'PENDING' && (
+                        .find((p) => p.page.pageName === 'admin-user-history')
+                        ?.actions.includes('update') &&
+                        ele.status === 'pending' && (
                           <button
                             onClick={() => handleCancel(ele)}
                             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-200 font-medium text-red-700"
@@ -394,7 +409,7 @@ const UserHistoryPage = () => {
                                 fill="#D50000"
                               />
                             </svg>
-                            Cancel
+                            Reject
                           </button>
                         )}
                     </div>

@@ -1,7 +1,6 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
 import { removeAccents } from "../utils/methods.js";
-import mongoose from "mongoose";
 import UserHistory from "../models/userHistoryModel.js";
 
 const getAllUserHisotry = asyncHandler(async (req, res) => {
@@ -15,7 +14,9 @@ const getAllUserHisotry = asyncHandler(async (req, res) => {
     matchStage.status = status;
   }
 
-  const keywordRegex = keyword ? { $regex: removeAccents(keyword), $options: "i" } : null;
+  const keywordRegex = keyword
+    ? { $regex: removeAccents(keyword), $options: "i" }
+    : null;
 
   const aggregationPipeline = [
     { $match: matchStage },
@@ -54,9 +55,10 @@ const getAllUserHisotry = asyncHandler(async (req, res) => {
       $project: {
         _id: 1,
         status: 1,
-        amount: 1,
-        hash: 1,
-        createdAt: 1,
+        oldValue: 1,
+        newValue: 1,
+        field: 1,
+        changedAt: 1,
         userInfo: {
           _id: 1,
           userId: 1,
@@ -76,16 +78,16 @@ const getAllUserHisotry = asyncHandler(async (req, res) => {
 });
 
 const updateUserHistory = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
+  const { status, id } = req.body;
   const { user } = req;
+  console.log({ id, status });
 
   try {
     const userHistory = await UserHistory.findById(id);
     const userData = await User.findById(userHistory.userId);
 
-    if (userHistory.status === "pending" && status === "approved") {
-      user[userHistory.field] = userHistory.newValue;
+    if (userHistory.status === "pending" && status === "approve") {
+      userData[userHistory.field] = userHistory.newValue;
       await userData.save();
 
       userHistory.status = "approved";
@@ -99,7 +101,9 @@ const updateUserHistory = asyncHandler(async (req, res) => {
       await userHistory.save();
     }
 
-    res.status(200).json({ message: status === "approved" ? "Approved" : "Rejected!" });
+    res
+      .status(200)
+      .json({ message: status === "approve" ? "Approved" : "Rejected!" });
   } catch (err) {
     res.status(400).json({ error: "Internal Error" });
   }

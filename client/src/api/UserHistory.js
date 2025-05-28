@@ -7,8 +7,8 @@ const UserHistory = {
       `${URL_API_USER_HISTORY}/?pageNumber=${pageNumber}&keyword=${keyword}&status=${status}`,
     );
   },
-  update: (body, id) => {
-    return API.put(`${URL_API_USER_HISTORY}/${id}`, body);
+  update: (body) => {
+    return API.put(`${URL_API_USER_HISTORY}`, body);
   },
 };
 
