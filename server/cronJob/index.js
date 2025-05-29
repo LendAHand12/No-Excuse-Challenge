@@ -248,29 +248,15 @@ export const blockUserNotKYC = asyncHandler(async () => {
 
 export const test1 = asyncHandler(async () => {
   const listUser = await User.find({
-    $and: [
-      { isAdmin: false },
-      { facetecTid: { $ne: "" } },
-      { kycFee: true },
-      { status: "APPROVED" },
-    ],
+    $and: [{ isAdmin: false }, { countPay: 13 }],
   });
-  const admin = await User.findOne({ email: "admin2@gmail.com" });
 
   for (let u of listUser) {
-    console.log({ name: u.userId });
-    await Transaction.create({
-      userId: u.id,
-      amount: 2,
-      userCountPay: 0,
-      userId_to: admin._id,
-      username_to: "KYC Fee",
-      tier: u.tier,
-      buyPackage: u.buyPackage,
-      hash: "",
-      type: "KYC",
-      status: "SUCCESS",
-    });
+    const trans = await Transaction.find({ userId: u._id });
+    if (trans.length === 0) {
+      console.log({ name: u.userId });
+      u.countPay = 0;
+      await u.save();
+    }
   }
-  console.log({ length: listUser.length });
 });
