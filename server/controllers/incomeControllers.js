@@ -39,11 +39,11 @@ const getIncomeOfUser = asyncHandler(async (req, res) => {
     let user = await User.findById(pay.userId);
     results.push({
       _id: pay._id,
-      from: user.userId,
+      from: user?.userId || "Unknow",
       tier: pay.tier,
       amount: pay.amount,
-      userId: user.userId,
-      email: user.email,
+      userId: user?.userId || "Unknow",
+      email: user?.email || "Unknow",
       type: pay.type,
       createdAt: pay.createdAt,
       isHoldRefund: pay.isHoldRefund,
