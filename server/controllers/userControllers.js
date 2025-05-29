@@ -661,9 +661,9 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
         res.status(400).json({ error: "User has generated a transaction" });
       }
     }
-    if (isRegistered && isRegistered === "on" && user.countPay === 0) {
-      user.countPay = 13;
-    }
+    // if (isRegistered && isRegistered === "on" && user.countPay === 0) {
+    //   user.countPay = 13;
+    // }
     if (tier && user.tier !== tier && tier >= 2) {
       user.countPay = 0;
       user.tier = tier;
@@ -1900,7 +1900,7 @@ const checkUnPayUserOnTierUser = async (tier) => {
   if (listTrans.length === 0) {
     let user = await User.findById(lastUserInTier.userId);
     if (!user.havePaid) {
-      user.countPay = 13;
+      // user.countPay = 13;
       user.tier = user.tier - 1;
       const newCountChild = user.countChild.slice(0, -1);
       user.countChild = [...newCountChild];
@@ -1966,7 +1966,7 @@ const removeLastUserInTier = asyncHandler(async (req, res) => {
   if (listTrans.length === 0) {
     let user = await User.findById(userId);
     if (!user.havePaid) {
-      user.countPay = 13;
+      // user.countPay = 13;
       user.tier = user.tier - 1;
       const newCountChild = user.countChild.slice(0, -1);
       user.countChild = [...newCountChild];
