@@ -901,7 +901,7 @@ const UserProfile = () => {
                               type="radio"
                               {...register('isRegistered')}
                             ></input>
-                            <p>Đã hoàn thành</p>
+                            <p>Finished</p>
                           </div>
                         )}
                         {!isEditting || data.countPay >= 1
