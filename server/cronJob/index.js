@@ -255,8 +255,8 @@ export const test1 = asyncHandler(async () => {
     const trans = await Transaction.find({ userId: u._id });
     if (trans.length === 0) {
       console.log({ name: u.userId });
-      // u.countPay = 0;
-      // await u.save();
+      u.countPay = 0;
+      await u.save();
     }
   }
 });
