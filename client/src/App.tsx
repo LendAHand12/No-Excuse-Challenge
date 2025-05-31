@@ -585,114 +585,118 @@ function App() {
             </>
           }
         />
-        <Route
-          path="/user/payment"
-          element={
-            <>
-              <PageTitle title="Payment | NoExcuseChallenge" />
-              <Payment />
-            </>
-          }
-        />
-        <Route
-          path="/user/system"
-          element={
-            <>
-              <PageTitle title="System | NoExcuseChallenge" />
-              <SystemPage />
-            </>
-          }
-        />
-        <Route
-          path="/user/referral"
-          element={
-            <>
-              <PageTitle title="Referral | NoExcuseChallenge" />
-              <ReferralPage />
-            </>
-          }
-        />
-        <Route
-          path="/user/transactions"
-          element={
-            <>
-              <PageTitle title="Transactions | NoExcuseChallenge" />
-              <Transactions />
-            </>
-          }
-        />
-        <Route
-          path="/user/ice-breakers"
-          element={
-            <>
-              <PageTitle title="Ice Breakers | NoExcuseChallenge" />
-              <IceBreakerPage />
-            </>
-          }
-        />
-        <Route
-          path="/user/dreampool"
-          element={
-            <>
-              <PageTitle title="DreamPool | NoExcuseChallenge" />
-              <DreamPoolPage />
-            </>
-          }
-        />
-        <Route
-          path="/user/income"
-          element={
-            <>
-              <PageTitle title="Income | NoExcuseChallenge" />
-              <IncomePage />
-            </>
-          }
-        />
-        <Route
-          path="/user/withdraws"
-          element={
-            <>
-              <PageTitle title="Withdraws | NoExcuseChallenge" />
-              <WithdrawsPage />
-            </>
-          }
-        />
-        <Route
-          path="/user/claims"
-          element={
-            <>
-              <PageTitle title="Claims | NoExcuseChallenge" />
-              <ClaimsPage />
-            </>
-          }
-        />
-        <Route
-          path="/user/kyc"
-          element={
-            <>
-              <PageTitle title="Register KYC | NoExcuseChallenge" />
-              <RegisterKYCPage />
-            </>
-          }
-        />
-        <Route
-          path="/user/claim"
-          element={
-            <>
-              <PageTitle title="Claim KYC | NoExcuseChallenge" />
-              <ClaimKYCPage />
-            </>
-          }
-        />
-        <Route
-          path="/user/update-info"
-          element={
-            <>
-              <PageTitle title="Update Info | NoExcuseChallenge" />
-              <UserUpdateInfoKYCPage />
-            </>
-          }
-        />
+        {userInfo.errLahCode !== 'OVER45' && (
+          <>
+            <Route
+              path="/user/payment"
+              element={
+                <>
+                  <PageTitle title="Payment | NoExcuseChallenge" />
+                  <Payment />
+                </>
+              }
+            />
+            <Route
+              path="/user/system"
+              element={
+                <>
+                  <PageTitle title="System | NoExcuseChallenge" />
+                  <SystemPage />
+                </>
+              }
+            />
+            <Route
+              path="/user/referral"
+              element={
+                <>
+                  <PageTitle title="Referral | NoExcuseChallenge" />
+                  <ReferralPage />
+                </>
+              }
+            />
+            <Route
+              path="/user/transactions"
+              element={
+                <>
+                  <PageTitle title="Transactions | NoExcuseChallenge" />
+                  <Transactions />
+                </>
+              }
+            />
+            <Route
+              path="/user/ice-breakers"
+              element={
+                <>
+                  <PageTitle title="Ice Breakers | NoExcuseChallenge" />
+                  <IceBreakerPage />
+                </>
+              }
+            />
+            <Route
+              path="/user/dreampool"
+              element={
+                <>
+                  <PageTitle title="DreamPool | NoExcuseChallenge" />
+                  <DreamPoolPage />
+                </>
+              }
+            />
+            <Route
+              path="/user/income"
+              element={
+                <>
+                  <PageTitle title="Income | NoExcuseChallenge" />
+                  <IncomePage />
+                </>
+              }
+            />
+            <Route
+              path="/user/withdraws"
+              element={
+                <>
+                  <PageTitle title="Withdraws | NoExcuseChallenge" />
+                  <WithdrawsPage />
+                </>
+              }
+            />
+            <Route
+              path="/user/claims"
+              element={
+                <>
+                  <PageTitle title="Claims | NoExcuseChallenge" />
+                  <ClaimsPage />
+                </>
+              }
+            />
+            <Route
+              path="/user/kyc"
+              element={
+                <>
+                  <PageTitle title="Register KYC | NoExcuseChallenge" />
+                  <RegisterKYCPage />
+                </>
+              }
+            />
+            <Route
+              path="/user/claim"
+              element={
+                <>
+                  <PageTitle title="Claim KYC | NoExcuseChallenge" />
+                  <ClaimKYCPage />
+                </>
+              }
+            />
+            <Route
+              path="/user/update-info"
+              element={
+                <>
+                  <PageTitle title="Update Info | NoExcuseChallenge" />
+                  <UserUpdateInfoKYCPage />
+                </>
+              }
+            />
+          </>
+        )}
       </Route>
       <Route path="*" element={<NotFoundPage />}></Route>
     </Routes>

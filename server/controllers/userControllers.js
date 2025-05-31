@@ -365,6 +365,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       income: tree.income,
       facetecTid: user.facetecTid,
       kycFee: user.kycFee,
+      errLahCode: user.errLahCode,
     });
   } else {
     res.status(404);
@@ -515,6 +516,7 @@ const updateUser = asyncHandler(async (req, res) => {
           totalHold,
           facetecTid: updatedUser.facetecTid,
           kycFee: updatedUser.kycFee,
+          errLahCode: updatedUser.errLahCode,
         },
       });
     }

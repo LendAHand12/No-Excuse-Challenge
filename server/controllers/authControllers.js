@@ -278,6 +278,7 @@ const authUser = asyncHandler(async (req, res) => {
         income: tree ? tree.income : 0,
         facetecTid: user.facetecTid,
         kycFee: user.kycFee,
+        errLahCode: user.errLahCode,
       },
       accessToken,
       refreshToken,

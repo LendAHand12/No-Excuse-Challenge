@@ -11,6 +11,7 @@ import { LOGOUT } from '../slices/auth';
 const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { userInfo } = useSelector((state) => state.auth);
+  console.log({ userInfo });
   var routes = PublicRoutes;
   const { disconnect } = useDisconnect();
   const dispatch = useDispatch();
@@ -27,12 +28,15 @@ const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
         routes = AdminRoutes.filter((route) => {
           let currentRoute = `${route.link}`;
           let page = permissions.find((ele) => ele.page?.path === currentRoute);
-          if (page && page.actions.includes("read")) {
+          if (page && page.actions.includes('read')) {
             return route;
           }
         });
       } else {
-        routes = UserRoutes;
+        routes =
+          userInfo.errLahCode === 'OVER45'
+            ? UserRoutes.filter((route) => route.link === '/user/profile')
+            : UserRoutes;
       }
     } catch (err) {
       // handleLogout();
@@ -64,7 +68,8 @@ const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
         {/* <!-- ===== Content Area End ===== --> */}
       </div>
       <div className="lg:hidden bg-black text-NoExcuseChallenge text-center py-3">
-        © 2024, made with by <span className="font-bold">NoExcuseChallenge.</span>
+        © 2024, made with by{' '}
+        <span className="font-bold">NoExcuseChallenge.</span>
       </div>
       {/* <!-- ===== Page Wrapper End ===== --> */}
     </div>

@@ -49,6 +49,7 @@ const Profile = () => {
     currentLayer,
     facetecTid,
     kycFee,
+    errLahCode,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -84,7 +85,9 @@ const Profile = () => {
         setErrPhone(true);
       } else {
         setErrPhone(false);
-        const callbackUrl = `${import.meta.env.VITE_URL}/user/update-info?walletAddress=${walletAddress}&phone=${phoneNumber}&email=${email}`;
+        const callbackUrl = `${
+          import.meta.env.VITE_URL
+        }/user/update-info?walletAddress=${walletAddress}&phone=${phoneNumber}&email=${email}`;
         window.location.href = `${
           import.meta.env.VITE_FACETEC_URL
         }/verify.html?callback=${encodeURIComponent(
@@ -444,12 +447,18 @@ const Profile = () => {
           </div>
           <button
             className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
-              availableUsdt === 0 || status !== 'APPROVED' || facetecTid === ''
+              errLahCode === 'OVER45' ||
+              availableUsdt === 0 ||
+              status !== 'APPROVED' ||
+              facetecTid === ''
                 ? 'opacity-30'
                 : ''
             }`}
             disabled={
-              availableUsdt === 0 || status !== 'APPROVED' || facetecTid === ''
+              errLahCode === 'OVER45' ||
+              availableUsdt === 0 ||
+              status !== 'APPROVED' ||
+              facetecTid === ''
             }
             onClick={() => setShowModal(true)}
           >
@@ -562,7 +571,7 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        {!isEdit && status === 'APPROVED' && (
+        {errLahCode !== 'OVER45' && !isEdit && status === 'APPROVED' && (
           <div className="flex justify-end">
             <button
               onClick={() => setIsEdit(true)}
