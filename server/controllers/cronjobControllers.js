@@ -42,19 +42,38 @@ const runCronjob = asyncHandler(async (req, res) => {
 
   const cron = cronjobs.find((ele) => ele.title === cronjob.title);
 
-  if(cron) {
-    await cron.func();
-  } else {
+  if (!cron) {
     throw new Error("Cronjob not found");
   }
 
-  await Cronjob.create({
+  // Ghi log với trạng thái pending
+  const log = await Cronjob.create({
     userId: user.id,
     title: cronjob.title,
+    status: "pending",
   });
 
+  // Gọi cron func không chờ, xử lý kết quả async
+  cron
+    .func()
+    .then(async () => {
+      await Cronjob.findByIdAndUpdate(log._id, {
+        status: "success",
+        finishedAt: new Date(),
+      });
+    })
+    .catch(async (err) => {
+      await Cronjob.findByIdAndUpdate(log._id, {
+        status: "failed",
+        error: err.message || "Unknown error",
+        finishedAt: new Date(),
+      });
+    });
+
+  // Trả về ngay
   res.json({
-    message: "Process completed!",
+    message: "Cronjob triggered successfully!",
+    logId: log._id,
   });
 });
 

@@ -42,6 +42,7 @@ import {
   checkRefWithTime,
   blockUserNotKYC,
   test1,
+  updateHewePrice,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 
@@ -144,6 +145,11 @@ const cron5 = new CronJob("00 05 * * *", async () => {
   console.log("Check ref with time done");
 });
 
+const cron6 = new CronJob("0 * * * *", async () => {
+  // evry hour
+  await updateHewePrice();
+});
+
 // await test1();
 
 cron0.start();
@@ -153,6 +159,7 @@ cron2.start();
 cron3.start();
 cron4.start();
 cron5.start();
+cron6.start();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>

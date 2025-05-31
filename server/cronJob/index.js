@@ -3,12 +3,14 @@ import moment from "moment";
 
 import User from "../models/userModel.js";
 import sendMail from "../utils/sendMail.js";
-import { sendMailUpdateLayerForAdmin } from "../utils/sendMailCustom.js";
+import { sendMailGetHewePrice, sendMailUpdateLayerForAdmin } from "../utils/sendMailCustom.js";
 import { getCountAllChildren, getCountIncome } from "../controllers/userControllers.js";
 import { findRootLayer, getUserClosestToNow } from "../utils/methods.js";
 import Tree from "../models/treeModel.js";
 import Transaction from "../models/transactionModel.js";
 import Honor from "../models/honorModel.js";
+import { getPriceHewe } from "../utils/getPriceHewe.js";
+import Config from "../models/configModel.js";
 
 export const deleteUser24hUnPay = asyncHandler(async () => {
   const listUser = await User.find({
@@ -51,6 +53,7 @@ export const countChildToData = asyncHandler(async () => {
 
   for (let t of listTrees) {
     try {
+      console.log({ name: t.userName });
       const countChild = await getCountAllChildren(t._id, t.tier);
       const income = await getCountIncome(t._id, t.tier);
       t.countChild = countChild;
@@ -244,6 +247,20 @@ export const blockUserNotKYC = asyncHandler(async () => {
     }
     await u.save();
   }
+});
+
+export const updateHewePrice = asyncHandler(async () => {
+  console.log("Update hewe price start");
+  let responseHewe = await getPriceHewe();
+  if (responseHewe.data.result === "false") {
+    await sendMailGetHewePrice();
+  } else {
+    const hewePrice = responseHewe.data.ticker.latest;
+    const hewePriceConfig = await Config.findOne({ label: "HEWE_PRICE" });
+    hewePriceConfig.value = hewePrice;
+    await hewePriceConfig.save();
+  }
+  console.log("Update hewe price done");
 });
 
 export const test1 = asyncHandler(async () => {
