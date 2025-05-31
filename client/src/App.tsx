@@ -585,7 +585,7 @@ function App() {
             </>
           }
         />
-        {userInfo.errLahCode !== 'OVER45' && (
+        {userInfo?.errLahCode !== 'OVER45' && (
           <>
             <Route
               path="/user/payment"
