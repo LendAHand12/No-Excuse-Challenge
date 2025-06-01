@@ -11,7 +11,6 @@ import { LOGOUT } from '../slices/auth';
 const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { userInfo } = useSelector((state) => state.auth);
-  console.log({ userInfo });
   var routes = PublicRoutes;
   const { disconnect } = useDisconnect();
   const dispatch = useDispatch();

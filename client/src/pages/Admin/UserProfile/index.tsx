@@ -157,6 +157,8 @@ const UserProfile = () => {
 
       formData.append('isRegistered', values.isRegistered);
 
+      formData.append('removeErrLahCode', values.removeErrLahCode);
+
       setLoadingUpdate(true);
       await User.adminUpdateUser(id, formData)
         .then((response) => {
@@ -1061,6 +1063,23 @@ const UserProfile = () => {
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">Total Hold</div>
                       <div className="px-4 py-2">{data.totalHold} USDT</div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        Overdue referral
+                      </div>
+                      <div className="px-4 py-2">
+                        {isEditting && data.errLahCode !== "" && (
+                          <div className="flex gap-4">
+                            <input
+                              type="radio"
+                              {...register('removeErrLahCode')}
+                            ></input>
+                            <p>Reset</p>
+                          </div>
+                        )}
+                        {!isEditting && data.errLahCode}
+                      </div>
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">{t('fine')}</div>

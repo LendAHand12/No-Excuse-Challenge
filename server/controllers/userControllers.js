@@ -235,6 +235,7 @@ const getUserById = asyncHandler(async (req, res) => {
       income: tree.income,
       facetecTid: user.facetecTid,
       kycFee: user.kycFee,
+      errLahCode: user.errLahCode
     });
   } else {
     res.status(404);
@@ -547,6 +548,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     rewardHewe,
     hewePerDay,
     level,
+    removeErrLahCode
   } = req.body;
 
   if (userId) {
@@ -665,6 +667,9 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     }
     if (isRegistered && isRegistered === "on" && user.countPay === 0) {
       user.countPay = 13;
+    }
+    if (removeErrLahCode && removeErrLahCode === "on" && user.errLahCode !== "") {
+      user.errLahCode = "";
     }
     if (tier && user.tier !== tier && tier >= 2) {
       user.countPay = 0;
@@ -976,6 +981,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
       role: user.role,
       permissions: permissions ? permissions.pagePermissions : [],
       bonusRef: user.bonusRef,
+      errLahCode: user.errLahCode
     });
   } else {
     res.status(400);
