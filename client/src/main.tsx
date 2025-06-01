@@ -16,7 +16,7 @@ import { bsc } from 'wagmi/chains';
 import { metaMask, walletConnect, safe } from 'wagmi/connectors';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const projectId = '4e33da07c03760a57c04483a79dccc0b';
+const projectId = '1b15f85b4e2f0c6f99354a3f49fe7660';
 
 const config = createConfig({
   chains: [bsc],

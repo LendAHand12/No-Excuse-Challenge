@@ -80,7 +80,6 @@ const getAllUserHisotry = asyncHandler(async (req, res) => {
 const updateUserHistory = asyncHandler(async (req, res) => {
   const { status, id } = req.body;
   const { user } = req;
-  console.log({ id, status });
 
   try {
     const userHistory = await UserHistory.findById(id);

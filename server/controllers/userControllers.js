@@ -716,6 +716,7 @@ const changeStatusUser = asyncHandler(async (req, res) => {
   if (user) {
     user.status = status || user.status;
     if (status === "REJECTED") {
+      user.status = "UNVERIFY";
       user.facetecTid = "";
       await sendMailReject({
         senderName: user.userId,

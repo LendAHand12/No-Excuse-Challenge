@@ -336,6 +336,18 @@ const AdminUserPages = () => {
                     </p>
                   )}
                 </div>
+                <div>
+                  FaceTec Url :{' '}
+                  <a
+                    target="_blank"
+                    className="text-blue-500"
+                    href={`${
+                      import.meta.env.VITE_FACETEC_DASHBOARD_URL
+                    }/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${currentKYCId}`}
+                  >
+                    Link
+                  </a>
+                </div>
                 <div className="flex justify-center items-center space-x-4">
                   <button
                     onClick={handleRejectUser}
