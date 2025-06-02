@@ -175,10 +175,6 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    walletAddressChange: {
-      type: String,
-      default: "",
-    },
     role: {
       type: String,
       // enum: ["USER", "ADMIN", "ADMIN1", "ADMIN2"],
@@ -197,7 +193,7 @@ const userSchema = mongoose.Schema(
     },
     ageEstimate: {
       type: Number,
-    }
+    },
   },
   {
     timestamps: true,

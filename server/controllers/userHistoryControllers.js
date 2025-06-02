@@ -14,9 +14,7 @@ const getAllUserHisotry = asyncHandler(async (req, res) => {
     matchStage.status = status;
   }
 
-  const keywordRegex = keyword
-    ? { $regex: removeAccents(keyword), $options: "i" }
-    : null;
+  const keywordRegex = keyword ? { $regex: removeAccents(keyword), $options: "i" } : null;
 
   const aggregationPipeline = [
     { $match: matchStage },
@@ -44,11 +42,13 @@ const getAllUserHisotry = asyncHandler(async (req, res) => {
     ...aggregationPipeline,
     { $count: "total" },
   ]);
+
   const count = countAggregation[0]?.total || 0;
+  console.log({ page, count });
 
   // Thêm phân trang và sắp xếp
   aggregationPipeline.push(
-    { $sort: { createdAt: -1 } },
+    { $sort: { createdAt: 1 } },
     { $skip: pageSize * (page - 1) },
     { $limit: pageSize },
     {
@@ -100,9 +100,7 @@ const updateUserHistory = asyncHandler(async (req, res) => {
       await userHistory.save();
     }
 
-    res
-      .status(200)
-      .json({ message: status === "approve" ? "Approved" : "Rejected!" });
+    res.status(200).json({ message: status === "approve" ? "Approved" : "Rejected!" });
   } catch (err) {
     res.status(400).json({ error: "Internal Error" });
   }

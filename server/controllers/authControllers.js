@@ -273,7 +273,6 @@ const authUser = asyncHandler(async (req, res) => {
         chartData: mergeIntoThreeGroups(listDirectUser),
         targetSales: process.env[`LEVEL_${user.ranking + 1}`],
         bonusRef: user.bonusRef,
-        walletAddressChange: user.walletAddressChange,
         totalChild: tree ? tree.countChild : 0,
         income: tree ? tree.income : 0,
         facetecTid: user.facetecTid,

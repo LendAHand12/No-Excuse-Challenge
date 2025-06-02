@@ -45,11 +45,11 @@ const Profile = () => {
     totalHold,
     withdrawPending,
     bonusRef,
-    walletAddressChange,
     currentLayer,
     facetecTid,
     kycFee,
     errLahCode,
+    pendingUpdateInfo,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -357,13 +357,13 @@ const Profile = () => {
           </div>
         )}
 
-        {walletAddressChange && (
+        {pendingUpdateInfo && (
           <div
             className="bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded relative mb-5"
             role="alert"
           >
             <span className="block sm:inline">
-              {t('Wallet information update is pending admin approval')}
+              {t('Your information update is awaiting admin approval')}
             </span>
           </div>
         )}

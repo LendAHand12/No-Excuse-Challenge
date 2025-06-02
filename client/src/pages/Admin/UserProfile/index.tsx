@@ -63,7 +63,6 @@ const UserProfile = () => {
             closeLah,
             bonusRef,
             kycFee,
-            walletAddressChange,
           } = response.data;
           setValue('userId', userId);
           setValue('email', email);
@@ -75,7 +74,6 @@ const UserProfile = () => {
           setCurrentCloseLah(closeLah);
           setIsBonusRef(bonusRef);
           setKycFee(kycFee);
-          setWalletChange(walletAddressChange);
         })
         .catch((error) => {
           let message =
@@ -1069,7 +1067,7 @@ const UserProfile = () => {
                         Overdue referral
                       </div>
                       <div className="px-4 py-2">
-                        {isEditting && data.errLahCode !== "" && (
+                        {isEditting && data.errLahCode !== '' && (
                           <div className="flex gap-4">
                             <input
                               type="radio"
@@ -1147,6 +1145,30 @@ const UserProfile = () => {
                               className="w-full h-full rounded-md object-cover"
                               alt="FaceTec image"
                             />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-full flex justify-center">
+                      <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+                        <p className="font-semibold"> FaceTec Url :</p>
+                        <div className="flex flex-col w-full">
+                          {data.facetecTid !== '' && (
+                            <a
+                              target="_blank"
+                              className="text-blue-500"
+                              href={`${
+                                import.meta.env.VITE_FACETEC_DASHBOARD_URL
+                              }/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${
+                                data.id
+                              }`}
+                            >
+                              {`${
+                                import.meta.env.VITE_FACETEC_DASHBOARD_URL
+                              }/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${
+                                data.id
+                              }`}
+                            </a>
                           )}
                         </div>
                       </div>

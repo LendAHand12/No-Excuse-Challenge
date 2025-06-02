@@ -229,13 +229,12 @@ const getUserById = asyncHandler(async (req, res) => {
       chartData: mergeIntoThreeGroups(listDirectUser),
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
       bonusRef: user.bonusRef,
-      walletAddressChange: user.walletAddressChange,
       totalHold,
       totalChild: tree.countChild,
       income: tree.income,
       facetecTid: user.facetecTid,
       kycFee: user.kycFee,
-      errLahCode: user.errLahCode
+      errLahCode: user.errLahCode,
     });
   } else {
     res.status(404);
@@ -304,6 +303,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
 
     const totalHold = listTransHold.reduce((sum, ele) => sum + ele.amount, 0);
 
+    const pendingUpdateInfo = await UserHistory.find({ userId: user._id, status: "pending" });
+
     res.json({
       id: user._id,
       email: user.email,
@@ -360,13 +361,13 @@ const getUserInfo = asyncHandler(async (req, res) => {
       chartData: mergeIntoThreeGroups(listDirectUser),
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
       bonusRef: user.bonusRef,
-      walletAddressChange: user.walletAddressChange,
       totalHold,
       totalChild: tree.countChild,
       income: tree.income,
       facetecTid: user.facetecTid,
       kycFee: user.kycFee,
       errLahCode: user.errLahCode,
+      pendingUpdateInfo: pendingUpdateInfo.length > 0 ? true : false,
     });
   } else {
     res.status(404);
@@ -379,7 +380,7 @@ const updateUser = asyncHandler(async (req, res) => {
 
   const user = await User.findOne({ _id: req.params.id }).select("-password");
   const userHavePhone = await User.find({
-    $and: [{ phone }, { userId: { $ne: user.userId } }, { isAdmin: false }],
+    $and: [{ phone: `+${phone}` }, { userId: { $ne: user.userId } }, { isAdmin: false }],
   });
   const userHaveWalletAddress = await User.find({
     $and: [{ walletAddress }, { userId: { $ne: user.userId } }, { isAdmin: false }],
@@ -396,12 +397,15 @@ const updateUser = asyncHandler(async (req, res) => {
 
     const changes = [];
     for (const field of ["email", "phone", "walletAddress"]) {
-      if (req.body[field] && user[field] !== req.body[field]) {
+      if (
+        req.body[field] &&
+        user[field] !== (field === "phone" ? `+${req.body[field]}` : req.body[field])
+      ) {
         changes.push({
           userId: user._id,
           field,
           oldValue: user[field],
-          newValue: req.body[field],
+          newValue: field === "phone" ? `+${req.body[field]}` : req.body[field],
           status: kycConfig.value === true ? "approved" : "pending",
           reviewedBy: kycConfig.value === true ? "AUTO" : "",
         });
@@ -513,7 +517,6 @@ const updateUser = asyncHandler(async (req, res) => {
           chartData: mergeIntoThreeGroups(listDirectUser),
           targetSales: process.env[`LEVEL_${updatedUser.ranking + 1}`],
           bonusRef: updatedUser.bonusRef,
-          walletAddressChange: updatedUser.walletAddressChange,
           totalHold,
           facetecTid: updatedUser.facetecTid,
           kycFee: updatedUser.kycFee,
@@ -548,7 +551,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     rewardHewe,
     hewePerDay,
     level,
-    removeErrLahCode
+    removeErrLahCode,
   } = req.body;
 
   if (userId) {
@@ -636,6 +639,9 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     }
     if (user.status === "LOCKED" && newStatus !== "LOCKED") {
       user.lockedTime = null;
+    }
+    if (user.status === "APPROVED" && newStatus === "UNVERIFY") {
+      user.facetecTid = "";
     }
     user.status = newStatus || user.status;
     if (newStatus === "LOCKED") {
@@ -982,7 +988,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
       role: user.role,
       permissions: permissions ? permissions.pagePermissions : [],
       bonusRef: user.bonusRef,
-      errLahCode: user.errLahCode
+      errLahCode: user.errLahCode,
     });
   } else {
     res.status(400);
