@@ -11,7 +11,7 @@ const getAllUserHisotry = asyncHandler(async (req, res) => {
   const matchStage = {};
 
   if (status && status !== "all") {
-    matchStage.status = status;
+    matchStage.status = status.toLocaleLowerCase();
   }
 
   const keywordRegex = keyword ? { $regex: removeAccents(keyword), $options: "i" } : null;
@@ -37,6 +37,8 @@ const getAllUserHisotry = asyncHandler(async (req, res) => {
     });
   }
 
+  console.log({ aggregationPipeline });
+
   // Đếm số bản ghi sau khi lọc
   const countAggregation = await UserHistory.aggregate([
     ...aggregationPipeline,
@@ -48,7 +50,7 @@ const getAllUserHisotry = asyncHandler(async (req, res) => {
 
   // Thêm phân trang và sắp xếp
   aggregationPipeline.push(
-    { $sort: { createdAt: 1 } },
+    { $sort: { _id: -1 } },
     { $skip: pageSize * (page - 1) },
     { $limit: pageSize },
     {
