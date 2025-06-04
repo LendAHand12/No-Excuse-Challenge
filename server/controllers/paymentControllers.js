@@ -747,7 +747,8 @@ const onDonePayment = asyncHandler(async (req, res) => {
         await sendMailGetHewePrice();
       }
       const hewePriceConfig = await Config.findOne({ label: "HEWE_PRICE" });
-      const hewePrice = responseHewe?.data?.ticker?.latest || hewePriceConfig.value;
+      const hewePrice =
+        responseHewe?.data?.ticker?.latest || hewePriceConfig.value;
       console.log({ hewePrice });
       const totalHewe = Math.round(100 / hewePrice);
       const hewePerDay = Math.round(totalHewe / 540);
@@ -865,122 +866,71 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
 });
 
 const getAllPayments = asyncHandler(async (req, res) => {
-  let { pageNumber, keyword, status, tier } = req.query;
-  const page = Number(pageNumber) || 1;
-  let searchType = {};
-  if (
-    status === "DIRECT" ||
-    status === "REFERRAL" ||
-    status === "REGISTER" ||
-    status === "FINE" ||
-    status === "PIG" ||
-    status === "KYC" ||
-    status === "COMPANY"
-  ) {
-    searchType = { type: status };
-  }
-  if (status === "HOLD") {
-    searchType = { type: { $regex: status, $options: "i" } };
-  }
-
-  const pageSize = 10;
-
-  const count = await Transaction.countDocuments({
-    $and: [
-      {
-        $or: [
-          { userId: { $regex: keyword, $options: "i" } }, // Tìm theo userIds
-          { userId_to: { $regex: keyword, $options: "i" } }, // Tìm theo địa chỉ ví
-          { username_to: { $regex: keyword, $options: "i" } }, // Tìm theo địa chỉ ví
-        ],
-      },
-      status !== "ALL" ? { ...searchType } : {},
-      { tier },
-      {
-        status: "SUCCESS",
-      },
-      { type: { $ne: "PACKAGE" } },
-    ],
-  });
-
-  const allPayments = await Transaction.find({
-    $and: [
-      {
-        $or: [
-          { userId: { $regex: keyword, $options: "i" } }, // Tìm theo userId
-          { username_to: { $regex: keyword, $options: "i" } },
-          { userId_to: { $regex: keyword, $options: "i" } },
-        ],
-      },
-      status !== "ALL" ? { ...searchType } : {},
-      { tier },
-      {
-        status: "SUCCESS",
-      },
-      { type: { $ne: "PACKAGE" } },
-    ],
-  })
-    .limit(pageSize)
-    .skip(pageSize * (page - 1))
-    .sort(status === "HOLD" ? "isHoldRefund -createdAt" : "-createdAt")
-    .select("-password");
-
-  const result = [];
-  for (let pay of allPayments) {
-    let user = await User.findById(pay.userId);
-    if (status === "REGISTER" || status === "FINE") {
-      result.push({
-        _id: pay._id,
-        address_from: pay.address_from,
-        tier: pay.tier,
-        // hash: pay.hash,
-        amount: pay.amount,
-        userId: user.userId,
-        email: user.email,
-        type: pay.type,
-        createdAt: pay.createdAt,
-      });
-    } else if (
+  try {
+    let { pageNumber, keyword, status, tier } = req.query;
+    const page = Number(pageNumber) || 1;
+    let searchType = {};
+    if (
       status === "DIRECT" ||
       status === "REFERRAL" ||
-      status === "ALL" ||
+      status === "REGISTER" ||
+      status === "FINE" ||
       status === "PIG" ||
       status === "KYC" ||
       status === "COMPANY"
     ) {
-      const userRef = await User.findById(pay.userId_to);
-      result.push({
-        _id: pay._id,
-        address_from: pay.address_from,
-        tier: pay.tier,
-        // hash: pay.hash,
-        amount: pay.amount,
-        userId: user.userId,
-        email: user.email,
-        userReceiveId: userRef ? userRef.userId : "Unknow",
-        userReceiveEmail: userRef ? userRef.email : "Unknow",
-        userCountPay: pay.userCountPay,
-        type: pay.type,
-        createdAt: pay.createdAt,
-      });
-    } else if (status === "HOLD") {
-      const userReceive = await User.findById(pay.userId_to);
-      if (userReceive) {
-        const treeOfReceiveUser = await Tree.findOne({
-          userId: pay.userId_to,
-          tier: 1,
-        });
-        const listRefOfReceiver = await Tree.find({
-          refId: treeOfReceiveUser._id,
-        });
-        const checkResult = await checkCanRefund({
-          userReceive,
-          listRefOfReceiver,
-          userCountPay: pay.userCountPay,
-          trans: pay,
-          treeOfReceiveUser,
-        });
+      searchType = { type: status };
+    }
+    if (status === "HOLD") {
+      searchType = { type: { $regex: status, $options: "i" } };
+    }
 
+    const pageSize = 10;
+
+    const count = await Transaction.countDocuments({
+      $and: [
+        {
+          $or: [
+            { userId: { $regex: keyword, $options: "i" } }, // Tìm theo userIds
+            { userId_to: { $regex: keyword, $options: "i" } }, // Tìm theo địa chỉ ví
+            { username_to: { $regex: keyword, $options: "i" } }, // Tìm theo địa chỉ ví
+          ],
+        },
+        status !== "ALL" ? { ...searchType } : {},
+        { tier },
+        {
+          status: "SUCCESS",
+        },
+        { type: { $ne: "PACKAGE" } },
+      ],
+    });
+
+    const allPayments = await Transaction.find({
+      $and: [
+        {
+          $or: [
+            { userId: { $regex: keyword, $options: "i" } }, // Tìm theo userId
+            { username_to: { $regex: keyword, $options: "i" } },
+            { userId_to: { $regex: keyword, $options: "i" } },
+          ],
+        },
+        status !== "ALL" ? { ...searchType } : {},
+        { tier },
+        {
+          status: "SUCCESS",
+        },
+        { type: { $ne: "PACKAGE" } },
+      ],
+    })
+      .limit(pageSize)
+      .skip(pageSize * (page - 1))
+      .sort(status === "HOLD" ? "isHoldRefund -createdAt" : "-createdAt")
+      .select("-password");
+
+    const result = [];
+    for (let pay of allPayments) {
+      let user = await User.findById(pay.userId);
+      if (status === "REGISTER" || status === "FINE") {
         result.push({
           _id: pay._id,
           address_from: pay.address_from,
@@ -989,22 +939,77 @@ const getAllPayments = asyncHandler(async (req, res) => {
           amount: pay.amount,
           userId: user.userId,
           email: user.email,
-          userReceiveId: userReceive ? userReceive.userId : "Unknow",
-          userReceiveEmail: userReceive ? userReceive.email : "Unknow",
           type: pay.type,
-          userCountPay: pay.userCountPay,
           createdAt: pay.createdAt,
-          isHoldRefund: pay.isHoldRefund,
-          isOk: checkResult === "" ? true : false,
         });
+      } else if (
+        status === "DIRECT" ||
+        status === "REFERRAL" ||
+        status === "ALL" ||
+        status === "PIG" ||
+        status === "KYC" ||
+        status === "COMPANY"
+      ) {
+        const userRef = await User.findById(pay.userId_to);
+        result.push({
+          _id: pay._id,
+          address_from: pay.address_from,
+          tier: pay.tier,
+          // hash: pay.hash,
+          amount: pay.amount,
+          userId: user.userId,
+          email: user.email,
+          userReceiveId: userRef ? userRef.userId : "Unknow",
+          userReceiveEmail: userRef ? userRef.email : "Unknow",
+          userCountPay: pay.userCountPay,
+          type: pay.type,
+          createdAt: pay.createdAt,
+        });
+      } else if (status === "HOLD") {
+        const userReceive = await User.findById(pay.userId_to);
+        if (userReceive) {
+          const treeOfReceiveUser = await Tree.findOne({
+            userId: pay.userId_to,
+            tier: 1,
+          });
+          const listRefOfReceiver = await Tree.find({
+            refId: treeOfReceiveUser._id,
+          });
+          const checkResult = await checkCanRefund({
+            userReceive,
+            listRefOfReceiver,
+            userCountPay: pay.userCountPay,
+            trans: pay,
+            treeOfReceiveUser,
+          });
+
+          result.push({
+            _id: pay._id,
+            address_from: pay.address_from,
+            tier: pay.tier,
+            // hash: pay.hash,
+            amount: pay.amount,
+            userId: user.userId,
+            email: user.email,
+            userReceiveId: userReceive ? userReceive.userId : "Unknow",
+            userReceiveEmail: userReceive ? userReceive.email : "Unknow",
+            type: pay.type,
+            userCountPay: pay.userCountPay,
+            createdAt: pay.createdAt,
+            isHoldRefund: pay.isHoldRefund,
+            isOk: checkResult === "" ? true : false,
+          });
+        }
       }
     }
-  }
 
-  res.json({
-    payments: result,
-    pages: Math.ceil(count / pageSize),
-  });
+    res.json({
+      payments: result,
+      pages: Math.ceil(count / pageSize),
+    });
+  } catch (err) {
+    console.log({ err });
+  }
 });
 
 const getPaymentsOfUser = asyncHandler(async (req, res) => {
