@@ -1152,13 +1152,10 @@ const checkCanRefund = async ({
   treeOfReceiveUser,
 }) => {
   if (userReceive.status === "LOCKED") {
-    res.status(404);
     return `User parent locked`;
   } else if (userReceive.closeLah) {
-    res.status(404);
     return `User is being blocked from trading`;
   } else if (userReceive.countPay - 1 < userCountPay) {
-    res.status(404);
     return userReceive.countPay === 0
       ? `User parent NOT FINISHED REGISTER`
       : `User parent pay = ${
