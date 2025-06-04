@@ -76,7 +76,7 @@ const userSchema = mongoose.Schema(
     errLahCode: {
       type: String,
       default: "",
-      enum: ["", "TIER", "OVER35", "OVER45"],
+      enum: ["", "TIER", "OVER35", "OVER45", "OVER90"],
     },
     tierDate: {
       type: Date,

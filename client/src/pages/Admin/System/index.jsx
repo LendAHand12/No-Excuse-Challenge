@@ -67,6 +67,7 @@ const AdminSystemPage = () => {
       isYellow,
       isGray,
       isBlue,
+      isPink,
       indexOnLevel,
       totalChild,
       income,
@@ -78,6 +79,8 @@ const AdminSystemPage = () => {
           style={{
             backgroundColor: isRed
               ? '#b91c1c'
+              : isPink
+              ? '#e600769c'
               : isBlue
               ? '#0000ff'
               : isYellow
@@ -115,6 +118,7 @@ const AdminSystemPage = () => {
             isGray={node.isGray}
             isYellow={node.isYellow}
             isBlue={node.isBlue}
+            isPink={node.isPink}
             indexOnLevel={node.indexOnLevel}
             totalChild={node.totalChild}
             income={node.income}

@@ -647,6 +647,8 @@ const UserProfile = () => {
                                   ? 'bg-[#8c8c8c]'
                                   : ele.isRed
                                   ? 'bg-[#b91c1c]'
+                                  : ele.isPink
+                                  ? 'bg-[#e600769c]'
                                   : ele.isBlue
                                   ? 'bg-[#0000ff]'
                                   : ele.isYellow

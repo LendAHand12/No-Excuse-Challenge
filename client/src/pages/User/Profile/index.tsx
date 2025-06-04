@@ -545,19 +545,21 @@ const Profile = () => {
                     {listDirectUser.map((ele) => (
                       <li className="" key={ele.userId}>
                         <div className="py-2">
-                          <div className="text-base">
+                          <div className="text-base min-w-fit">
                             <span
                               className={`${
                                 ele.isGray
                                   ? 'bg-[#8c8c8c]'
                                   : ele.isRed
                                   ? 'bg-[#b91c1c]'
+                                  : ele.isPink
+                                  ? 'bg-[#e600769c]'
                                   : ele.isBlue
                                   ? 'bg-[#0000ff]'
                                   : ele.isYellow
                                   ? 'bg-[#F4B400]'
                                   : 'bg-[#16a34a]'
-                              } py-1 px-2 rounded text-white text-sm`}
+                              } py-1 px-2 rounded text-white text-sm min-w-fit`}
                             >
                               {ele.userId}
                             </span>

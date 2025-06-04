@@ -139,7 +139,7 @@ const cron4 = new CronJob("00 04 * * *", async () => {
 });
 
 const cron5 = new CronJob("00 05 * * *", async () => {
-  // 4h
+  // 5h
   console.log("Check ref with time start");
   await checkRefWithTime();
   console.log("Check ref with time done");
