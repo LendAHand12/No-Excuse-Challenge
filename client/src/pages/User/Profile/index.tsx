@@ -7,6 +7,7 @@ import { UPDATE_USER_INFO } from '@/slices/auth';
 import { useForm } from 'react-hook-form';
 import User from '@/api/User';
 import KYC from '@/api/KYC';
+import Claim from '@/api/Claim';
 import { useCallback, useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import USER_RANKINGS from '@/constants/userRankings';
@@ -98,13 +99,49 @@ const Profile = () => {
     [phoneNumber],
   );
 
+  // const claimHewe = async () => {
+  //   setLoadingClaimHewe(true);
+  //   await KYC.claim({ coin: 'hewe' })
+  //     .then((response) => {
+  //       if (response.data.url) {
+  //         window.location.href = response.data.url;
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       let message =
+  //         error.response && error.response.data.error
+  //           ? error.response.data.error
+  //           : error.message;
+  //       toast.error(t(message));
+  //       setLoadingClaimHewe(false);
+  //     });
+  // };
+
+  // const claimUsdt = async () => {
+  //   setLoadingClaimUsdt(true);
+  //   await KYC.claim({ coin: 'usdt' })
+  //     .then((response) => {
+  //       if (response.data.url) {
+  //         window.location.href = response.data.url;
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       let message =
+  //         error.response && error.response.data.error
+  //           ? error.response.data.error
+  //           : error.message;
+  //       toast.error(t(message));
+  //       setLoadingClaimHewe(false);
+  //     });
+  // };
+
   const claimHewe = async () => {
     setLoadingClaimHewe(true);
-    await KYC.claim({ coin: 'hewe' })
+    await Claim.hewe()
       .then((response) => {
-        if (response.data.url) {
-          window.location.href = response.data.url;
-        }
+        toast.success(t(response.data.message));
+        setLoadingClaimHewe(false);
+        setRefresh(!refresh);
       })
       .catch((error) => {
         let message =
@@ -118,11 +155,12 @@ const Profile = () => {
 
   const claimUsdt = async () => {
     setLoadingClaimUsdt(true);
-    await KYC.claim({ coin: 'usdt' })
+    await Claim.usdt()
       .then((response) => {
-        if (response.data.url) {
-          window.location.href = response.data.url;
-        }
+        toast.success(t(response.data.message));
+        setLoadingClaimUsdt(false);
+        setShowModal(false);
+        setRefresh(!refresh);
       })
       .catch((error) => {
         let message =
@@ -130,7 +168,7 @@ const Profile = () => {
             ? error.response.data.error
             : error.message;
         toast.error(t(message));
-        setLoadingClaimHewe(false);
+        setLoadingClaimUsdt(false);
       });
   };
 
