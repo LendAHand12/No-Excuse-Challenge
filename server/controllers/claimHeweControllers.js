@@ -22,9 +22,7 @@ const claimHewe = asyncHandler(async (req, res) => {
   processingHeweUserIds.push(user.id);
 
   try {
-    if (user.status !== "APPROVED" 
-      // || user.facetecTid === ""
-    ) {
+    if (user.status !== "APPROVED" || user.facetecTid === "") {
       throw new Error("Please verify your account");
     }
     // const response = await axios.post("https://serepay.net/api/payment/claimHewe", {
@@ -92,16 +90,14 @@ const claimUsdt = asyncHandler(async (req, res) => {
   //     "This withdrawal function is under maintenance, please come back later",
   // });
   try {
-    if (user.status !== "APPROVED" 
-      // || user.facetecTid === ""
-    ) {
+    if (user.status !== "APPROVED" || user.facetecTid === "") {
       throw new Error("Please verify your account");
     }
     if (user.errLahCode === "OVER45") {
       throw new Error("Request denied");
     }
     if (user.availableUsdt > 0) {
-      if (user.availableUsdt < 100) {
+      if (user.availableUsdt < 200) {
         const receipt = await sendUsdt({
           amount: user.availableUsdt - 1,
           receiverAddress: user.walletAddress,
@@ -169,7 +165,9 @@ const getAllClaims = asyncHandler(async (req, res) => {
     matchStage.coin = coin;
   }
 
-  const keywordRegex = keyword ? { $regex: removeAccents(keyword), $options: "i" } : null;
+  const keywordRegex = keyword
+    ? { $regex: removeAccents(keyword), $options: "i" }
+    : null;
 
   const aggregationPipeline = [
     { $match: matchStage },
@@ -193,7 +191,10 @@ const getAllClaims = asyncHandler(async (req, res) => {
   }
 
   // Đếm số bản ghi sau khi lọc
-  const countAggregation = await Claim.aggregate([...aggregationPipeline, { $count: "total" }]);
+  const countAggregation = await Claim.aggregate([
+    ...aggregationPipeline,
+    { $count: "total" },
+  ]);
   const count = countAggregation[0]?.total || 0;
 
   // Thêm phân trang và sắp xếp
@@ -311,7 +312,10 @@ const getAllClaimsOfUser = asyncHandler(async (req, res) => {
   ];
 
   // Đếm số bản ghi sau khi lọc
-  const countAggregation = await Claim.aggregate([...aggregationPipeline, { $count: "total" }]);
+  const countAggregation = await Claim.aggregate([
+    ...aggregationPipeline,
+    { $count: "total" },
+  ]);
   const count = countAggregation[0]?.total || 0;
 
   // Thêm phân trang và sắp xếp

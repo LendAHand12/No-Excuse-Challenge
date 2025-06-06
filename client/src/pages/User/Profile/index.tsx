@@ -99,49 +99,13 @@ const Profile = () => {
     [phoneNumber],
   );
 
-  // const claimHewe = async () => {
-  //   setLoadingClaimHewe(true);
-  //   await KYC.claim({ coin: 'hewe' })
-  //     .then((response) => {
-  //       if (response.data.url) {
-  //         window.location.href = response.data.url;
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       let message =
-  //         error.response && error.response.data.error
-  //           ? error.response.data.error
-  //           : error.message;
-  //       toast.error(t(message));
-  //       setLoadingClaimHewe(false);
-  //     });
-  // };
-
-  // const claimUsdt = async () => {
-  //   setLoadingClaimUsdt(true);
-  //   await KYC.claim({ coin: 'usdt' })
-  //     .then((response) => {
-  //       if (response.data.url) {
-  //         window.location.href = response.data.url;
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       let message =
-  //         error.response && error.response.data.error
-  //           ? error.response.data.error
-  //           : error.message;
-  //       toast.error(t(message));
-  //       setLoadingClaimHewe(false);
-  //     });
-  // };
-
   const claimHewe = async () => {
     setLoadingClaimHewe(true);
-    await Claim.hewe()
+    await KYC.claim({ coin: 'hewe' })
       .then((response) => {
-        toast.success(t(response.data.message));
-        setLoadingClaimHewe(false);
-        setRefresh(!refresh);
+        if (response.data.url) {
+          window.location.href = response.data.url;
+        }
       })
       .catch((error) => {
         let message =
@@ -155,12 +119,11 @@ const Profile = () => {
 
   const claimUsdt = async () => {
     setLoadingClaimUsdt(true);
-    await Claim.usdt()
+    await KYC.claim({ coin: 'usdt' })
       .then((response) => {
-        toast.success(t(response.data.message));
-        setLoadingClaimUsdt(false);
-        setShowModal(false);
-        setRefresh(!refresh);
+        if (response.data.url) {
+          window.location.href = response.data.url;
+        }
       })
       .catch((error) => {
         let message =
@@ -168,9 +131,46 @@ const Profile = () => {
             ? error.response.data.error
             : error.message;
         toast.error(t(message));
-        setLoadingClaimUsdt(false);
+        setLoadingClaimHewe(false);
       });
   };
+
+  // const claimHewe = async () => {
+  //   setLoadingClaimHewe(true);
+  //   await Claim.hewe()
+  //     .then((response) => {
+  //       toast.success(t(response.data.message));
+  //       setLoadingClaimHewe(false);
+  //       setRefresh(!refresh);
+  //     })
+  //     .catch((error) => {
+  //       let message =
+  //         error.response && error.response.data.error
+  //           ? error.response.data.error
+  //           : error.message;
+  //       toast.error(t(message));
+  //       setLoadingClaimHewe(false);
+  //     });
+  // };
+
+  // const claimUsdt = async () => {
+  //   setLoadingClaimUsdt(true);
+  //   await Claim.usdt()
+  //     .then((response) => {
+  //       toast.success(t(response.data.message));
+  //       setLoadingClaimUsdt(false);
+  //       setShowModal(false);
+  //       setRefresh(!refresh);
+  //     })
+  //     .catch((error) => {
+  //       let message =
+  //         error.response && error.response.data.error
+  //           ? error.response.data.error
+  //           : error.message;
+  //       toast.error(t(message));
+  //       setLoadingClaimUsdt(false);
+  //     });
+  // };
 
   useEffect(() => {
     (async () => {
