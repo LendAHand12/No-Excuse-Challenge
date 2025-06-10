@@ -125,6 +125,7 @@ const checkUserCompleteKyc = expressAsyncHandler(async (req, res) => {
         const data = faceTecData.data.data[0];
         const tid = data.callData.tid;
         user.facetecTid = tid;
+        user.ageEstimate = data.ageV2GroupEnumInt;
         if (!user.kycFee) {
           user.kycFee = true;
           user.availableUsdt = user.availableUsdt - 2;
