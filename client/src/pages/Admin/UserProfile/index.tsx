@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import User from '@/api/User';
+import KYC from '@/api/KYC';
 import Loading from '@/components/Loading';
 import USER_RANKINGS from '@/constants/userRankings';
 import { confirmAlert } from 'react-confirm-alert';
@@ -24,6 +25,7 @@ const UserProfile = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
+  const [loadingCheckKyc, setLoadingCheckKyc] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [data, setData] = useState({});
   const [isEditting, setEditting] = useState(false);
@@ -349,6 +351,29 @@ const UserProfile = () => {
             : error.message;
         toast.error(t(message));
         setLoadingDelete(false);
+      });
+  };
+
+  const handleCheckKyc = async () => {
+    setLoadingCheckKyc(true);
+    await KYC.checkKyc({ userId: id })
+      .then((response) => {
+        const { message, success } = response.data;
+        setLoadingCheckKyc(false);
+        if(success) {
+          toast.success(t(message));
+          setRefresh(!refresh);
+        } else {
+          toast.error(message);
+        }
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message;
+        toast.error(t(message));
+        setLoadingCheckKyc(false);
       });
   };
 
@@ -1238,6 +1263,18 @@ const UserProfile = () => {
                       className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-orange-500 text-white"
                     >
                       {t('Approve change wallet address')}
+                    </div>
+                  )}
+                  {userInfo?.permissions
+                  .find((p) => p.page.pageName === 'admin-users-details')
+                  ?.actions.includes('update') &&
+                  data.facetecTid === "" && data.status === "UNVERIFY" && (
+                    <div
+                      onClick={handleCheckKyc}
+                      className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-orange-500 text-white"
+                    >
+                      {loadingCheckKyc && <Loading />}
+                      Check KYC
                     </div>
                   )}
               </div>

@@ -14,6 +14,9 @@ const Page = {
   getDouble: (pageNumber, keyword) => {
     return API.get(`${URL_API_KYC}/double?pageNumber=${pageNumber}&keyword=${keyword}`);
   },
+  checkKyc: (body) => {
+    return API.post(`${URL_API_KYC}/checkKyc`, body);
+  },
 };
 
 export default Page;
