@@ -423,3 +423,26 @@ export const sendMailGetHewePrice = async () => {
   // send a promise since nodemailer is async
   if (mailSent) return Promise.resolve(1);
 };
+
+export const sendMailChangeSystemForUser = async (userListString) => {
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: process.env.MAIL_ADMIN1,
+    subject: "Please check connect API get HEWE price",
+    html: `
+    <h1>Warning: Please select parent ID for the following users for payments to work properly : ${userListString} </h1>
+			`,
+    cc: [process.env.CC_MAIL, process.env.MAIL_ADMIN4],
+  };
+
+  const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(info);
+    }
+  });
+
+  // send a promise since nodemailer is async
+  if (mailSent) return Promise.resolve(1);
+};
