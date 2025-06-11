@@ -43,8 +43,8 @@ const register = expressAsyncHandler(async (req, res) => {
       return res.status(400).json({ message: "Unknown user" });
     }
 
-    const faceTecDataRes = await getFaceTecData(`ID_${user.id}`);
-    const faceTecData = faceTecDataRes.data[0];
+    const faceTecDataRes = await getFaceTecData({ userId: user.id });
+    const faceTecData = faceTecDataRes.data.data[0];
     const {
       isLikelyDuplicate,
       allUserEnrollmentsListSearchResult,
