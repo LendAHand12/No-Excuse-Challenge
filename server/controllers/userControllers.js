@@ -142,7 +142,7 @@ const getUserById = asyncHandler(async (req, res) => {
               ? true
               : false,
           isYellow: refedUser.errLahCode === "OVER35",
-          isBlue: refedUser.errLahCode === "OVER90",
+          isBlue: refedUser.errLahCode === "OVER45",
           isPink: refedUser.countPay === 13 && listRefOfRefUser.length < 2,
         });
       }
@@ -284,7 +284,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
               ? true
               : false,
           isYellow: refedUser.errLahCode === "OVER35",
-          isBlue: refedUser.errLahCode === "OVER90",
+          isBlue: refedUser.errLahCode === "OVER45",
           isPink: refedUser.countPay === 13 && listRefOfRefUser.length < 2,
         });
       }
@@ -906,7 +906,7 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
             : false,
         isRed: child.tier === 1 && child.countPay === 0 ? true : false,
         isYellow: child.errLahCode === "OVER35",
-        isBlue: child.errLahCode === "OVER90",
+        isBlue: child.errLahCode === "OVER45",
         indexOnLevel: childTree.indexOnLevel,
         isSubId: childTree.isSubId,
         isPink: child.countPay === 13 && listRefOfChild.length < 2,

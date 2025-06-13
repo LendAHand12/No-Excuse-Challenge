@@ -273,9 +273,10 @@ export const checkRefWithTime = asyncHandler(async () => {
 
     const listRefId = await Tree.find({ refId: tree._id });
     if (listRefId.length < 2) {
-      if (diffDays > 90) {
-        u.errLahCode = "OVER90";
-      } else if (diffDays > 45) {
+      // if (diffDays > 90) {
+      //   u.errLahCode = "OVER90";
+      // } else 
+      if (diffDays > 45) {
         u.errLahCode = "OVER45";
       } else if (diffDays > 35) {
         u.errLahCode = "OVER35";
