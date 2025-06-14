@@ -590,12 +590,12 @@ const Profile = () => {
                                   ? 'bg-[#8c8c8c]'
                                   : ele.isRed
                                   ? 'bg-[#b91c1c]'
-                                  : ele.isPink
-                                  ? 'bg-[#e600769c]'
                                   : ele.isBlue
                                   ? 'bg-[#0000ff]'
                                   : ele.isYellow
                                   ? 'bg-[#F4B400]'
+                                  : ele.isPink
+                                  ? 'bg-[#e600769c]'
                                   : 'bg-[#16a34a]'
                               } py-1 px-2 rounded text-white text-sm min-w-fit`}
                             >

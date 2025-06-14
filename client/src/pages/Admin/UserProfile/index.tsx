@@ -360,7 +360,7 @@ const UserProfile = () => {
       .then((response) => {
         const { message, success } = response.data;
         setLoadingCheckKyc(false);
-        if(success) {
+        if (success) {
           toast.success(t(message));
           setRefresh(!refresh);
         } else {
@@ -672,12 +672,12 @@ const UserProfile = () => {
                                   ? 'bg-[#8c8c8c]'
                                   : ele.isRed
                                   ? 'bg-[#b91c1c]'
-                                  : ele.isPink
-                                  ? 'bg-[#e600769c]'
                                   : ele.isBlue
                                   ? 'bg-[#0000ff]'
                                   : ele.isYellow
                                   ? 'bg-[#F4B400]'
+                                  : ele.isPink
+                                  ? 'bg-[#e600769c]'
                                   : 'bg-[#16a34a]'
                               } py-1 px-2 rounded text-white text-sm`}
                             >
@@ -1265,10 +1265,11 @@ const UserProfile = () => {
                       {t('Approve change wallet address')}
                     </div>
                   )}
-                  {userInfo?.permissions
+                {userInfo?.permissions
                   .find((p) => p.page.pageName === 'admin-users-details')
                   ?.actions.includes('update') &&
-                  data.facetecTid === "" && data.status === "UNVERIFY" && (
+                  data.facetecTid === '' &&
+                  data.status === 'UNVERIFY' && (
                     <div
                       onClick={handleCheckKyc}
                       className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-orange-500 text-white"
