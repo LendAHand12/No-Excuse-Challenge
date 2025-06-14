@@ -79,12 +79,12 @@ const AdminSystemPage = () => {
           style={{
             backgroundColor: isRed
               ? '#b91c1c'
-              : isPink
-              ? '#e600769c'
               : isBlue
               ? '#0000ff'
               : isYellow
               ? '#F4B400'
+              : isPink
+              ? '#e600769c'
               : layer <= userInfo.currentLayer[currentTier - 1]
               ? colors[userInfo.currentLayer[currentTier - 1]]
               : '#16a34a',

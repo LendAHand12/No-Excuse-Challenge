@@ -58,14 +58,14 @@ const SystemPage = () => {
           style={{
             backgroundColor: isGray
               ? '#8c8c8c'
-              : isPink
-              ? "#e600769c"
-              : isBlue
-              ? '#0000ff'
               : isRed
               ? '#b91c1c'
+              : isBlue
+              ? '#0000ff'
               : isYellow
               ? '#F4B400'
+              : isPink
+              ? '#e600769c'
               : layer <= userInfo.currentLayer[currentTier - 1]
               ? colors[userInfo.currentLayer[currentTier - 1]]
               : '#16a34a',
