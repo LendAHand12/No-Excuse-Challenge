@@ -11,11 +11,13 @@ import DefaultLayout from '../../../layout/DefaultLayout';
 import { transfer } from '../../../utils/smartContract';
 import { useSelector } from 'react-redux';
 import Select from 'react-select';
+import { useNavigate } from 'react-router-dom';
 
 Modal.setAppElement('#root');
 
 const PaymentNextTierPage = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { userInfo } = useSelector((state) => state.auth);
   const [loadingPaymentInfo, setLoadingPaymentInfo] = useState(true);
   const [paymentsList, setPaymentsList] = useState([]);
@@ -29,6 +31,9 @@ const PaymentNextTierPage = () => {
   const [errSubId, setErrSubId] = useState(false);
   const [childId, setChildId] = useState('');
   const [loadingListPayment, setLoadingListPayment] = useState(false);
+  const [showCommit, setShowCommit] = useState(false);
+  const [notEnoughtChild1, setNotEnoughtChild1] = useState(0);
+  const [notEnoughtChild2, setNotEnoughtChild2] = useState(0);
 
   const topRef = useRef(null);
 
@@ -44,9 +49,21 @@ const PaymentNextTierPage = () => {
     }
     await Payment.getPaymentNextTierInfo(childId)
       .then((response) => {
-        const { status, payments, paymentIds, message, userStepPayment } =
-          response.data;
+        const {
+          status,
+          payments,
+          paymentIds,
+          message,
+          userStepPayment,
+          holdForNotEnoughLevel,
+          notEnoughtChild,
+        } = response.data;
         setResMessage(message);
+        if (userStepPayment === 0 && holdForNotEnoughLevel) {
+          setShowCommit(holdForNotEnoughLevel);
+          setNotEnoughtChild1(notEnoughtChild.countChild1);
+          setNotEnoughtChild2(notEnoughtChild.countChild2);
+        }
         setResStatus(status);
 
         if (status === 'OK') {
@@ -94,29 +111,24 @@ const PaymentNextTierPage = () => {
   }, []);
 
   const paymentMetamask = useCallback(async () => {
-    // if (!childId) {
-    //   setErrSubId(true);
-    //   scrollToTop();
-    //   return;
-    // }
     setLoadingPayment(true);
     try {
-      const referralTransaction = await transfer(
-        import.meta.env.VITE_MAIN_WALLET_ADDRESS,
-        total,
-      );
-      if (referralTransaction) {
-        const { transactionHash } = referralTransaction;
+      // const referralTransaction = await transfer(
+      //   import.meta.env.VITE_MAIN_WALLET_ADDRESS,
+      //   total,
+      // );
+      // if (referralTransaction) {
+      //   const { transactionHash } = referralTransaction;
       await doneNextTierPayment({
-        transactionHash,
+        transactionHash: 'transactionHash',
         childId,
       });
       setLoadingPayment(false);
       setStep(step + 1);
-      } else {
-        setLoadingPayment(false);
-        throw new Error(t('payment error'));
-      }
+      // } else {
+      //   setLoadingPayment(false);
+      //   throw new Error(t('payment error'));
+      // }
     } catch (error) {
       toast.error(t(error.message));
       setLoadingPayment(false);
@@ -157,6 +169,69 @@ const PaymentNextTierPage = () => {
           </div>
         ) : (
           <>
+            <Modal
+              isOpen={showCommit}
+              style={{
+                content: {
+                  top: '50%',
+                  left: '50%',
+                  right: 'auto',
+                  bottom: 'auto',
+                  marginRight: '-50%',
+                  transform: 'translate(-50%, -50%)',
+                },
+              }}
+            >
+              <div className="overflow-y-auto overflow-x-hidden justify-center items-center w-full md:inset-0 h-modal md:h-full">
+                <div className="relative w-full max-w-md h-full md:h-auto">
+                  <div className="relative text-center bg-white rounded-lg sm:p-5">
+                    <div className="flex flex-col items-center">
+                      <div
+                        className="text-left text-gray-700 rounded relative mb-5"
+                        role="alert"
+                      >
+                        <div className="font-bold mb-4 text-red-900">
+                          ⚠️ Warning:
+                        </div>
+                        Please check the number of IDs in Tier 1 that need to be
+                        fulfilled within <b>45 days</b>. <br></br>
+                        <ul className="my-1 list-disc">
+                          <li className="font-medium ml-4">
+                            Branch 1 to fulfill :{' '}
+                            {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                              notEnoughtChild1}{' '}
+                            IDs
+                          </li>
+                          <li className="font-medium ml-4">
+                            Branch 2 to fulfill :{' '}
+                            {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                              notEnoughtChild2}{' '}
+                            IDs
+                          </li>
+                        </ul>
+                        By clicking <b>"Yes"</b>, the member agrees to complete
+                        <b> 128 active IDs</b> in both <b> Branch 1</b> and{' '}
+                        <b> Branch 2</b>.
+                      </div>
+                      <div className="w-full flex justify-around items-center">
+                        <button
+                          onClick={() => navigate('/user/profile')}
+                          className="flex items-center gap-2 px-6 py-2 bg-red-600 text-white rounded-md hover:opacity-70"
+                        >
+                          No
+                        </button>
+                        <button
+                          onClick={() => setShowCommit(false)}
+                          className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:opacity-70"
+                        >
+                          Yes
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Modal>
             {resStatus === 'PENDING' && (
               <div
                 className="bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded relative mb-5"

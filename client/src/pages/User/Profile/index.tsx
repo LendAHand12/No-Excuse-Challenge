@@ -51,6 +51,9 @@ const Profile = () => {
     kycFee,
     errLahCode,
     pendingUpdateInfo,
+    notEnoughtChild,
+    tryToTier2,
+    countdown,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -428,6 +431,18 @@ const Profile = () => {
           </div>
         )}
 
+        {tryToTier2 === 'YES' && (
+          <div
+            className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
+            role="alert"
+          >
+            <span className="block sm:inline">
+              You have only <b>{countdown}</b> days left to complete the 128
+              required IDs to be eligible for Tier 2 benefits.
+            </span>
+          </div>
+        )}
+
         <div className="bg-[#FAFBFC] p-4 rounded-2xl flex 2xl:flex-row flex-col items-start 2xl:items-center xl:justify-between gap-8">
           <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
             <p className="font-medium">Available HEWE</p>
@@ -575,36 +590,61 @@ const Profile = () => {
                 </div>
               </div>
             </div>
+            {currentLayer.slice(-1)[0] === 5 && (
+              <div className="bg-[#FAFBFC] p-4 rounded-2xl">
+                <div className="py-2 px-4">
+                  <p className="uppercase mt-2 font-bold">{t('children')}</p>
+                  <div className="lg:py-2">
+                    <ul className="flex flex-col lg:flex-row lg:gap-4">
+                      {listDirectUser.map((ele) => (
+                        <li className="" key={ele.userId}>
+                          <div className="py-2">
+                            <div className="text-base min-w-fit">
+                              <span
+                                className={`${
+                                  ele.isGray
+                                    ? 'bg-[#8c8c8c]'
+                                    : ele.isRed
+                                    ? 'bg-[#b91c1c]'
+                                    : ele.isBlue
+                                    ? 'bg-[#0000ff]'
+                                    : ele.isYellow
+                                    ? 'bg-[#F4B400]'
+                                    : ele.isPink
+                                    ? 'bg-[#e600769c]'
+                                    : 'bg-[#16a34a]'
+                                } py-1 px-2 rounded text-white text-sm min-w-fit`}
+                              >
+                                {ele.userId}
+                              </span>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="bg-[#FAFBFC] p-4 rounded-2xl">
               <div className="py-2 px-4">
-                <p className="uppercase mt-2 font-bold">{t('children')}</p>
+                <p className="uppercase mt-2 font-bold">
+                  {t('Sales needed to move to tier 2')}
+                </p>
                 <div className="lg:py-2">
-                  <ul className="flex flex-col lg:flex-row lg:gap-4">
-                    {listDirectUser.map((ele) => (
-                      <li className="" key={ele.userId}>
-                        <div className="py-2">
-                          <div className="text-base min-w-fit">
-                            <span
-                              className={`${
-                                ele.isGray
-                                  ? 'bg-[#8c8c8c]'
-                                  : ele.isRed
-                                  ? 'bg-[#b91c1c]'
-                                  : ele.isBlue
-                                  ? 'bg-[#0000ff]'
-                                  : ele.isYellow
-                                  ? 'bg-[#F4B400]'
-                                  : ele.isPink
-                                  ? 'bg-[#e600769c]'
-                                  : 'bg-[#16a34a]'
-                              } py-1 px-2 rounded text-white text-sm min-w-fit`}
-                            >
-                              {ele.userId}
-                            </span>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
+                  <ul className="flex flex-col list-disc">
+                    <li className="ml-4">
+                      Branch 1 :{' '}
+                      {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                        notEnoughtChild?.countChild1 || 0}{' '}
+                      IDs
+                    </li>
+                    <li className="ml-4">
+                      Branch 2 :{' '}
+                      {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                        notEnoughtChild?.countChild2 || 0}{' '}
+                      IDs
+                    </li>
                   </ul>
                 </div>
               </div>

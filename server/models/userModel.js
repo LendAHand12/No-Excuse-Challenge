@@ -194,6 +194,11 @@ const userSchema = mongoose.Schema(
     ageEstimate: {
       type: Number,
     },
+    tryToTier2: {
+      type: String,
+      default: "",
+      enum: ["", "YES", "DONE", "REDO"],
+    },
   },
   {
     timestamps: true,
