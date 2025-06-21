@@ -472,7 +472,7 @@ export const totalChildOn2Branch = async (treeOfUserId) => {
   };
 };
 
-export const sumLevels = (obj, fromLevel = 6, toLevel = 10) => {
+export const sumLevels = (obj, fromLevel = 5, toLevel = 9) => {
   let sum = 0;
 
   for (let i = fromLevel; i <= toLevel; i++) {
