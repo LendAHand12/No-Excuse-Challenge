@@ -199,13 +199,21 @@ const PaymentNextTierPage = () => {
                           <li className="font-medium ml-4">
                             Branch 1 to fulfill :{' '}
                             {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                              notEnoughtChild1}{' '}
+                              notEnoughtChild1 >
+                            0
+                              ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                                notEnoughtChild1
+                              : 0}{' '}
                             IDs
                           </li>
                           <li className="font-medium ml-4">
                             Branch 2 to fulfill :{' '}
                             {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                              notEnoughtChild2}{' '}
+                              notEnoughtChild2 >
+                            0
+                              ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                                notEnoughtChild2
+                              : 0}{' '}
                             IDs
                           </li>
                         </ul>
