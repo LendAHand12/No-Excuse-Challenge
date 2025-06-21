@@ -700,13 +700,21 @@ const UserProfile = () => {
                       <li className="ml-4">
                         Branch 1 :{' '}
                         {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                          data.notEnoughtChild?.countChild1 || 0}{' '}
+                          data.notEnoughtChild?.countChild1 >
+                        0
+                          ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                            data.notEnoughtChild?.countChild1
+                          : 0 || 0}{' '}
                         IDs
                       </li>
                       <li className="ml-4">
                         Branch 2 :{' '}
                         {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                          data.notEnoughtChild?.countChild2 || 0}{' '}
+                          data.notEnoughtChild?.countChild2 >
+                        0
+                          ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                            data.notEnoughtChild?.countChild2
+                          : 0 || 0}{' '}
                         IDs
                       </li>
                     </ul>
