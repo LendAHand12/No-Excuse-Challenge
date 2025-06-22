@@ -5,7 +5,11 @@ import User from "../models/userModel.js";
 import sendMail from "../utils/sendMail.js";
 import { sendMailGetHewePrice, sendMailUpdateLayerForAdmin } from "../utils/sendMailCustom.js";
 import { getCountAllChildren, getCountIncome } from "../controllers/userControllers.js";
-import { findRootLayer, getUserClosestToNow } from "../utils/methods.js";
+import {
+  findRootLayer,
+  getTotalLevel6ToLevel10OfUser,
+  getUserClosestToNow,
+} from "../utils/methods.js";
 import Tree from "../models/treeModel.js";
 import Transaction from "../models/transactionModel.js";
 import Honor from "../models/honorModel.js";
@@ -335,13 +339,18 @@ export const checkUserTryToTier2 = asyncHandler(async () => {
       const diffDay = currentDay.diff(u.tier2Time, "days");
       if (diffDay >= 45) {
         u.tryToTier2 = "REDO";
+        u.tier = 1;
+        const treeOfUser = await Tree.findOne({ userId: u._id, tier: 2, isSubId: false });
+        treeOfUser.disable = true;
+        await treeOfUser.save();
       } else {
         const treeOfUser = await Tree.findOne({ userId: u._id, tier: 1, isSubId: false });
         const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(treeOfUser);
-        if (countChild1 >= 64 && countChild2 >= 64) {
+        if (countChild1 >= 63 && countChild2 >= 63) {
           u.tryToTier2 = "DONE";
         }
       }
+      await u.save();
     } catch (error) {
       console.log({ error });
     }

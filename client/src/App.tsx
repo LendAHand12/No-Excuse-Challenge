@@ -71,6 +71,7 @@ import AdminDoubleKycPage from './pages/Admin/DoubleKyc';
 import AdminConfigPage from './pages/Admin/Config';
 import UserHistoryPage from './pages/Admin/UserHistory';
 import UserUpdateInfoKYCPage from './pages/User/UpdateInfoKYC';
+import UsersTier2 from './pages/User/UsersTier2';
 
 function App() {
   const { pathname } = useLocation();
@@ -573,6 +574,20 @@ function App() {
             }
           />
         )}
+
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/user/tier2')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/user/tier2"
+            element={
+              <>
+                <PageTitle title="Users Tier2 | NoExcuseChallenge" />
+                <UsersTier2 />
+              </>
+            }
+          />
+        )}
       </Route>
 
       <Route element={<PrivateRoute />}>
@@ -695,6 +710,17 @@ function App() {
                 </>
               }
             />
+            {userInfo?.tier > 1 && (
+              <Route
+                path="/user/tier2"
+                element={
+                  <>
+                    <PageTitle title="Users Tier 2 | NoExcuseChallenge" />
+                    <UsersTier2 />
+                  </>
+                }
+              />
+            )}
           </>
         )}
       </Route>

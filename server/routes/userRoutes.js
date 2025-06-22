@@ -34,6 +34,7 @@ import {
   adminChangeWalletUser,
   getListChildNotEnoughBranchOfUser,
   getListUserForCreateAdmin,
+  getAllUsersTier2,
 } from "../controllers/userControllers.js";
 import { protectRoute, isAdmin, isSuperAdmin } from "../middleware/authMiddleware.js";
 import uploadCCCD from "../middleware/uploadCCCD.js";
@@ -71,6 +72,8 @@ router
   .get(protectRoute, isSuperAdmin, getAdminById)
   .put(protectRoute, isSuperAdmin, updateAdmin)
   .delete(protectRoute, isSuperAdmin, deleteAdmin);
+
+router.route("/tiers/2").get(protectRoute, getAllUsersTier2);
 
 router
   .route("/:id")

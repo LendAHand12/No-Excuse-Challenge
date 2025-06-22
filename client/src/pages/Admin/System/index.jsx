@@ -68,6 +68,7 @@ const AdminSystemPage = () => {
       isGray,
       isBlue,
       isPink,
+      isBrown,
       indexOnLevel,
       totalChild,
       income,
@@ -81,6 +82,8 @@ const AdminSystemPage = () => {
               ? '#b91c1c'
               : isBlue
               ? '#0000ff'
+              : isBrown
+              ? '#964B00'
               : isYellow
               ? '#F4B400'
               : isPink
@@ -122,6 +125,7 @@ const AdminSystemPage = () => {
             indexOnLevel={node.indexOnLevel}
             totalChild={node.totalChild}
             income={node.income}
+            isBrown={node.isBrown}
           >
             {node.label}
           </StyledNode>

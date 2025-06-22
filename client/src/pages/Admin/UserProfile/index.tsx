@@ -439,6 +439,18 @@ const UserProfile = () => {
             </div>
           )}
 
+          {data.tier === 2 && data.tryToTier2 === 'YES' && (
+            <div
+              className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
+              role="alert"
+            >
+              <span className="block sm:inline">
+                You have only <b>{data.countdown}</b> days left to complete the
+                128 required IDs to be eligible for Tier 2 benefits.
+              </span>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit(onSubmit)} className="md:flex no-wrap">
             <div className="w-full lg:w-3/12 lg:mx-2 mb-4 lg:mb-0">
               <div className="bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
@@ -690,37 +702,53 @@ const UserProfile = () => {
                   </ul>
                 </div>
               </div>
-              {data.currentLayer[0] === 5 && (
-                <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
-                  <p className="uppercase mt-2 font-bold">
-                    {t('Sales needed to move to tier 2')}
-                  </p>
-                  <div className="py-2">
-                    <ul className="flex flex-col list-disc">
-                      <li className="ml-4">
-                        Branch 1 :{' '}
-                        {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                          data.notEnoughtChild?.countChild1 >
-                        0
-                          ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                            data.notEnoughtChild?.countChild1
-                          : 0 || 0}{' '}
-                        IDs
-                      </li>
-                      <li className="ml-4">
-                        Branch 2 :{' '}
-                        {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                          data.notEnoughtChild?.countChild2 >
-                        0
-                          ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                            data.notEnoughtChild?.countChild2
-                          : 0 || 0}{' '}
-                        IDs
-                      </li>
-                    </ul>
+              {data.currentLayer[0] === 5 ||
+                (data.tier === 2 && (
+                  <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                    <p className="uppercase mt-2 font-bold">
+                      {t('Sales are working')}
+                    </p>
+                    <div className="lg:py-2">
+                      <ul className="flex flex-col list-disc">
+                        <li className="ml-4">
+                          Branch 1 : {data.notEnoughtChild?.countChild1} IDs
+                        </li>
+                        <li className="ml-4">
+                          Branch 2 : {data.notEnoughtChild?.countChild2} IDs
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="py-2">
+                      <p className="uppercase mt-2 font-bold">
+                        {t('Sales to be compensated')}
+                      </p>
+                      <div className="lg:py-2">
+                        <ul className="flex flex-col list-disc">
+                          <li className="ml-4">
+                            Branch 1 :{' '}
+                            {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                              data.notEnoughtChild?.countChild1 >
+                            0
+                              ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                                data.notEnoughtChild?.countChild1
+                              : 0 || 0}{' '}
+                            IDs
+                          </li>
+                          <li className="ml-4">
+                            Branch 2 :{' '}
+                            {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                              data.notEnoughtChild?.countChild2 >
+                            0
+                              ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                                data.notEnoughtChild?.countChild2
+                              : 0 || 0}{' '}
+                            IDs
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
+                ))}
               <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                 <p className="uppercase mt-2 font-bold">{t('refUserName')}</p>
                 <div className="py-2">

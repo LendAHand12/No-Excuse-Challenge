@@ -12,6 +12,9 @@ const User = {
       `${URL_API_USER}/?pageNumber=${pageNumber}&keyword=${keyword}&status=${statusSearch}`,
     );
   },
+  getAllUsersTier2: (pageNumber) => {
+    return API.get(`${URL_API_USER}/tiers/2?pageNumber=${pageNumber}`);
+  },
   getUserById: (id) => {
     return API.get(`${URL_API_USER}/${id}`);
   },

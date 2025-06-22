@@ -178,14 +178,15 @@ const getUserById = asyncHandler(async (req, res) => {
     const totalHold = listTransHold.reduce((sum, ele) => sum + ele.amount, 0);
 
     let notEnoughtChild = { countChild1: 0, countChild2: 0 };
-    if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 5) {
+    if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 5 || user.tier > 1) {
       notEnoughtChild = await getTotalLevel6ToLevel10OfUser(tree);
     }
 
     let countdown = 0;
     if (user.tryToTier2 === "YES") {
-      let currentDay = moment();
-      countdown = currentDay.diff(user.tier2Time, "days");
+      const tier2Deadline = moment(user.tier2Time).add(45, "days"); // ngày tier2Time + 45 ngày
+      const currentDay = moment(); // ngày hiện tại
+      countdown = tier2Deadline.diff(currentDay, "days"); // số ngày còn lại
     }
 
     res.json({
@@ -329,13 +330,14 @@ const getUserInfo = asyncHandler(async (req, res) => {
     });
 
     let notEnoughtChild = { countChild1: 0, countChild2: 0 };
-    if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 5) {
+    if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 5 || user.tier > 1) {
       notEnoughtChild = await getTotalLevel6ToLevel10OfUser(tree);
     }
     let countdown = 0;
     if (user.tryToTier2 === "YES") {
-      let currentDay = moment();
-      countdown = currentDay.diff(user.tier2Time, "days");
+      const tier2Deadline = moment(user.tier2Time).add(45, "days"); // ngày tier2Time + 45 ngày
+      const currentDay = moment(); // ngày hiện tại
+      countdown = tier2Deadline.diff(currentDay, "days"); // số ngày còn lại
     }
 
     res.json({
@@ -879,6 +881,7 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
         indexOnLevel: childTree.indexOnLevel,
         isSubId: childTree.isSubId,
         isPink: child.countPay === 13 && listRefOfChild.length < 2,
+        isBrown: childTree.disable,
       });
     }
     res.status(200).json(tree);
@@ -2205,6 +2208,39 @@ const getListUserForCreateAdmin = asyncHandler(async (req, res) => {
   res.json({ resultTier1, resultTier2 });
 });
 
+const getAllUsersTier2 = asyncHandler(async (req, res) => {
+  const { pageNumber } = req.query;
+  const page = Number(pageNumber) || 1;
+
+  const pageSize = 20;
+
+  const count = await Tree.countDocuments({ tier: 2, disable: false, isSubId: false });
+  let allUsers = [];
+
+  const allTrees = await Tree.find({ tier: 2, disable: false, isSubId: false })
+    .limit(pageSize)
+    .skip(pageSize * (page - 1))
+    .sort("indexOnLevel")
+    .select("-password");
+
+  for (let i = 0; i < allTrees.length; i++) {
+    const tree = allTrees[i];
+    const u = await User.findById(tree.userId);
+
+    allUsers.push({
+      order: (page - 1) * pageSize + i + 1, // <== Số thứ tự đúng theo trang
+      userId: u.userId,
+      email: u.email,
+      time: u.tier2Time,
+    });
+  }
+
+  res.json({
+    users: allUsers,
+    pages: Math.ceil(count / pageSize),
+  });
+});
+
 export {
   getUserProfile,
   getAllUsers,
@@ -2244,4 +2280,5 @@ export {
   getListChildNotEnoughBranchOfUser,
   getListUserForCreateAdmin,
   getCountIncome,
+  getAllUsersTier2,
 };

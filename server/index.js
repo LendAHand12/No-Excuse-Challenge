@@ -41,8 +41,8 @@ import {
   rankingCalc,
   checkRefWithTime,
   blockUserNotKYC,
-  test1,
   updateHewePrice,
+  checkUserTryToTier2,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 
@@ -117,6 +117,13 @@ const cron12 = new CronJob("30 01 * * *", async () => {
   console.log("Block user not KYC done");
 });
 
+const cron13 = new CronJob("45 01 * * *", async () => {
+  // 1h30
+  console.log("Check User try to Tier2 start");
+  await checkUserTryToTier2();
+  console.log("Check User try to Tier2 done");
+});
+
 const cron2 = new CronJob("00 02 * * *", async () => {
   // 2h
   console.log("Count child start");
@@ -155,6 +162,7 @@ const cron6 = new CronJob("0 * * * *", async () => {
 cron0.start();
 cron1.start();
 cron12.start();
+cron13.start();
 cron2.start();
 cron3.start();
 cron4.start();
