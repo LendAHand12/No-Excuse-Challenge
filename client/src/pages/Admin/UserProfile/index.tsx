@@ -719,7 +719,7 @@ const UserProfile = () => {
                   </div>
                   <div className="py-2">
                     <p className="uppercase mt-2 font-bold">
-                      {t('Sales to be compensated')}
+                      {t('Sales must be compensated')}
                     </p>
                     <div className="lg:py-2">
                       <ul className="flex flex-col list-disc">

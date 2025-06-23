@@ -184,7 +184,7 @@ const getUserById = asyncHandler(async (req, res) => {
 
     let countdown = 0;
     if (user.tryToTier2 === "YES") {
-      const tier2Deadline = moment(user.tier2Time).add(45, "days"); // ngày tier2Time + 45 ngày
+      const tier2Deadline = moment(user.timeToTry).add(45, "days"); // ngày tier2Time + 45 ngày
       const currentDay = moment(); // ngày hiện tại
       countdown = tier2Deadline.diff(currentDay, "days"); // số ngày còn lại
     }
@@ -335,7 +335,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
     }
     let countdown = 0;
     if (user.tryToTier2 === "YES") {
-      const tier2Deadline = moment(user.tier2Time).add(45, "days"); // ngày tier2Time + 45 ngày
+      const tier2Deadline = moment(user.timeToTry).add(45, "days"); // ngày tier2Time + 45 ngày
       const currentDay = moment(); // ngày hiện tại
       countdown = tier2Deadline.diff(currentDay, "days"); // số ngày còn lại
     }

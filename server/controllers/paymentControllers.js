@@ -818,6 +818,7 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
         user.adminChangeTier = true;
         if (user.currentLayer[0] === 5) {
           user.tryToTier2 = "YES";
+          user.timeToTry = new Date();
         }
 
         const newChildParent = await Tree.findById(childId);

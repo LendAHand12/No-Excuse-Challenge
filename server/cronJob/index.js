@@ -45,7 +45,8 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
         console.log({ TH1111111: u.userId });
         const firstChild = await Tree.findById(treeOfUser.children[0]);
         firstChild.parentId = updatedParent._id;
-        firstChild.refId = "64cd449ec75ae7bc7ebbab03";
+        firstChild.refId =
+          firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
         await firstChild.save();
 
         const newUpdatedParentChildren = [...updatedParent.children, firstChild._id];
@@ -57,12 +58,12 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
         console.log({ TH22222222: u.userId });
         const firstChild = await Tree.findById(treeOfUser.children[0]);
         firstChild.parentId = updatedParent._id;
-        firstChild.refId = "64cd449ec75ae7bc7ebbab03";
+        firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
         await firstChild.save();
 
         const secondChild = await Tree.findById(treeOfUser.children[1]);
         secondChild.parentId = updatedParent._id;
-        secondChild.refId = "64cd449ec75ae7bc7ebbab03";
+        secondChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : secondChild.refId;
         await secondChild.save();
 
         const newUpdatedParentChildren = [firstChild._id, secondChild._id];
@@ -331,25 +332,32 @@ export const test1 = asyncHandler(async () => {
 });
 
 export const checkUserTryToTier2 = asyncHandler(async () => {
-  const listUser = await User.find({ tryToTier2: "YES" });
+  const listUser = await User.find({ tier: 2 });
 
   for (let u of listUser) {
     try {
-      let currentDay = moment();
-      const diffDay = currentDay.diff(u.tier2Time, "days");
-      if (diffDay >= 45) {
-        u.tryToTier2 = "REDO";
-        u.tier = 1;
-        const treeOfUser = await Tree.findOne({ userId: u._id, tier: 2, isSubId: false });
-        treeOfUser.disable = true;
-        await treeOfUser.save();
+      const treeOfUser = await Tree.findOne({ userId: u._id, tier: 1, isSubId: false });
+      const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(treeOfUser);
+      if (countChild1 >= 63 && countChild2 >= 63) {
+        u.tryToTier2 = "DONE";
+        u.timeToTry = null;
       } else {
-        const treeOfUser = await Tree.findOne({ userId: u._id, tier: 1, isSubId: false });
-        const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(treeOfUser);
-        if (countChild1 >= 63 && countChild2 >= 63) {
-          u.tryToTier2 = "DONE";
+        if (u.timeToTry) {
+          let currentDay = moment();
+          const diffDay = currentDay.diff(u.timeToTry, "days");
+          if (diffDay >= 45) {
+            u.tryToTier2 = "REDO";
+            u.tier = 1;
+            const treeOfUser = await Tree.findOne({ userId: u._id, tier: 2, isSubId: false });
+            treeOfUser.disable = true;
+            await treeOfUser.save();
+          }
+        } else {
+          u.tryToTier2 = "YES";
+          u.timeToTry = new Date();
         }
       }
+
       await u.save();
     } catch (error) {
       console.log({ error });

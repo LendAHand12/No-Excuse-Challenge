@@ -199,6 +199,9 @@ const userSchema = mongoose.Schema(
       default: "",
       enum: ["", "YES", "DONE", "REDO"],
     },
+    timeToTry: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
