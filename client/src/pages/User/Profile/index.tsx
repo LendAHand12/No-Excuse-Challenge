@@ -625,55 +625,54 @@ const Profile = () => {
                 </div>
               </div>
             </div>
-            {currentLayer[0] === 5 ||
-              (tier === 2 && (
-                <div className="bg-[#FAFBFC] p-4 rounded-2xl">
-                  <div className="py-2 px-4">
-                    <p className="uppercase mt-2 font-bold">
-                      {t('Sales are working')}
-                    </p>
-                    <div className="lg:py-2">
-                      <ul className="flex flex-col list-disc">
-                        <li className="ml-4">
-                          Branch 1 : {notEnoughtChild?.countChild1} IDs
-                        </li>
-                        <li className="ml-4">
-                          Branch 2 : {notEnoughtChild?.countChild2} IDs
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="py-2 px-4">
-                    <p className="uppercase mt-2 font-bold">
-                      {t('Sales to be compensated')}
-                    </p>
-                    <div className="lg:py-2">
-                      <ul className="flex flex-col list-disc">
-                        <li className="ml-4">
-                          Branch 1 :{' '}
-                          {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                            notEnoughtChild?.countChild1 >
-                          0
-                            ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                              notEnoughtChild?.countChild1
-                            : 0 || 0}{' '}
-                          IDs
-                        </li>
-                        <li className="ml-4">
-                          Branch 2 :{' '}
-                          {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                            notEnoughtChild?.countChild2 >
-                          0
-                            ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                              notEnoughtChild?.countChild2
-                            : 0 || 0}{' '}
-                          IDs
-                        </li>
-                      </ul>
-                    </div>
+            {(currentLayer[0] === 5 || tier === 2) && (
+              <div className="bg-[#FAFBFC] p-4 rounded-2xl">
+                <div className="py-2 px-4">
+                  <p className="uppercase mt-2 font-bold">
+                    {t('Sales are working')}
+                  </p>
+                  <div className="lg:py-2">
+                    <ul className="flex flex-col list-disc">
+                      <li className="ml-4">
+                        Branch 1 : {notEnoughtChild?.countChild1} IDs
+                      </li>
+                      <li className="ml-4">
+                        Branch 2 : {notEnoughtChild?.countChild2} IDs
+                      </li>
+                    </ul>
                   </div>
                 </div>
-              ))}
+                <div className="py-2 px-4">
+                  <p className="uppercase mt-2 font-bold">
+                    {t('Sales to be compensated')}
+                  </p>
+                  <div className="lg:py-2">
+                    <ul className="flex flex-col list-disc">
+                      <li className="ml-4">
+                        Branch 1 :{' '}
+                        {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                          notEnoughtChild?.countChild1 >
+                        0
+                          ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                            notEnoughtChild?.countChild1
+                          : 0 || 0}{' '}
+                        IDs
+                      </li>
+                      <li className="ml-4">
+                        Branch 2 :{' '}
+                        {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                          notEnoughtChild?.countChild2 >
+                        0
+                          ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                            notEnoughtChild?.countChild2
+                          : 0 || 0}{' '}
+                        IDs
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         {errLahCode !== 'OVER45' && !isEdit && status === 'APPROVED' && (

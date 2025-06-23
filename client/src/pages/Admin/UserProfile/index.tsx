@@ -702,53 +702,52 @@ const UserProfile = () => {
                   </ul>
                 </div>
               </div>
-              {data.currentLayer[0] === 5 ||
-                (data.tier === 2 && (
-                  <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+              {(data.currentLayer[0] === 5 || data.tier === 2) && (
+                <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                  <p className="uppercase mt-2 font-bold">
+                    {t('Sales are working')}
+                  </p>
+                  <div className="lg:py-2">
+                    <ul className="flex flex-col list-disc">
+                      <li className="ml-4">
+                        Branch 1 : {data.notEnoughtChild?.countChild1} IDs
+                      </li>
+                      <li className="ml-4">
+                        Branch 2 : {data.notEnoughtChild?.countChild2} IDs
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="py-2">
                     <p className="uppercase mt-2 font-bold">
-                      {t('Sales are working')}
+                      {t('Sales to be compensated')}
                     </p>
                     <div className="lg:py-2">
                       <ul className="flex flex-col list-disc">
                         <li className="ml-4">
-                          Branch 1 : {data.notEnoughtChild?.countChild1} IDs
+                          Branch 1 :{' '}
+                          {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                            data.notEnoughtChild?.countChild1 >
+                          0
+                            ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                              data.notEnoughtChild?.countChild1
+                            : 0 || 0}{' '}
+                          IDs
                         </li>
                         <li className="ml-4">
-                          Branch 2 : {data.notEnoughtChild?.countChild2} IDs
+                          Branch 2 :{' '}
+                          {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                            data.notEnoughtChild?.countChild2 >
+                          0
+                            ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
+                              data.notEnoughtChild?.countChild2
+                            : 0 || 0}{' '}
+                          IDs
                         </li>
                       </ul>
                     </div>
-                    <div className="py-2">
-                      <p className="uppercase mt-2 font-bold">
-                        {t('Sales to be compensated')}
-                      </p>
-                      <div className="lg:py-2">
-                        <ul className="flex flex-col list-disc">
-                          <li className="ml-4">
-                            Branch 1 :{' '}
-                            {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                              data.notEnoughtChild?.countChild1 >
-                            0
-                              ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                                data.notEnoughtChild?.countChild1
-                              : 0 || 0}{' '}
-                            IDs
-                          </li>
-                          <li className="ml-4">
-                            Branch 2 :{' '}
-                            {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                              data.notEnoughtChild?.countChild2 >
-                            0
-                              ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                                data.notEnoughtChild?.countChild2
-                              : 0 || 0}{' '}
-                            IDs
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
                   </div>
-                ))}
+                </div>
+              )}
               <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                 <p className="uppercase mt-2 font-bold">{t('refUserName')}</p>
                 <div className="py-2">
