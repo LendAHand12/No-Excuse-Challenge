@@ -437,7 +437,7 @@ const Profile = () => {
             role="alert"
           >
             <span className="block sm:inline">
-              You have only <b>{countdown}</b> days left to complete the 128
+              You have only <b>{countdown}</b> days left to complete the 126
               required IDs to be eligible for Tier 2 benefits.
             </span>
           </div>
@@ -634,10 +634,10 @@ const Profile = () => {
                   <div className="lg:py-2">
                     <ul className="flex flex-col list-disc">
                       <li className="ml-4">
-                        Branch 1 : {notEnoughtChild?.countChild1} IDs
+                        Branch 1 : {notEnoughtChild?.countChild1 + 1} IDs
                       </li>
                       <li className="ml-4">
-                        Branch 2 : {notEnoughtChild?.countChild2} IDs
+                        Branch 2 : {notEnoughtChild?.countChild2 + 1} IDs
                       </li>
                     </ul>
                   </div>

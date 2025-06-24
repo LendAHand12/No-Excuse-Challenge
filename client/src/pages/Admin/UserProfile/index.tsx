@@ -710,10 +710,10 @@ const UserProfile = () => {
                   <div className="lg:py-2">
                     <ul className="flex flex-col list-disc">
                       <li className="ml-4">
-                        Branch 1 : {data.notEnoughtChild?.countChild1} IDs
+                        Branch 1 : {data.notEnoughtChild?.countChild1 + 1} IDs
                       </li>
                       <li className="ml-4">
-                        Branch 2 : {data.notEnoughtChild?.countChild2} IDs
+                        Branch 2 : {data.notEnoughtChild?.countChild2 + 1} IDs
                       </li>
                     </ul>
                   </div>
