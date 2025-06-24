@@ -438,16 +438,22 @@ export const countChildOfEachLevel = async (rootId) => {
 
     // Gom các _id của children
     const childIds = [];
+    const workingChildIds = [];
     for (const node of nodes) {
       if (node.children?.length > 0) {
         for (const childId of node.children) {
+          const tree = await Tree.findById(childId);
+          const child = await User.findById(tree.userId);
+          if (child.errLahCode !== "OVER45") {
+            workingChildIds.push(new mongoose.Types.ObjectId(childId));
+          }
           childIds.push(new mongoose.Types.ObjectId(childId));
         }
       }
     }
 
     if (childIds.length > 0) {
-      result[`level${tier}`] = childIds.length;
+      result[`level${tier}`] = workingChildIds.length;
       await recurse(childIds, tier + 1);
     }
   };
@@ -485,6 +491,7 @@ export const sumLevels = (obj, fromLevel = 5, toLevel = 9) => {
 
 export const checkUserCanNextTier = async (treeOfUser) => {
   const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(treeOfUser);
+  console.log({ countChild1, countChild2 });
 
   if (treeOfUser.countChild >= 127) {
     // if (treeOfUser.countChild >= 126) {
@@ -501,8 +508,8 @@ export const getTotalLevel6ToLevel10OfUser = async (treeOfUser) => {
   const countWithLevelChild1 = await countChildOfEachLevel(treeOfUser.children[0]);
   const countWithLevelChild2 = await countChildOfEachLevel(treeOfUser.children[1]);
 
-  const countChild1 = sumLevels(countWithLevelChild1);
-  const countChild2 = sumLevels(countWithLevelChild2);
+  const countChild1 = sumLevels(countWithLevelChild1, 1, 9);
+  const countChild2 = sumLevels(countWithLevelChild2, 1, 9);
 
   return { countChild1, countChild2 };
 };

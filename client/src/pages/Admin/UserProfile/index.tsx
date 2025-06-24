@@ -702,7 +702,7 @@ const UserProfile = () => {
                   </ul>
                 </div>
               </div>
-              {(data.currentLayer[0] === 5 || data.tier === 2) && (
+              {data.tier === 2 && (
                 <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                   <p className="uppercase mt-2 font-bold">
                     {t('Sales are working')}

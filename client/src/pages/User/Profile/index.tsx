@@ -625,7 +625,7 @@ const Profile = () => {
                 </div>
               </div>
             </div>
-            {(currentLayer[0] === 5 || tier === 2) && (
+            {tier === 2 && (
               <div className="bg-[#FAFBFC] p-4 rounded-2xl">
                 <div className="py-2 px-4">
                   <p className="uppercase mt-2 font-bold">
