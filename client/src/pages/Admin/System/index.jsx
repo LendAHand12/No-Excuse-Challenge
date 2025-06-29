@@ -10,16 +10,16 @@ import { useParams } from 'react-router-dom';
 import DefaultLayout from '../../../layout/DefaultLayout';
 
 const colors = [
-  '#00bcd4',
-  '#ff5722',
-  '#673ab7',
-  '#a1887f',
-  '#fff176',
-  '#4db6ac',
-  '#ce93d8',
-  '#81d4fa',
-  '#9e9d24',
-  '#f06292',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
 ];
 
 const AdminSystemPage = () => {
@@ -74,18 +74,18 @@ const AdminSystemPage = () => {
           className={`relative cursor-pointer p-3 text-white text-sm rounded-md inline-block`}
           style={{
             backgroundColor: isRed
-              ? '#b91c1c'
+              ? '#ee0000'
               : isBlue
-              ? '#0000ff'
+              ? '#0033ff'
               : isBrown
-              ? '#964B00'
+              ? '#663300'
               : isYellow
-              ? '#F4B400'
+              ? '#ffff00'
               : isPink
-              ? '#e600769c'
+              ? '#ff3399'
               : layer <= userInfo.currentLayer[currentTier - 1]
               ? colors[userInfo.currentLayer[currentTier - 1]]
-              : '#16a34a',
+              : '#00ff00',
           }}
         >
           <div className="flex flex-col items-center">

@@ -25,16 +25,16 @@ const colors = [
   // '#4f46e5',
   // '#7c3aed',
   // '#9333ea',
-  '#00bcd4',
-  '#ff5722',
-  '#673ab7',
-  '#a1887f',
-  '#fff176',
-  '#4db6ac',
-  '#ce93d8',
-  '#81d4fa',
-  '#9e9d24',
-  '#f06292',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
+  '#33ccff',
 ];
 
 const SystemPage = () => {
@@ -69,16 +69,16 @@ const SystemPage = () => {
             backgroundColor: isGray
               ? '#8c8c8c'
               : isRed
-              ? '#b91c1c'
+              ? '#ee0000'
               : isBlue
-              ? '#0000ff'
+              ? '#0033ff'
               : isYellow
-              ? '#F4B400'
+              ? '#ffff00'
               : isPink
-              ? '#e600769c'
+              ? '#ff3399'
               : layer <= userInfo.currentLayer[currentTier - 1]
               ? colors[userInfo.currentLayer[currentTier - 1]]
-              : '#16a34a',
+              : '#00ff00',
           }}
         >
           <div className="flex flex-col items-center">
