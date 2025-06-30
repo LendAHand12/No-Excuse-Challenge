@@ -80,12 +80,12 @@ const AdminSystemPage = () => {
               : isBrown
               ? '#663300'
               : isYellow
-              ? '#ffff00'
+              ? '#ffcc00'
               : isPink
               ? '#ff3399'
               : layer <= userInfo.currentLayer[currentTier - 1]
               ? colors[userInfo.currentLayer[currentTier - 1]]
-              : '#00ff00',
+              : '#009933',
           }}
         >
           <div className="flex flex-col items-center">
