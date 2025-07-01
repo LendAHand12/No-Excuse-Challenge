@@ -1,156 +1,173 @@
 import asyncHandler from "express-async-handler";
 import axios from "axios";
 import Claim from "../models/claimModel.js";
+import User from "../models/userModel.js";
 import sendHewe from "../services/sendHewe.js";
 import sendUsdt from "../services/sendUsdt.js";
 import Withdraw from "../models/withdrawModel.js";
 import { sendTelegramMessage } from "../utils/sendTelegram.js";
-import { removeAccents } from "../utils/methods.js";
+import { decodeCallbackToken, removeAccents } from "../utils/methods.js";
 import mongoose from "mongoose";
 
 var processingHeweUserIds = [];
 
 const claimHewe = asyncHandler(async (req, res) => {
-  const user = req.user;
+  const { token } = req.body;
 
-  if (processingHeweUserIds.includes(user.id)) {
-    return res.status(400).json({
-      error: "Your withdraw request is already being processed. Please wait!",
-    });
-  }
+  const decode = decodeCallbackToken(token);
+  if (decode) {
+    const { userId } = decode;
+    const user = await User.findById(userId);
 
-  processingHeweUserIds.push(user.id);
-
-  try {
-    if (user.status !== "APPROVED" || user.facetecTid === "") {
-      throw new Error("Please verify your account");
-    }
-    // const response = await axios.post("https://serepay.net/api/payment/claimHewe", {
-    //   amountClaim: user.availableHewe,
-    //   address: user.heweWallet,
-    // });
-
-    if (user.availableHewe > 0) {
-      const receipt = await sendHewe({
-        amount: user.availableHewe,
-        receiverAddress: user.walletAddress,
-      });
-
-      const claimed = await Claim.create({
-        userId: user.id,
-        amount: user.availableHewe,
-        hash: receipt.hash,
-        coin: "HEWE",
-      });
-
-      user.claimedHewe = user.claimedHewe + user.availableHewe;
-      user.availableHewe = 0;
-      await user.save();
-
-      const index = processingHeweUserIds.indexOf(user.id);
-      if (index !== -1) {
-        processingHeweUserIds.splice(index, 1);
+    if (user) {
+      if (processingHeweUserIds.includes(user._id)) {
+        return res.status(400).json({
+          error: "Your withdraw request is already being processed. Please wait!",
+        });
       }
 
-      res.status(200).json({
-        message: "claim HEWE successful",
-      });
+      processingHeweUserIds.push(user._id);
+
+      try {
+        if (user.status !== "APPROVED" || user.facetecTid === "") {
+          throw new Error("Please verify your account");
+        }
+        // const response = await axios.post("https://serepay.net/api/payment/claimHewe", {
+        //   amountClaim: user.availableHewe,
+        //   address: user.heweWallet,
+        // });
+
+        if (user.availableHewe > 0) {
+          const receipt = await sendHewe({
+            amount: user.availableHewe,
+            receiverAddress: user.walletAddress,
+          });
+
+          const claimed = await Claim.create({
+            userId: user.id,
+            amount: user.availableHewe,
+            hash: receipt.hash,
+            coin: "HEWE",
+          });
+
+          user.claimedHewe = user.claimedHewe + user.availableHewe;
+          user.availableHewe = 0;
+          await user.save();
+
+          const index = processingHeweUserIds.indexOf(user.id);
+          if (index !== -1) {
+            processingHeweUserIds.splice(index, 1);
+          }
+
+          res.status(200).json({
+            message: "claim HEWE successful",
+          });
+        } else {
+          const index = processingHeweUserIds.indexOf(user._id);
+          if (index !== -1) {
+            processingHeweUserIds.splice(index, 1);
+          }
+
+          throw new Error("Insufficient balance in account");
+        }
+      } catch (err) {
+        const index = processingHeweUserIds.indexOf(user._id);
+        if (index !== -1) {
+          processingHeweUserIds.splice(index, 1);
+        }
+        res.status(400).json({ error: err.message });
+      }
     } else {
-      const index = processingHeweUserIds.indexOf(user._id);
-      if (index !== -1) {
-        processingHeweUserIds.splice(index, 1);
-      }
-
-      throw new Error("Insufficient balance in account");
+      throw new Error("Unknow User");
     }
-  } catch (err) {
-    const index = processingHeweUserIds.indexOf(user._id);
-    if (index !== -1) {
-      processingHeweUserIds.splice(index, 1);
-    }
-    res.status(400).json({ error: err.message });
+  } else {
+    throw new Error("Internal Error");
   }
 });
 
 var processingUserIds = [];
 
 const claimUsdt = asyncHandler(async (req, res) => {
-  const user = req.user;
+  const { token } = req.body;
 
-  if (processingUserIds.includes(user.id)) {
-    return res.status(400).json({
-      error: "Your withdraw request is already being processed. Please wait!",
-    });
-  }
+  const decode = decodeCallbackToken(token);
+  if (decode) {
+    const { userId } = decode;
+    const user = await User.findById(userId);
 
-  processingUserIds.push(user.id);
-
-  // res.status(400).json({
-  //   error:
-  //     "This withdrawal function is under maintenance, please come back later",
-  // });
-  try {
-    if (user.status !== "APPROVED" || user.facetecTid === "") {
-      throw new Error("Please verify your account");
-    }
-    if (user.errLahCode === "OVER45") {
-      throw new Error("Request denied");
-    }
-    if (user.availableUsdt > 0) {
-      if (user.availableUsdt < 200) {
-        const receipt = await sendUsdt({
-          amount: user.availableUsdt - 1,
-          receiverAddress: user.walletAddress,
+    if (user) {
+      if (processingUserIds.includes(user._id)) {
+        return res.status(400).json({
+          error: "Your withdraw request is already being processed. Please wait!",
         });
-        const claimed = await Claim.create({
-          userId: user.id,
-          amount: user.availableUsdt,
-          hash: receipt.hash,
-          coin: "USDT",
-        });
+      }
 
-        user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
-        user.availableUsdt = 0;
-        await user.save();
+      processingUserIds.push(user._id);
 
-        const index = processingUserIds.indexOf(user.id);
-        if (index !== -1) {
-          processingUserIds.splice(index, 1);
+      try {
+        if (user.status !== "APPROVED" || user.facetecTid === "") {
+          throw new Error("Please verify your account");
         }
+        if (user.errLahCode === "OVER45") {
+          throw new Error("Request denied");
+        }
+        if (user.availableUsdt > 0) {
+          if (user.availableUsdt < 200) {
+            const receipt = await sendUsdt({
+              amount: user.availableUsdt - 1,
+              receiverAddress: user.walletAddress,
+            });
+            const claimed = await Claim.create({
+              userId: user.id,
+              amount: user.availableUsdt,
+              hash: receipt.hash,
+              coin: "USDT",
+            });
+            user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
+            user.availableUsdt = 0;
 
-        res.status(200).json({
-          message: "claim USDT successful",
-        });
-      } else {
-        const withdraw = await Withdraw.create({
-          userId: user.id,
-          amount: user.availableUsdt,
-        });
-        user.availableUsdt = 0;
-        await user.save();
+            await user.save();
 
-        await sendTelegramMessage({ userName: user.userId });
-
+            const index = processingUserIds.indexOf(user.id);
+            if (index !== -1) {
+              processingUserIds.splice(index, 1);
+            }
+            res.status(200).json({
+              message: "claim USDT successful",
+            });
+          } else {
+            const withdraw = await Withdraw.create({
+              userId: user.id,
+              amount: user.availableUsdt,
+            });
+            user.availableUsdt = 0;
+            await user.save();
+            // await sendTelegramMessage({ userName: user.userId });
+            const index = processingUserIds.indexOf(user._id);
+            if (index !== -1) {
+              processingUserIds.splice(index, 1);
+            }
+            res.status(200).json({
+              message: "Withdrawal request has been sent to Admin. Please wait!",
+            });
+          }
+        } else {
+          throw new Error("Insufficient balance in account");
+        }
+      } catch (err) {
         const index = processingUserIds.indexOf(user._id);
         if (index !== -1) {
           processingUserIds.splice(index, 1);
         }
-
-        res.status(200).json({
-          message: "Withdrawal request has been sent to Admin. Please wait!",
+        res.status(400).json({
+          error: err.message ? err.message.split(",")[0] : "Internal Error",
         });
       }
     } else {
-      throw new Error("Insufficient balance in account");
+      throw new Error("Unknow User");
     }
-  } catch (err) {
-    const index = processingUserIds.indexOf(user._id);
-    if (index !== -1) {
-      processingUserIds.splice(index, 1);
-    }
-    res.status(400).json({
-      error: err.message ? err.message.split(",")[0] : "Internal Error",
-    });
+  } else {
+    throw new Error("Internal Error");
   }
 });
 
@@ -165,9 +182,7 @@ const getAllClaims = asyncHandler(async (req, res) => {
     matchStage.coin = coin;
   }
 
-  const keywordRegex = keyword
-    ? { $regex: removeAccents(keyword), $options: "i" }
-    : null;
+  const keywordRegex = keyword ? { $regex: removeAccents(keyword), $options: "i" } : null;
 
   const aggregationPipeline = [
     { $match: matchStage },
@@ -191,10 +206,7 @@ const getAllClaims = asyncHandler(async (req, res) => {
   }
 
   // Đếm số bản ghi sau khi lọc
-  const countAggregation = await Claim.aggregate([
-    ...aggregationPipeline,
-    { $count: "total" },
-  ]);
+  const countAggregation = await Claim.aggregate([...aggregationPipeline, { $count: "total" }]);
   const count = countAggregation[0]?.total || 0;
 
   // Thêm phân trang và sắp xếp
@@ -312,10 +324,7 @@ const getAllClaimsOfUser = asyncHandler(async (req, res) => {
   ];
 
   // Đếm số bản ghi sau khi lọc
-  const countAggregation = await Claim.aggregate([
-    ...aggregationPipeline,
-    { $count: "total" },
-  ]);
+  const countAggregation = await Claim.aggregate([...aggregationPipeline, { $count: "total" }]);
   const count = countAggregation[0]?.total || 0;
 
   // Thêm phân trang và sắp xếp

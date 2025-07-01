@@ -589,7 +589,6 @@ function App() {
           />
         )}
       </Route>
-
       <Route element={<PrivateRoute />}>
         <Route
           path="/user/profile"
@@ -693,15 +692,6 @@ function App() {
               }
             />
             <Route
-              path="/user/claim"
-              element={
-                <>
-                  <PageTitle title="Claim KYC | NoExcuseChallenge" />
-                  <ClaimKYCPage />
-                </>
-              }
-            />
-            <Route
               path="/user/update-info"
               element={
                 <>
@@ -724,6 +714,15 @@ function App() {
           </>
         )}
       </Route>
+      <Route
+        path="/user/claim"
+        element={
+          <>
+            <PageTitle title="Claim KYC | NoExcuseChallenge" />
+            <ClaimKYCPage />
+          </>
+        }
+      />
       <Route path="*" element={<NotFoundPage />}></Route>
     </Routes>
   );

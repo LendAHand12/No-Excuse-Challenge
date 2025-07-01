@@ -403,6 +403,15 @@ export const createCallbackToken = (userId) => {
   });
 };
 
+export const decodeCallbackToken = (token) => {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_REFRESH_TOKEN_SECRET);
+    return decoded; // { userId, purpose: "kyc", iat, exp }
+  } catch (err) {
+    throw new Error("Token expired, please try again");
+  }
+};
+
 export const updateValueAtIndex = (arr, index, newValue) => {
   if (index >= 0 && index < arr.length) {
     arr[index] = newValue;

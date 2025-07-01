@@ -6,7 +6,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import queryString from 'query-string';
 
 import Claim from '@/api/Claim';
-import DefaultLayout from '../../../layout/DefaultLayout';
 
 const ClaimKYCPage = () => {
   const { t } = useTranslation();
@@ -23,7 +22,7 @@ const ClaimKYCPage = () => {
     (async () => {
       if (status === 'success' && token && user_id && coin) {
         if (coin === 'hewe') {
-          await Claim.hewe()
+          await Claim.hewe({ user_id, token })
             .then((response) => {
               toast.success(t(response.data.message));
               setLoadingClaim(false);
@@ -31,14 +30,15 @@ const ClaimKYCPage = () => {
             })
             .catch((error) => {
               let message =
-                error.response && error.response.data.error
+                error.response && error.response.data.message
+                  ? error.response.data.message
+                  : error.response.data.error
                   ? error.response.data.error
                   : error.message;
               toast.error(t(message));
-              setLoadingClaim(false);
             });
         } else if (coin === 'usdt') {
-          await Claim.usdt()
+          await Claim.usdt({ user_id, token })
             .then((response) => {
               toast.success(t(response.data.message));
               setLoadingClaim(false);
@@ -46,11 +46,12 @@ const ClaimKYCPage = () => {
             })
             .catch((error) => {
               let message =
-                error.response && error.response.data.error
+                error.response && error.response.data.message
+                  ? error.response.data.message
+                  : error.response.data.error
                   ? error.response.data.error
                   : error.message;
               toast.error(t(message));
-              setLoadingClaim(false);
             });
         }
       }
@@ -58,9 +59,9 @@ const ClaimKYCPage = () => {
   }, [token]);
 
   return (
-    <DefaultLayout>
+    <>
       <ToastContainer />
-      <div className="min-h-screen bg-white text-gray-900 flex justify-center items-center">
+      <div className="min-h-screen bg-white text-gray-900 flex flex-col justify-center items-center">
         {loadingClaim ? (
           <h1>Processing...</h1>
         ) : (
@@ -88,16 +89,16 @@ const ClaimKYCPage = () => {
             <p className="text-2xl font-bold">
               {`Claim ${coin.toUpperCase()} successful`}
             </p>
-            <Link
-              to="/user/profile"
-              className="border border-black max-w-xl w-full text-center rounded-3xl py-2"
-            >
-              {t('Profile')}
-            </Link>
           </div>
         )}
+        <Link
+          to="/user/profile"
+          className="border border-black max-w-xl w-full text-center rounded-3xl py-2 mt-4"
+        >
+          {t('Back to Profile')}
+        </Link>
       </div>
-    </DefaultLayout>
+    </>
   );
 };
 
