@@ -20,6 +20,7 @@ const MoveSystem = () => {
   const [parentId, setParentId] = useState('');
   const [refId, setRefId] = useState('');
   const [errParentId, setErrParentId] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -66,13 +67,21 @@ const MoveSystem = () => {
     } else {
       await User.changeSystem({ moveId: id, parentId, refId })
         .then((response) => {
-          console.log({data: response.data});
+          const { success, message } = response.data;
+          if (!success) {
+            setErrorMessage(message);
+          } else {
+            setErrorMessage('');
+            toast.success(message);
+          }
           setLoading(false);
         })
         .catch((error) => {
           let message =
             error.response && error.response.data.message
               ? error.response.data.message
+              : error.response.data.error
+              ? error.response.data.error
               : error.message;
           toast.error(t(message));
           setLoading(false);
@@ -134,13 +143,16 @@ const MoveSystem = () => {
                   Admin2.
                 </p>
               </div>
+              {errorMessage && (
+                <div className="bg-red-100 border border-red-400 text-red-700 text-center w-full py-2 rounded-md">
+                  {errorMessage}
+                </div>
+              )}
               <button
                 onClick={handleSubmit}
                 className="w-full flex justify-center items-center hover:underline text-NoExcuseChallenge bg-black font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
               >
-                {
-                  loading &&  <Loading />
-                }
+                {loading && <Loading />}
                 {t('Confirm')}
               </button>
             </div>

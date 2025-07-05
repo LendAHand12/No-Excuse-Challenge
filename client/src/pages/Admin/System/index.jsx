@@ -277,7 +277,7 @@ const AdminSystemPage = () => {
                   lineBorderRadius={'10px'}
                   label={
                     <StyledNode
-                      layer={userInfo.currentLayer}
+                      layer={userInfo?.currentLayer}
                       income={treeData.income}
                       totalChild={treeData.totalChild}
                     >
