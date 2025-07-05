@@ -163,6 +163,10 @@ const AdminUserPages = () => {
     navigate(`/admin/users/${id}`);
   };
 
+  const handleMoveSystem = (id) => {
+    navigate(`/admin/move-system/${id}`);
+  };
+
   const handleTree = (id) => {
     navigate(`/admin/system/${id}`);
   };
@@ -656,6 +660,59 @@ const AdminUserPages = () => {
                                 strokeWidth="4"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
+                              />
+                            </svg>
+                          </button>
+                        )}
+
+                      {ele.status !== 'DELETED' &&
+                        userInfo?.permissions
+                          .find((p) => p.page.pageName === 'admin-move-system')
+                          ?.actions.includes('read') && (
+                          <button
+                            onClick={() => handleMoveSystem(ele._id)}
+                            className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
+                          >
+                            <svg
+                              width="24"
+                              height="24"
+                              viewBox="0 0 48 48"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <rect
+                                width="48"
+                                height="48"
+                                fill="white"
+                                fill-opacity="0.01"
+                              />
+                              <path
+                                d="M18 31H38V5"
+                                stroke="currentColor"
+                                stroke-width="4"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              />
+                              <path
+                                d="M30 21H10V43"
+                                stroke="currentColor"
+                                stroke-width="4"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              />
+                              <path
+                                d="M44 11L38 5L32 11"
+                                stroke="currentColor"
+                                stroke-width="4"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              />
+                              <path
+                                d="M16 37L10 43L4 37"
+                                stroke="currentColor"
+                                stroke-width="4"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
                               />
                             </svg>
                           </button>

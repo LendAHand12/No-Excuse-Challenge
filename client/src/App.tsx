@@ -72,6 +72,7 @@ import AdminConfigPage from './pages/Admin/Config';
 import UserHistoryPage from './pages/Admin/UserHistory';
 import UserUpdateInfoKYCPage from './pages/User/UpdateInfoKYC';
 import UsersTier2 from './pages/User/UsersTier2';
+import MoveSystem from './pages/Admin/MoveSystem';
 
 function App() {
   const { pathname } = useLocation();
@@ -214,6 +215,20 @@ function App() {
               <>
                 <PageTitle title="User Profile | NoExcuseChallenge" />
                 <AdminUserProfile />
+              </>
+            }
+          />
+        )}
+
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/move-system/:id')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/move-system/:id"
+            element={
+              <>
+                <PageTitle title="Move System | NoExcuseChallenge" />
+                <MoveSystem />
               </>
             }
           />
