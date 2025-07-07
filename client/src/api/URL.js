@@ -27,3 +27,4 @@ export const URL_API_CRONJOB = '/api/cronjob';
 export const URL_API_KYC = '/api/kyc';
 export const URL_API_CONFIG = '/api/config';
 export const URL_API_USER_HISTORY = '/api/user-history';
+export const URL_API_MOVE_SYSTEM = '/api/move-system';

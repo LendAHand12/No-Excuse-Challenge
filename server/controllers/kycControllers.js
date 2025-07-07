@@ -34,6 +34,19 @@ const claimKYC = expressAsyncHandler(async (req, res) => {
   res.json({ url: redirectToKYC });
 });
 
+const moveSystemKyc = expressAsyncHandler(async (req, res) => {
+  const { user } = req;
+
+  const token = createCallbackToken(user._id);
+  const callbackUrl = `${process.env.FRONTEND_BASE_URL}/user/move-system?token=${token}`;
+
+  const redirectToKYC = `${
+    process.env.KYC_URL
+  }/verify.html?callback=${encodeURIComponent(callbackUrl)}&user_id=${user.id}`;
+
+  res.json({ url: redirectToKYC });
+});
+
 const register = expressAsyncHandler(async (req, res) => {
   const { facetect_tid, user_id } = req.body;
   const { user } = req;
@@ -162,4 +175,4 @@ const isValidObjectId = (id) => {
   return mongoose.Types.ObjectId.isValid(id);
 };
 
-export { startKYC, register, claimKYC, checkUserCompleteKyc };
+export { startKYC, register, claimKYC, checkUserCompleteKyc, moveSystemKyc };
