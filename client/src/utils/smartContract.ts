@@ -41,11 +41,21 @@ export const getAccount = async () => {
   if (!web3) {
     return false;
   }
+
+  // yêu cầu ví cấp quyền truy cập account
+  try {
+    await window.ethereum.request({ method: 'eth_requestAccounts' });
+  } catch (err) {
+    console.error('User denied account access');
+    throw new Error('User denied account access');
+  }
+
   const accounts = await web3.eth.getAccounts();
+
   if (accounts.length > 0) {
     return accounts[0];
   } else {
-    throw new Error('Please connect metamask wallet');
+    throw new Error('Please connect your wallet');
   }
 };
 
