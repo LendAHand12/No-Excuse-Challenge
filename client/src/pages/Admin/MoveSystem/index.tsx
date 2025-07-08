@@ -21,6 +21,7 @@ const MoveSystem = () => {
   const [refId, setRefId] = useState('');
   const [errParentId, setErrParentId] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [withChild, setWithChild] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -65,7 +66,7 @@ const MoveSystem = () => {
       setErrParentId(true);
       return;
     } else {
-      await User.changeSystem({ moveId: id, parentId, refId })
+      await User.changeSystem({ moveId: id, parentId, refId, withChild })
         .then((response) => {
           const { success, message } = response.data;
           if (!success) {
@@ -87,7 +88,7 @@ const MoveSystem = () => {
           setLoading(false);
         });
     }
-  }, [refId, parentId, id]);
+  }, [refId, parentId, id, withChild]);
 
   return (
     <DefaultLayout>
@@ -142,6 +143,19 @@ const MoveSystem = () => {
                   * If you do not select a referral name, the default will be
                   Admin2.
                 </p>
+              </div>
+              <div className="space-y-2">
+                <div className="text flex items-center gap-2">
+                  <input
+                    onChange={(e) => setWithChild(e.target.value)}
+                    type="checkbox"
+                    id="withChild"
+                    checked={withChild}
+                  />
+                  <label className="" htmlFor="withChild">
+                    Include children
+                  </label>
+                </div>
               </div>
               {errorMessage && (
                 <div className="bg-red-100 border border-red-400 text-red-700 text-center w-full py-2 rounded-md">

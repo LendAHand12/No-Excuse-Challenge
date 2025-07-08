@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 // import SidebarLinkGroup from './SidebarLinkGroup';
-import Logo from '../../images/logo/logo.svg';
+import Logo from '../../images/logo/logo.png';
 import { Route } from '../../types/route';
 import COVER3 from '../../images/cover/cover-3.png';
 import { useTranslation } from 'react-i18next';

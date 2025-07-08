@@ -1154,7 +1154,7 @@ async function getAllDescendants(targetUserTreeId, currentTier) {
 }
 
 const changeSystem = asyncHandler(async (req, res) => {
-  const { moveId, parentId, refId } = req.body;
+  const { moveId, parentId, refId, withChild } = req.body;
 
   const movePersonTree = await Tree.findOne({
     userId: moveId,
@@ -1170,30 +1170,15 @@ const changeSystem = asyncHandler(async (req, res) => {
   } else if (receivePerson.children.length === 2) {
     res.json({ success: false, message: `${receivePerson.userName} has 2 children` });
   } else {
-    const parentOfMoveChild = await Tree.findById(movePersonTree.parentId);
-
-    if (movePersonTree.children.length === 2 && parentOfMoveChild.children.length >= 1) {
-      const child1 = await Tree.findById(movePersonTree.children[0]);
-      const child2 = await Tree.findById(movePersonTree.children[1]);
-
-      res.json({
-        success: false,
-        message: `Please move 2 children, ${child1.userName} and ${child2.userName} before`,
-      });
-    } else {
+    if (withChild === "on") {
+      const parentOfMoveChild = await Tree.findById(movePersonTree.parentId);
       const newParentOfMoveChild = parentOfMoveChild.children.filter(
         (ele) => ele.toString() !== movePersonTree._id.toString()
       );
-      for (let childId of movePersonTree.children) {
-        const child = await Tree.findById(childId);
-        child.parentId = parentOfMoveChild._id;
-        newParentOfMoveChild.push(childId);
-      }
       parentOfMoveChild.children = newParentOfMoveChild;
       await parentOfMoveChild.save();
 
       movePersonTree.parentId = receivePerson._id;
-      movePersonTree.children = [];
       if (refId) {
         movePersonTree.refId = refId;
       }
@@ -1206,6 +1191,44 @@ const changeSystem = asyncHandler(async (req, res) => {
         success: true,
         message: "Update successful",
       });
+    } else {
+      const parentOfMoveChild = await Tree.findById(movePersonTree.parentId);
+
+      if (movePersonTree.children.length === 2 && parentOfMoveChild.children.length >= 1) {
+        const child1 = await Tree.findById(movePersonTree.children[0]);
+        const child2 = await Tree.findById(movePersonTree.children[1]);
+
+        res.json({
+          success: false,
+          message: `Please move 2 children, ${child1.userName} and ${child2.userName} before`,
+        });
+      } else {
+        const newParentOfMoveChild = parentOfMoveChild.children.filter(
+          (ele) => ele.toString() !== movePersonTree._id.toString()
+        );
+        for (let childId of movePersonTree.children) {
+          const child = await Tree.findById(childId);
+          child.parentId = parentOfMoveChild._id;
+          newParentOfMoveChild.push(childId);
+        }
+        parentOfMoveChild.children = newParentOfMoveChild;
+        await parentOfMoveChild.save();
+
+        movePersonTree.parentId = receivePerson._id;
+        movePersonTree.children = [];
+        if (refId) {
+          movePersonTree.refId = refId;
+        }
+        await movePersonTree.save();
+
+        receivePerson.children.push(movePersonTree._id);
+        await receivePerson.save();
+
+        res.json({
+          success: true,
+          message: "Update successful",
+        });
+      }
     }
   }
 });

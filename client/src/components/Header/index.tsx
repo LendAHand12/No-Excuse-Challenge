@@ -3,7 +3,7 @@ import { Link, NavLink } from 'react-router-dom';
 // import DropdownNotification from './DropdownNotification';
 import DropdownUser from './DropdownUser';
 // import DarkModeSwitcher from './DarkModeSwitcher';
-import Logo from '../../images/logo/logo.svg';
+import Logo from '../../images/logo/logo.png';
 import { useSelector } from 'react-redux';
 import WalletUser from './WalletUser';
 import DropdownLanguage from './DropdownLanguage';

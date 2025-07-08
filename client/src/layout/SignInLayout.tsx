@@ -1,6 +1,6 @@
 import React, { useState, ReactNode, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import Logo from '../images/logo/logo.svg';
+import Logo from '../images/logo/logo.png';
 import { useTranslation } from 'react-i18next';
 import COVER4 from '../images/cover/cover-4.png';
 
