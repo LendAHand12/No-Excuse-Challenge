@@ -11,15 +11,17 @@ export const loadWeb3 = async () => {
     const netId = await web3.eth.getChainId();
     console.log({ netId });
     if (parseInt(netId) !== 56) {
-      toast.error(
-        'Your Wallet network is not supported yet, please select BSC',
-      );
-      return false;
+      if (parseInt(netId) !== 1) {
+        toast.error(
+          'Your Wallet network is not supported yet, please select BSC',
+        );
+        return false;
+      }
     }
   } else {
     // no ethereum provider
     console.log('no ethereum wallet detected');
-    toast.error('Please install or enable MetaMask.', { delay: 1000 });
+    toast.error('Please install EVM wallet.', { delay: 1000 });
     return false;
   }
   return web3;
