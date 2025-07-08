@@ -29,6 +29,7 @@ import Permission from "../models/permissionModel.js";
 import Withdraw from "../models/withdrawModel.js";
 import Config from "../models/configModel.js";
 import UserHistory from "../models/userHistoryModel.js";
+import MoveSystem from "../models/moveSystemModel.js";
 import { Types } from "mongoose";
 import moment from "moment";
 
@@ -185,6 +186,10 @@ const getUserById = asyncHandler(async (req, res) => {
       countdown = tier2Deadline.diff(currentDay, "days"); // số ngày còn lại
     }
 
+    const isMoveSystem = await MoveSystem.find({
+      userId: user._id,
+    });
+
     res.json({
       id: user._id,
       email: user.email,
@@ -250,6 +255,7 @@ const getUserById = asyncHandler(async (req, res) => {
       notEnoughtChild,
       countdown,
       tryToTier2: user.tryToTier2,
+      isMoveSystem: isMoveSystem.length > 0 ? true : false,
     });
   } else {
     res.status(404);
@@ -340,6 +346,10 @@ const getUserInfo = asyncHandler(async (req, res) => {
       countdown = tier2Deadline.diff(currentDay, "days"); // số ngày còn lại
     }
 
+    const isMoveSystem = await MoveSystem.find({
+      userId: user._id,
+    });
+
     res.json({
       id: user._id,
       email: user.email,
@@ -406,6 +416,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       notEnoughtChild,
       countdown,
       tryToTier2: user.tryToTier2,
+      isMoveSystem: isMoveSystem.length > 0 ? true : false,
     });
   } else {
     res.status(404);

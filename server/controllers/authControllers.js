@@ -6,6 +6,7 @@ import sendMail from "../utils/sendMail.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import Tree from "../models/treeModel.js";
+import MoveSystem from "../models/moveSystemModel.js";
 import { getActivePackages } from "./packageControllers.js";
 import Permission from "../models/permissionModel.js";
 import { checkSerepayWallet, findNextReferrer, mergeIntoThreeGroups } from "../utils/methods.js";
@@ -230,6 +231,10 @@ const authUser = asyncHandler(async (req, res) => {
       "pagePermissions.page"
     );
 
+    const isMoveSystem = await MoveSystem.find({
+      userId: user._id,
+    });
+
     res.status(200).json({
       userInfo: {
         id: user._id,
@@ -278,6 +283,7 @@ const authUser = asyncHandler(async (req, res) => {
         facetecTid: user.facetecTid,
         kycFee: user.kycFee,
         errLahCode: user.errLahCode,
+        isMoveSystem: isMoveSystem.length > 0 ? true : false,
       },
       accessToken,
       refreshToken,

@@ -53,6 +53,7 @@ const Profile = () => {
     notEnoughtChild,
     tryToTier2,
     countdown,
+    isMoveSystem,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -788,11 +789,15 @@ const Profile = () => {
         </div>
         <div className="flex justify-between">
           <button
-            className="bg-blue-900 text-white px-6 py-2 rounded-lg"
+            className={`bg-blue-900 text-white px-6 py-2 rounded-lg ${
+              isMoveSystem ? 'opacity-40' : ''
+            }`}
             onClick={() => setShowMoveSystem(true)}
+            disabled={isMoveSystem}
           >
             Migrate ID to dreamchain
           </button>
+
           {errLahCode !== 'OVER45' && !isEdit && status === 'APPROVED' && (
             <button
               onClick={() => setIsEdit(true)}
