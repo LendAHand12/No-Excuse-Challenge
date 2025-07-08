@@ -37,7 +37,9 @@ export const getRefParentUser = async (userId, tier) => {
     throw new Error("No referrer information found");
   }
 
-  return parentUser;
+  const parent = await User.findById(parentUser.userId);
+
+  return { ...parentUser._doc, walletAddress: parent.walletAddress };
 };
 
 export const findNextUser = async (tier) => {

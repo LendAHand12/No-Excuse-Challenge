@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import Modal from 'react-modal';
 import DefaultLayout from '../../../layout/DefaultLayout';
 import { transfer } from '../../../utils/smartContract';
+import { shortenWalletAddress } from '../../../utils';
 
 Modal.setAppElement('#root');
 
@@ -188,7 +189,9 @@ const PaymentPage = () => {
                           <div className="">
                             <span className="mx-2 text-black">
                               <span className="font-medium mr-2">To : </span>
-                              <span className="">{payment.to}</span>
+                              <span className="">
+                                {shortenWalletAddress(payment.to, 10)}
+                              </span>
                             </span>
                           </div>
                         </div>

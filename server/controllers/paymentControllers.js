@@ -207,7 +207,8 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           type: "DIRECT",
           id: transactionDirect._id,
           amount: directCommissionFee,
-          to: refUser.userName,
+          // to: refUser.userName,
+          to: refUser.walletAddress,
         });
         payments.push({
           userName: refUser.userId,
@@ -292,7 +293,8 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
             type: "REFERRAL",
             id: transactionReferral._id,
             amount: referralCommissionFee,
-            to: receiveUser.userId,
+            // to: receiveUser.userId,
+            to: receiveUser.walletAddress,
           });
           countPayUser = countPayUser + 1;
           indexFor++;
@@ -1039,10 +1041,22 @@ const getPaymentsOfUser = asyncHandler(async (req, res) => {
     .limit(pageSize)
     .skip(pageSize * (page - 1))
     .sort("-createdAt")
-    .select("-password");
+    .select("-password")
+    .lean();
+
+  let results = [];
+
+  for (let payment of allPayments) {
+    if (payment.type.includes("REFERRAL") || payment.type.includes("DIRECT")) {
+      const user = await User.findById(payment.userId_to);
+      results.push({ ...payment, username_to: user.walletAddress });
+    } else {
+      results.push({ ...payment });
+    }
+  }
 
   res.json({
-    payments: allPayments,
+    payments: results,
     pages: Math.ceil(count / pageSize),
   });
 });
