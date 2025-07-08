@@ -1,4 +1,4 @@
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi';
 import { shortenWalletAddress } from '../../utils';
 import { useState } from 'react';
 import ClickOutside from '../ClickOutside';
@@ -11,16 +11,27 @@ const WalletUser = () => {
   const { address, isConnected } = useAccount();
   const { connectors, connectAsync } = useConnect();
   const { disconnect } = useDisconnect();
+  const { chains, switchChain } = useSwitchChain();
 
   const handleConnect = async (connector: any) => {
     try {
       const result = await connectAsync({ connector });
+
       if (result?.accounts.length > 0) {
+        // ✅ Sau khi connect, cố gắng switch sang BSC (chainId: 56)
+        try {
+          await switchChain({ chainId: 56 }); // 56 = BSC Mainnet
+        } catch (switchError) {
+          console.error('Switch network failed', switchError);
+          toast.error('Please switch your wallet to BSC network manually.');
+          return;
+        }
+
         toast.success('Connected to wallet successfully!');
         setDropdownOpen(!dropdownOpen);
       }
     } catch (error: any) {
-      console.log({ error });
+      console.error({ error });
       toast.error('Failed to connect to wallet!');
     }
   };
@@ -62,7 +73,10 @@ const WalletUser = () => {
           {!isConnected && (
             <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5">
               {connectors
-                .filter((con) => con.name === 'WalletConnect' || con.name === "MetaMask")
+                .filter(
+                  (con) =>
+                    con.name === 'WalletConnect' || con.name === 'MetaMask',
+                )
                 .map((connector) => {
                   return (
                     <button

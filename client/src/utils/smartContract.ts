@@ -11,12 +11,8 @@ export const loadWeb3 = async () => {
     const netId = await web3.eth.getChainId();
     console.log({ netId });
     if (parseInt(netId) !== 56) {
-      if (parseInt(netId) !== 1) {
-        toast.error(
-          'Your Wallet network is not supported yet, please select BSC',
-        );
-        return false;
-      }
+      toast.error('Please switch your wallet to BSC network manually.');
+      return false;
     }
   } else {
     // no ethereum provider
