@@ -256,6 +256,7 @@ const getUserById = asyncHandler(async (req, res) => {
       countdown,
       tryToTier2: user.tryToTier2,
       isMoveSystem: isMoveSystem.length > 0 ? true : false,
+      changeCreatedAt: user.changeCreatedAt,
     });
   } else {
     res.status(404);
@@ -417,6 +418,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       countdown,
       tryToTier2: user.tryToTier2,
       isMoveSystem: isMoveSystem.length > 0 ? true : false,
+      changeCreatedAt: user.changeCreatedAt,
     });
   } else {
     res.status(404);
@@ -605,6 +607,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     hewePerDay,
     level,
     removeErrLahCode,
+    changeCreatedAt,
   } = req.body;
 
   if (userId) {
@@ -685,6 +688,9 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     user.walletAddress = walletAddress || user.walletAddress;
     user.hewePerDay = hewePerDay || user.hewePerDay;
     user.totalHewe = rewardHewe || user.totalHewe;
+    if (changeCreatedAt) {
+      user.changeCreatedAt = new Date(changeCreatedAt).toISOString() || user.changeCreatedAt;
+    }
     if (level) {
       const newLevel = user.currentLayer.length > 0 ? [...user.currentLayer] : [0];
       updateValueAtIndex(newLevel, user.tier - 1, level);

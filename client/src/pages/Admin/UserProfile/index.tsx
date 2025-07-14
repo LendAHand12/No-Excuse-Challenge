@@ -6,7 +6,7 @@ import Loading from '@/components/Loading';
 import USER_RANKINGS from '@/constants/userRankings';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import PhoneInput from 'react-phone-number-input';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -16,6 +16,8 @@ import DefaultLayout from '../../../layout/DefaultLayout';
 import { adjustSales } from '../../../utils';
 import UploadFile from './UploadInfo';
 import { useSelector } from 'react-redux';
+import moment from 'moment';
+import DatePicker from 'react-datepicker';
 
 const UserProfile = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -45,6 +47,7 @@ const UserProfile = () => {
     handleSubmit,
     formState: { errors },
     setValue,
+    control,
     watch,
   } = useForm();
 
@@ -65,6 +68,7 @@ const UserProfile = () => {
             closeLah,
             bonusRef,
             kycFee,
+            changeCreatedAt,
           } = response.data;
           setValue('userId', userId);
           setValue('email', email);
@@ -72,6 +76,7 @@ const UserProfile = () => {
           setValue('idCode', idCode);
           setValue('tier', tier);
           setValue('walletAddress', walletAddress);
+          setValue('changeCreatedAt', changeCreatedAt);
           setCurrentOpenLah(openLah);
           setCurrentCloseLah(closeLah);
           setIsBonusRef(bonusRef);
@@ -137,6 +142,10 @@ const UserProfile = () => {
 
       if (values.hold !== data.hold) {
         formData.append('hold', values.hold);
+      }
+
+      if (values.changeCreatedAt !== data.changeCreatedAt) {
+        formData.append('changeCreatedAt', values.changeCreatedAt);
       }
 
       if (values.availableHewe !== data.availableHewe) {
@@ -598,7 +607,23 @@ const UserProfile = () => {
                   <li className="flex items-center py-3">
                     <span>{t('memberSince')}</span>
                     <span className="ml-auto">
-                      {new Date(data.createdAt).toLocaleDateString('vi')}
+                      {isEditting ? (
+                        <Controller
+                          control={control}
+                          name="changeCreatedAt"
+                          render={({ field }) => (
+                            <DatePicker
+                              placeholderText={t('fromDate')}
+                              onChange={(date) => field.onChange(date)}
+                              selected={field.value}
+                              dateFormat="dd/MM/yyyy"
+                              className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            />
+                          )}
+                        />
+                      ) : (
+                        new Date(data.changeCreatedAt).toLocaleDateString('vi')
+                      )}
                     </span>
                   </li>
                   <li className="flex items-center py-3">

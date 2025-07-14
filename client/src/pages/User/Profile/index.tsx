@@ -25,7 +25,7 @@ const Profile = () => {
   let {
     email,
     userId,
-    createdAt,
+    changeCreatedAt,
     id,
     status,
     tier,
@@ -655,7 +655,7 @@ const Profile = () => {
               </div>
               <div className="flex justify-between bg-[#E5E9EE] py-2 px-4 rounded-lg">
                 <p>Member since</p>
-                <p> {new Date(createdAt).toLocaleDateString('vi')}</p>
+                <p> {new Date(changeCreatedAt).toLocaleDateString('vi')}</p>
               </div>
               <div className="flex justify-between py-2 px-4">
                 <p>Completed ranking time</p>
