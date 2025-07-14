@@ -109,6 +109,7 @@ const registerUser = asyncHandler(async (req, res) => {
         buyPackage: "A",
         role: "user",
         kycFee: true,
+        changeCreatedAt: new Date(),
       });
 
       const tree = await Tree.create({
