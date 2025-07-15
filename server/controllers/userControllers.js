@@ -21,6 +21,7 @@ import {
 } from "../utils/methods.js";
 import { areArraysEqual } from "../cronJob/index.js";
 import {
+  sendMailChangeSystemForUser,
   sendMailChangeWalletToAdmin,
   sendMailReject,
   sendMailUserCanInceaseTierToAdmin,
@@ -1519,41 +1520,75 @@ const changeWallet = asyncHandler(async (req, res) => {
 });
 
 const adminDeleteUser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id);
-  if (!user) {
+  const u = await User.findById(req.params.id);
+  if (!u) {
     res.status(404);
     throw new Error("User not found");
   } else {
-    for (let tierIndex = 1; tierIndex <= user.tier; tierIndex++) {
-      const treeUser = await Tree.findOne({
-        userId: user._id,
-        tier: tierIndex,
-      });
-      if (treeUser.children.length > 1) {
-        res.status(404);
-        throw new Error("This account have child");
-      }
-    }
-    let oldParents = [];
-    for (let tierIndex = 1; tierIndex <= user.tier; tierIndex++) {
-      const treeUser = await Tree.findOne({
-        userId: user._id,
-        tier: tierIndex,
-      });
-      const parentTree = await Tree.findById(treeUser.parentId);
-      oldParents.push(treeUser.parentId);
-      if (treeUser.children.length === 0) {
-        await removeIdFromChildrenOfParent(treeUser, parentTree);
-        await deleteTreeOfUserWithTier(user, tierIndex);
-      } else if (treeUser.children.length === 1) {
-        await removeIdFromChildrenOfParent(treeUser, parentTree);
-        await deleteTreeOfUserWithTier(user, tierIndex);
-        await pushChildrent1ToUp(treeUser, parentTree, tierIndex);
-      }
-      await replaceRefId(treeUser._id);
-    }
+    const treeOfUser = await Tree.findOne({
+      userId: u._id,
+      tier: 1,
+      isSubId: false,
+    });
 
-    await addDeleteUserToData(user, oldParents);
+    let parent = await Tree.findById(treeOfUser.parentId);
+    if (parent) {
+      let childs = parent.children;
+      let newChilds = childs.filter((item) => {
+        if (item.toString() !== treeOfUser._id.toString()) return item;
+      });
+      parent.children = [...newChilds];
+      const updatedParent = await parent.save();
+
+      if (treeOfUser.children.length === 1 && updatedParent.children.length < 2) {
+        const firstChild = await Tree.findById(treeOfUser.children[0]);
+        firstChild.parentId = updatedParent._id;
+        firstChild.refId =
+          firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
+        await firstChild.save();
+
+        const newUpdatedParentChildren = [...updatedParent.children, firstChild._id];
+        updatedParent.children = newUpdatedParentChildren;
+        await updatedParent.save();
+      }
+
+      if (treeOfUser.children.length === 2 && updatedParent.children.length === 0) {
+        const firstChild = await Tree.findById(treeOfUser.children[0]);
+        firstChild.parentId = updatedParent._id;
+        firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
+        await firstChild.save();
+
+        const secondChild = await Tree.findById(treeOfUser.children[1]);
+        secondChild.parentId = updatedParent._id;
+        secondChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : secondChild.refId;
+        await secondChild.save();
+
+        const newUpdatedParentChildren = [firstChild._id, secondChild._id];
+        updatedParent.children = newUpdatedParentChildren;
+        await updatedParent.save();
+      }
+
+      if (treeOfUser.children.length === 2 && updatedParent.children.length === 1) {
+        const firstChild = await Tree.findById(treeOfUser.children[0]);
+        const secondChild = await Tree.findById(treeOfUser.children[1]);
+        const userListString = `${firstChild.userName}, ${secondChild.userName}`;
+        await sendMailChangeSystemForUser(userListString);
+      }
+
+      u.status = "DELETED";
+      u.deletedTime = new Date();
+      u.oldParents = [parent.userId, ...u.oldParents];
+      await u.save();
+
+      await Tree.deleteOne({ userId: u._id });
+    } else {
+      u.status = "DELETED";
+      u.deletedTime = new Date();
+      u.oldParents = [parent.userId, ...u.oldParents];
+      await u.save();
+
+      await Tree.deleteOne({ userId: u._id });
+    }
     res.json({
       message: "Delete user successfull",
     });

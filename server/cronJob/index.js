@@ -33,7 +33,6 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
     );
     let parent = await Tree.findById(treeOfUser.parentId);
     if (parent) {
-      console.log({ processingUser: u.userId });
       let childs = parent.children;
       let newChilds = childs.filter((item) => {
         if (item.toString() !== treeOfUser._id.toString()) return item;
@@ -42,7 +41,6 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
       const updatedParent = await parent.save();
 
       if (treeOfUser.children.length === 1 && updatedParent.children.length < 2) {
-        console.log({ TH1111111: u.userId });
         const firstChild = await Tree.findById(treeOfUser.children[0]);
         firstChild.parentId = updatedParent._id;
         firstChild.refId =
@@ -55,7 +53,6 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
       }
 
       if (treeOfUser.children.length === 2 && updatedParent.children.length === 0) {
-        console.log({ TH22222222: u.userId });
         const firstChild = await Tree.findById(treeOfUser.children[0]);
         firstChild.parentId = updatedParent._id;
         firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
