@@ -127,7 +127,6 @@ const getUserById = asyncHandler(async (req, res) => {
         const listRefOfRefUser = await Tree.find({ refId: refId._id });
         listDirectUser.push({
           userId: refedUser.userId,
-          isGray: refedUser.status === "LOCKED" ? (req.user.isAdmin ? true : false) : false,
           isRed:
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
@@ -284,7 +283,6 @@ const getUserInfo = asyncHandler(async (req, res) => {
         const listRefOfRefUser = await Tree.find({ refId: refId._id });
         listDirectUser.push({
           userId: refedUser.userId,
-          isGray: refedUser.status === "LOCKED" ? (req.user.isAdmin ? true : false) : false,
           isRed:
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
@@ -498,7 +496,6 @@ const updateUser = asyncHandler(async (req, res) => {
           );
           listDirectUser.push({
             userId: refedUser.userId,
-            isGray: refedUser.status === "LOCKED" ? (req.user.isAdmin ? true : false) : false,
             isRed: refedUser.tier === 1 && refedUser.countPay === 0 ? true : false,
             isYellow: refedUser.errLahCode === "OVER30",
             countChild: refedUser.countChild[0] + 1,
@@ -887,12 +884,6 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
         label: `${childTree.userName}`,
         totalChild: childTree.countChild,
         income: childTree.income,
-        isGray:
-          child.status === "LOCKED"
-            ? currentTier === 1 || userRequest.isAdmin
-              ? true
-              : false
-            : false,
         isRed: child.tier === 1 && child.countPay === 0 ? true : false,
         isYellow: child.errLahCode === "OVER35",
         isBlue: child.errLahCode === "OVER45",
@@ -985,7 +976,6 @@ const getUserProfile = asyncHandler(async (req, res) => {
         );
         listDirectUser.push({
           userId: refedUser.userId,
-          isGray: refedUser.status === "LOCKED" ? (req.user.isAdmin ? true : false) : false,
           isRed:
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true

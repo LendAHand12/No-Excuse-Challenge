@@ -714,9 +714,7 @@ const Profile = () => {
                           <div className="text-base w-full">
                             <span
                               className={`${
-                                ele.isGray
-                                  ? 'bg-[#8c8c8c]'
-                                  : ele.isRed
+                                ele.isRed
                                   ? 'bg-[#b91c1c]'
                                   : ele.isBlue
                                   ? 'bg-[#0000ff]'

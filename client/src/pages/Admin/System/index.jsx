@@ -60,7 +60,6 @@ const AdminSystemPage = () => {
       layer,
       isRed,
       isYellow,
-      isGray,
       isBlue,
       isPink,
       isBrown,
@@ -113,7 +112,6 @@ const AdminSystemPage = () => {
             layer={node.layer}
             onClick={() => onClick(node.key, node.layer, node.isSubId)}
             isRed={node.isRed}
-            isGray={node.isGray}
             isYellow={node.isYellow}
             isBlue={node.isBlue}
             isPink={node.isPink}

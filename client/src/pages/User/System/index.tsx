@@ -55,7 +55,6 @@ const SystemPage = () => {
       layer,
       isRed,
       isYellow,
-      isGray,
       isBlue,
       isPink,
       totalChild,
@@ -66,9 +65,7 @@ const SystemPage = () => {
           onClick={onClick}
           className={`cursor-pointer p-3 text-white text-sm rounded-md inline-block`}
           style={{
-            backgroundColor: isGray
-              ? '#8c8c8c'
-              : isRed
+            backgroundColor: isRed
               ? '#ee0000'
               : isBlue
               ? '#0033ff'
@@ -129,7 +126,6 @@ const SystemPage = () => {
             layer={node.layer}
             onClick={() => onClick(node.key, node.layer)}
             isRed={node.isRed}
-            isGray={node.isGray}
             isYellow={node.isYellow}
             isBlue={node.isBlue}
             isPink={node.isPink}
