@@ -271,13 +271,12 @@ export const blockUserNotKYC = asyncHandler(async () => {
     $and: [{ isAdmin: false }, { status: "UNVERIFY" }],
   });
 
-  const currentDay = moment("2025-05-23 00:00:00");
+  const currentDay = moment();
   const fromDate = moment("2025-05-20");
   for (let u of listUser) {
     if (u.createdAt >= fromDate) {
       if (u.facetecTid === "") {
         const diffHours = currentDay.diff(u.createdAt, "hours", true);
-        // console.log({ name: u.userId, diffHours });
         if (diffHours > 48) {
           u.status = "LOCKED";
           u.lockedTime = new Date();

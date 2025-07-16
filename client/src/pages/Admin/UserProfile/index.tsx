@@ -435,7 +435,7 @@ const UserProfile = () => {
             </div>
           )}
 
-          {kycFee && (
+          {/* {kycFee && (
             <div
               className="w-full bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded mb-5"
               role="alert"
@@ -446,7 +446,7 @@ const UserProfile = () => {
                 )}
               </span>
             </div>
-          )}
+          )} */}
 
           {data.tier === 2 && data.tryToTier2 === 'YES' && (
             <div
