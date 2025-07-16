@@ -35,6 +35,7 @@ const UserProfile = () => {
   const [packageOptions, setPackageOptions] = useState([]);
   const [currentOpenLah, setCurrentOpenLah] = useState(null);
   const [currentCloseLah, setCurrentCloseLah] = useState(null);
+  const [currentLockKyc, setCurrentLockKyc] = useState(null);
   const [phone, setPhone] = useState('');
   const [errorPhone, setErrPhone] = useState(false);
   const [isBonusRef, setIsBonusRef] = useState(false);
@@ -69,6 +70,7 @@ const UserProfile = () => {
             bonusRef,
             kycFee,
             changeCreatedAt,
+            lockKyc,
           } = response.data;
           setValue('userId', userId);
           setValue('email', email);
@@ -79,6 +81,7 @@ const UserProfile = () => {
           setValue('changeCreatedAt', changeCreatedAt);
           setCurrentOpenLah(openLah);
           setCurrentCloseLah(closeLah);
+          setCurrentLockKyc(lockKyc);
           setIsBonusRef(bonusRef);
           setKycFee(kycFee);
         })
@@ -129,6 +132,9 @@ const UserProfile = () => {
       }
       if (currentOpenLah !== data.openLah) {
         formData.append('openLah', currentOpenLah);
+      }
+      if (currentLockKyc !== data.lockKyc) {
+        formData.append('lockKyc', currentLockKyc);
       }
       if (currentCloseLah !== data.closeLah) {
         formData.append('closeLah', currentCloseLah);
@@ -186,7 +192,7 @@ const UserProfile = () => {
           setEditting(false);
         });
     },
-    [data, currentCloseLah, currentOpenLah, phone],
+    [data, currentCloseLah, currentOpenLah, phone, currentLockKyc],
   );
 
   const handleDeleteUser = async (onClose) => {
@@ -404,6 +410,11 @@ const UserProfile = () => {
     [currentCloseLah],
   );
 
+  const handleChangeLockKyc = useCallback(
+    () => setCurrentLockKyc(!currentLockKyc),
+    [currentLockKyc],
+  );
+
   const renderRank = (level) => {
     return USER_RANKINGS.find((ele) => level <= ele.value)?.label;
   };
@@ -582,6 +593,21 @@ const UserProfile = () => {
                           onChange={handleChangeCloseLah}
                         />
                       ) : currentCloseLah ? (
+                        'True'
+                      ) : (
+                        'False'
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>{t('Lock KYC')}</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Switch
+                          checked={currentLockKyc}
+                          onChange={handleChangeLockKyc}
+                        />
+                      ) : currentLockKyc ? (
                         'True'
                       ) : (
                         'False'

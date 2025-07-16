@@ -12,76 +12,60 @@ import mongoose from "mongoose";
 var processingHeweUserIds = [];
 
 const claimHewe = asyncHandler(async (req, res) => {
-  const { token } = req.body;
+  const { user } = req;
 
-  const decode = decodeCallbackToken(token);
-  if (decode) {
-    const { userId } = decode;
-    const user = await User.findById(userId);
+  if (processingHeweUserIds.includes(user._id)) {
+    return res.status(400).json({
+      error: "Your withdraw request is already being processed. Please wait!",
+    });
+  }
 
-    if (user) {
-      if (processingHeweUserIds.includes(user._id)) {
-        return res.status(400).json({
-          error: "Your withdraw request is already being processed. Please wait!",
-        });
+  processingHeweUserIds.push(user._id);
+
+  try {
+    // if (user.status !== "APPROVED" || user.facetecTid === "") {
+    //   throw new Error("Please verify your account");
+    // }
+
+    if (user.availableHewe > 0) {
+      const receipt = await sendHewe({
+        amount: user.availableHewe,
+        receiverAddress: user.walletAddress,
+      });
+
+      const claimed = await Claim.create({
+        userId: user.id,
+        amount: user.availableHewe,
+        hash: receipt.hash,
+        coin: "HEWE",
+      });
+
+      user.claimedHewe = user.claimedHewe + user.availableHewe;
+      user.availableHewe = 0;
+      await user.save();
+
+      const index = processingHeweUserIds.indexOf(user.id);
+      if (index !== -1) {
+        processingHeweUserIds.splice(index, 1);
       }
 
-      processingHeweUserIds.push(user._id);
-
-      try {
-        if (user.status !== "APPROVED" || user.facetecTid === "") {
-          throw new Error("Please verify your account");
-        }
-        // const response = await axios.post("https://serepay.net/api/payment/claimHewe", {
-        //   amountClaim: user.availableHewe,
-        //   address: user.heweWallet,
-        // });
-
-        if (user.availableHewe > 0) {
-          const receipt = await sendHewe({
-            amount: user.availableHewe,
-            receiverAddress: user.walletAddress,
-          });
-
-          const claimed = await Claim.create({
-            userId: user.id,
-            amount: user.availableHewe,
-            hash: receipt.hash,
-            coin: "HEWE",
-          });
-
-          user.claimedHewe = user.claimedHewe + user.availableHewe;
-          user.availableHewe = 0;
-          await user.save();
-
-          const index = processingHeweUserIds.indexOf(user.id);
-          if (index !== -1) {
-            processingHeweUserIds.splice(index, 1);
-          }
-
-          res.status(200).json({
-            message: "claim HEWE successful",
-          });
-        } else {
-          const index = processingHeweUserIds.indexOf(user._id);
-          if (index !== -1) {
-            processingHeweUserIds.splice(index, 1);
-          }
-
-          throw new Error("Insufficient balance in account");
-        }
-      } catch (err) {
-        const index = processingHeweUserIds.indexOf(user._id);
-        if (index !== -1) {
-          processingHeweUserIds.splice(index, 1);
-        }
-        res.status(400).json({ error: err.message });
-      }
+      res.status(200).json({
+        message: "claim HEWE successful",
+      });
     } else {
-      throw new Error("Unknow User");
+      const index = processingHeweUserIds.indexOf(user._id);
+      if (index !== -1) {
+        processingHeweUserIds.splice(index, 1);
+      }
+
+      throw new Error("Insufficient balance in account");
     }
-  } else {
-    throw new Error("Internal Error");
+  } catch (err) {
+    const index = processingHeweUserIds.indexOf(user._id);
+    if (index !== -1) {
+      processingHeweUserIds.splice(index, 1);
+    }
+    res.status(400).json({ error: err.message });
   }
 });
 

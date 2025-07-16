@@ -272,24 +272,11 @@ export const blockUserNotKYC = asyncHandler(async () => {
   });
 
   const currentDay = moment();
-  const fromDate = moment("2025-05-20");
   for (let u of listUser) {
-    if (u.createdAt >= fromDate) {
-      if (u.facetecTid === "") {
-        const diffHours = currentDay.diff(u.createdAt, "hours", true);
-        if (diffHours > 48) {
-          u.status = "LOCKED";
-          u.lockedTime = new Date();
-        }
-      }
-    } else {
-      if (u.facetecTid === "") {
-        const diffDays = currentDay.diff(fromDate, "days");
-        // console.log({ name: u.userId, diffDays });
-        if (diffDays > 20) {
-          u.status = "LOCKED";
-          u.lockedTime = new Date();
-        }
+    if (u.facetecTid === "") {
+      const diffHours = currentDay.diff(u.createdAt, "hours", true);
+      if (diffHours > 48) {
+        u.lockKyc = true;
       }
     }
     await u.save();
