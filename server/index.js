@@ -112,12 +112,12 @@ const cron1 = new CronJob("00 01 * * *", async () => {
   console.log("Delete user done");
 });
 
-// const cron12 = new CronJob("30 01 * * *", async () => {
-// 1h30
-console.log("Block user not KYC start");
-await blockUserNotKYC();
-console.log("Block user not KYC done");
-// });
+const cron12 = new CronJob("30 01 * * *", async () => {
+  // 1h30
+  console.log("Block user not KYC start");
+  await blockUserNotKYC();
+  console.log("Block user not KYC done");
+});
 
 const cron13 = new CronJob("45 01 * * *", async () => {
   // 1h30
@@ -163,7 +163,7 @@ const cron6 = new CronJob("0 * * * *", async () => {
 
 cron0.start();
 cron1.start();
-// cron12.start();
+cron12.start();
 cron13.start();
 cron2.start();
 cron3.start();
