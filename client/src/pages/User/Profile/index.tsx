@@ -382,7 +382,7 @@ const Profile = () => {
                   </span>
                   <span>
                     Failure to complete the KYC process will result in your
-                    account being <b>blocked</b> at 00:00.
+                    account being <b>blocked</b> at 24:00.
                   </span>
                 </div>
                 <div>
