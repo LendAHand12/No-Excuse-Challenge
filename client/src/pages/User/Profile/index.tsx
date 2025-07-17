@@ -634,13 +634,9 @@ const Profile = () => {
           </div>
           <button
             className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
-              availableHewe === 0 || status !== 'APPROVED' || facetecTid === ''
-                ? 'opacity-30'
-                : ''
+              availableHewe === 0 ? 'opacity-30' : ''
             }`}
-            disabled={
-              availableHewe === 0 || status !== 'APPROVED' || facetecTid === ''
-            }
+            disabled={availableHewe === 0}
             onClick={claimHewe}
           >
             {loadingClaimHewe && <Loading />}
