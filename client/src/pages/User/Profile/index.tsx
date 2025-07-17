@@ -144,21 +144,22 @@ const Profile = () => {
   };
 
   const claimHewe = async () => {
-    setLoadingClaimHewe(true);
-    await Claim.hewe()
-      .then((response) => {
-        toast.success(t(response.data.message));
-        setLoadingClaimHewe(false);
-        setRefresh(!refresh);
-      })
-      .catch((error) => {
-        let message =
-          error.response && error.response.data.error
-            ? error.response.data.error
-            : error.message;
-        toast.error(t(message));
-        setLoadingClaimHewe(false);
-      });
+    console.log('iuhdaiwuhdiawuh');
+    // setLoadingClaimHewe(true);
+    // await Claim.hewe()
+    //   .then((response) => {
+    //     toast.success(t(response.data.message));
+    //     setLoadingClaimHewe(false);
+    //     setRefresh(!refresh);
+    //   })
+    //   .catch((error) => {
+    //     let message =
+    //       error.response && error.response.data.error
+    //         ? error.response.data.error
+    //         : error.message;
+    //     toast.error(t(message));
+    //     setLoadingClaimHewe(false);
+    //   });
   };
 
   // const claimUsdt = async () => {
@@ -634,10 +635,10 @@ const Profile = () => {
           <button
             className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
               availableHewe === 0 || status !== 'APPROVED' || facetecTid === ''
+                ? 'opacity-30'
+                : ''
             }`}
-            disabled={
-              availableHewe === 0 || status !== 'APPROVED' || facetecTid === ''
-            }
+            disabled={availableHewe === 0 || facetecTid === ''}
             onClick={claimHewe}
           >
             {loadingClaimHewe && <Loading />}
