@@ -638,7 +638,9 @@ const Profile = () => {
                 ? 'opacity-30'
                 : ''
             }`}
-            disabled={availableHewe === 0 || facetecTid === ''}
+            disabled={
+              availableHewe === 0 || status !== 'APPROVED' || facetecTid === ''
+            }
             onClick={claimHewe}
           >
             {loadingClaimHewe && <Loading />}
