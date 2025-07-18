@@ -144,22 +144,21 @@ const Profile = () => {
   };
 
   const claimHewe = async () => {
-    console.log('iuhdaiwuhdiawuh');
-    // setLoadingClaimHewe(true);
-    // await Claim.hewe()
-    //   .then((response) => {
-    //     toast.success(t(response.data.message));
-    //     setLoadingClaimHewe(false);
-    //     setRefresh(!refresh);
-    //   })
-    //   .catch((error) => {
-    //     let message =
-    //       error.response && error.response.data.error
-    //         ? error.response.data.error
-    //         : error.message;
-    //     toast.error(t(message));
-    //     setLoadingClaimHewe(false);
-    //   });
+    setLoadingClaimHewe(true);
+    await Claim.hewe()
+      .then((response) => {
+        toast.success(t(response.data.message));
+        setLoadingClaimHewe(false);
+        setRefresh(!refresh);
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.error
+            ? error.response.data.error
+            : error.message;
+        toast.error(t(message));
+        setLoadingClaimHewe(false);
+      });
   };
 
   // const claimUsdt = async () => {
