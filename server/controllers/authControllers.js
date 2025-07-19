@@ -59,7 +59,7 @@ const registerUser = asyncHandler(async (req, res) => {
     status: { $ne: "DELETED" },
   });
   const userExistsEmail = await User.findOne({
-    email: email.toLowerCase(),
+    email: email,
     status: { $ne: "DELETED" },
   });
   const userExistsPhone = await User.findOne({
