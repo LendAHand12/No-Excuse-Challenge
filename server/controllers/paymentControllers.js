@@ -324,7 +324,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
       paymentIds: [],
       userStepPayment: user.paymentStep,
     });
-  } else if (user.currentLayer.slice(-1) < 5) {
+  } else if (user.currentLayer.slice(-1) < 4) {
     res.status(200).json({
       status: "PENDING",
       message: `Your current level is insufficient to upgrade to the tier ${user.tier + 1}`,

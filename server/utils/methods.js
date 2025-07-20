@@ -502,7 +502,6 @@ export const sumLevels = (obj, fromLevel = 5, toLevel = 9) => {
 
 export const checkUserCanNextTier = async (treeOfUser) => {
   const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(treeOfUser);
-  console.log({ countChild1, countChild2 });
 
   if (treeOfUser.countChild >= 127) {
     // if (treeOfUser.countChild >= 126) {
