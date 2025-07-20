@@ -312,6 +312,8 @@ const AdminTransactionsPage = () => {
                               'DreamPool'
                             ) : ele.type === 'COMPANY' ? (
                               'Purchase HEWE'
+                            ) : ele.type === 'KYC' ? (
+                              'Amfatec KYC'
                             ) : (
                               <div className="">
                                 <div className="text-base flex items-center gap-2 font-semibold">
