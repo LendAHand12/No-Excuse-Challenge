@@ -131,7 +131,6 @@ const updateWithdraw = asyncHandler(async (req, res) => {
   try {
     const withdraw = await Withdraw.findById(id);
     const user = await User.findById(withdraw.userId);
-    console.log({ user });
     if (status === "APPROVED") {
       withdraw.hash = hash;
       user.claimedUsdt = user.claimedUsdt + user.availableUsdt;

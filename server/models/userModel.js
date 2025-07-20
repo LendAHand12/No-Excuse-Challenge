@@ -209,6 +209,15 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    paymentMethod: {
+      type: String,
+      default: "usdt",
+    },
+    city: {
+      type: String,
+      default: "VN",
+      enum: ["", "VN", "US", "IN"],
+    },
   },
   {
     timestamps: true,

@@ -99,6 +99,8 @@ const registerUser = asyncHandler(async (req, res) => {
     const treeReceiveUser = await Tree.findById(receiveId);
 
     if (treeReceiveUser.userName === "NoExcuse 9" || treeReceiveUser.children.length < 2) {
+      const parent = await User.findById(treeReceiveUser.userId);
+
       const user = await User.create({
         userId,
         email: email.toLowerCase(),
@@ -110,6 +112,7 @@ const registerUser = asyncHandler(async (req, res) => {
         role: "user",
         kycFee: true,
         changeCreatedAt: new Date(),
+        city: parent.city,
       });
 
       const tree = await Tree.create({
@@ -192,8 +195,7 @@ const authUser = asyncHandler(async (req, res) => {
     $and: [
       { $or: [{ email: code }, { userId: code }] },
       { isConfirmed: true },
-      { status: { $ne: "LOCKED" } },
-      { status: { $ne: "DELETED" } },
+      { status: { $nin: ["LOCKED", "DELETED"] } },
     ],
   });
 

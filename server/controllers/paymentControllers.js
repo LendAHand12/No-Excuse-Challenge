@@ -74,12 +74,12 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
       } else {
         const refUser = await getRefParentUser(user.id, user.tier);
         let haveRefNotPayEnough = false;
-        let registerFee = 5;
+        let registerFee = user.city === "US" ? 10 : 5;
         let pigFee = 5;
         let companyFee = 25;
-        let kycFee = 2;
-        let directCommissionFee = 15;
-        let referralCommissionFee = 5;
+        let kycFee = user.city === "US" ? 5 : 2;
+        let directCommissionFee = user.city === "US" ? 55 : 15;
+        let referralCommissionFee = user.city === "US" ? 10 : 5;
         // giao dich dang ky
         payments.push({
           userName: "Registration Fee",

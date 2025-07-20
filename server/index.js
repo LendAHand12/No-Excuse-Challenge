@@ -105,12 +105,17 @@ const cron0 = new CronJob("00 00 * * *", async () => {
   console.log("Dis hewe user done");
 });
 
-const cron1 = new CronJob("00 01 * * *", async () => {
-  // 1h
-  console.log("Delete user start");
-  await deleteUser24hUnPay();
-  console.log("Delete user done");
-});
+const cron1 = new CronJob(
+  "0 4 * * *", // chạy 4:00 sáng
+  async () => {
+    console.log("Delete user start");
+    await deleteUser24hUnPay();
+    console.log("Delete user done");
+  },
+  null,
+  true,
+  "Asia/Bangkok" // múi giờ GMT+7
+);
 
 const cron12 = new CronJob("30 01 * * *", async () => {
   // 1h30
