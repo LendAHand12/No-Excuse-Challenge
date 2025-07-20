@@ -9,11 +9,13 @@ import Modal from 'react-modal';
 import DefaultLayout from '../../../layout/DefaultLayout';
 import { transfer } from '../../../utils/smartContract';
 import { shortenWalletAddress } from '../../../utils';
+import { useSelector } from 'react-redux';
 
 Modal.setAppElement('#root');
 
 const PaymentPage = () => {
   const { t } = useTranslation();
+  const { userInfo } = useSelector((state) => state.auth);
   const [total, setTotal] = useState(0);
   const [loadingPaymentInfo, setLoadingPaymentInfo] = useState(true);
   const [paymentsList, setPaymentsList] = useState([]);
@@ -39,7 +41,8 @@ const PaymentPage = () => {
             (accumulator, currentValue) => accumulator + currentValue.amount,
             0,
           );
-          setTotal(totalPayment + 0.2);
+          const fee = userInfo.city === "VN" ? 0.2 : 0;
+          setTotal(totalPayment + fee);
           setPaymentIdsList(paymentIds);
           setPaymentsList(payments);
           setShowPayment(true);

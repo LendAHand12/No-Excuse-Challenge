@@ -258,6 +258,7 @@ const getUserById = asyncHandler(async (req, res) => {
       isMoveSystem: isMoveSystem.length > 0 ? true : false,
       changeCreatedAt: user.changeCreatedAt,
       lockKyc: user.lockKyc,
+      city: user.city,
     });
   } else {
     res.status(404);
@@ -420,6 +421,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       isMoveSystem: isMoveSystem.length > 0 ? true : false,
       changeCreatedAt: user.changeCreatedAt,
       lockKyc: user.lockKyc,
+      city: user.city,
     });
   } else {
     res.status(404);
@@ -1048,6 +1050,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
       bonusRef: user.bonusRef,
       errLahCode: user.errLahCode,
       lockKyc: user.lockKyc,
+      city: user.city,
     });
   } else {
     res.status(400);

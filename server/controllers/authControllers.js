@@ -289,6 +289,7 @@ const authUser = asyncHandler(async (req, res) => {
         isMoveSystem: isMoveSystem.length > 0 ? true : false,
         changeCreatedAt: user.changeCreatedAt,
         lockKyc: user.lockKyc,
+        city: user.city,
       },
       accessToken,
       refreshToken,
