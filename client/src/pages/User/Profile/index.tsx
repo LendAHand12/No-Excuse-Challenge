@@ -835,7 +835,7 @@ const Profile = () => {
           </div>
         </div>
         <div className="flex justify-between">
-          <button
+          {/* <button
             className={`bg-blue-900 text-white px-6 py-2 rounded-lg ${
               isMoveSystem ? 'opacity-40' : ''
             }`}
@@ -843,7 +843,7 @@ const Profile = () => {
             disabled={isMoveSystem}
           >
             Migrate ID to dreamchain
-          </button>
+          </button> */}
 
           {errLahCode !== 'OVER45' && !isEdit && status === 'APPROVED' && (
             <button
