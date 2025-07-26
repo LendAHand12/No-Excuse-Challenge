@@ -14,6 +14,9 @@ const withdrawSchema = mongoose.Schema(
     hash: {
       type: String,
     },
+    method: {
+      type: String,
+    },
     status: {
       type: String,
       required: true,

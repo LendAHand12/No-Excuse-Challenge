@@ -361,6 +361,9 @@ const AdminWithdrawPages = () => {
                 Amount
               </th>
               <th scope="col" className="px-6 py-3">
+                Method
+              </th>
+              <th scope="col" className="px-6 py-3">
                 {t('time')}
               </th>
               <th scope="col" className="px-6 py-3">
@@ -397,6 +400,9 @@ const AdminWithdrawPages = () => {
                   </td>
                   <td className="px-6 py-4">
                     <b>{ele.amount}</b> USDT
+                  </td>
+                  <td className="px-6 py-4">
+                    <b>{ele.method}</b>
                   </td>
                   <td className="px-6 py-4">
                     {new Date(ele.createdAt).toLocaleString('vi')}

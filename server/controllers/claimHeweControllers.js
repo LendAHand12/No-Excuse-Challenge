@@ -96,15 +96,16 @@ const claimUsdt = asyncHandler(async (req, res) => {
           throw new Error("Request denied");
         }
         if (user.availableUsdt > 0) {
-          if (user.availableUsdt < 200) {
-            const receipt = await sendUsdt({
-              amount: user.availableUsdt - 1,
-              receiverAddress: user.walletAddress,
-            });
+          console.log({method: user.paymentMethod});
+          if (user.availableUsdt < 200 && user.paymentMethod === "") {
+            // const receipt = await sendUsdt({
+            //   amount: user.availableUsdt - 1,
+            //   receiverAddress: user.walletAddress,
+            // });
             const claimed = await Claim.create({
               userId: user.id,
               amount: user.availableUsdt,
-              hash: receipt.hash,
+              hash: "receipt.hash",
               coin: "USDT",
             });
             user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
@@ -123,6 +124,7 @@ const claimUsdt = asyncHandler(async (req, res) => {
             const withdraw = await Withdraw.create({
               userId: user.id,
               amount: user.availableUsdt,
+              method: user.paymentMethod
             });
             user.availableUsdt = 0;
             await user.save();

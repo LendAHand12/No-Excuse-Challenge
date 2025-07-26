@@ -47,11 +47,39 @@ const PaymentPage = () => {
   const [paymentConfirmed, setPaymentConfirmed] = useState(
     userInfo.paymentProcessed,
   );
+  const [timeLeft, setTimeLeft] = useState(0);
 
   const handleClick = (method) => {
     setSelectedMethod(method);
     setUuid(uuidv4().slice(0, 8));
     setCopied(false);
+    setTimeLeft(600);
+  };
+
+  // Đếm ngược thời gian
+  useEffect(() => {
+    if (!timeLeft) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setSelectedMethod(null); // ẩn QR
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
+  const formatTime = (sec) => {
+    const minutes = Math.floor(sec / 60)
+      .toString()
+      .padStart(2, '0');
+    const seconds = (sec % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
   };
 
   const handleCopy = () => {
@@ -401,6 +429,11 @@ const PaymentPage = () => {
                                 that do not match will be rejected.
                               </div>
 
+                              <div className="text-center text-gray-500">
+                                  Time remaining to complete payment :{' '}
+                                  {formatTime(timeLeft)}
+                                </div>
+
                               <div className="text-center pt-2">
                                 <button
                                   onClick={handleConfirmPayment}
@@ -408,11 +441,6 @@ const PaymentPage = () => {
                                 >
                                   I have completed the payment
                                 </button>
-                                {paymentConfirmed && (
-                                  <div className="mt-2 text-green-600 text-lg">
-                                    ✅ We have received your payment submission.
-                                  </div>
-                                )}
                               </div>
                             </div>
                           )}
