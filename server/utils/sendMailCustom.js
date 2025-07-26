@@ -446,3 +446,28 @@ export const sendMailChangeSystemForUser = async (userListString) => {
   // send a promise since nodemailer is async
   if (mailSent) return Promise.resolve(1);
 };
+
+export const sendMailPaymentForAdmin = async ({ userId, uuid }) => {
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: process.env.MAIL_ADMIN1,
+    subject: "There is a payment branch in the US that needs approval.",
+    html: `
+    <h1>
+    Please check the payment of user with id: ${userId} and transaction code: ${uuid}
+    </h1>
+			`,
+    cc: [process.env.CC_MAIL, process.env.MAIL_ADMIN4],
+  };
+
+  const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(info);
+    }
+  });
+
+  // send a promise since nodemailer is async
+  if (mailSent) return Promise.resolve(1);
+};

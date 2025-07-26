@@ -106,7 +106,7 @@ const cron0 = new CronJob("00 00 * * *", async () => {
 });
 
 const cron1 = new CronJob(
-  "0 4 * * *", // chạy 4:00 sáng
+  "05 * * * *", // chạy 4:00 sáng
   async () => {
     console.log("Delete user start");
     await deleteUser24hUnPay();

@@ -41,7 +41,7 @@ const PaymentPage = () => {
             (accumulator, currentValue) => accumulator + currentValue.amount,
             0,
           );
-          const fee = userInfo.city === "VN" ? 0.2 : 0;
+          const fee = userInfo.city === 'VN' ? 0.2 : 0;
           setTotal(totalPayment + fee);
           setPaymentIdsList(paymentIds);
           setPaymentsList(payments);

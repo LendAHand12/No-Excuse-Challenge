@@ -12,6 +12,7 @@ import DefaultLayout from '@/layout/DefaultLayout';
 import Modal from 'react-modal';
 import { shortenWalletAddress } from '@/utils';
 import { useSelector } from 'react-redux';
+import Payment from '../../../api/Payment';
 
 const AdminUserPages = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -38,6 +39,8 @@ const AdminUserPages = () => {
   const [currentKYCId, setCurrentKYCId] = useState('');
   const [rejectReason, setRejectReason] = useState('');
   const [rejectReasonError, setRejectReasonError] = useState(false);
+  const [showApprovePayment, setShowApprovePayment] = useState(false);
+  const [currentApprovePaymentId, setCurrentApprovePaymentId] = useState('');
 
   const openModal = () => {
     setShowDeleteModal(true);
@@ -205,6 +208,23 @@ const AdminUserPages = () => {
     navigate('/admin/user/export');
   };
 
+  const handleApprovePayment = useCallback(async () => {
+    await Payment.donePayWithCash({ userId: currentApprovePaymentId })
+      .then((response) => {
+        const { message } = response.data;
+        setShowApprovePayment(false);
+        toast.success(t(message));
+        setRefresh(!refresh);
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message;
+        toast.error(t(message));
+      });
+  }, [currentApprovePaymentId]);
+
   return (
     <DefaultLayout>
       <ToastContainer />
@@ -371,6 +391,69 @@ const AdminUserPages = () => {
           </div>
         </div>
       </Modal>
+      <Modal
+        isOpen={showApprovePayment}
+        onRequestClose={() => setShowApprovePayment(false)}
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+          },
+        }}
+      >
+        <div className="overflow-y-auto overflow-x-hidden justify-center items-center w-full md:inset-0 h-modal md:h-full">
+          <div className="relative w-full max-w-md h-full md:h-auto">
+            <div className="relative text-center bg-white rounded-lg sm:p-5">
+              <button
+                onClick={() => setShowApprovePayment(false)}
+                className="text-gray-400 absolute top-2.5 right-2.5 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+                <span className="sr-only">Close modal</span>
+              </button>
+              <svg
+                fill="currentColor"
+                width="26"
+                height="26"
+                viewBox="0 0 24 24"
+                className="text-gray-400 w-11 h-11 mb-3.5 mx-auto"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M18.71,7.21a1,1,0,0,0-1.42,0L9.84,14.67,6.71,11.53A1,1,0,1,0,5.29,13l3.84,3.84a1,1,0,0,0,1.42,0l8.16-8.16A1,1,0,0,0,18.71,7.21Z" />
+              </svg>
+              <p className="mb-4 text-gray-500">
+                Are you sure you want to approve transactions for this user?
+              </p>
+              <div className="space-y-4">
+                <div className="flex justify-center items-center space-x-4">
+                  <button
+                    onClick={handleApprovePayment}
+                    className="py-2 px-3 text-sm font-medium text-center text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-red-300 "
+                  >
+                    Approve
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
       <div className="relative overflow-x-auto py-24 px-10">
         <div className="flex items-center justify-between pb-4 bg-white">
           <div className="flex gap-4">
@@ -480,13 +563,13 @@ const AdminUserPages = () => {
                 Username
               </th>
               <th scope="col" className="px-6 py-3">
-                Email
-              </th>
-              <th scope="col" className="px-6 py-3">
                 Age
               </th>
               <th scope="col" className="px-6 py-3">
                 Wallet Address
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Payment Pending
               </th>
               <th scope="col" className="px-6 py-3">
                 {t('status')}
@@ -512,10 +595,11 @@ const AdminUserPages = () => {
                       <div className="text-base font-semibold">
                         {ele.userId}
                       </div>
-                      <div className="font-normal text-gray-500">{ele._id}</div>
+                      <div className="font-normal text-gray-500">
+                        {ele.email}
+                      </div>
                     </div>
                   </th>
-                  <td className="px-6 py-4">{ele.email}</td>
                   <td className="px-6 py-4">
                     {ele.ageEstimate && (
                       <a
@@ -548,6 +632,28 @@ const AdminUserPages = () => {
                   </td>
                   <td className="px-6 py-4">
                     {shortenWalletAddress(ele.walletAddress, 12)}
+                  </td>
+                  <td className="px-6 py-4">
+                    {ele.paymentUUID.length > 0 ? (
+                      <div>
+                        <button
+                          onClick={() => {
+                            setShowApprovePayment(true);
+                            setCurrentApprovePaymentId(ele._id);
+                          }}
+                          className={`${
+                            ele.paymentProcessed
+                              ? 'bg-orange-400'
+                              : 'bg-green-500'
+                          } py-1 px-3 text-white text-lg max-w-fit rounded-lg`}
+                          disabled={!ele.paymentProcessed}
+                        >
+                          {ele.paymentUUID[ele.tier - 1]}
+                        </button>
+                      </div>
+                    ) : (
+                      ''
+                    )}
                   </td>
                   <td className="px-6 py-4">
                     <div

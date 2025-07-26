@@ -211,12 +211,18 @@ const userSchema = mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      default: "usdt",
+      default: "",
     },
     city: {
       type: String,
       default: "VN",
       enum: ["", "VN", "US", "IN"],
+    },
+    paymentProcessed: {
+      type: Boolean,
+    },
+    paymentUUID: {
+      type: Array,
     },
   },
   {

@@ -12,7 +12,9 @@ import {
   getAllTransForExport,
   onDonePayment,
   getPaymentNextTierInfo,
-  onDoneNextTierPayment
+  onDoneNextTierPayment,
+  payWithCash,
+  onDonePaymentWithCash,
 } from "../controllers/paymentControllers.js";
 import { protectRoute, isAdmin } from "../middleware/authMiddleware.js";
 
@@ -23,25 +25,18 @@ router.route("/getParentWithCount").post(getParentWithCount);
 router.route("/info").get(protectRoute, getPaymentInfo);
 router.route("/infoNextTier").get(protectRoute, getPaymentNextTierInfo);
 router.route("/user").get(protectRoute, isAdmin, getAllPayments);
-router
-  .route("/getAllTransForExport")
-  .post(protectRoute, isAdmin, getAllTransForExport);
-router
-  .route("/")
-  .get(protectRoute, getPaymentsOfUser)
-  .post(protectRoute, addPayment);
+router.route("/getAllTransForExport").post(protectRoute, isAdmin, getAllTransForExport);
+router.route("/").get(protectRoute, getPaymentsOfUser).post(protectRoute, addPayment);
 
 router.route("/done").post(protectRoute, onDonePayment);
 router.route("/doneNextTier").post(protectRoute, onDoneNextTierPayment);
 
 router.route("/:id").get(protectRoute, isAdmin, getPaymentDetail);
-router
-  .route("/checkCanRefund")
-  .post(protectRoute, isAdmin, checkCanRefundPayment);
+router.route("/checkCanRefund").post(protectRoute, isAdmin, checkCanRefundPayment);
 
 router.route("/changeToRefunded").post(protectRoute, isAdmin, changeToRefunded);
-router
-  .route("/onAdminDoneRefund")
-  .post(protectRoute, isAdmin, onAdminDoneRefund);
+router.route("/onAdminDoneRefund").post(protectRoute, isAdmin, onAdminDoneRefund);
+router.route("/payWithCash").post(protectRoute, payWithCash);
+router.route("/donePayWithCash").post(protectRoute, isAdmin, onDonePaymentWithCash);
 
 export default router;

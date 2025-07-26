@@ -259,6 +259,8 @@ const getUserById = asyncHandler(async (req, res) => {
       changeCreatedAt: user.changeCreatedAt,
       lockKyc: user.lockKyc,
       city: user.city,
+      paymentMethod: user.paymentMethod,
+      paymentProcessed: user.paymentProcessed,
     });
   } else {
     res.status(404);
@@ -422,6 +424,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
       changeCreatedAt: user.changeCreatedAt,
       lockKyc: user.lockKyc,
       city: user.city,
+      paymentMethod: user.paymentMethod,
+      paymentProcessed: user.paymentProcessed,
     });
   } else {
     res.status(404);

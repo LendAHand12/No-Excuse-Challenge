@@ -21,74 +21,71 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
     $and: [{ tier: 1 }, { countPay: 0 }, { isAdmin: false }, { status: { $ne: "DELETED" } }],
   });
   for (let u of listUser) {
-    const treeOfUser = await Tree.findOne({ userId: u._id });
-    if (treeOfUser.children.length === 2) {
-      console.log({ userId2: u.userId });
-    } else if (treeOfUser.children.length === 1) {
-      console.log({ userId1: u.userId });
-    }
-    await Tree.updateMany(
-      { refId: treeOfUser._id },
-      { $set: { refId: "64cd449ec75ae7bc7ebbab03" } }
-    );
-    let parent = await Tree.findById(treeOfUser.parentId);
-    if (parent) {
-      let childs = parent.children;
-      let newChilds = childs.filter((item) => {
-        if (item.toString() !== treeOfUser._id.toString()) return item;
-      });
-      parent.children = [...newChilds];
-      const updatedParent = await parent.save();
+    const currentDay = moment();
+    const diffHours = currentDay.diff(u.createdAt, "hours", true);
 
-      if (treeOfUser.children.length === 1 && updatedParent.children.length < 2) {
-        const firstChild = await Tree.findById(treeOfUser.children[0]);
-        firstChild.parentId = updatedParent._id;
-        firstChild.refId =
-          firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
-        await firstChild.save();
-
-        const newUpdatedParentChildren = [...updatedParent.children, firstChild._id];
-        updatedParent.children = newUpdatedParentChildren;
-        await updatedParent.save();
-      }
-
-      if (treeOfUser.children.length === 2 && updatedParent.children.length === 0) {
-        const firstChild = await Tree.findById(treeOfUser.children[0]);
-        firstChild.parentId = updatedParent._id;
-        firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
-        await firstChild.save();
-
-        const secondChild = await Tree.findById(treeOfUser.children[1]);
-        secondChild.parentId = updatedParent._id;
-        secondChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : secondChild.refId;
-        await secondChild.save();
-
-        const newUpdatedParentChildren = [firstChild._id, secondChild._id];
-        updatedParent.children = newUpdatedParentChildren;
-        await updatedParent.save();
-      }
-
-      if (treeOfUser.children.length === 2 && updatedParent.children.length === 1) {
-        console.log({ TH333333: u.userId });
-        const firstChild = await Tree.findById(treeOfUser.children[0]);
-        const secondChild = await Tree.findById(treeOfUser.children[1]);
-        const userListString = `${firstChild.userName}, ${secondChild.userName}`;
-        await sendMailChangeSystemForUser(userListString);
-      }
-
-      u.status = "DELETED";
-      u.deletedTime = new Date();
-      u.oldParents = [parent.userId, ...u.oldParents];
-      await u.save();
-
-      await Tree.deleteOne({ userId: u._id });
-    } else {
-      u.status = "DELETED";
-      u.deletedTime = new Date();
-      u.oldParents = [parent.userId, ...u.oldParents];
-      await u.save();
-
-      await Tree.deleteOne({ userId: u._id });
+    if (diffHours >= 24) {
+      console.log({ name: u.userId, create: u.createdAt, diffHours });
+      // const treeOfUser = await Tree.findOne({ userId: u._id });
+      // if (treeOfUser.children.length === 2) {
+      //   console.log({ userId2: u.userId });
+      // } else if (treeOfUser.children.length === 1) {
+      //   console.log({ userId1: u.userId });
+      // }
+      // await Tree.updateMany(
+      //   { refId: treeOfUser._id },
+      //   { $set: { refId: "64cd449ec75ae7bc7ebbab03" } }
+      // );
+      // let parent = await Tree.findById(treeOfUser.parentId);
+      // if (parent) {
+      //   let childs = parent.children;
+      //   let newChilds = childs.filter((item) => {
+      //     if (item.toString() !== treeOfUser._id.toString()) return item;
+      //   });
+      //   parent.children = [...newChilds];
+      //   const updatedParent = await parent.save();
+      //   if (treeOfUser.children.length === 1 && updatedParent.children.length < 2) {
+      //     const firstChild = await Tree.findById(treeOfUser.children[0]);
+      //     firstChild.parentId = updatedParent._id;
+      //     firstChild.refId =
+      //       firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
+      //     await firstChild.save();
+      //     const newUpdatedParentChildren = [...updatedParent.children, firstChild._id];
+      //     updatedParent.children = newUpdatedParentChildren;
+      //     await updatedParent.save();
+      //   }
+      //   if (treeOfUser.children.length === 2 && updatedParent.children.length === 0) {
+      //     const firstChild = await Tree.findById(treeOfUser.children[0]);
+      //     firstChild.parentId = updatedParent._id;
+      //     firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
+      //     await firstChild.save();
+      //     const secondChild = await Tree.findById(treeOfUser.children[1]);
+      //     secondChild.parentId = updatedParent._id;
+      //     secondChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : secondChild.refId;
+      //     await secondChild.save();
+      //     const newUpdatedParentChildren = [firstChild._id, secondChild._id];
+      //     updatedParent.children = newUpdatedParentChildren;
+      //     await updatedParent.save();
+      //   }
+      //   if (treeOfUser.children.length === 2 && updatedParent.children.length === 1) {
+      //     console.log({ TH333333: u.userId });
+      //     const firstChild = await Tree.findById(treeOfUser.children[0]);
+      //     const secondChild = await Tree.findById(treeOfUser.children[1]);
+      //     const userListString = `${firstChild.userName}, ${secondChild.userName}`;
+      //     await sendMailChangeSystemForUser(userListString);
+      //   }
+      //   u.status = "DELETED";
+      //   u.deletedTime = new Date();
+      //   u.oldParents = [parent.userId, ...u.oldParents];
+      //   await u.save();
+      //   await Tree.deleteOne({ userId: u._id });
+      // } else {
+      //   u.status = "DELETED";
+      //   u.deletedTime = new Date();
+      //   u.oldParents = [parent.userId, ...u.oldParents];
+      //   await u.save();
+      //   await Tree.deleteOne({ userId: u._id });
+      // }
     }
   }
 });

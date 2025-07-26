@@ -290,6 +290,8 @@ const authUser = asyncHandler(async (req, res) => {
         changeCreatedAt: user.changeCreatedAt,
         lockKyc: user.lockKyc,
         city: user.city,
+        paymentMethod: user.paymentMethod,
+        paymentProcessed: user.paymentProcessed,
       },
       accessToken,
       refreshToken,
