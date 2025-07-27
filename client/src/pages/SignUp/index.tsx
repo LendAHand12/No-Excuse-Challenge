@@ -68,8 +68,8 @@ const SignUpPage = () => {
         receiveId,
         phone: phone.trim(),
         idCode: idCode.trim(),
-        accountName: accountName.trim(),
-        accountNumber: accountNumber.trim(),
+        accountName: accountName ? accountName.trim() : '',
+        accountNumber: accountNumber ? accountNumber.trim() : '',
       })
         .then((response) => {
           setLoading(false);
