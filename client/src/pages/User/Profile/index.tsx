@@ -792,9 +792,7 @@ const Profile = () => {
             {tier === 2 && (
               <div className="bg-[#FAFBFC] p-4 rounded-2xl">
                 <div className="py-2 px-4">
-                  <p className="uppercase mt-2 font-bold">
-                    {t('Sales are working')}
-                  </p>
+                  <p className="uppercase mt-2 font-bold">{t('ACTIVE ID')}</p>
                   <div className="lg:py-2">
                     <ul className="flex flex-col list-disc">
                       <li className="ml-4">
@@ -808,7 +806,7 @@ const Profile = () => {
                 </div>
                 <div className="py-2 px-4">
                   <p className="uppercase mt-2 font-bold">
-                    {t('Sales must be compensated')}
+                    {t('NUMBERS OF ID REQUIRE')}
                   </p>
                   <div className="lg:py-2">
                     <ul className="flex flex-col list-disc">

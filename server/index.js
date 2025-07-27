@@ -93,6 +93,12 @@ app.use("/api/config", configRoutes);
 app.use("/api/user-history", userHistoryRoutes);
 app.use("/api/move-system", moveSystemRoutes);
 
+app.get("/api/test-tele", async (req, res) => {
+  await sendTelegramMessage({ userName: "kiet" });
+
+  return res.json({ message: "Test thành công" });
+});
+
 app.use(notFound);
 
 // configure a custome error handler middleware

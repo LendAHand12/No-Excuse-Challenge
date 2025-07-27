@@ -753,9 +753,7 @@ const UserProfile = () => {
               </div>
               {data.tier === 2 && (
                 <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
-                  <p className="uppercase mt-2 font-bold">
-                    {t('Sales are working')}
-                  </p>
+                  <p className="uppercase mt-2 font-bold">{t('ACTIVE ID')}</p>
                   <div className="lg:py-2">
                     <ul className="flex flex-col list-disc">
                       <li className="ml-4">
@@ -768,7 +766,7 @@ const UserProfile = () => {
                   </div>
                   <div className="py-2">
                     <p className="uppercase mt-2 font-bold">
-                      {t('Sales must be compensated')}
+                      {t('NUMBERS OF ID REQUIRE')}
                     </p>
                     <div className="lg:py-2">
                       <ul className="flex flex-col list-disc">
