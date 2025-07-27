@@ -97,14 +97,15 @@ const claimUsdt = asyncHandler(async (req, res) => {
         }
         if (user.availableUsdt > 0) {
           if (user.availableUsdt < 200 && user.paymentMethod === "") {
-            // const receipt = await sendUsdt({
-            //   amount: user.availableUsdt - 1,
-            //   receiverAddress: user.walletAddress,
-            // });
+            const receipt = await sendUsdt({
+              amount: user.availableUsdt - 1,
+              receiverAddress: user.walletAddress,
+            });
+
             const claimed = await Claim.create({
               userId: user.id,
               amount: user.availableUsdt,
-              hash: "receipt.hash",
+              hash: receipt.hash,
               coin: "USDT",
             });
             user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
