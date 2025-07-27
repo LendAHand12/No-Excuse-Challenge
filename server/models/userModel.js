@@ -224,6 +224,12 @@ const userSchema = mongoose.Schema(
     paymentUUID: {
       type: Array,
     },
+    accountName: {
+      type: String,
+    },
+    accountNumber: {
+      type: String,
+    },
   },
   {
     timestamps: true,

@@ -261,6 +261,8 @@ const getUserById = asyncHandler(async (req, res) => {
       city: user.city,
       paymentMethod: user.paymentMethod,
       paymentProcessed: user.paymentProcessed,
+      accountName: user.accountName,
+      accountNumber: user.accountNumber,
     });
   } else {
     res.status(404);
@@ -426,6 +428,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
       city: user.city,
       paymentMethod: user.paymentMethod,
       paymentProcessed: user.paymentProcessed,
+      accountName: user.accountName,
+      accountNumber: user.accountNumber,
     });
   } else {
     res.status(404);
@@ -615,6 +619,8 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     removeErrLahCode,
     changeCreatedAt,
     lockKyc,
+    accountName,
+    accountNumber,
   } = req.body;
 
   if (userId) {
@@ -645,6 +651,17 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     });
     if (userExistsPhone) {
       let message = "Dupplicate phone";
+      res.status(400);
+      throw new Error(message);
+    }
+  }
+
+  if (accountNumber) {
+    const userExistsPhone = await User.findOne({
+      $and: [{ accountNumber: { $ne: "" } }, { accountNumber }],
+    });
+    if (userExistsPhone) {
+      let message = "Dupplicate account number";
       res.status(400);
       throw new Error(message);
     }
@@ -695,6 +712,8 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     user.walletAddress = walletAddress || user.walletAddress;
     user.hewePerDay = hewePerDay || user.hewePerDay;
     user.totalHewe = rewardHewe || user.totalHewe;
+    user.accountName = accountName || user.accountName;
+    user.accountNumber = accountNumber || user.accountNumber;
     if (changeCreatedAt) {
       user.changeCreatedAt = new Date(changeCreatedAt).toISOString() || user.changeCreatedAt;
     }

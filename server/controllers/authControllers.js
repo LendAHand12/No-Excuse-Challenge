@@ -24,6 +24,8 @@ const checkLinkRef = asyncHandler(async (req, res) => {
     const treeUserRef = await Tree.findById(ref);
 
     if (treeUserReceive && treeUserRef) {
+      const userReceive = await User.findById(treeUserReceive.userId);
+
       if (!treeUserReceive.parentId || treeUserReceive.userName === "NoExcuse 9") {
         message = "validUrl";
         res.status(200).json({
@@ -33,6 +35,7 @@ const checkLinkRef = asyncHandler(async (req, res) => {
         message = "validUrl";
         res.status(200).json({
           message,
+          city: userReceive.city,
         });
       } else {
         res.status(400).json({
@@ -52,7 +55,18 @@ const checkLinkRef = asyncHandler(async (req, res) => {
 });
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { userId, email, password, ref, receiveId, phone, idCode, walletAddress } = req.body;
+  const {
+    userId,
+    email,
+    password,
+    ref,
+    receiveId,
+    phone,
+    idCode,
+    walletAddress,
+    accountName,
+    accountNumber,
+  } = req.body;
 
   const userExistsUserId = await User.findOne({
     userId: userId,
@@ -72,6 +86,10 @@ const registerUser = asyncHandler(async (req, res) => {
   });
   const userExistsWalletAddress = await User.findOne({
     walletAddress,
+    status: { $ne: "DELETED" },
+  });
+  const userExistsAccountNumber = await User.findOne({
+    accountNumber,
     status: { $ne: "DELETED" },
   });
 
@@ -95,6 +113,10 @@ const registerUser = asyncHandler(async (req, res) => {
     let message = "duplicateWalletAddress";
     res.status(400);
     throw new Error(message);
+  } else if (accountNumber && userExistsAccountNumber) {
+    let message = "Duplicate account number";
+    res.status(400);
+    throw new Error(message);
   } else {
     const treeReceiveUser = await Tree.findById(receiveId);
 
@@ -113,6 +135,8 @@ const registerUser = asyncHandler(async (req, res) => {
         kycFee: true,
         changeCreatedAt: new Date(),
         city: parent.city,
+        accountName,
+        accountNumber,
       });
 
       const tree = await Tree.create({
@@ -292,6 +316,8 @@ const authUser = asyncHandler(async (req, res) => {
         city: user.city,
         paymentMethod: user.paymentMethod,
         paymentProcessed: user.paymentProcessed,
+        accountName: user.accountName,
+        accountNumber: user.accountNumber,
       },
       accessToken,
       refreshToken,

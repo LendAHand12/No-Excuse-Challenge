@@ -39,6 +39,7 @@ const SignUpPage = () => {
   const [errorPhone, setErrPhone] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [refCity, setRefCity] = useState('');
 
   const onSubmit = useCallback(
     async (data) => {
@@ -47,8 +48,17 @@ const SignUpPage = () => {
         return;
       }
       setLoading(true);
-      const { userId, email, password, ref, receiveId, idCode, walletAddress } =
-        data;
+      const {
+        userId,
+        email,
+        password,
+        ref,
+        receiveId,
+        idCode,
+        walletAddress,
+        accountName,
+        accountNumber,
+      } = data;
       await Auth.register({
         userId: userId.trim(),
         email: email.trim(),
@@ -58,6 +68,8 @@ const SignUpPage = () => {
         receiveId,
         phone: phone.trim(),
         idCode: idCode.trim(),
+        accountName: accountName.trim(),
+        accountNumber: accountNumber.trim(),
       })
         .then((response) => {
           setLoading(false);
@@ -79,7 +91,11 @@ const SignUpPage = () => {
   useEffect(() => {
     (async () => {
       await Auth.checkLinkRef({ ref, receiveId })
-        .then(() => setCheckingRefUrl(false))
+        .then((res) => {
+          const { city } = res.data;
+          setCheckingRefUrl(false);
+          setRefCity(city);
+        })
         .catch((error) => {
           let message =
             error.response && error.response.data.error
@@ -178,9 +194,41 @@ const SignUpPage = () => {
                             })}
                             disabled={loading}
                           />
-                          <p className="text-red-500 mt-1 text-sm">
-                            {errors.walletAddress?.message}
-                          </p>
+                          {refCity === 'US' && (
+                            <>
+                              <div>
+                                <input
+                                  className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
+                                  type="text"
+                                  placeholder={`${t('Payout Display Name')}`}
+                                  {...register('accountName', {
+                                    required: t('Account name is required'),
+                                  })}
+                                  disabled={loading}
+                                />
+                                <p className="text-red-500 mt-1 text-sm">
+                                  {errors.accountName?.message}
+                                </p>
+                              </div>
+                              <div>
+                                <input
+                                  className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
+                                  type="text"
+                                  placeholder={`${t(
+                                    'Payout Email or Phone Number',
+                                  )}`}
+                                  {...register('accountNumber', {
+                                    required: t('ID code is required'),
+                                  })}
+                                  disabled={loading}
+                                />
+                                <p className="text-red-500 mt-1 text-sm">
+                                  {errors.accountNumber?.message}
+                                </p>
+                              </div>
+                            </>
+                          )}
+
                           {/* Password */}
                           <div className="relative mt-5">
                             <input

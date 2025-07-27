@@ -38,6 +38,7 @@ const AdminWithdrawPages = () => {
   const [loadingPayment, setLoadingPayment] = useState(false);
   const [currentRequestStatus, setCurrentRequestStatus] = useState(null);
   const [keyword, setKeyword] = useState(key);
+  const [showPaymentInfo, setShowPaymentInfo] = useState(false);
 
   const onSearch = (e) => {
     setKeyword(e.target.value);
@@ -108,7 +109,11 @@ const AdminWithdrawPages = () => {
   );
 
   const handleApprove = async (request) => {
-    setShowModal(true);
+    if (!request.method || request.method === '') {
+      setShowModal(true);
+    } else {
+      setShowPaymentInfo(true);
+    }
     setCurrentRequestStatus('approve');
     setCurrentApproveRequest(request);
   };
@@ -144,6 +149,7 @@ const AdminWithdrawPages = () => {
         .then((response) => {
           toast.success(t(response.data.message));
           setShowModal(false);
+          setShowPaymentInfo(false);
           setRefresh(!refresh);
         })
         .catch((error) => {
@@ -269,6 +275,87 @@ const AdminWithdrawPages = () => {
                   Yes, I'm sure
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={showPaymentInfo}
+        onRequestClose={() => setShowPaymentInfo(false)}
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+            padding: 0,
+            border: 'none',
+            background: 'transparent',
+          },
+          overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          },
+        }}
+      >
+        <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
+          {/* Close button */}
+          <button
+            onClick={() => setShowPaymentInfo(false)}
+            className="absolute top-3 right-3 text-gray-400 hover:text-gray-700"
+          >
+            ✕
+          </button>
+
+          <h2 className="text-xl font-semibold text-gray-800 text-center mb-4">
+            Payout Information
+          </h2>
+
+          {/* Form */}
+          <div className="space-y-5">
+            {/* Số tiền */}
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">
+                Amount to Transfer : <br></br> {currentApproveRequest?.amount}{' '}
+                USD
+              </label>
+            </div>
+
+            {/* Phương thức */}
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">
+                Payment Method : <br></br> {currentApproveRequest?.method}
+              </label>
+            </div>
+
+            {/* Tên tài khoản */}
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">
+                Payout Display Name : <br></br>
+                {currentApproveRequest?.accountName}
+              </label>
+            </div>
+
+            {/* Email hoặc số điện thoại */}
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">
+                Payout Email or Phone Number : <br></br>
+                {currentApproveRequest?.accountNumber}
+              </label>
+              <p className="text-xs text-gray-500 mt-1">
+                This is where your payout will be sent.
+              </p>
+            </div>
+
+            {/* Nút xác nhận */}
+            <div className="pt-2">
+              <button
+                onClick={() => donePayment('')}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+              >
+                Confirm and Submit
+              </button>
             </div>
           </div>
         </div>

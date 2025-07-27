@@ -17,6 +17,12 @@ const withdrawSchema = mongoose.Schema(
     method: {
       type: String,
     },
+    accountName: {
+      type: String,
+    },
+    accountNumber: {
+      type: String,
+    },
     status: {
       type: String,
       required: true,

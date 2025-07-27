@@ -1196,6 +1196,28 @@ const UserProfile = () => {
                       <div className="px-4 py-2 font-semibold">Total Hold</div>
                       <div className="px-4 py-2">{data.totalHold} USDT</div>
                     </div>
+                    {data.city === 'US' && (
+                      <>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            Payout Gateway
+                          </div>
+                          <div className="px-4 py-2">{data.paymentMethod}</div>
+                        </div>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            Payout Display Name
+                          </div>
+                          <div className="px-4 py-2">{data.accountName}</div>
+                        </div>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            Payout Email or Phone Number
+                          </div>
+                          <div className="px-4 py-2">{data.accountNumber}</div>
+                        </div>
+                      </>
+                    )}
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">
                         Overdue referral

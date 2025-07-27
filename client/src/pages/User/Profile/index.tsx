@@ -55,6 +55,9 @@ const Profile = () => {
     countdown,
     isMoveSystem,
     lockKyc,
+    accountName,
+    accountNumber,
+    city,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -84,6 +87,8 @@ const Profile = () => {
       walletAddress,
       imgBackData: '',
       imgFrontData: '',
+      accountName,
+      accountNumber,
     },
   });
 
@@ -993,6 +998,18 @@ const Profile = () => {
               <p>Fine :</p>
               <p>{fine} USDT</p>
             </div>
+            {city === 'US' && (
+              <>
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
+                  <p>Payout Display Name :</p>
+                  <p>{accountName}</p>
+                </div>
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                  <p>Payout Email or Phone Number :</p>
+                  <p>{accountNumber}</p>
+                </div>
+              </>
+            )}
           </div>
           {isEdit && (
             <button

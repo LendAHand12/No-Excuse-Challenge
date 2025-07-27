@@ -54,6 +54,8 @@ const getAllWithdraws = asyncHandler(async (req, res) => {
         amount: 1,
         hash: 1,
         method: 1,
+        accountName: 1,
+        accountNumber: 1,
         createdAt: 1,
         userInfo: {
           _id: 1,
@@ -119,7 +121,7 @@ const getAllWithdrawsForExport = asyncHandler(async (req, res) => {
       status: withdraw.status,
       hash: withdraw.hash,
       createdAt: withdraw.createdAt,
-      method: withdraw.method
+      method: withdraw.method,
     });
   }
 

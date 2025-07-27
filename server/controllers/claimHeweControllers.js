@@ -96,7 +96,6 @@ const claimUsdt = asyncHandler(async (req, res) => {
           throw new Error("Request denied");
         }
         if (user.availableUsdt > 0) {
-          console.log({method: user.paymentMethod});
           if (user.availableUsdt < 200 && user.paymentMethod === "") {
             // const receipt = await sendUsdt({
             //   amount: user.availableUsdt - 1,
@@ -124,7 +123,9 @@ const claimUsdt = asyncHandler(async (req, res) => {
             const withdraw = await Withdraw.create({
               userId: user.id,
               amount: user.availableUsdt,
-              method: user.paymentMethod
+              method: user.paymentMethod,
+              accountName: user.accountName,
+              accountNumber: user.accountNumber,
             });
             user.availableUsdt = 0;
             await user.save();
