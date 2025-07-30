@@ -90,7 +90,7 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
 });
 
 export const countChildToData = asyncHandler(async () => {
-  const listTrees = await Tree.find({}).select("tier countChild userId");
+  const listTrees = await Tree.find({}).select("tier countChild userId userName");
 
   for (let t of listTrees) {
     try {

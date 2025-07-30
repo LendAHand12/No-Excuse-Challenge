@@ -270,7 +270,9 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
               listRefOfReceiver.length === 0 ||
               (p.children.length === 2 && listRefOfReceiver.length < 2)
             ) {
-              haveParentNotPayEnough = true;
+              if (p.userId !== refUser.userId) {
+                haveParentNotPayEnough = true;
+              }
             }
           }
 
