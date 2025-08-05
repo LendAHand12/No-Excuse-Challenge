@@ -596,7 +596,7 @@ const AdminUserPages = () => {
                         {ele.userId}
                       </div>
                       <div className="font-normal text-gray-500">
-                        {ele.email}
+                        {ele._id}
                       </div>
                     </div>
                   </th>
