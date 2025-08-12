@@ -15,6 +15,7 @@ import Modal from 'react-modal';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import PhoneInput from 'react-phone-number-input';
 import './index.css';
+import ClaimModal from '../../../components/ClaimModal';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -130,9 +131,9 @@ const Profile = () => {
   //     });
   // };
 
-  const claimUsdt = async () => {
+  const claimUsdt = async (amount) => {
     setLoadingClaimUsdt(true);
-    await KYC.claim({ coin: 'usdt' })
+    await KYC.claim({ coin: 'usdt', amount })
       .then((response) => {
         if (response.data.url) {
           window.location.href = response.data.url;
@@ -259,83 +260,13 @@ const Profile = () => {
   return (
     <DefaultLayout>
       <ToastContainer />
-      <Modal
-        isOpen={showModal}
-        onRequestClose={closeModal}
-        style={{
-          content: {
-            top: '50%',
-            left: '50%',
-            right: 'auto',
-            bottom: 'auto',
-            marginRight: '-50%',
-            transform: 'translate(-50%, -50%)',
-          },
-        }}
-      >
-        <div className="overflow-y-auto overflow-x-hidden justify-center items-center w-full md:inset-0 h-modal md:h-full">
-          <div className="relative w-full max-w-md h-full md:h-auto">
-            <div className="relative text-center bg-white rounded-lg sm:p-5">
-              <button
-                onClick={closeModal}
-                className="text-gray-400 absolute top-2.5 right-2.5 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
-              >
-                <svg
-                  aria-hidden="true"
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-                <span className="sr-only">Close modal</span>
-              </button>
-              <svg
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-gray-400 w-11 h-11 mb-3.5 mx-auto"
-              >
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M1.68542 6.65868C0.758716 6.96758 0.779177 8.28543 1.71502 8.56541L9.20844 10.8072L11.6551 18.5165C11.948 19.4394 13.2507 19.4488 13.5569 18.5302L18.8602 2.62029C19.1208 1.83853 18.3771 1.09479 17.5953 1.35538L1.68542 6.65868ZM5.31842 7.55586L16.3304 3.8852L12.6316 14.9817L10.9548 9.69826C10.8547 9.38295 10.6052 9.13754 10.2883 9.04272L5.31842 7.55586Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M17.7674 1.43951L18.8105 2.51742L9.98262 11.0605L8.93948 9.98265L17.7674 1.43951Z"
-                  fill="currentColor"
-                />
-              </svg>
-              <p className="mb-4 text-gray-500 ">
-                Are you sure you want to claim {availableUsdt} USDT ?
-              </p>
-              <div className="flex justify-center items-center space-x-4">
-                <button
-                  onClick={closeModal}
-                  disabled={loadingClaimUsdt}
-                  className="py-2 px-3 text-sm font-medium text-gray-500 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
-                >
-                  No, cancel
-                </button>
-                <button
-                  onClick={claimUsdt}
-                  disabled={loadingClaimUsdt}
-                  className="flex items-center py-2 px-3 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900"
-                >
-                  {loadingClaimUsdt && <Loading />}
-                  Yes, I'm sure
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Modal>
+      <ClaimModal
+        showModal={showModal}
+        closeModal={closeModal}
+        availableUsdt={availableUsdt}
+        claimUsdt={claimUsdt}
+        loadingClaimUsdt={loadingClaimUsdt}
+      />
 
       <Modal
         isOpen={showFaceId}

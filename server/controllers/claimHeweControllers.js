@@ -72,7 +72,7 @@ const claimHewe = asyncHandler(async (req, res) => {
 var processingUserIds = [];
 
 const claimUsdt = asyncHandler(async (req, res) => {
-  const { token } = req.body;
+  const { token, amount } = req.body;
 
   const decode = decodeCallbackToken(token);
   if (decode) {
@@ -95,21 +95,21 @@ const claimUsdt = asyncHandler(async (req, res) => {
         if (user.errLahCode === "OVER45") {
           throw new Error("Request denied");
         }
-        if (user.availableUsdt > 0) {
-          if (user.availableUsdt < 200 && user.paymentMethod === "") {
+        if (user.availableUsdt > 0 && user.availableUsdt >= amount) {
+          if (amount < 200 && user.paymentMethod === "") {
             const receipt = await sendUsdt({
-              amount: user.availableUsdt - 1,
+              amount: amount - 1,
               receiverAddress: user.walletAddress,
             });
 
             const claimed = await Claim.create({
               userId: user.id,
-              amount: user.availableUsdt,
+              amount: amount,
               hash: receipt.hash,
               coin: "USDT",
             });
-            user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
-            user.availableUsdt = 0;
+            user.claimedUsdt = user.claimedUsdt + amount;
+            user.availableUsdt = user.availableUsdt - amount;
 
             await user.save();
 
@@ -123,12 +123,12 @@ const claimUsdt = asyncHandler(async (req, res) => {
           } else {
             const withdraw = await Withdraw.create({
               userId: user.id,
-              amount: user.availableUsdt,
+              amount: amount,
               method: user.paymentMethod,
               accountName: user.accountName,
               accountNumber: user.accountNumber,
             });
-            user.availableUsdt = 0;
+            user.availableUsdt = user.availableUsdt - amount;
             await user.save();
             // await sendTelegramMessage({ userName: user.userId });
             const index = processingUserIds.indexOf(user._id);

@@ -13,7 +13,7 @@ const ClaimKYCPage = () => {
   const navigate = useNavigate();
   const parsed = queryString.parse(location.search);
   const [loadingClaim, setLoadingClaim] = useState(true);
-  let { token, user_id, coin, status } = parsed;
+  let { token, user_id, coin, status, amount } = parsed;
   if (status !== 'success' || !token || !user_id || !coin) {
     toast.error(t('invalidUrl'));
   }
@@ -38,7 +38,7 @@ const ClaimKYCPage = () => {
               toast.error(t(message));
             });
         } else if (coin === 'usdt') {
-          await Claim.usdt({ user_id, token })
+          await Claim.usdt({ user_id, token, amount })
             .then((response) => {
               toast.success(t(response.data.message));
               setLoadingClaim(false);

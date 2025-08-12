@@ -5,8 +5,8 @@ const Claim = {
   hewe: () => {
     return API.post(`${URL_API_CLAIM}/hewe`);
   },
-  usdt: ({ user_id, token }) => {
-    return API.post(`${URL_API_CLAIM}/usdt`, { user_id, token });
+  usdt: ({ user_id, token, amount }) => {
+    return API.post(`${URL_API_CLAIM}/usdt`, { user_id, token, amount });
   },
   list: (pageNumber, coin, keyword) => {
     return API.get(
