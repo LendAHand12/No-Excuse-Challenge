@@ -741,26 +741,30 @@ const Profile = () => {
                   </p>
                   <div className="lg:py-2">
                     <ul className="flex flex-col list-disc">
-                      <li className="ml-4">
-                        Branch 1 :{' '}
-                        {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                          notEnoughtChild?.countChild1 >
-                        0
-                          ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                            notEnoughtChild?.countChild1
-                          : 0 || 0}{' '}
-                        IDs
-                      </li>
-                      <li className="ml-4">
-                        Branch 2 :{' '}
-                        {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                          notEnoughtChild?.countChild2 >
-                        0
-                          ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                            notEnoughtChild?.countChild2
-                          : 0 || 0}{' '}
-                        IDs
-                      </li>
+                      {(() => {
+                        const c1 = notEnoughtChild?.countChild1 ?? 0;
+                        const c2 = notEnoughtChild?.countChild2 ?? 0;
+                        let b1 = 0;
+                        let b2 = 0;
+
+                        if (c1 > 77 || c2 > 77) {
+                          b1 = 0;
+                          b2 = 0;
+                        } else if (c1 < 19 || c2 < 19) {
+                          b1 = Math.max(19 - c1, 0);
+                          b2 = Math.max(77 - c2, 0);
+                        } else {
+                          b1 = Math.max(77 - c1, 0);
+                          b2 = Math.max(19 - c2, 0);
+                        }
+
+                        return (
+                          <>
+                            <li className="ml-4">Branch 1 : {b1} IDs</li>
+                            <li className="ml-4">Branch 2 : {b2} IDs</li>
+                          </>
+                        );
+                      })()}
                     </ul>
                   </div>
                 </div>

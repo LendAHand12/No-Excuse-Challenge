@@ -24,6 +24,9 @@ const Claim = {
   reset: () => {
     return API.get(`${URL_API_CLAIM}/reset`);
   },
+  price: (body) => {
+    return API.post(`${URL_API_CLAIM}/price`, body);
+  },
 };
 
 export default Claim;

@@ -317,6 +317,7 @@ export const checkUserTryToTier2 = asyncHandler(async () => {
     try {
       const treeOfUser = await Tree.findOne({ userId: u._id, tier: 1, isSubId: false });
       const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(treeOfUser);
+      // console.log({ user: u.userId, countChild1, countChild2 });
       if (countChild1 >= 62 && countChild2 >= 62) {
         u.tryToTier2 = "DONE";
         u.timeToTry = null;
@@ -337,7 +338,7 @@ export const checkUserTryToTier2 = asyncHandler(async () => {
         }
       }
 
-      await u.save();
+      // await u.save();
     } catch (error) {
       console.log({ error });
     }

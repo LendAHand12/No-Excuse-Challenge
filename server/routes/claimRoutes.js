@@ -6,6 +6,7 @@ import {
   getAllClaimsForExport,
   getAllClaimsOfUser,
   resetProcessing,
+  getPrice,
 } from "../controllers/claimHeweControllers.js";
 import { protectRoute, isAdmin } from "../middleware/authMiddleware.js";
 
@@ -17,5 +18,6 @@ router.route("/list").get(protectRoute, isAdmin, getAllClaims);
 router.route("/export").post(protectRoute, isAdmin, getAllClaimsForExport);
 router.route("/user").get(protectRoute, getAllClaimsOfUser);
 router.route("/reset").get(protectRoute, isAdmin, resetProcessing);
+router.route("/price").post(protectRoute, getPrice);
 
 export default router;

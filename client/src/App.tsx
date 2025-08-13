@@ -75,6 +75,7 @@ import UserUpdateInfoKYCPage from './pages/User/UpdateInfoKYC';
 import UsersTier2 from './pages/User/UsersTier2';
 import MoveSystem from './pages/Admin/MoveSystem';
 import MoveSystemList from './pages/Admin/MoveSystemList';
+import SwapPage from './pages/User/SwapPage';
 
 function App() {
   const { pathname } = useLocation();
@@ -760,6 +761,15 @@ function App() {
           <>
             <PageTitle title="Move System KYC | NoExcuseChallenge" />
             <MoveSystemPage />
+          </>
+        }
+      />
+      <Route
+        path="/user/swap"
+        element={
+          <>
+            <PageTitle title="Swap Page | NoExcuseChallenge" />
+            <SwapPage />
           </>
         }
       />

@@ -8,6 +8,8 @@ import Withdraw from "../models/withdrawModel.js";
 import { sendTelegramMessage } from "../utils/sendTelegram.js";
 import { decodeCallbackToken, removeAccents } from "../utils/methods.js";
 import mongoose from "mongoose";
+import { getPriceHewe } from "../utils/getPriceHewe.js";
+import { getPriceAmc } from "../utils/getPriceAmc.js";
 
 var processingHeweUserIds = [];
 
@@ -354,6 +356,29 @@ const resetProcessing = asyncHandler(async (req, res) => {
   });
 });
 
+const getPrice = asyncHandler(async (req, res) => {
+  const { coin } = req.body;
+  const { user } = req;
+
+  if (coin === "HEWE") {
+    let responseHewe = await getPriceHewe();
+    const hewePrice = responseHewe.data.ticker.latest;
+
+    res.json({
+      price: hewePrice,
+      availableUsdt: user.availableUsdt,
+    });
+  } else if (coin === "AMC") {
+    let responseAmc = await getPriceAmc();
+    const amcPrice = responseAmc.data.result[0].p;
+
+    res.json({
+      price: amcPrice,
+      availableUsdt: user.availableUsdt,
+    });
+  }
+});
+
 export {
   claimHewe,
   claimUsdt,
@@ -361,4 +386,5 @@ export {
   getAllClaimsForExport,
   getAllClaimsOfUser,
   resetProcessing,
+  getPrice,
 };
