@@ -263,8 +263,13 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
               haveParentNotPayEnough = true;
             }
           } else {
+            let refId = p._id;
+            if (p.isSubId) {
+              let mainTree = await Tree.findOne({ userId: p.userId, isSubId: false });
+              refId = mainTree._id;
+            }
             const listRefOfReceiver = await Tree.find({
-              refId: p._id,
+              refId,
             });
             if (
               listRefOfReceiver.length === 0 ||
