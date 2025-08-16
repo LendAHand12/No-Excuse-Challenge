@@ -318,6 +318,8 @@ const authUser = asyncHandler(async (req, res) => {
         paymentProcessed: user.paymentProcessed,
         accountName: user.accountName,
         accountNumber: user.accountNumber,
+        availableAmc: user.availableAmc,
+        claimedAmc: user.claimedAmc,
       },
       accessToken,
       refreshToken,

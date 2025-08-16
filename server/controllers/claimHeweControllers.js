@@ -97,8 +97,8 @@ const claimUsdt = asyncHandler(async (req, res) => {
         if (user.errLahCode === "OVER45") {
           throw new Error("Request denied");
         }
-        if (user.availableUsdt > 0 && user.availableUsdt >= amount) {
-          if (amount < 200 && user.paymentMethod === "") {
+        if (user.availableUsdt > 0 && user.availableUsdt >= parseInt(amount)) {
+          if (parseInt(amount) < 200 && user.paymentMethod === "") {
             const receipt = await sendUsdt({
               amount: amount - 1,
               receiverAddress: user.walletAddress,
@@ -106,12 +106,12 @@ const claimUsdt = asyncHandler(async (req, res) => {
 
             const claimed = await Claim.create({
               userId: user.id,
-              amount: amount,
+              amount: parseInt(amount),
               hash: receipt.hash,
               coin: "USDT",
             });
-            user.claimedUsdt = user.claimedUsdt + amount;
-            user.availableUsdt = user.availableUsdt - amount;
+            user.claimedUsdt = user.claimedUsdt + parseInt(amount);
+            user.availableUsdt = user.availableUsdt - parseInt(amount);
 
             await user.save();
 
@@ -125,12 +125,12 @@ const claimUsdt = asyncHandler(async (req, res) => {
           } else {
             const withdraw = await Withdraw.create({
               userId: user.id,
-              amount: amount,
+              amount: parseInt(amount),
               method: user.paymentMethod,
               accountName: user.accountName,
               accountNumber: user.accountNumber,
             });
-            user.availableUsdt = user.availableUsdt - amount;
+            user.availableUsdt = user.availableUsdt - parseInt(amount);
             await user.save();
             // await sendTelegramMessage({ userName: user.userId });
             const index = processingUserIds.indexOf(user._id);

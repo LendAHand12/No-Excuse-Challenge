@@ -159,11 +159,19 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
+    availableAmc: {
+      type: Number,
+      default: 0,
+    },
     claimedUsdt: {
       type: Number,
       default: 0,
     },
     claimedHewe: {
+      type: Number,
+      default: 0,
+    },
+    claimedAmc: {
       type: Number,
       default: 0,
     },

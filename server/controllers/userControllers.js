@@ -263,6 +263,8 @@ const getUserById = asyncHandler(async (req, res) => {
       paymentProcessed: user.paymentProcessed,
       accountName: user.accountName,
       accountNumber: user.accountNumber,
+      availableAmc: user.availableAmc,
+      claimedAmc: user.claimedAmc,
     });
   } else {
     res.status(404);
@@ -430,6 +432,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
       paymentProcessed: user.paymentProcessed,
       accountName: user.accountName,
       accountNumber: user.accountNumber,
+      availableAmc: user.availableAmc,
+      claimedAmc: user.claimedAmc,
     });
   } else {
     res.status(404);
@@ -586,6 +590,8 @@ const updateUser = asyncHandler(async (req, res) => {
           facetecTid: updatedUser.facetecTid,
           kycFee: updatedUser.kycFee,
           errLahCode: updatedUser.errLahCode,
+          availableAmc: updatedUser.availableAmc,
+          claimedAmc: updatedUser.claimedAmc,
         },
       });
     }
