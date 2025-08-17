@@ -7,9 +7,9 @@ const User = {
       customContentType: 'multipart/form-data',
     });
   },
-  getAllUsers: (pageNumber, keyword, statusSearch) => {
+  getAllUsers: (pageNumber, keyword, statusSearch, coin) => {
     return API.get(
-      `${URL_API_USER}/?pageNumber=${pageNumber}&keyword=${keyword}&status=${statusSearch}`,
+      `${URL_API_USER}/?pageNumber=${pageNumber}&keyword=${keyword}&status=${statusSearch}&coin=${coin}`,
     );
   },
   getAllUsersTier2: (pageNumber) => {

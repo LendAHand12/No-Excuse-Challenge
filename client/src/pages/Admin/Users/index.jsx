@@ -23,6 +23,7 @@ const AdminUserPages = () => {
   const key = searchParams.get('keyword') || '';
   const page = searchParams.get('page') || 1;
   const status = searchParams.get('status') || 'all';
+  const coin = searchParams.get('coin') || 'all';
   const [totalPage, setTotalPage] = useState(0);
   const [keyword, setKeyword] = useState(key);
   const [loading, setLoading] = useState(true);
@@ -32,6 +33,7 @@ const AdminUserPages = () => {
     pageNumber: page,
     keyword: key,
     status,
+    coin,
   });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentDeleteId, setCurrentDeleteId] = useState('');
@@ -65,8 +67,8 @@ const AdminUserPages = () => {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const { pageNumber, keyword, status } = objectFilter;
-      await User.getAllUsers(pageNumber, keyword, status)
+      const { pageNumber, keyword, status, coin } = objectFilter;
+      await User.getAllUsers(pageNumber, keyword, status, coin)
         .then((response) => {
           const { users, pages } = response.data;
           setData(users);
@@ -90,6 +92,16 @@ const AdminUserPages = () => {
       setObjectFilter({
         ...objectFilter,
         status: e.target.value,
+        pageNumber: 1,
+      }),
+    [objectFilter],
+  );
+
+  const onChangeCoin = useCallback(
+    (e) =>
+      setObjectFilter({
+        ...objectFilter,
+        coin: e.target.value,
         pageNumber: 1,
       }),
     [objectFilter],
@@ -472,6 +484,22 @@ const AdminUserPages = () => {
                 ))}
               </select>
             </div>
+            <div>
+              <select
+                className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
+                onChange={onChangeCoin}
+                defaultValue={objectFilter.coin}
+                disabled={loading}
+              >
+                <option value="all">All</option>
+                <option value="usdt" key="usdt">
+                  USDT
+                </option>
+                <option value="hewe" key="hewe">
+                  HEWE
+                </option>
+              </select>
+            </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg
@@ -506,7 +534,7 @@ const AdminUserPages = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col items-center gap-2">
             {userInfo?.permissions
               ?.find((p) => p.page.path === '/admin/users')
               ?.actions.includes('export') && (
@@ -563,7 +591,11 @@ const AdminUserPages = () => {
                 Username
               </th>
               <th scope="col" className="px-6 py-3">
-                Age
+                {objectFilter.coin === 'usdt'
+                  ? 'usdt'
+                  : objectFilter.coin === 'hewe'
+                  ? 'hewe'
+                  : 'Age'}
               </th>
               <th scope="col" className="px-6 py-3">
                 Wallet Address
@@ -595,40 +627,44 @@ const AdminUserPages = () => {
                       <div className="text-base font-semibold">
                         {ele.userId}
                       </div>
-                      <div className="font-normal text-gray-500">
-                        {ele._id}
-                      </div>
+                      <div className="font-normal text-gray-500">{ele._id}</div>
                     </div>
                   </th>
                   <td className="px-6 py-4">
-                    {ele.ageEstimate && (
-                      <a
-                        className={`hover:underline ${
-                          ele.ageEstimate && ele.ageEstimate < 5
-                            ? 'text-red-500'
-                            : 'text-blue-500'
-                        }`}
-                        href={`http://3.107.26.68:3002/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${ele._id}`}
-                        target="_blank"
-                      >
-                        {ele.ageEstimate === 2
-                          ? '8+'
-                          : ele.ageEstimate === 3
-                          ? '13+'
-                          : ele.ageEstimate === 4
-                          ? '16+'
-                          : ele.ageEstimate === 5
-                          ? '18+'
-                          : ele.ageEstimate === 6
-                          ? '21+'
-                          : ele.ageEstimate === 7
-                          ? '25+'
-                          : ele.ageEstimate === 8
-                          ? '30+'
-                          : ''}
-                      </a>
-                    )}
-                    {!ele.ageEstimate && <p>N/A</p>}
+                    {objectFilter.coin !== 'usdt' &&
+                      objectFilter.coin !== 'hewe' &&
+                      ele.ageEstimate && (
+                        <a
+                          className={`hover:underline ${
+                            ele.ageEstimate && ele.ageEstimate < 5
+                              ? 'text-red-500'
+                              : 'text-blue-500'
+                          }`}
+                          href={`http://3.107.26.68:3002/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${ele._id}`}
+                          target="_blank"
+                        >
+                          {ele.ageEstimate === 2
+                            ? '8+'
+                            : ele.ageEstimate === 3
+                            ? '13+'
+                            : ele.ageEstimate === 4
+                            ? '16+'
+                            : ele.ageEstimate === 5
+                            ? '18+'
+                            : ele.ageEstimate === 6
+                            ? '21+'
+                            : ele.ageEstimate === 7
+                            ? '25+'
+                            : ele.ageEstimate === 8
+                            ? '30+'
+                            : ''}
+                        </a>
+                      )}
+                    {objectFilter.coin !== 'usdt' &&
+                      objectFilter.coin !== 'hewe' &&
+                      !ele.ageEstimate && <p>N/A</p>}
+                    {objectFilter.coin === 'usdt' && <p>{ele.availableUsdt}</p>}
+                    {objectFilter.coin === 'hewe' && <p>{ele.availableHewe}</p>}
                   </td>
                   <td className="px-6 py-4">
                     {shortenWalletAddress(ele.walletAddress, 12)}
