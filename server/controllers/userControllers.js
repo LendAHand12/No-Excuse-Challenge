@@ -33,6 +33,7 @@ import UserHistory from "../models/userHistoryModel.js";
 import MoveSystem from "../models/moveSystemModel.js";
 import { Types } from "mongoose";
 import moment from "moment";
+import { getPriceHewe } from "../utils/getPriceHewe.js";
 
 dotenv.config();
 
@@ -78,7 +79,6 @@ const getAllUsers = asyncHandler(async (req, res) => {
     pages: Math.ceil(count / pageSize),
   });
 });
-
 
 const getAllUsersWithKeyword = asyncHandler(async (req, res) => {
   const { keyword } = req.body;
@@ -350,6 +350,11 @@ const getUserInfo = asyncHandler(async (req, res) => {
       userId: user._id,
     });
 
+    let subUser = null;
+    if (user.tier === 2) {
+      subUser = await Tree.findOne({ userId: user._id, isSubId: true, tier: 1 });
+    }
+
     res.json({
       id: user._id,
       email: user.email,
@@ -426,6 +431,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       accountNumber: user.accountNumber,
       availableAmc: user.availableAmc,
       claimedAmc: user.claimedAmc,
+      subUser,
     });
   } else {
     res.status(404);
@@ -1021,6 +1027,11 @@ const getUserProfile = asyncHandler(async (req, res) => {
       "pagePermissions.page"
     );
 
+    let subUser = null;
+    if (user.tier === 2) {
+      subUser = await Tree.findOne({ userId: user._id, isSubId: true, tier: 1 });
+    }
+
     res.json({
       id: user._id,
       email: user.email,
@@ -1072,6 +1083,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
       errLahCode: user.errLahCode,
       lockKyc: user.lockKyc,
       city: user.city,
+      subUser,
     });
   } else {
     res.status(400);
@@ -1086,6 +1098,37 @@ const getListChildOfUser = asyncHandler(async (req, res) => {
     userId: req.user.id,
     tier: 1,
     isSubId: false,
+  }).lean();
+  const listRef = await Tree.find({ refId: parent._id });
+  if (parent.children.length === 2 && listRef.length === 1) {
+    const branchFirstChildId = await findParentTreePath(listRef[0]._id, parent._id);
+    const firstChildId =
+      parent.children[0] === branchFirstChildId.toString()
+        ? parent.children[1]
+        : parent.children[0];
+    result = await getAllDescendants(firstChildId, 1);
+    const firstChild = await Tree.findById(firstChildId);
+    if (firstChild.children.length < 2) {
+      result.unshift({
+        id: firstChild._id,
+        userId: firstChild.userId,
+        userName: firstChild.userName,
+      });
+    }
+  } else {
+    result = await getAllDescendants(parent._id, 1);
+  }
+
+  res.json({ userTreeId: parent._id, result });
+});
+
+const getListChildOfSubUser = asyncHandler(async (req, res) => {
+  let result = [];
+
+  const parent = await Tree.findOne({
+    userId: req.user.id,
+    tier: 1,
+    isSubId: true,
   }).lean();
   const listRef = await Tree.find({ refId: parent._id });
   if (parent.children.length === 2 && listRef.length === 1) {
@@ -2329,6 +2372,56 @@ const getAllUsersTier2 = asyncHandler(async (req, res) => {
   });
 });
 
+const getSubUserProfile = asyncHandler(async (req, res) => {
+  const user = req.user;
+
+  if (user) {
+    const tree = await Tree.findOne({
+      userId: user._id,
+      tier: 1,
+      isSubId: true,
+    });
+    const listDirectUser = [];
+    const listRefIdOfUser = await Tree.find({ refId: tree._id, tier: 1 });
+    if (listRefIdOfUser && listRefIdOfUser.length > 0) {
+      for (let refId of listRefIdOfUser) {
+        const refedUser = await User.findById(refId.userId).select(
+          "userId email walletAddress status countPay countChild tier errLahCode buyPackage"
+        );
+        const listRefOfRefUser = await Tree.find({ refId: refId._id });
+        listDirectUser.push({
+          userId: refedUser.userId,
+          isRed:
+            refedUser.tier === 1 && refedUser.countPay === 0
+              ? true
+              : refedUser.tier === 1 && refedUser.countPay < 13
+              ? true
+              : false,
+          isYellow: refedUser.errLahCode === "OVER35",
+          isBlue: refedUser.errLahCode === "OVER45",
+          isPink: refedUser.countPay === 13 && listRefOfRefUser.length < 2,
+        });
+      }
+    }
+
+    const docs = await Transaction.find({ username_to: tree.userName }).lean();
+    const totalAmountUsdt = docs.reduce((sum, item) => sum + (item.amount || 0), 0);
+
+    // let responseHewe = await getPriceHewe();
+    // const hewePrice = responseHewe?.data?.ticker?.latest || 0.0005287;
+    const totalHewe = Math.round(25 / 0.0005287);
+
+    res.json({
+      listDirectUser,
+      totalAmountUsdt,
+      totalAmountHewe: totalHewe,
+    });
+  } else {
+    res.status(404);
+    throw new Error("User does not exist");
+  }
+});
+
 export {
   getUserProfile,
   getAllUsers,
@@ -2369,4 +2462,6 @@ export {
   getListUserForCreateAdmin,
   getCountIncome,
   getAllUsersTier2,
+  getSubUserProfile,
+  getListChildOfSubUser,
 };

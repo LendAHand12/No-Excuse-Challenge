@@ -290,7 +290,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
             amount: referralCommissionFee,
             userCountPay: countPayUser,
             userId_to: receiveUser._id,
-            username_to: receiveUser.userId,
+            username_to: p.userName,
             tier: user.tier,
             buyPackage: user.buyPackage,
             hash: "",
@@ -542,7 +542,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           amount: directCommissionFee,
           userCountPay: user.countPay,
           userId_to: directCommissionUser._id,
-          username_to: directCommissionUser.userId,
+          username_to: treeOfRefUser.userName,
           tier: user.tier + 1 - user.paymentStep,
           buyPackage: user.buyPackage,
           hash: "",
@@ -844,13 +844,14 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
         }
 
         const newChildParent = await Tree.findById(childId);
+        const mainTree = await Tree.findOne({ tier: 1, userId: user._id, isSubId: false });
         let childsOfChild = [...newChildParent.children];
 
         const newTreeTier1 = await Tree.create({
           userName: user.userId + "1-1",
           userId: user._id,
           parentId: childId,
-          refId: childId,
+          refId: mainTree.refId,
           tier: user.tier,
           buyPackage: "A",
           children: [],

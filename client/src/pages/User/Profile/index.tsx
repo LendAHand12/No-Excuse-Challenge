@@ -16,11 +16,13 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import PhoneInput from 'react-phone-number-input';
 import './index.css';
 import ClaimModal from '../../../components/ClaimModal';
+import { useNavigate } from 'react-router-dom';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Profile = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const { userInfo } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -59,6 +61,7 @@ const Profile = () => {
     accountName,
     accountNumber,
     city,
+    subUser,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -782,6 +785,14 @@ const Profile = () => {
           >
             Migrate ID to dreamchain
           </button> */}
+          {tier >= 2 && subUser && (
+            <button
+              className={`bg-blue-600 text-white px-6 py-2 rounded-lg`}
+              onClick={() => navigate(`/user/sub/${subUser._id}`)}
+            >
+              Profile {subUser.userName}
+            </button>
+          )}
 
           {errLahCode !== 'OVER45' && !isEdit && status === 'APPROVED' && (
             <button

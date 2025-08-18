@@ -76,6 +76,7 @@ import UsersTier2 from './pages/User/UsersTier2';
 import MoveSystem from './pages/Admin/MoveSystem';
 import MoveSystemList from './pages/Admin/MoveSystemList';
 import SwapPage from './pages/User/SwapPage';
+import SubProfilePage from './pages/User/SubProfile';
 
 function App() {
   const { pathname } = useLocation();
@@ -743,6 +744,35 @@ function App() {
                 }
               />
             )}
+            <Route
+              path="/user/move-system"
+              element={
+                <>
+                  <PageTitle title="Move System KYC | NoExcuseChallenge" />
+                  <MoveSystemPage />
+                </>
+              }
+            />
+            <Route
+              path="/user/swap"
+              element={
+                <>
+                  <PageTitle title="Swap Page | NoExcuseChallenge" />
+                  <SwapPage />
+                </>
+              }
+            />
+            {userInfo?.tier > 1 && (
+              <Route
+                path="/user/sub/:id"
+                element={
+                  <>
+                    <PageTitle title="Sub User Tier 1 | NoExcuseChallenge" />
+                    <SubProfilePage />
+                  </>
+                }
+              />
+            )}
           </>
         )}
       </Route>
@@ -752,24 +782,6 @@ function App() {
           <>
             <PageTitle title="Claim KYC | NoExcuseChallenge" />
             <ClaimKYCPage />
-          </>
-        }
-      />
-      <Route
-        path="/user/move-system"
-        element={
-          <>
-            <PageTitle title="Move System KYC | NoExcuseChallenge" />
-            <MoveSystemPage />
-          </>
-        }
-      />
-      <Route
-        path="/user/swap"
-        element={
-          <>
-            <PageTitle title="Swap Page | NoExcuseChallenge" />
-            <SwapPage />
           </>
         }
       />

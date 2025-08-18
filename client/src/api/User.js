@@ -39,6 +39,9 @@ const User = {
   getListChild: () => {
     return API.get(`${URL_API_USER}/listChild`);
   },
+  getListChildSubUser: () => {
+    return API.get(`${URL_API_USER}/listChildSubUser`);
+  },
   getListChildLteBranch: () => {
     return API.get(`${URL_API_USER}/listChildLteBranch`);
   },
@@ -119,6 +122,9 @@ const User = {
   },
   withdraws: () => {
     return API.get(`${URL_API_WITHDRAW}/user`);
+  },
+  getSubInfo: () => {
+    return API.post(`${URL_API_USER}/sub-info`);
   },
 };
 

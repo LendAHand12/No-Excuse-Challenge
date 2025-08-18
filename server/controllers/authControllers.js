@@ -262,6 +262,11 @@ const authUser = asyncHandler(async (req, res) => {
       userId: user._id,
     });
 
+    let subUser = null;
+    if (user.tier === 2) {
+      subUser = await Tree.findOne({ userId: user._id, isSubId: true, tier: 1 });
+    }
+
     res.status(200).json({
       userInfo: {
         id: user._id,
@@ -320,6 +325,7 @@ const authUser = asyncHandler(async (req, res) => {
         accountNumber: user.accountNumber,
         availableAmc: user.availableAmc,
         claimedAmc: user.claimedAmc,
+        subUser,
       },
       accessToken,
       refreshToken,
