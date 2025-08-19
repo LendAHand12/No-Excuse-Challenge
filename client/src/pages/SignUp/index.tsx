@@ -179,21 +179,27 @@ const SignUpPage = () => {
                             </p>
                           </div>
                           {/* Wallet address */}
-                          <input
-                            className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
-                            type="text"
-                            placeholder={`${t('Wallet address')} : Oxbx7...`}
-                            {...register('walletAddress', {
-                              required: t('Wallet address is required'),
-                              pattern: {
-                                value: /^0x[a-fA-F0-9]{40}$/g,
-                                message: t(
-                                  'Please enter the correct wallet format',
-                                ),
-                              },
-                            })}
-                            disabled={loading}
-                          />
+                          <div>
+                            <input
+                              className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
+                              type="text"
+                              placeholder={`${t('Wallet address')} : Oxbx7...`}
+                              {...register('walletAddress', {
+                                required: t('Wallet address is required'),
+                                pattern: {
+                                  value: /^0x[a-fA-F0-9]{40}$/g,
+                                  message: t(
+                                    'Please enter the correct wallet format',
+                                  ),
+                                },
+                              })}
+                              disabled={loading}
+                            />
+                            <p className="text-red-500 mt-1 text-sm">
+                              {errors.walletAddress?.message}
+                            </p>
+                          </div>
+
                           {refCity === 'US' && (
                             <>
                               <div>

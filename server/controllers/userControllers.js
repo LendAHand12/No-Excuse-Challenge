@@ -118,7 +118,7 @@ const getUserById = asyncHandler(async (req, res) => {
         );
         const listRefOfRefUser = await Tree.find({ refId: refId._id });
         listDirectUser.push({
-          userId: refedUser.userId,
+          userId: refId.userName,
           isRed:
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
