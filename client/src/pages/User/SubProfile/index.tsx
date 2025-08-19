@@ -19,7 +19,11 @@ const SubProfilePage = () => {
   const [link, setLink] = useState(defaultRef);
   const [copied, setCopied] = useState(false);
   const [userTreeId, setUserTreeId] = useState('');
-  const [subInfo, setSubInfo] = useState({});
+  const [subInfo, setSubInfo] = useState({
+    totalAmountUsdt: 0,
+    totalAmountHewe: 0,
+    listDirectUser: [],
+  });
 
   useEffect(() => {
     if (childId === '') {
