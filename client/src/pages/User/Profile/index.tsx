@@ -535,14 +535,16 @@ const Profile = () => {
           </div>
         )}
 
-        {tier === 2 && tryToTier2 === 'YES' && (
+        {tryToTier2 !== '' && (
           <div
             className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
             role="alert"
           >
             <span className="block sm:inline">
-              You have only <b>{countdown}</b> days left to complete the 126
-              required IDs to be eligible for Tier 2 benefits.
+              {tryToTier2 === 'YES'
+                ? `You have only ${countdown} days left to complete the 126
+              required IDs to be eligible for Tier 2 benefits.`
+                : `You have run out of sales compensation time.`}
             </span>
           </div>
         )}

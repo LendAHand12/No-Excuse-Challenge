@@ -537,6 +537,10 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
             haveRefNotPayEnough = false;
           }
         }
+
+        if (user.paymentStep === 0 && treeOfRefUser.disable) {
+          haveRefNotPayEnough = true;
+        }
         const transactionDirect = await Transaction.create({
           userId: user.id,
           amount: directCommissionFee,
@@ -616,6 +620,9 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
             ) {
               haveParentNotPayEnough = true;
             }
+          }
+          if (user.paymentStep === 0 && p.disable) {
+            haveParentNotPayEnough = true;
           }
           payments.push({
             userName: p.userName,

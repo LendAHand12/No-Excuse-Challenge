@@ -315,10 +315,11 @@ export const checkUserTryToTier2 = asyncHandler(async () => {
 
   for (let u of listUser) {
     try {
+      console.log({ name: u.userId });
       const treeOfUser = await Tree.findOne({ userId: u._id, tier: 1, isSubId: false });
       const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(treeOfUser);
       // console.log({ user: u.userId, countChild1, countChild2 });
-      if (countChild1 >= 62 && countChild2 >= 62) {
+      if ((countChild1 >= 19 && countChild2 >= 77) || (countChild1 >= 77 && countChild2 >= 19)) {
         u.tryToTier2 = "DONE";
         u.timeToTry = null;
       } else {
@@ -326,6 +327,7 @@ export const checkUserTryToTier2 = asyncHandler(async () => {
           let currentDay = moment();
           const diffDay = currentDay.diff(u.timeToTry, "days");
           if (diffDay >= 45) {
+            console.log({ over45: u.userId });
             u.tryToTier2 = "REDO";
             u.tier = 1;
             const treeOfUser = await Tree.findOne({ userId: u._id, tier: 2, isSubId: false });
@@ -338,7 +340,7 @@ export const checkUserTryToTier2 = asyncHandler(async () => {
         }
       }
 
-      // await u.save();
+      await u.save();
     } catch (error) {
       console.log({ error });
     }
