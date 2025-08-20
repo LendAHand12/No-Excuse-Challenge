@@ -190,41 +190,43 @@ const getUserById = asyncHandler(async (req, res) => {
         isSubId: true,
       });
       let listDirectUser = [];
-      let listRefIdOfUser = await Tree.find({ refId: tree._id, tier: 1 });
-      if (listRefIdOfUser && listRefIdOfUser.length > 0) {
-        for (let refId of listRefIdOfUser) {
-          let refedUser = await User.findById(refId.userId).select(
-            "userId email walletAddress status countPay countChild tier errLahCode buyPackage"
-          );
-          const listRefOfRefUser = await Tree.find({ refId: refId._id });
-          listDirectUser.push({
-            userId: refedUser.userId,
-            isRed:
-              refedUser.tier === 1 && refedUser.countPay === 0
-                ? true
-                : refedUser.tier === 1 && refedUser.countPay < 13
-                ? true
-                : false,
-            isYellow: refedUser.errLahCode === "OVER35",
-            isBlue: refedUser.errLahCode === "OVER45",
-            isPink: refedUser.countPay === 13 && listRefOfRefUser.length < 2,
-          });
+      if (tree) {
+        let listRefIdOfUser = await Tree.find({ refId: tree._id, tier: 1 });
+        if (listRefIdOfUser && listRefIdOfUser.length > 0) {
+          for (let refId of listRefIdOfUser) {
+            let refedUser = await User.findById(refId.userId).select(
+              "userId email walletAddress status countPay countChild tier errLahCode buyPackage"
+            );
+            const listRefOfRefUser = await Tree.find({ refId: refId._id });
+            listDirectUser.push({
+              userId: refedUser.userId,
+              isRed:
+                refedUser.tier === 1 && refedUser.countPay === 0
+                  ? true
+                  : refedUser.tier === 1 && refedUser.countPay < 13
+                  ? true
+                  : false,
+              isYellow: refedUser.errLahCode === "OVER35",
+              isBlue: refedUser.errLahCode === "OVER45",
+              isPink: refedUser.countPay === 13 && listRefOfRefUser.length < 2,
+            });
+          }
         }
+
+        let docs = await Transaction.find({ username_to: tree.userName }).lean();
+        let totalAmountUsdt = docs.reduce((sum, item) => sum + (item.amount || 0), 0);
+
+        // let responseHewe = await getPriceHewe();
+        // let hewePrice = responseHewe?.data?.ticker?.latest || 0.0005287;
+        const totalHewe = Math.round(25 / 0.0005287);
+
+        subInfo = {
+          subName: tree.userName,
+          listDirectUser,
+          totalAmountUsdt,
+          totalAmountHewe: totalHewe,
+        };
       }
-
-      let docs = await Transaction.find({ username_to: tree.userName }).lean();
-      let totalAmountUsdt = docs.reduce((sum, item) => sum + (item.amount || 0), 0);
-
-      // let responseHewe = await getPriceHewe();
-      // let hewePrice = responseHewe?.data?.ticker?.latest || 0.0005287;
-      const totalHewe = Math.round(25 / 0.0005287);
-
-      subInfo = {
-        subName: tree.userName,
-        listDirectUser,
-        totalAmountUsdt,
-        totalAmountHewe: totalHewe,
-      };
     }
 
     res.json({
