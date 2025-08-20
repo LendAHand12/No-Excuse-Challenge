@@ -14,7 +14,7 @@ import { shortenWalletAddress } from '@/utils';
 import { useSelector } from 'react-redux';
 import Payment from '../../../api/Payment';
 
-const AdminUserPages = () => {
+const DormantUserPages = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -22,8 +22,6 @@ const AdminUserPages = () => {
   const searchParams = new URLSearchParams(location.search);
   const key = searchParams.get('keyword') || '';
   const page = searchParams.get('page') || 1;
-  const status = searchParams.get('status') || 'all';
-  const coin = searchParams.get('coin') || 'all';
   const [totalPage, setTotalPage] = useState(0);
   const [keyword, setKeyword] = useState(key);
   const [loading, setLoading] = useState(true);
@@ -32,8 +30,6 @@ const AdminUserPages = () => {
   const [objectFilter, setObjectFilter] = useState({
     pageNumber: page,
     keyword: key,
-    status,
-    coin,
   });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentDeleteId, setCurrentDeleteId] = useState('');
@@ -67,8 +63,8 @@ const AdminUserPages = () => {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const { pageNumber, keyword, status, coin } = objectFilter;
-      await User.getAllUsers(pageNumber, keyword, status, coin)
+      const { pageNumber, keyword } = objectFilter;
+      await User.getAllUsersOver45(pageNumber, keyword)
         .then((response) => {
           const { users, pages } = response.data;
           setData(users);
@@ -119,11 +115,10 @@ const AdminUserPages = () => {
     if (pageNumber) {
       searchParams.set('page', pageNumber);
     }
-    if (searchStatus) {
-      searchParams.set('status', searchStatus);
-    }
     const queryString = searchParams.toString();
-    const url = queryString ? `/admin/users?${queryString}` : '/admin/users';
+    const url = queryString
+      ? `/admin/user/dormant?${queryString}`
+      : '/admin/users';
     navigate(url);
   };
 
@@ -215,10 +210,6 @@ const AdminUserPages = () => {
         setLoading(false);
       });
   }, [currentDeleteId]);
-
-  const handleExportUsers = async () => {
-    navigate('/admin/user/export');
-  };
 
   const handleApprovePayment = useCallback(async () => {
     await Payment.donePayWithCash({ userId: currentApprovePaymentId })
@@ -469,37 +460,6 @@ const AdminUserPages = () => {
       <div className="relative overflow-x-auto py-24 px-10">
         <div className="flex items-center justify-between pb-4 bg-white">
           <div className="flex gap-4">
-            <div>
-              <select
-                className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
-                onChange={onChangeStatus}
-                defaultValue={objectFilter.status}
-                disabled={loading}
-              >
-                <option value="all">All</option>
-                {userStatus.map((status) => (
-                  <option value={status.status} key={status.status}>
-                    {t(status.status)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <select
-                className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
-                onChange={onChangeCoin}
-                defaultValue={objectFilter.coin}
-                disabled={loading}
-              >
-                <option value="all">All</option>
-                <option value="usdt" key="usdt">
-                  USDT
-                </option>
-                <option value="hewe" key="hewe">
-                  HEWE
-                </option>
-              </select>
-            </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg
@@ -534,55 +494,6 @@ const AdminUserPages = () => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-center gap-2">
-            {userInfo?.permissions
-              ?.find((p) => p.page.path === '/admin/users')
-              ?.actions.includes('export') && (
-              <div>
-                <button
-                  onClick={handleExportUsers}
-                  className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm rounded-md hover:opacity-70"
-                >
-                  <svg
-                    fill="currentColor"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M8.71,7.71,11,5.41V15a1,1,0,0,0,2,0V5.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42l-4-4a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-4,4A1,1,0,1,0,8.71,7.71ZM21,14a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V15a1,1,0,0,0-2,0v4a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V15A1,1,0,0,0,21,14Z" />
-                  </svg>
-                  Export Data
-                </button>
-              </div>
-            )}
-            {userInfo?.permissions
-              ?.find((p) => p.page.path === '/admin/users')
-              ?.actions.includes('create') && (
-              <div>
-                <button
-                  onClick={() => navigate('/admin/users/create')}
-                  className="flex items-center gap-2 px-6 py-2 bg-blue-500 text-white text-sm rounded-md hover:opacity-70"
-                >
-                  <svg
-                    fill="currentColor"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    id="plus"
-                    data-name="Flat Color"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      id="primary"
-                      d="M12,20a1,1,0,0,1-1-1V13H5a1,1,0,0,1,0-2h6V5a1,1,0,0,1,2,0v6h6a1,1,0,0,1,0,2H13v6A1,1,0,0,1,12,20Z"
-                    ></path>
-                  </svg>
-                  Create user
-                </button>
-              </div>
-            )}
-          </div>
         </div>
         <table className="w-full text-sm text-left text-gray-500">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
@@ -591,11 +502,7 @@ const AdminUserPages = () => {
                 Username
               </th>
               <th scope="col" className="px-6 py-3">
-                {objectFilter.coin === 'usdt'
-                  ? 'usdt'
-                  : objectFilter.coin === 'hewe'
-                  ? 'hewe'
-                  : 'Age'}
+                Age
               </th>
               <th scope="col" className="px-6 py-3">
                 Wallet Address
@@ -807,7 +714,7 @@ const AdminUserPages = () => {
                           </button>
                         )}
 
-                      {ele.status !== 'DELETED' &&
+                      {/* {ele.status !== 'DELETED' &&
                         userInfo?.permissions
                           .find((p) => p.page.pageName === 'admin-move-system')
                           ?.actions.includes('read') && (
@@ -858,7 +765,7 @@ const AdminUserPages = () => {
                               />
                             </svg>
                           </button>
-                        )}
+                        )} */}
 
                       {userInfo?.permissions
                         .find((p) => p.page.pageName === 'admin-users-details')
@@ -904,4 +811,4 @@ const AdminUserPages = () => {
   );
 };
 
-export default AdminUserPages;
+export default DormantUserPages;

@@ -77,6 +77,7 @@ import MoveSystem from './pages/Admin/MoveSystem';
 import MoveSystemList from './pages/Admin/MoveSystemList';
 import SwapPage from './pages/User/SwapPage';
 import SubProfilePage from './pages/User/SubProfile';
+import DormantUsersPage from './pages/Admin/DormantUsers';
 
 function App() {
   const { pathname } = useLocation();
@@ -617,6 +618,20 @@ function App() {
               <>
                 <PageTitle title="Users Tier2 | NoExcuseChallenge" />
                 <UsersTier2 />
+              </>
+            }
+          />
+        )}
+
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/user/dormant')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/user/dormant"
+            element={
+              <>
+                <PageTitle title="Dormant Users | NoExcuseChallenge" />
+                <DormantUsersPage />
               </>
             }
           />

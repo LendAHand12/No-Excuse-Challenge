@@ -37,6 +37,7 @@ import {
   getAllUsersTier2,
   getSubUserProfile,
   getListChildOfSubUser,
+  getAllUsersOver45,
 } from "../controllers/userControllers.js";
 import { protectRoute, isAdmin, isSuperAdmin } from "../middleware/authMiddleware.js";
 import uploadCCCD from "../middleware/uploadCCCD.js";
@@ -44,6 +45,7 @@ import uploadCCCD from "../middleware/uploadCCCD.js";
 const router = express.Router();
 
 router.route("/").get(protectRoute, isAdmin, getAllUsers);
+router.route("/over45").get(protectRoute, isAdmin, getAllUsersOver45);
 router.route("/info").get(protectRoute, getUserInfo);
 router.route("/getAllDeletedUsers").get(protectRoute, isAdmin, getAllDeletedUsers);
 router.route("/profile").get(protectRoute, getUserProfile);

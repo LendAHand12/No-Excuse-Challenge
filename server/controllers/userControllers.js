@@ -8,6 +8,7 @@ import sendMail from "../utils/sendMail.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import Tree from "../models/treeModel.js";
+import Claim from "../models/claimModel.js";
 import { getActivePackages } from "./packageControllers.js";
 import {
   checkSerepayWallet,
@@ -67,6 +68,43 @@ const getAllUsers = asyncHandler(async (req, res) => {
   } else if (coin === "hewe") {
     sortOption = { availableHewe: -1 };
   }
+
+  const allUsers = await User.find(query)
+    .limit(pageSize)
+    .skip(pageSize * (page - 1))
+    .sort(sortOption)
+    .select("-password");
+
+  res.json({
+    users: allUsers,
+    pages: Math.ceil(count / pageSize),
+  });
+});
+
+const getAllUsersOver45 = asyncHandler(async (req, res) => {
+  const { pageNumber, keyword } = req.query;
+  const page = Number(pageNumber) || 1;
+
+  const pageSize = 20;
+
+  const query = {
+    $and: [
+      {
+        $or: [
+          { userId: { $regex: keyword, $options: "i" } },
+          { email: { $regex: keyword, $options: "i" } },
+          { walletAddress: { $regex: keyword, $options: "i" } },
+        ],
+      },
+      { role: "user" },
+      { errLahCode: "OVER45" },
+    ],
+  };
+
+  const count = await User.countDocuments(query);
+
+  // Xác định kiểu sort
+  let sortOption = { createdAt: -1 };
 
   const allUsers = await User.find(query)
     .limit(pageSize)
@@ -229,6 +267,13 @@ const getUserById = asyncHandler(async (req, res) => {
       }
     }
 
+    const result = await Claim.aggregate([
+      { $match: { userId: user._id } },
+      { $group: { _id: null, totalAmount: { $sum: "$amount" } } },
+    ]);
+
+    const totalEarn = result[0]?.totalAmount || 0;
+
     res.json({
       id: user._id,
       email: user.email,
@@ -280,7 +325,7 @@ const getUserById = asyncHandler(async (req, res) => {
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
-      totalEarning: user.availableUsdt + user.claimedUsdt + totalWithdraws,
+      totalEarning: totalEarn,
       withdrawPending: withdrawPending,
       chartData: mergeIntoThreeGroups(listDirectUser),
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
@@ -358,7 +403,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
     const withdraws = await Withdraw.find({
       userId: user._id,
     });
-    const totalWithdraws = withdraws.reduce((sum, withdraw) => sum + withdraw.amount, 0);
+    // const totalWithdraws = withdraws.reduce((sum, withdraw) => sum + withdraw.amount, 0);
     const withdrawPending = withdraws
       .filter((ele) => ele.status === "PENDING")
       .reduce((sum, withdraw) => sum + withdraw.amount, 0);
@@ -402,6 +447,13 @@ const getUserInfo = asyncHandler(async (req, res) => {
     if (user.tier === 2) {
       subUser = await Tree.findOne({ userId: user._id, isSubId: true, tier: 1 });
     }
+
+    const result = await Claim.aggregate([
+      { $match: { userId: user._id } },
+      { $group: { _id: null, totalAmount: { $sum: "$amount" } } },
+    ]);
+
+    const totalEarn = result[0]?.totalAmount || 0;
 
     res.json({
       id: user._id,
@@ -454,7 +506,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
-      totalEarning: user.availableUsdt + user.claimedUsdt + totalWithdraws,
+      totalEarning: totalEarn,
       withdrawPending: withdrawPending,
       chartData: mergeIntoThreeGroups(listDirectUser),
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
@@ -2512,4 +2564,5 @@ export {
   getAllUsersTier2,
   getSubUserProfile,
   getListChildOfSubUser,
+  getAllUsersOver45,
 };
