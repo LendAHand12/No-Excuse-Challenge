@@ -267,12 +267,12 @@ const getUserById = asyncHandler(async (req, res) => {
       }
     }
 
-    const result = await Claim.aggregate([
-      { $match: { userId: user._id } },
-      { $group: { _id: null, totalAmount: { $sum: "$amount" } } },
-    ]);
+    // const result = await Claim.aggregate([
+    //   { $match: { userId: user._id } },
+    //   { $group: { _id: null, totalAmount: { $sum: "$amount" } } },
+    // ]);
 
-    const totalEarn = result[0]?.totalAmount || 0;
+    // const totalEarn = result[0]?.totalAmount || 0;
 
     res.json({
       id: user._id,
@@ -325,7 +325,7 @@ const getUserById = asyncHandler(async (req, res) => {
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
-      totalEarning: totalEarn,
+      totalEarning: user.availableUsdt + user.claimedUsdt + totalWithdraws,
       withdrawPending: withdrawPending,
       chartData: mergeIntoThreeGroups(listDirectUser),
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
@@ -403,7 +403,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
     const withdraws = await Withdraw.find({
       userId: user._id,
     });
-    // const totalWithdraws = withdraws.reduce((sum, withdraw) => sum + withdraw.amount, 0);
+    const totalWithdraws = withdraws.reduce((sum, withdraw) => sum + withdraw.amount, 0);
     const withdrawPending = withdraws
       .filter((ele) => ele.status === "PENDING")
       .reduce((sum, withdraw) => sum + withdraw.amount, 0);
@@ -448,12 +448,12 @@ const getUserInfo = asyncHandler(async (req, res) => {
       subUser = await Tree.findOne({ userId: user._id, isSubId: true, tier: 1 });
     }
 
-    const result = await Claim.aggregate([
-      { $match: { userId: user._id } },
-      { $group: { _id: null, totalAmount: { $sum: "$amount" } } },
-    ]);
+    // const result = await Claim.aggregate([
+    //   { $match: { userId: user._id } },
+    //   { $group: { _id: null, totalAmount: { $sum: "$amount" } } },
+    // ]);
 
-    const totalEarn = result[0]?.totalAmount || 0;
+    // const totalEarn = result[0]?.totalAmount || 0;
 
     res.json({
       id: user._id,
@@ -506,7 +506,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
-      totalEarning: totalEarn,
+      totalEarning: user.availableUsdt + user.claimedUsdt + totalWithdraws,
       withdrawPending: withdrawPending,
       chartData: mergeIntoThreeGroups(listDirectUser),
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
