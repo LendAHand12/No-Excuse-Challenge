@@ -75,7 +75,7 @@ const AdminSystemPage = () => {
             backgroundColor: isRed
               ? '#ee0000'
               : isBlue
-              ? '#0033ff'
+              ? '#149af6'
               : isBrown
               ? '#663300'
               : isYellow

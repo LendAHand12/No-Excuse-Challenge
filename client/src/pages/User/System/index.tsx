@@ -68,7 +68,7 @@ const SystemPage = () => {
             backgroundColor: isRed
               ? '#ee0000'
               : isBlue
-              ? '#0033ff'
+              ? '#149af6'
               : isYellow
               ? '#ffcc00'
               : isPink
