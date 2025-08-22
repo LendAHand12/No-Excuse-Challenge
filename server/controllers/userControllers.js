@@ -268,7 +268,7 @@ const getUserById = asyncHandler(async (req, res) => {
     }
 
     const result = await Transaction.aggregate([
-      { $match: { userId_to: user.id } },
+      { $match: { userId_to: user.id, status: "SUCCESS" } },
       { $group: { _id: null, totalAmount: { $sum: "$amount" } } },
     ]);
 
@@ -449,7 +449,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
     }
 
     const result = await Transaction.aggregate([
-      { $match: { userId_to: user.id } },
+      { $match: { userId_to: user.id, status: "SUCCESS" } },
       { $group: { _id: null, totalAmount: { $sum: "$amount" } } },
     ]);
 
