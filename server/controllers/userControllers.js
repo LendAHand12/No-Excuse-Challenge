@@ -1455,7 +1455,7 @@ const changeSystem = asyncHandler(async (req, res) => {
         const parentUser = await Tree.findById(movePersonTree.refId);
         console.log({parentUser})
         const listRefOfParent = await Tree.find({ refId: parentUser._id });
-        if (listRefOfParent.length < 2) {
+        if (listRefOfParent.length < 3) {
           if (parentUser.timeRetryOver45) {
             parentUser.timeRetryOver45 = moment(parentUser.timeRetryOver45)
               .add(15, "days")
@@ -1522,7 +1522,7 @@ const changeSystem = asyncHandler(async (req, res) => {
         if (moveUser.errLahCode === "OVER45") {
           const parentUser = await Tree.findById(movePersonTree.refId);
           const listRefOfParent = await Tree.find({ refId: parentUser._id });
-          if (listRefOfParent.length < 2) {
+          if (listRefOfParent.length < 3) {
             if (parentUser.timeRetryOver45) {
               parentUser.timeRetryOver45 = moment(parentUser.timeRetryOver45)
                 .add(15, "days")
