@@ -118,7 +118,6 @@ const getAllUsersOver45 = asyncHandler(async (req, res) => {
   });
 });
 
-
 const getAllUsersWithKeyword = asyncHandler(async (req, res) => {
   const { keyword } = req.body;
   if (keyword) {
@@ -370,7 +369,7 @@ const getUserById = asyncHandler(async (req, res) => {
       claimedAmc: user.claimedAmc,
       subInfo,
       currentParent: parentTree ? parentTree.userName : null,
-      timeRetryOver45: user.timeRetryOver45
+      timeRetryOver45: user.timeRetryOver45,
     });
   } else {
     res.status(404);
@@ -566,7 +565,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       availableAmc: user.availableAmc,
       claimedAmc: user.claimedAmc,
       subUser,
-      timeRetryOver45: user.timeRetryOver45
+      timeRetryOver45: user.timeRetryOver45,
     });
   } else {
     res.status(404);
@@ -779,7 +778,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     lockKyc,
     accountName,
     accountNumber,
-    timeRetryOver45
+    timeRetryOver45,
   } = req.body;
 
   if (userId) {
@@ -1453,15 +1452,18 @@ const changeSystem = asyncHandler(async (req, res) => {
       parentOfMoveChild.children = newParentOfMoveChild;
       await parentOfMoveChild.save();
       if (moveUser.errLahCode === "OVER45") {
-        const parentUser = await User.findById(parentOfMoveChild.userId);
-        if (parentUser.timeRetryOver45) {
-          parentUser.timeRetryOver45 = moment(parentUser.timeRetryOver45)
-            .add(15, "days")
-            .toDate();
-          await parentUser.save();
-        } else {
-          parentUser.timeRetryOver45 = moment().add(15, "days").toDate();
-          await parentUser.save();
+        const parentUser = await User.findById(movePersonTree.refId);
+        const listRefOfParent = await Tree.find({ refId: parentUser._id });
+        if (listRefOfParent.length < 2) {
+          if (parentUser.timeRetryOver45) {
+            parentUser.timeRetryOver45 = moment(parentUser.timeRetryOver45)
+              .add(15, "days")
+              .toDate();
+            await parentUser.save();
+          } else {
+            parentUser.timeRetryOver45 = moment().add(15, "days").toDate();
+            await parentUser.save();
+          }
         }
         moveUser.doneChangeToDie = true;
         await moveUser.save();
@@ -1517,15 +1519,18 @@ const changeSystem = asyncHandler(async (req, res) => {
         await receivePerson.save();
 
         if (moveUser.errLahCode === "OVER45") {
-          const parentUser = await User.findById(parentOfMoveChild.userId);
-          if (parentUser.timeRetryOver45) {
-            parentUser.timeRetryOver45 = moment(parentUser.timeRetryOver45)
-              .add(15, "days")
-              .toDate();
-            await parentUser.save();
-          } else {
-            parentUser.timeRetryOver45 = moment().add(15, "days").toDate();
-            await parentUser.save();
+          const parentUser = await User.findById(movePersonTree.refId);
+          const listRefOfParent = await Tree.find({ refId: parentUser._id });
+          if (listRefOfParent.length < 2) {
+            if (parentUser.timeRetryOver45) {
+              parentUser.timeRetryOver45 = moment(parentUser.timeRetryOver45)
+                .add(15, "days")
+                .toDate();
+              await parentUser.save();
+            } else {
+              parentUser.timeRetryOver45 = moment().add(15, "days").toDate();
+              await parentUser.save();
+            }
           }
           moveUser.doneChangeToDie = true;
           await moveUser.save();
