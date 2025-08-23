@@ -502,13 +502,7 @@ const DormantUserPages = () => {
                 Username
               </th>
               <th scope="col" className="px-6 py-3">
-                Age
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Wallet Address
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Payment Pending
+                Moved
               </th>
               <th scope="col" className="px-6 py-3">
                 {t('status')}
@@ -538,65 +532,11 @@ const DormantUserPages = () => {
                     </div>
                   </th>
                   <td className="px-6 py-4">
-                    {objectFilter.coin !== 'usdt' &&
-                      objectFilter.coin !== 'hewe' &&
-                      ele.ageEstimate && (
-                        <a
-                          className={`hover:underline ${
-                            ele.ageEstimate && ele.ageEstimate < 5
-                              ? 'text-red-500'
-                              : 'text-blue-500'
-                          }`}
-                          href={`http://3.107.26.68:3002/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${ele._id}`}
-                          target="_blank"
-                        >
-                          {ele.ageEstimate === 2
-                            ? '8+'
-                            : ele.ageEstimate === 3
-                            ? '13+'
-                            : ele.ageEstimate === 4
-                            ? '16+'
-                            : ele.ageEstimate === 5
-                            ? '18+'
-                            : ele.ageEstimate === 6
-                            ? '21+'
-                            : ele.ageEstimate === 7
-                            ? '25+'
-                            : ele.ageEstimate === 8
-                            ? '30+'
-                            : ''}
-                        </a>
-                      )}
-                    {objectFilter.coin !== 'usdt' &&
-                      objectFilter.coin !== 'hewe' &&
-                      !ele.ageEstimate && <p>N/A</p>}
-                    {objectFilter.coin === 'usdt' && <p>{ele.availableUsdt}</p>}
-                    {objectFilter.coin === 'hewe' && <p>{ele.availableHewe}</p>}
-                  </td>
-                  <td className="px-6 py-4">
-                    {shortenWalletAddress(ele.walletAddress, 12)}
-                  </td>
-                  <td className="px-6 py-4">
-                    {ele.paymentUUID.length > 0 ? (
-                      <div>
-                        <button
-                          onClick={() => {
-                            setShowApprovePayment(true);
-                            setCurrentApprovePaymentId(ele._id);
-                          }}
-                          className={`${
-                            ele.paymentProcessed
-                              ? 'bg-orange-400'
-                              : 'bg-green-500'
-                          } py-1 px-3 text-white text-lg max-w-fit rounded-lg`}
-                          disabled={!ele.paymentProcessed}
-                        >
-                          {ele.paymentUUID[ele.tier - 1]}
-                        </button>
-                      </div>
-                    ) : (
-                      ''
-                    )}
+                    <div
+                      className={`w-4 h-4 rounded-full ${
+                        ele.doneChangeToDie ? 'bg-green-500' : 'bg-red-500'
+                      }`}
+                    ></div>
                   </td>
                   <td className="px-6 py-4">
                     <div
@@ -714,7 +654,7 @@ const DormantUserPages = () => {
                           </button>
                         )}
 
-                      {/* {ele.status !== 'DELETED' &&
+                      {ele.status !== 'DELETED' &&
                         userInfo?.permissions
                           .find((p) => p.page.pageName === 'admin-move-system')
                           ?.actions.includes('read') && (
@@ -765,7 +705,7 @@ const DormantUserPages = () => {
                               />
                             </svg>
                           </button>
-                        )} */}
+                        )}
 
                       {userInfo?.permissions
                         .find((p) => p.page.pageName === 'admin-users-details')

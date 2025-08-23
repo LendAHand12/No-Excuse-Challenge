@@ -436,7 +436,7 @@ const routes = [
   //   ),
   // },
   {
-    title: 'Dormant Users',
+    title: 'Basic Members',
     link: '/admin/user/dormant',
     icon: (
       <svg

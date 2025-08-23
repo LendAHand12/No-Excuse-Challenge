@@ -71,6 +71,7 @@ const UserProfile = () => {
             kycFee,
             changeCreatedAt,
             lockKyc,
+            timeRetryOver45
           } = response.data;
           setValue('userId', userId);
           setValue('email', email);
@@ -79,6 +80,7 @@ const UserProfile = () => {
           setValue('tier', tier);
           setValue('walletAddress', walletAddress);
           setValue('changeCreatedAt', changeCreatedAt);
+          setValue('timeRetryOver45', timeRetryOver45);
           setCurrentOpenLah(openLah);
           setCurrentCloseLah(closeLah);
           setCurrentLockKyc(lockKyc);
@@ -152,6 +154,10 @@ const UserProfile = () => {
 
       if (values.changeCreatedAt !== data.changeCreatedAt) {
         formData.append('changeCreatedAt', values.changeCreatedAt);
+      }
+
+      if (values.timeRetryOver45 !== data.timeRetryOver45) {
+        formData.append('timeRetryOver45', values.timeRetryOver45);
       }
 
       if (values.availableHewe !== data.availableHewe) {
@@ -649,6 +655,28 @@ const UserProfile = () => {
                         />
                       ) : (
                         new Date(data.changeCreatedAt).toLocaleDateString('vi')
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>{t('Time try referral')}</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Controller
+                          control={control}
+                          name="timeRetryOver45"
+                          render={({ field }) => (
+                            <DatePicker
+                              placeholderText={t('fromDate')}
+                              onChange={(date) => field.onChange(date)}
+                              selected={field.value}
+                              dateFormat="dd/MM/yyyy"
+                              className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            />
+                          )}
+                        />
+                      ) : (
+                        data.timeRetryOver45 ? new Date(data.timeRetryOver45).toLocaleDateString('vi') : ""
                       )}
                     </span>
                   </li>
