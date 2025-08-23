@@ -1452,7 +1452,8 @@ const changeSystem = asyncHandler(async (req, res) => {
       parentOfMoveChild.children = newParentOfMoveChild;
       await parentOfMoveChild.save();
       if (moveUser.errLahCode === "OVER45") {
-        const parentUser = await User.findById(movePersonTree.refId);
+        const parentUser = await Tree.findById(movePersonTree.refId);
+        console.log({parentUser})
         const listRefOfParent = await Tree.find({ refId: parentUser._id });
         if (listRefOfParent.length < 2) {
           if (parentUser.timeRetryOver45) {
@@ -1519,7 +1520,7 @@ const changeSystem = asyncHandler(async (req, res) => {
         await receivePerson.save();
 
         if (moveUser.errLahCode === "OVER45") {
-          const parentUser = await User.findById(movePersonTree.refId);
+          const parentUser = await Tree.findById(movePersonTree.refId);
           const listRefOfParent = await Tree.find({ refId: parentUser._id });
           if (listRefOfParent.length < 2) {
             if (parentUser.timeRetryOver45) {
