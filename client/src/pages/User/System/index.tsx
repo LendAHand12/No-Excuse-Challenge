@@ -25,16 +25,16 @@ const colors = [
   // '#4f46e5',
   // '#7c3aed',
   // '#9333ea',
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
+  '#149af6',
+  '#149af6',
+  '#149af6',
+  '#149af6',
+  '#149af6',
+  '#149af6',
+  '#149af6',
+  '#149af6',
+  '#149af6',
+  '#149af6',
 ];
 
 const SystemPage = () => {
@@ -68,7 +68,7 @@ const SystemPage = () => {
             backgroundColor: isRed
               ? '#ee0000'
               : isBlue
-              ? '#149af6'
+              ? '#0033ff'
               : isYellow
               ? '#ffcc00'
               : isPink

@@ -10,16 +10,16 @@ import { useParams } from 'react-router-dom';
 import DefaultLayout from '../../../layout/DefaultLayout';
 
 const colors = [
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
-  '#33ccff',
+  '#149af6',
+  '#149af6',
+  '#149af6',
+  '#149af6',
+  '#149af6',
+  '#149af6',
+  '#149af6',
+  '#149af6',
+  '#149af6',
+  '#149af6',
 ];
 
 const AdminSystemPage = () => {
@@ -75,7 +75,8 @@ const AdminSystemPage = () => {
             backgroundColor: isRed
               ? '#ee0000'
               : isBlue
-              ? '#149af6'
+              ? // ? '#149af6'
+                '#0033ff'
               : isBrown
               ? '#663300'
               : isYellow
