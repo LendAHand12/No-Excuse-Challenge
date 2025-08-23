@@ -1452,11 +1452,13 @@ const changeSystem = asyncHandler(async (req, res) => {
       parentOfMoveChild.children = newParentOfMoveChild;
       await parentOfMoveChild.save();
       if (moveUser.errLahCode === "OVER45") {
-        const parentUser = await Tree.findById(movePersonTree.refId);
-        console.log({parentUser})
-        const listRefOfParent = await Tree.find({ refId: parentUser._id });
+        const parentTree = await Tree.findById(movePersonTree.refId);
+        const parentUser = await User.findById(parentTree.userId);
+        const listRefOfParent = await Tree.find({ refId: parentTree._id });
+        console.log({ listRefOfParent });
         if (listRefOfParent.length < 3) {
           if (parentUser.timeRetryOver45) {
+            console.log("aaaaaaaaaaaaaaaaaaa");
             parentUser.timeRetryOver45 = moment(parentUser.timeRetryOver45)
               .add(15, "days")
               .toDate();
@@ -1520,16 +1522,21 @@ const changeSystem = asyncHandler(async (req, res) => {
         await receivePerson.save();
 
         if (moveUser.errLahCode === "OVER45") {
-          const parentUser = await Tree.findById(movePersonTree.refId);
-          const listRefOfParent = await Tree.find({ refId: parentUser._id });
+          const parentTree = await Tree.findById(movePersonTree.refId);
+          const parentUser = await User.findById(parentTree.userId);
+          const listRefOfParent = await Tree.find({ refId: parentTree._id });
+          console.log({ listRefOfParent });
           if (listRefOfParent.length < 3) {
             if (parentUser.timeRetryOver45) {
+              console.log("aaaaaaaaaaaaaaaaaaa");
               parentUser.timeRetryOver45 = moment(parentUser.timeRetryOver45)
                 .add(15, "days")
                 .toDate();
               await parentUser.save();
             } else {
+              console.log("bbbbbbbbbbbbbb");
               parentUser.timeRetryOver45 = moment().add(15, "days").toDate();
+              console.log({ parentUser });
               await parentUser.save();
             }
           }
