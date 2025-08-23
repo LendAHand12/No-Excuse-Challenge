@@ -146,6 +146,7 @@ const getUserById = asyncHandler(async (req, res) => {
 
   if (user) {
     const tree = await Tree.findOne({ userId: user._id, tier: 1 });
+    console.log({ tree });
 
     const listDirectUser = [];
     const listRefIdOfUser = await Tree.find({ refId: tree._id, tier: 1 });
@@ -290,7 +291,10 @@ const getUserById = asyncHandler(async (req, res) => {
 
     const totalEarn = result[0]?.totalAmount || 0;
 
-    const parentTree = await Tree.findById(tree.parentId);
+    let parentTree;
+    if (tree.parentId) {
+      parentTree = await Tree.findById(tree.parentId);
+    }
 
     res.json({
       id: user._id,
