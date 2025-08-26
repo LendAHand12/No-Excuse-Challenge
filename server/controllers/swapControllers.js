@@ -72,15 +72,15 @@ const getAllSwap = asyncHandler(async (req, res) => {
 });
 
 const requestSwap = asyncHandler(async (req, res) => {
-  const user = req;
+  const user = req.user;
   const { coinForm, coinTo, amountFrom, amountTo, price } = req.body;
 
   try {
     if (amountFrom > user.availableUsdt) {
       throw new Error("Insufficient balance in account");
     } else {
-      const swap = await Swap.create({
-        userId: user._id,
+      console.log({
+        userId: user.id,
         coinForm,
         coinTo,
         amountFrom,
@@ -88,21 +88,31 @@ const requestSwap = asyncHandler(async (req, res) => {
         price,
       });
 
+      const swap = await Swap.create({
+        userId: user.id,
+        coinForm,
+        coinTo,
+        amountFrom: parseInt(amountFrom),
+        amountTo: parseInt(amountTo),
+        price: parseInt(price),
+      });
+
       if (coinTo === "HEWE") {
-        user.availableHewe = user.availableHewe + amountTo;
+        user.availableHewe = parseInt(user.availableHewe) + parseInt(amountTo);
       }
 
       if (coinTo === "AMC") {
-        user.availableAmc = user.availableAmc + amountTo;
+        user.availableAmc = parseInt(user.availableAmc) + parseInt(amountTo);
       }
 
-      user.availableUsdt = user.availableUsdt - amountFrom;
+      user.availableUsdt = parseInt(user.availableUsdt) - parseInt(amountFrom);
 
       await user.save();
 
-      res.status(200).json({ message: "" });
+      res.status(200).json({ message: "Swap completed successfully!" });
     }
   } catch (err) {
+    console.log({ err });
     res.status(400).json({ error: "Internal Error" });
   }
 });

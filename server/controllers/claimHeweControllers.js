@@ -161,6 +161,66 @@ const claimUsdt = asyncHandler(async (req, res) => {
   }
 });
 
+var processingAmcUserIds = [];
+
+const claimAmc = asyncHandler(async (req, res) => {
+  const { user } = req;
+
+  if (processingAmcUserIds.includes(user._id)) {
+    return res.status(400).json({
+      error: "Your withdraw request is already being processed. Please wait!",
+    });
+  }
+
+  processingAmcUserIds.push(user._id);
+
+  try {
+    if (user.status !== "APPROVED" || user.facetecTid === "") {
+      throw new Error("Please verify your account");
+    }
+
+    if (user.availableAmc > 0) {
+      // const receipt = await sendHewe({
+      //   amount: user.availableAmc,
+      //   receiverAddress: user.walletAddress,
+      // });
+
+      const claimed = await Claim.create({
+        userId: user.id,
+        amount: user.availableAmc,
+        hash: "receipt.hash",
+        coin: "AMC",
+      });
+
+      user.claimedAmc = user.claimedAmc + user.availableAmc;
+      user.availableAmc = 0;
+      await user.save();
+
+      const index = processingAmcUserIds.indexOf(user.id);
+      if (index !== -1) {
+        processingAmcUserIds.splice(index, 1);
+      }
+
+      res.status(200).json({
+        message: "claim AMC successful",
+      });
+    } else {
+      const index = processingAmcUserIds.indexOf(user._id);
+      if (index !== -1) {
+        processingAmcUserIds.splice(index, 1);
+      }
+
+      throw new Error("Insufficient balance in account");
+    }
+  } catch (err) {
+    const index = processingAmcUserIds.indexOf(user._id);
+    if (index !== -1) {
+      processingAmcUserIds.splice(index, 1);
+    }
+    res.status(400).json({ error: err.message });
+  }
+});
+
 const getAllClaims = asyncHandler(async (req, res) => {
   let { pageNumber, coin, keyword } = req.query;
   const page = Number(pageNumber) || 1;
@@ -387,4 +447,5 @@ export {
   getAllClaimsOfUser,
   resetProcessing,
   getPrice,
+  claimAmc,
 };

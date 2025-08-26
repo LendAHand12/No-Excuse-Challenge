@@ -42,6 +42,7 @@ const Profile = () => {
     totalHewe,
     availableHewe,
     availableUsdt,
+    availableAmc,
     walletAddress,
     claimedHewe,
     ranking,
@@ -70,6 +71,7 @@ const Profile = () => {
   const [refresh, setRefresh] = useState(false);
   const [loadingClaimHewe, setLoadingClaimHewe] = useState(false);
   const [loadingClaimUsdt, setLoadingClaimUsdt] = useState(false);
+  const [loadingClaimAmc, setLoadingClaimAmc] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showFaceId, setShowFaceId] = useState(
     lockKyc === false && facetecTid === '' ? true : false,
@@ -167,6 +169,24 @@ const Profile = () => {
             : error.message;
         toast.error(t(message));
         setLoadingClaimHewe(false);
+      });
+  };
+
+  const claimAmc = async () => {
+    setLoadingClaimAmc(true);
+    await KYC.claim({ coin: 'amc' })
+      .then((response) => {
+        if (response.data.url) {
+          window.location.href = response.data.url;
+        }
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.error
+            ? error.response.data.error
+            : error.message;
+        toast.error(t(message));
+        setLoadingClaimAmc(false);
       });
   };
 
@@ -581,6 +601,26 @@ const Profile = () => {
           >
             {loadingClaimHewe && <Loading />}
             WITHDRAW HEWE
+          </button>
+        </div>
+        <div className="bg-[#FAFBFC] p-4 rounded-2xl flex 2xl:flex-row flex-col items-start 2xl:items-center xl:justify-between gap-8">
+          <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
+            <p className="font-medium">Available AMC</p>
+            <input
+              className="bg-black rounded-xl text-NoExcuseChallenge p-2 flex-1"
+              readOnly
+              value={availableAmc}
+            />
+          </div>
+          <button
+            className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
+              availableAmc === 0 ? 'opacity-30' : ''
+            }`}
+            disabled={availableAmc === 0}
+            onClick={claimAmc}
+          >
+            {loadingClaimAmc && <Loading />}
+            WITHDRAW AMC
           </button>
         </div>
         <div className="bg-[#FAFBFC] p-4 rounded-2xl flex 2xl:flex-row flex-col items-start xl:items-center gap-8">

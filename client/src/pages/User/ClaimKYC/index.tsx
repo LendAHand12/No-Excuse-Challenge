@@ -53,6 +53,22 @@ const ClaimKYCPage = () => {
                   : error.message;
               toast.error(t(message));
             });
+        } else if (coin === 'amc') {
+          await Claim.amc({ user_id, token })
+            .then((response) => {
+              toast.success(t(response.data.message));
+              setLoadingClaim(false);
+              navigate('/user/profile');
+            })
+            .catch((error) => {
+              let message =
+                error.response && error.response.data.message
+                  ? error.response.data.message
+                  : error.response.data.error
+                  ? error.response.data.error
+                  : error.message;
+              toast.error(t(message));
+            });
         }
       }
     })();

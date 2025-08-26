@@ -20,6 +20,7 @@ import {
   sumLevels,
   checkUserCanNextTier,
   getTotalLevel6ToLevel10OfUser,
+  hasTwoBranches,
 } from "../utils/methods.js";
 import Wallet from "../models/walletModel.js";
 import Tree from "../models/treeModel.js";
@@ -175,16 +176,22 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         });
 
         // giao dich hoa hong truc tiep
-        if (refUser.closeLah) {
+        const refUserData = await User.findById(refUser.userId);
+
+        if (refUserData.closeLah) {
           haveRefNotPayEnough = true;
-        } else if (refUser.openLah || refUser.adminChangeTier || refUser.createBy === "ADMIN") {
+        } else if (
+          refUserData.openLah ||
+          refUserData.adminChangeTier ||
+          refUserData.createBy === "ADMIN"
+        ) {
           haveRefNotPayEnough = false;
         } else {
           if (
-            refUser.status === "LOCKED" ||
-            refUser.tier < user.tier ||
-            (refUser.tier === user.tier && refUser.countPay < 13) ||
-            refUser.errLahCode === "OVER45"
+            refUserData.status === "LOCKED" ||
+            refUserData.tier < user.tier ||
+            (refUserData.tier === user.tier && refUserData.countPay < 13) ||
+            refUserData.errLahCode === "OVER45"
           ) {
             haveRefNotPayEnough = true;
           } else {
@@ -246,7 +253,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           } else {
             if (
               receiveUser.status === "LOCKED" ||
-              (receiveUser.errLahCode === "OVER45" && indexFor > 6) ||
+              receiveUser.errLahCode === "OVER45" ||
               receiveUser.tier < user.tier ||
               (receiveUser.tier === user.tier && receiveUser.countPay < user.countPay + 1)
             ) {
@@ -604,7 +611,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           } else {
             if (
               receiveUser.status === "LOCKED" ||
-              (receiveUser.errLahCode !== "" && indexFor > 6) ||
+              receiveUser.errLahCode === "OVER45" ||
               receiveUser.tier < user.tier ||
               (receiveUser.tier === user.tier && receiveUser.countPay < user.countPay + 1)
             ) {
@@ -1195,7 +1202,10 @@ const checkCanRefund = async ({
   trans,
   treeOfReceiveUser,
 }) => {
-  if (userReceive.status === "LOCKED") {
+  const hasTwoRef = await hasTwoBranches(treeOfReceiveUser._id);
+  if (hasTwoRef === false) {
+    return `Payment blocked because there are not enough 2 branch`;
+  } else if (userReceive.status === "LOCKED") {
     return `User parent locked`;
   } else if (userReceive.closeLah) {
     return `User is being blocked from trading`;

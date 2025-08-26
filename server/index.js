@@ -33,6 +33,7 @@ import kycRoutes from "./routes/kycRoutes.js";
 import configRoutes from "./routes/configRoutes.js";
 import userHistoryRoutes from "./routes/userHistoryRoutes.js";
 import moveSystemRoutes from "./routes/moveSystemRoutes.js";
+import swapRoutes from "./routes/swapRoutes.js";
 
 import {
   countChildToData,
@@ -92,6 +93,7 @@ app.use("/api/kyc", kycRoutes);
 app.use("/api/config", configRoutes);
 app.use("/api/user-history", userHistoryRoutes);
 app.use("/api/move-system", moveSystemRoutes);
+app.use("/api/swap", swapRoutes);
 
 app.get("/api/test-tele", async (req, res) => {
   await sendTelegramMessage({ userName: "kiet" });

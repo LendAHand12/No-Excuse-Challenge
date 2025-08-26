@@ -524,3 +524,45 @@ export const getTotalLevel6ToLevel10OfUser = async (treeOfUser) => {
 
   return { countChild1, countChild2 };
 };
+
+const getBranchRoot = async (nodeId, rootId) => {
+  let current = await Tree.findById(nodeId).lean();
+  while (current && current.parentId && String(current.parentId) !== String(rootId)) {
+    current = await Tree.findById(current.parentId).lean();
+  }
+  return current ? String(current._id) : null;
+};
+
+export const hasTwoBranches = async (refId) => {
+  if (!mongoose.Types.ObjectId.isValid(refId)) {
+    return { valid: false, error: "Invalid ObjectId" };
+  }
+
+  const refTree = await Tree.findById(refId).lean();
+  if (!refTree) {
+    return { valid: false, error: "Ref not found" };
+  }
+
+  // Lấy tất cả F1 của A (do A trực tiếp giới thiệu)
+  const f1s = await Tree.find({ refId }).lean();
+
+  if (f1s.length < 2) {
+    // return { valid: false, count: f1s.length, message: "Chưa đủ 2 F1" };
+    return false;
+  }
+
+  // Lấy root branch (B hoặc C) mà mỗi F1 nằm dưới
+  const branches = new Set();
+  for (let f1 of f1s) {
+    const branchRoot = await getBranchRoot(f1._id, refId);
+    if (branchRoot) branches.add(branchRoot);
+  }
+
+  if (branches.size >= 2) {
+    // return { valid: true, count: f1s.length, message: "Đã có 2 F1 ở 2 nhánh khác nhau" };
+    return true;
+  } else {
+    // return { valid: false, count: f1s.length, message: "Chưa đủ F1 ở 2 nhánh khác nhau" };
+    return false;
+  }
+};

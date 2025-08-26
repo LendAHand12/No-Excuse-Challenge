@@ -5,6 +5,9 @@ const Claim = {
   hewe: () => {
     return API.post(`${URL_API_CLAIM}/hewe`);
   },
+  amc: () => {
+    return API.post(`${URL_API_CLAIM}/amc`);
+  },
   usdt: ({ user_id, token, amount }) => {
     return API.post(`${URL_API_CLAIM}/usdt`, { user_id, token, amount });
   },

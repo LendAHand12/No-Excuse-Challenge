@@ -1,11 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import LOGO from '@/images/logo/logo.png';
 import USDT from '@/images/icon/usdt.svg';
 import Claim from '@/api/Claim';
+import Swap from '@/api/Swap';
+import User from '@/api/User';
 import { ToastContainer, toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import Loading from '@/components/Loading';
+import { UPDATE_USER_INFO } from '@/slices/auth';
 
 export default function SwapPage() {
   const { t } = useTranslation();
@@ -14,7 +18,26 @@ export default function SwapPage() {
   const [toCoin, setToCoin] = useState('HEWE'); // mặc định HEWE
   const [amount, setAmount] = useState('');
   const [price, setPrice] = useState(0); // giá token
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingSwap, setLoadingSwap] = useState(false);
+  const dispatch = useDispatch();
+  const [refresh, setRefresh] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      await User.getUserInfo()
+        .then((response) => {
+          dispatch(UPDATE_USER_INFO(response.data));
+        })
+        .catch((error) => {
+          let message =
+            error.response && error.response.data.message
+              ? error.response.data.message
+              : error.message;
+          toast.error(t(message));
+        });
+    })();
+  }, [refresh]);
 
   const fetchPrice = async (coin) => {
     setLoading(true);
@@ -40,8 +63,34 @@ export default function SwapPage() {
 
   const getReceivedAmount = () => {
     if (!amount || !price) return '';
-    return (Number(amount) * price).toFixed(4);
+    return (Number(amount) / price).toFixed(4);
   };
+
+  const handleSwap = useCallback(async () => {
+    setLoadingSwap(true);
+    await Swap.request({
+      coinForm: 'USDT',
+      coinTo: toCoin,
+      amountFrom: amount,
+      amountTo: (Number(amount) / price).toFixed(4),
+      price,
+    })
+      .then((response) => {
+        const { message } = response.data;
+        toast.success(t(message));
+        setAmount('');
+        setLoadingSwap(false);
+        setRefresh(!refresh);
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.error
+            ? error.response.data.error
+            : error.message;
+        toast.error(t(message));
+        setLoadingSwap(false);
+      });
+  }, [toCoin, amount, price]);
 
   return (
     <>
@@ -56,9 +105,9 @@ export default function SwapPage() {
             className="absolute inset-0 w-full h-full object-cover"
             src="/bg.mp4"
           />
-          <div className="absolute inset-0 bg-black/50"></div>
+          {/* <div className="absolute inset-0 bg-black/50"></div> */}
           {/* Swap Box */}
-          <div className="relative z-10 flex justify-end items-center min-h-screen px-4">
+          <div className="relative z-10 flex justify-end items-center min-h-screen px-4 lg:mr-32 md:mr-16">
             <div className="bg-slate-800/50 backdrop-blur-xl rounded-3xl border border-slate-700/50 p-6 shadow-2xl w-full max-w-[450px]">
               {/* Logo công ty */}
               <div className="flex justify-center mb-4">
@@ -173,15 +222,17 @@ export default function SwapPage() {
                 {loading
                   ? 'Fetching price...'
                   : price
-                  ? `1 USDT = ${price} ${toCoin}`
+                  ? `1 ${toCoin} = ${price} USDT`
                   : 'No price data'}
               </div>
 
               {/* Swap button */}
               <button
                 disabled={!amount || loading}
-                className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-semibold transition disabled:bg-gray-600"
+                onClick={handleSwap}
+                className="w-full flex justify-center bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-semibold transition disabled:bg-gray-600"
               >
+                {loadingSwap && <Loading />}
                 Swap
               </button>
               <div className="mt-4">

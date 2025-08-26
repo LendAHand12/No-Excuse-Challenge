@@ -20,37 +20,35 @@ const checkLinkRef = asyncHandler(async (req, res) => {
 
   try {
     const treeUserReceive = await Tree.findById(receiveId);
-
     const treeUserRef = await Tree.findById(ref);
 
     if (treeUserReceive && treeUserRef) {
       const userReceive = await User.findById(treeUserReceive.userId);
+      const userRef = await User.findById(treeUserRef.userId);
+
+      if (userRef.errLahCode === "OVER45") {
+        return res.status(400).json({ error: "invalidUrl" });
+      }
 
       if (!treeUserReceive.parentId || treeUserReceive.userName === "NoExcuse 9") {
         message = "validUrl";
-        res.status(200).json({
-          message,
-        });
-      } else if (treeUserReceive.children.length < 2) {
+        return res.status(200).json({ message });
+      }
+
+      if (treeUserReceive.children.length < 2) {
         message = "validUrl";
-        res.status(200).json({
+        return res.status(200).json({
           message,
           city: userReceive.city,
         });
-      } else {
-        res.status(400).json({
-          error: "full5child",
-        });
       }
+
+      return res.status(400).json({ error: "full5child" });
     } else {
-      res.status(400).json({
-        error: message,
-      });
+      return res.status(400).json({ error: message });
     }
   } catch (err) {
-    res.status(400).json({
-      error: message,
-    });
+    return res.status(400).json({ error: message });
   }
 });
 
