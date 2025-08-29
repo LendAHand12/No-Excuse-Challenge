@@ -63,6 +63,7 @@ const Profile = () => {
     accountNumber,
     city,
     subUser,
+    checkCanNextTier,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -80,6 +81,7 @@ const Profile = () => {
   const [showMoveSystem, setShowMoveSystem] = useState(false);
   const [errAgrre, setErrAgrre] = useState(false);
   const [valueCheckAgrree, setValueCheckAgrree] = useState('');
+  const [showNextTier, setShowNextTier] = useState(false);
 
   const {
     register,
@@ -214,6 +216,9 @@ const Profile = () => {
       await User.getUserInfo()
         .then((response) => {
           dispatch(UPDATE_USER_INFO(response.data));
+          if (response.data.checkCanNextTier) {
+            setShowNextTier(true);
+          }
         })
         .catch((error) => {
           let message =
@@ -362,6 +367,70 @@ const Profile = () => {
                       />
                     </svg>
                     Set Up Face ID
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={showNextTier}
+        onRequestClose={() => setShowNextTier(false)}
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+          },
+        }}
+      >
+        <div className="overflow-y-auto overflow-x-hidden justify-center items-center w-full md:inset-0 h-modal md:h-full">
+          <div className="relative w-full max-w-md h-full md:h-auto">
+            <div className="relative text-center bg-white rounded-lg sm:p-5">
+              <button
+                onClick={() => setShowNextTier(false)}
+                className="text-gray-400 absolute top-2.5 right-2.5 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+                <span className="sr-only">Close modal</span>
+              </button>
+              <div className="pr-6 flex flex-col items-center">
+                <div
+                  className="text-left text-gray-700 font-medium rounded relative mb-5"
+                  role="alert"
+                >
+                  <span className="text-xl">🎉 Congratulations! </span>
+                  <br></br>
+                  You have conquered Tier 1 and are now qualified to rise into{' '}
+                  <b>Tier 2</b>!<br></br>🚀 This achievement proves your
+                  commitment, discipline, and belief in yourself. But this is
+                  only the beginning — greater challenges bring greater rewards.
+                  <br></br>🔥 Keep pushing. Keep growing. Keep conquering.
+                  Because every step you take brings you closer to becoming a
+                  Legend.
+                </div>
+                <div>
+                  <button
+                    onClick={() => navigate('/user/payment')}
+                    className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:opacity-70"
+                  >
+                    Proceed to Payment
                   </button>
                 </div>
               </div>
@@ -792,15 +861,15 @@ const Profile = () => {
                         let b1 = 0;
                         let b2 = 0;
 
-                        if (c1 > 77 || c2 > 77) {
+                        if (c1 > 89 || c2 > 89) {
                           b1 = 0;
                           b2 = 0;
-                        } else if (c1 < 19 || c2 < 19) {
-                          b1 = Math.max(19 - c1, 0);
-                          b2 = Math.max(77 - c2, 0);
+                        } else if (c1 < 23 || c2 < 23) {
+                          b1 = Math.max(23 - c1, 0);
+                          b2 = Math.max(89 - c2, 0);
                         } else {
-                          b1 = Math.max(77 - c1, 0);
-                          b2 = Math.max(19 - c2, 0);
+                          b1 = Math.max(89 - c1, 0);
+                          b2 = Math.max(23 - c2, 0);
                         }
 
                         return (

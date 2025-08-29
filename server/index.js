@@ -47,6 +47,7 @@ import {
   checkUserTryToTier2,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
+import { getNextUserTier2 } from "./common.js";
 
 const app = express();
 
@@ -105,6 +106,8 @@ app.use(notFound);
 
 // configure a custome error handler middleware
 app.use(errorHandler);
+
+// const nextUser = await getNextUserTier2();
 
 const cron0 = new CronJob("00 00 * * *", async () => {
   // 0h

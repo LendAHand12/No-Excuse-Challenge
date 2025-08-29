@@ -19,6 +19,7 @@ import {
   mergeIntoThreeGroups,
   updateValueAtIndex,
   getTotalLevel6ToLevel10OfUser,
+  checkUserCanNextTier,
 } from "../utils/methods.js";
 import { areArraysEqual } from "../cronJob/index.js";
 import {
@@ -206,7 +207,7 @@ const getUserById = asyncHandler(async (req, res) => {
     const totalHold = listTransHold.reduce((sum, ele) => sum + ele.amount, 0);
 
     let notEnoughtChild = { countChild1: 0, countChild2: 0 };
-    if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 5 || user.tier > 1) {
+    if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 3 || user.tier > 1) {
       notEnoughtChild = await getTotalLevel6ToLevel10OfUser(tree);
     }
 
@@ -439,7 +440,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
     });
 
     let notEnoughtChild = { countChild1: 0, countChild2: 0 };
-    if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 5 || user.tier > 1) {
+    if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 3 || user.tier > 1) {
       notEnoughtChild = await getTotalLevel6ToLevel10OfUser(tree);
     }
     let countdown = 0;
@@ -468,6 +469,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
     ]);
 
     const totalEarn = result[0]?.totalAmount || 0;
+
+    const checkCanNextTier = user.currentLayer.slice(-1) >= 3 ? await checkUserCanNextTier(tree) : false;
 
     res.json({
       id: user._id,
@@ -547,6 +550,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       claimedAmc: user.claimedAmc,
       subUser,
       timeRetryOver45: user.timeRetryOver45,
+      checkCanNextTier,
     });
   } else {
     res.status(404);

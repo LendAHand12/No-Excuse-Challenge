@@ -339,7 +339,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
       paymentIds: [],
       userStepPayment: user.paymentStep,
     });
-  } else if (user.currentLayer.slice(-1) < 4) {
+  } else if (user.currentLayer.slice(-1) < 3) {
     res.status(200).json({
       status: "PENDING",
       message: `Your current level is insufficient to upgrade to the tier ${user.tier + 1}`,
@@ -352,11 +352,11 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
       tier: user.tier,
       isSubId: false,
     });
-    if (
-      user.city === "US"
-        ? user.currentLayer.slice(-1)[0] === 4
-        : user.currentLayer.slice(-1)[0] === 5
-    ) {
+    // if (
+    //   user.city === "US"
+    //     ? user.currentLayer.slice(-1)[0] === 3
+    //     : user.currentLayer.slice(-1)[0] === 4
+    // ) {
       const checkCanNextTier = await checkUserCanNextTier(treeOfUser);
       if (checkCanNextTier) {
         goNextTier = true;
@@ -367,9 +367,9 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           message: `Your current level is insufficient to upgrade to the tier ${user.tier + 1}`,
         });
       }
-    } else {
-      goNextTier = true;
-    }
+    // } else {
+    //   goNextTier = true;
+    // }
 
     if (goNextTier) {
       await Transaction.deleteMany({
