@@ -45,6 +45,7 @@ import {
   blockUserNotKYC,
   updateHewePrice,
   checkUserTryToTier2,
+  checkRefUserHaveChildOver45
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 import { getNextUserTier2 } from "./common.js";
@@ -142,6 +143,13 @@ const cron13 = new CronJob("45 01 * * *", async () => {
   console.log("Check User try to Tier2 done");
 });
 
+const cron14 = new CronJob("55 01 * * *", async () => {
+  // 1h55
+  console.log("Check User Have child over 45 start");
+  await checkRefUserHaveChildOver45();
+  console.log("Check Usr Have child over 45 done");
+});
+
 const cron2 = new CronJob("00 02 * * *", async () => {
   // 2h
   console.log("Count child start");
@@ -181,6 +189,7 @@ cron0.start();
 cron1.start();
 cron12.start();
 cron13.start();
+cron14.start();
 cron2.start();
 cron3.start();
 cron4.start();

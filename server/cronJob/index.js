@@ -1,9 +1,16 @@
 import asyncHandler from "express-async-handler";
 import moment from "moment";
+import fs from 'fs';
 
 import User from "../models/userModel.js";
-import { sendMailGetHewePrice, sendMailUpdateLayerForAdmin } from "../utils/sendMailCustom.js";
-import { getCountAllChildren, getCountIncome } from "../controllers/userControllers.js";
+import {
+  sendMailGetHewePrice,
+  sendMailUpdateLayerForAdmin,
+} from "../utils/sendMailCustom.js";
+import {
+  getCountAllChildren,
+  getCountIncome,
+} from "../controllers/userControllers.js";
 import {
   findRootLayer,
   getTotalLevel6ToLevel10OfUser,
@@ -17,7 +24,12 @@ import Config from "../models/configModel.js";
 
 export const deleteUser24hUnPay = asyncHandler(async () => {
   const listUser = await User.find({
-    $and: [{ tier: 1 }, { countPay: 0 }, { isAdmin: false }, { status: { $ne: "DELETED" } }],
+    $and: [
+      { tier: 1 },
+      { countPay: 0 },
+      { isAdmin: false },
+      { status: { $ne: "DELETED" } },
+    ],
   });
   for (let u of listUser) {
     const currentDay = moment();
@@ -42,30 +54,48 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
         });
         parent.children = [...newChilds];
         const updatedParent = await parent.save();
-        if (treeOfUser.children.length === 1 && updatedParent.children.length < 2) {
+        if (
+          treeOfUser.children.length === 1 &&
+          updatedParent.children.length < 2
+        ) {
           const firstChild = await Tree.findById(treeOfUser.children[0]);
           firstChild.parentId = updatedParent._id;
           firstChild.refId =
-            firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
+            firstChild.refId === treeOfUser._id
+              ? "64cd449ec75ae7bc7ebbab03"
+              : firstChild.refId;
           await firstChild.save();
-          const newUpdatedParentChildren = [...updatedParent.children, firstChild._id];
+          const newUpdatedParentChildren = [
+            ...updatedParent.children,
+            firstChild._id,
+          ];
           updatedParent.children = newUpdatedParentChildren;
           await updatedParent.save();
         }
-        if (treeOfUser.children.length === 2 && updatedParent.children.length === 0) {
+        if (
+          treeOfUser.children.length === 2 &&
+          updatedParent.children.length === 0
+        ) {
           const firstChild = await Tree.findById(treeOfUser.children[0]);
           firstChild.parentId = updatedParent._id;
-          firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
+          firstChild.refId === treeOfUser._id
+            ? "64cd449ec75ae7bc7ebbab03"
+            : firstChild.refId;
           await firstChild.save();
           const secondChild = await Tree.findById(treeOfUser.children[1]);
           secondChild.parentId = updatedParent._id;
-          secondChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : secondChild.refId;
+          secondChild.refId === treeOfUser._id
+            ? "64cd449ec75ae7bc7ebbab03"
+            : secondChild.refId;
           await secondChild.save();
           const newUpdatedParentChildren = [firstChild._id, secondChild._id];
           updatedParent.children = newUpdatedParentChildren;
           await updatedParent.save();
         }
-        if (treeOfUser.children.length === 2 && updatedParent.children.length === 1) {
+        if (
+          treeOfUser.children.length === 2 &&
+          updatedParent.children.length === 1
+        ) {
           console.log({ TH333333: u.userId });
           const firstChild = await Tree.findById(treeOfUser.children[0]);
           const secondChild = await Tree.findById(treeOfUser.children[1]);
@@ -89,7 +119,9 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
 });
 
 export const countChildToData = asyncHandler(async () => {
-  const listTrees = await Tree.find({}).select("tier countChild userId userName");
+  const listTrees = await Tree.find({}).select(
+    "tier countChild userId userName"
+  );
 
   for (let t of listTrees) {
     try {
@@ -170,7 +202,9 @@ export const areArraysEqual = (arr1, arr2) => {
 export const distributionHewe = asyncHandler(async () => {
   const listUser = await User.find({
     $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }, { countPay: 13 }],
-  }).select("userId totalHewe availableHewe hewePerDay claimedHewe currentLayer");
+  }).select(
+    "userId totalHewe availableHewe hewePerDay claimedHewe currentLayer"
+  );
 
   for (let u of listUser) {
     try {
@@ -330,9 +364,13 @@ export const checkUserTryToTier2 = asyncHandler(async () => {
           tier: 1,
           isSubId: false,
         });
-        const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(treeOfUser);
+        const { countChild1, countChild2 } =
+          await getTotalLevel6ToLevel10OfUser(treeOfUser);
         // console.log({ user: u.userId, countChild1, countChild2 });
-        if ((countChild1 >= 19 && countChild2 >= 77) || (countChild1 >= 77 && countChild2 >= 19)) {
+        if (
+          (countChild1 >= 19 && countChild2 >= 77) ||
+          (countChild1 >= 77 && countChild2 >= 19)
+        ) {
           u.tryToTier2 = "DONE";
           u.timeToTry = null;
         } else {
@@ -364,5 +402,61 @@ export const checkUserTryToTier2 = asyncHandler(async () => {
     } catch (error) {
       console.log({ error });
     }
+  }
+});
+
+export const checkRefUserHaveChildOver45 = asyncHandler(async () => {
+  const listTreeUser = await Tree.find({
+    $and: [{ isSubId: false }, { tier: 1 }],
+  });
+
+  let logData = "";
+
+  for (let tree of listTreeUser) {
+    const u = await User.findById(tree.userId);
+
+    if (u && u.errLahCode === "" && !u.timeRetryOver45) {
+      const listRefId = await Tree.find({ refId: tree._id });
+
+      if (listRefId.length > 0) {
+        let eligibleCount = 0;
+
+        for (let childTree of listRefId) {
+          let child = await User.findById(childTree.userId);
+          if (child && child.errLahCode !== "OVER45") {
+            eligibleCount++;
+          }
+        }
+
+        // Kiểm tra số lượng user đủ điều kiện
+        if (eligibleCount < 2) {
+          let addDays = eligibleCount === 1 ? 15 : 30;
+
+          u.timeRetryOver45 = moment().add(addDays, "days").toDate();
+
+          console.log({
+            userId: u.userId,
+            length: listRefId.length,
+            eligibleCount,
+          });
+
+          await u.save();
+
+          // Thêm thông tin vào logData
+          logData += `UserID: ${
+            u.userId
+          }, EligibleCount: ${eligibleCount}, TotalChild: ${
+            listRefId.length
+          }, NewTimeRetry: ${moment(u.timeRetryOver45).format(
+            "YYYY-MM-DD HH:mm:ss"
+          )}\n`;
+        }
+      }
+    }
+  }
+
+  if (logData) {
+    fs.writeFileSync("users_not_enough_children.txt", logData, "utf8");
+    console.log("Đã ghi thông tin vào file users_not_enough_children.txt");
   }
 });
