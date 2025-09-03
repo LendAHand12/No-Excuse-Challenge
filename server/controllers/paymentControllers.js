@@ -215,8 +215,8 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           type: "DIRECT",
           id: transactionDirect._id,
           amount: directCommissionFee,
-          // to: refUser.userName,
-          to: refUser.walletAddress,
+          to: refUser.userName,
+          // to: refUser.walletAddress,
         });
         payments.push({
           userName: refUser.userId,
@@ -308,8 +308,8 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
             type: "REFERRAL",
             id: transactionReferral._id,
             amount: referralCommissionFee,
-            // to: receiveUser.userId,
-            to: receiveUser.walletAddress,
+            to: receiveUser.userId,
+            // to: receiveUser.walletAddress,
           });
           countPayUser = countPayUser + 1;
           indexFor++;
@@ -357,16 +357,16 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
     //     ? user.currentLayer.slice(-1)[0] === 3
     //     : user.currentLayer.slice(-1)[0] === 4
     // ) {
-      const checkCanNextTier = await checkUserCanNextTier(treeOfUser);
-      if (checkCanNextTier) {
-        goNextTier = true;
-        holdForNotEnoughLevel = true;
-      } else {
-        res.status(200).json({
-          status: "PENDING",
-          message: `Your current level is insufficient to upgrade to the tier ${user.tier + 1}`,
-        });
-      }
+    const checkCanNextTier = await checkUserCanNextTier(treeOfUser);
+    if (checkCanNextTier) {
+      goNextTier = true;
+      holdForNotEnoughLevel = true;
+    } else {
+      res.status(200).json({
+        status: "PENDING",
+        message: `Your current level is insufficient to upgrade to the tier ${user.tier + 1}`,
+      });
+    }
     // } else {
     //   goNextTier = true;
     // }
