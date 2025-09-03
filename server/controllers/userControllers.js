@@ -334,7 +334,7 @@ const getUserById = asyncHandler(async (req, res) => {
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
-      totalEarning: totalEarn,
+      totalEarning: totalEarn + listRefIdOfUser.length >= 2 ? 10 : 0,
       withdrawPending: withdrawPending,
       chartData: mergeIntoThreeGroups(listDirectUser),
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
@@ -470,7 +470,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
 
     const totalEarn = result[0]?.totalAmount || 0;
 
-    const checkCanNextTier = user.currentLayer.slice(-1) >= 3 ? await checkUserCanNextTier(tree) : false;
+    const checkCanNextTier =
+      user.currentLayer.slice(-1) >= 3 ? await checkUserCanNextTier(tree) : false;
 
     res.json({
       id: user._id,
@@ -523,7 +524,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
-      totalEarning: totalEarn,
+      totalEarning: totalEarn + listRefIdOfUser.length >= 2 ? 10 : 0,
       withdrawPending: withdrawPending,
       chartData: mergeIntoThreeGroups(listDirectUser),
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
