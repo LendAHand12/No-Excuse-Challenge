@@ -71,7 +71,7 @@ const UserProfile = () => {
             kycFee,
             changeCreatedAt,
             lockKyc,
-            timeRetryOver45
+            timeRetryOver45,
           } = response.data;
           setValue('userId', userId);
           setValue('email', email);
@@ -675,8 +675,10 @@ const UserProfile = () => {
                             />
                           )}
                         />
+                      ) : data.timeRetryOver45 ? (
+                        new Date(data.timeRetryOver45).toLocaleDateString('vi')
                       ) : (
-                        data.timeRetryOver45 ? new Date(data.timeRetryOver45).toLocaleDateString('vi') : ""
+                        ''
                       )}
                     </span>
                   </li>
@@ -861,7 +863,7 @@ const UserProfile = () => {
                   </p>
                   <div className="py-2">
                     <ul>
-                      {data.subInfo?.listDirectUser.map((ele) => (
+                      {data.subInfo?.listDirectUser?.map((ele) => (
                         <li
                           className="bg-white border-b hover:bg-gray-50"
                           key={ele.userId}
