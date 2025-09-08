@@ -352,24 +352,20 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
       tier: user.tier,
       isSubId: false,
     });
-    // if (
-    //   user.city === "US"
-    //     ? user.currentLayer.slice(-1)[0] === 3
-    //     : user.currentLayer.slice(-1)[0] === 4
-    // ) {
-    const checkCanNextTier = await checkUserCanNextTier(treeOfUser);
-    if (checkCanNextTier) {
-      goNextTier = true;
-      holdForNotEnoughLevel = true;
+    if (user.currentLayer.slice(-1)[0] === 3) {
+      const checkCanNextTier = await checkUserCanNextTier(treeOfUser);
+      if (checkCanNextTier) {
+        goNextTier = true;
+        holdForNotEnoughLevel = true;
+      } else {
+        res.status(200).json({
+          status: "PENDING",
+          message: `Your current level is insufficient to upgrade to the tier ${user.tier + 1}`,
+        });
+      }
     } else {
-      res.status(200).json({
-        status: "PENDING",
-        message: `Your current level is insufficient to upgrade to the tier ${user.tier + 1}`,
-      });
+      goNextTier = true;
     }
-    // } else {
-    //   goNextTier = true;
-    // }
 
     if (goNextTier) {
       await Transaction.deleteMany({
@@ -690,7 +686,7 @@ const getAdminWallets = async () => {
   };
 };
 
-const findAncestors = async (treeId, limit) => {
+export const findAncestors = async (treeId, limit) => {
   const ancestors = [];
   let currentTreeId = treeId;
 

@@ -34,14 +34,7 @@ const userSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: [
-        "UNVERIFY",
-        "PENDING",
-        "APPROVED",
-        "LOCKED",
-        "DELETED",
-        "REJECTED",
-      ],
+      enum: ["UNVERIFY", "PENDING", "APPROVED", "LOCKED", "DELETED", "REJECTED"],
       default: "UNVERIFY",
     },
     imgFront: {
@@ -251,6 +244,14 @@ const userSchema = mongoose.Schema(
     doneChangeToDie: {
       type: Boolean,
       default: false,
+    },
+    preTier2Status: {
+      type: String,
+      enum: ["", "ACHIEVED", "PENDING", "APPROVED", "PASSED"],
+      default: "",
+    },
+    timeOkPreTier2: {
+      type: Date,
     },
   },
   {

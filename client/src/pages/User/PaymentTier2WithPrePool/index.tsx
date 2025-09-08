@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import Payment from '@/api/Payment';
+import PreTier2 from '@/api/PreTier2';
 import User from '@/api/User';
 import Loading from '@/components/Loading';
 import { ToastContainer, toast } from 'react-toastify';
@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 
 Modal.setAppElement('#root');
 
-const PaymentNextTierPage = () => {
+const PaymentTier2WithPrePoolPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { userInfo } = useSelector((state) => state.auth);
@@ -47,7 +47,7 @@ const PaymentNextTierPage = () => {
     } else {
       setLoadingPaymentInfo(true);
     }
-    await Payment.getPaymentNextTierInfo(childId)
+    await PreTier2.getPaymentTier2Info(childId)
       .then((response) => {
         const {
           status,
@@ -59,11 +59,11 @@ const PaymentNextTierPage = () => {
           notEnoughtChild,
         } = response.data;
         setResMessage(message);
-        if (userStepPayment === 0 && holdForNotEnoughLevel) {
-          setShowCommit(holdForNotEnoughLevel);
-          setNotEnoughtChild1(notEnoughtChild.countChild1);
-          setNotEnoughtChild2(notEnoughtChild.countChild2);
-        }
+        // if (userStepPayment === 0 && holdForNotEnoughLevel) {
+        //   setShowCommit(holdForNotEnoughLevel);
+        //   setNotEnoughtChild1(notEnoughtChild.countChild1);
+        //   setNotEnoughtChild2(notEnoughtChild.countChild2);
+        // }
         setResStatus(status);
 
         if (status === 'OK') {
@@ -71,7 +71,7 @@ const PaymentNextTierPage = () => {
             (accumulator, currentValue) => accumulator + currentValue.amount,
             0,
           );
-          setTotal(totalPayment + 2);
+          setTotal(totalPayment + (userStepPayment === 0 ? 2 : 1));
           setPaymentIdsList(paymentIds);
           setPaymentsList(payments);
           setStep(userStepPayment);
@@ -90,6 +90,7 @@ const PaymentNextTierPage = () => {
   };
 
   useEffect(() => {
+    console.log({ childId });
     onGetPaymentInfo(childId);
   }, [childId]);
 
@@ -113,22 +114,22 @@ const PaymentNextTierPage = () => {
   const paymentMetamask = useCallback(async () => {
     setLoadingPayment(true);
     try {
-      const referralTransaction = await transfer(
-        import.meta.env.VITE_MAIN_WALLET_ADDRESS,
-        total,
-      );
-      if (referralTransaction) {
-        const { transactionHash } = referralTransaction;
-        await doneNextTierPayment({
-          transactionHash,
-          childId,
-        });
-        setLoadingPayment(false);
-        setStep(step + 1);
-      } else {
-        setLoadingPayment(false);
-        throw new Error(t('payment error'));
-      }
+      // const referralTransaction = await transfer(
+      //   import.meta.env.VITE_MAIN_WALLET_ADDRESS,
+      //   total,
+      // );
+      // if (referralTransaction) {
+      //   const { transactionHash } = referralTransaction;
+      await doneNextTierPayment({
+        transactionHash: '',
+        childId,
+      });
+      setLoadingPayment(false);
+      setStep(step + 1);
+      // } else {
+      //   setLoadingPayment(false);
+      //   throw new Error(t('payment error'));
+      // }
     } catch (error) {
       toast.error(t(error.message));
       setLoadingPayment(false);
@@ -137,7 +138,7 @@ const PaymentNextTierPage = () => {
 
   const doneNextTierPayment = useCallback(
     async ({ transactionHash, childId }) => {
-      await Payment.onDoneNextTierPayment({
+      await PreTier2.onDonePayment({
         transIds: paymentIdsList,
         transactionHash,
         childId,
@@ -412,4 +413,4 @@ const PaymentNextTierPage = () => {
   );
 };
 
-export default PaymentNextTierPage;
+export default PaymentTier2WithPrePoolPage;

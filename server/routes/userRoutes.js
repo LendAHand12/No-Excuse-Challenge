@@ -38,6 +38,7 @@ import {
   getSubUserProfile,
   getListChildOfSubUser,
   getAllUsersOver45,
+  getAllUsersPreTier2,
 } from "../controllers/userControllers.js";
 import { protectRoute, isAdmin, isSuperAdmin } from "../middleware/authMiddleware.js";
 import uploadCCCD from "../middleware/uploadCCCD.js";
@@ -48,6 +49,7 @@ router.route("/").get(protectRoute, isAdmin, getAllUsers);
 router.route("/over45").get(protectRoute, isAdmin, getAllUsersOver45);
 router.route("/info").get(protectRoute, getUserInfo);
 router.route("/getAllDeletedUsers").get(protectRoute, isAdmin, getAllDeletedUsers);
+router.route("/getAllUsersPreTier2").get(protectRoute, isAdmin, getAllUsersPreTier2);
 router.route("/profile").get(protectRoute, getUserProfile);
 router
   .route("/changeWallet")

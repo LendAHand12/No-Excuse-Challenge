@@ -16,7 +16,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import PhoneInput from 'react-phone-number-input';
 import './index.css';
 import ClaimModal from '../../../components/ClaimModal';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -64,6 +64,8 @@ const Profile = () => {
     city,
     subUser,
     checkCanNextTier,
+    preTier2Status,
+    preTier2User,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -593,6 +595,53 @@ const Profile = () => {
       </Modal>
 
       <div className="px-2 lg:px-24 py-24 space-y-6 lg:space-y-8">
+        {tier === 1 &&
+          (preTier2Status === 'APPROVED' || preTier2Status === 'ACHIEVED') && (
+            <div
+              className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-5 font-medium"
+              role="alert"
+            >
+              <span className="block sm:inline">
+                Congratulations! You’re eligible for Pre-Tier 2.{' '}
+                <Link to="/user/payment-pre-tier-2" className="underline">
+                  {' '}
+                  Go to the payment page now.
+                </Link>
+              </span>
+            </div>
+          )}
+
+        {tier === 1 && preTier2Status === 'PASSED' && (
+          <div
+            className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-5 font-medium"
+            role="alert"
+          >
+            <span className="block sm:inline">
+              Congratulations! You’re on the waiting list for Tier 2 in the
+              Pre-Tier2 program
+            </span>
+          </div>
+        )}
+
+        {preTier2User && (
+          <div
+            className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-5 font-medium"
+            role="alert"
+          >
+            <span className="block sm:inline">
+              Congratulations! You’re eligible for Tier 2 with the new Pre-Tier2
+              program.{' '}
+              <Link
+                to="/user/payment-for-tier-with-pre-tier-2-pool"
+                className="underline"
+              >
+                {' '}
+                Go to the payment page now.
+              </Link>
+            </span>
+          </div>
+        )}
+
         {bonusRef && (
           <div
             className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-5"

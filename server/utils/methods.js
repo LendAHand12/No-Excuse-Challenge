@@ -518,16 +518,15 @@ export const checkUserCanNextTier = async (treeOfUser) => {
 };
 
 export const getTotalLevel6ToLevel10OfUser = async (treeOfUser) => {
-  console.log({name: treeOfUser.userName})
   const countWithLevelChild1 = await countChildOfEachLevel(treeOfUser.children[0]);
   const countWithLevelChild2 = await countChildOfEachLevel(treeOfUser.children[1]);
 
-  console.log({countWithLevelChild1, countWithLevelChild2});
+  // console.log({ countWithLevelChild1, countWithLevelChild2 });
 
-  const countChild1 = sumLevels(countWithLevelChild1, 4, 9);
-  const countChild2 = sumLevels(countWithLevelChild2, 4, 9);
+  const countChild1 = sumLevels(countWithLevelChild1, 3, 9);
+  const countChild2 = sumLevels(countWithLevelChild2, 3, 9);
 
-  console.log({countChild1, countChild2})
+  // console.log({countChild1, countChild2})
 
   return { countChild1, countChild2 };
 };

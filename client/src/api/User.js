@@ -12,6 +12,11 @@ const User = {
       `${URL_API_USER}/?pageNumber=${pageNumber}&keyword=${keyword}&status=${statusSearch}&coin=${coin}`,
     );
   },
+  getAllUsersPreTier2: (pageNumber, keyword, status) => {
+    return API.get(
+      `${URL_API_USER}/getAllUsersPreTier2?pageNumber=${pageNumber}&keyword=${keyword}&status=${status}`,
+    );
+  },
   getAllUsersOver45: (pageNumber, keyword) => {
     return API.get(
       `${URL_API_USER}/over45?pageNumber=${pageNumber}&keyword=${keyword}`,

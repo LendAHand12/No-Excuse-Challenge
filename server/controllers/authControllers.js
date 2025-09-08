@@ -9,7 +9,12 @@ import Tree from "../models/treeModel.js";
 import MoveSystem from "../models/moveSystemModel.js";
 import { getActivePackages } from "./packageControllers.js";
 import Permission from "../models/permissionModel.js";
-import { checkSerepayWallet, checkUserCanNextTier, findNextReferrer, mergeIntoThreeGroups } from "../utils/methods.js";
+import {
+  checkSerepayWallet,
+  checkUserCanNextTier,
+  findNextReferrer,
+  mergeIntoThreeGroups,
+} from "../utils/methods.js";
 import axios from "axios";
 import Honor from "../models/honorModel.js";
 import mongoose from "mongoose";
@@ -265,7 +270,8 @@ const authUser = asyncHandler(async (req, res) => {
       subUser = await Tree.findOne({ userId: user._id, isSubId: true, tier: 1 });
     }
 
-    const checkCanNextTier = user.currentLayer.slice(-1) >= 3 ? await checkUserCanNextTier(tree) : false;
+    const checkCanNextTier =
+      user.currentLayer.slice(-1) >= 3 ? await checkUserCanNextTier(tree) : false;
 
     res.status(200).json({
       userInfo: {
@@ -326,7 +332,8 @@ const authUser = asyncHandler(async (req, res) => {
         availableAmc: user.availableAmc,
         claimedAmc: user.claimedAmc,
         subUser,
-        checkCanNextTier
+        checkCanNextTier,
+        preTier2Status: user.preTier2Status,
       },
       accessToken,
       refreshToken,

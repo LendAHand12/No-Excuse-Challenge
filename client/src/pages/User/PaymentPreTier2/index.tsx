@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import Payment from '@/api/Payment';
+import PreTier2 from '@/api/PreTier2';
 import Loading from '@/components/Loading';
 import { ToastContainer, toast } from 'react-toastify';
 import { useForm } from 'react-hook-form';
@@ -30,7 +30,7 @@ const PaymentPage = () => {
 
   const onGetPaymentInfo = async () => {
     setLoadingPaymentInfo(true);
-    await Payment.getPaymentInfo()
+    await PreTier2.payment()
       .then((response) => {
         const { payments, paymentIds, message } = response.data;
         if (message) {
@@ -41,7 +41,7 @@ const PaymentPage = () => {
             (accumulator, currentValue) => accumulator + currentValue.amount,
             0,
           );
-          const fee = 1;
+          const fee = 0;
           setTotal(totalPayment + fee);
           setPaymentIdsList(paymentIds);
           setPaymentsList(payments);
@@ -66,19 +66,19 @@ const PaymentPage = () => {
   const paymentMetamask = useCallback(async () => {
     setLoadingPayment(true);
     try {
-      const referralTransaction = await transfer(
-        import.meta.env.VITE_MAIN_WALLET_ADDRESS,
-        total,
-      );
-      if (referralTransaction) {
-        const { transactionHash } = referralTransaction;
-        await donePayment(transactionHash);
-        setPaymentCompleted(true);
-        window.location.reload();
-      } else {
-        setLoadingPayment(false);
-        throw new Error(t('payment error'));
-      }
+      // const referralTransaction = await transfer(
+      //   import.meta.env.VITE_MAIN_WALLET_ADDRESS,
+      //   total,
+      // );
+      // if (referralTransaction) {
+      //   const { transactionHash } = referralTransaction;
+      await donePayment('transactionHash');
+      setPaymentCompleted(true);
+      // window.location.reload();
+      // } else {
+      //   setLoadingPayment(false);
+      //   throw new Error(t('payment error'));
+      // }
     } catch (error) {
       toast.error(t(error.message));
       setLoadingPayment(false);
@@ -87,7 +87,7 @@ const PaymentPage = () => {
 
   const donePayment = useCallback(
     async (transactionHash) => {
-      await Payment.onDonePayment({
+      await PreTier2.donePayment({
         transIds: paymentIdsList,
         transactionHash,
       })
@@ -150,6 +150,8 @@ const PaymentPage = () => {
                             ? 'bg-red-50 text-red-800'
                             : payment.type === 'PIG'
                             ? 'bg-pink-100'
+                            : payment.type === 'PRETIER2'
+                            ? 'bg-pink-100'
                             : payment.type === 'COMPANY'
                             ? 'bg-purple-100'
                             : payment.type === 'KYC'
@@ -180,6 +182,8 @@ const PaymentPage = () => {
                                 ? t('fine')
                                 : payment.type === 'PIG'
                                 ? 'Dream Pool'
+                                : payment.type === 'PRETIER2'
+                                ? 'Pre-Tier 2 Pool'
                                 : payment.type === 'COMPANY'
                                 ? 'HEWE'
                                 : payment.type === 'KYC'
@@ -192,9 +196,7 @@ const PaymentPage = () => {
                           <div className="">
                             <span className="mx-2 text-black">
                               <span className="font-medium mr-2">To : </span>
-                              <span className="">
-                                {shortenWalletAddress(payment.to, 10)}
-                              </span>
+                              <span className="">{payment.to}</span>
                             </span>
                           </div>
                         </div>

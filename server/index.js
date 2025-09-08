@@ -34,6 +34,7 @@ import configRoutes from "./routes/configRoutes.js";
 import userHistoryRoutes from "./routes/userHistoryRoutes.js";
 import moveSystemRoutes from "./routes/moveSystemRoutes.js";
 import swapRoutes from "./routes/swapRoutes.js";
+import preTier2Routes from "./routes/preTier2Routes.js";
 
 import {
   countChildToData,
@@ -45,7 +46,8 @@ import {
   blockUserNotKYC,
   updateHewePrice,
   checkUserTryToTier2,
-  checkRefUserHaveChildOver45
+  checkRefUserHaveChildOver45,
+  checkUserPreTier2,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 import { getNextUserTier2 } from "./common.js";
@@ -96,6 +98,7 @@ app.use("/api/config", configRoutes);
 app.use("/api/user-history", userHistoryRoutes);
 app.use("/api/move-system", moveSystemRoutes);
 app.use("/api/swap", swapRoutes);
+app.use("/api/pre-tier-2", preTier2Routes);
 
 app.get("/api/test-tele", async (req, res) => {
   await sendTelegramMessage({ userName: "kiet" });
@@ -183,6 +186,13 @@ const cron6 = new CronJob("0 * * * *", async () => {
   await updateHewePrice();
 });
 
+const cron7 = new CronJob("00 06 * * *", async () => {
+  // every 6 hour
+  console.log("Check user pre tier 2 start");
+  await checkUserPreTier2();
+  console.log("Check user pre tier 2 end");
+});
+
 // await test1();
 
 cron0.start();
@@ -195,6 +205,7 @@ cron3.start();
 cron4.start();
 cron5.start();
 cron6.start();
+cron7.start();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>

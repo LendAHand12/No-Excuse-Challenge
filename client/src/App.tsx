@@ -78,6 +78,13 @@ import MoveSystemList from './pages/Admin/MoveSystemList';
 import SwapPage from './pages/User/SwapPage';
 import SubProfilePage from './pages/User/SubProfile';
 import DormantUsersPage from './pages/Admin/DormantUsers';
+import UsersEligiblePreTier2Page from './pages/Admin/UsersEligiblePreTier2';
+import UsersPreTier2Page from './pages/Admin/UsersPreTier2';
+import UsersPreTier2 from './pages/User/UsersPreTier2';
+import PreTier2PaymentPage from './pages/User/PaymentPreTier2';
+import PaymentTier2WithPrePool from './pages/User/PaymentTier2WithPrePool';
+import AdminPreTier2PoolPage from './pages/Admin/PreTier2Pool';
+import PreTier2Pool from './pages/User/PreTier2Pool';
 
 function App() {
   const { pathname } = useLocation();
@@ -206,6 +213,48 @@ function App() {
               <>
                 <PageTitle title="Transactions | NoExcuseChallenge" />
                 <AdminTransactionsPage />
+              </>
+            }
+          />
+        )}
+
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/eligible-pre-tier-2')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/eligible-pre-tier-2"
+            element={
+              <>
+                <PageTitle title="Users Eligible Pre-Tier 2 | NoExcuseChallenge" />
+                <UsersEligiblePreTier2Page />
+              </>
+            }
+          />
+        )}
+
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/pre-tier-2-users')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/pre-tier-2-users"
+            element={
+              <>
+                <PageTitle title="Users Pre-Tier 2 | NoExcuseChallenge" />
+                <UsersPreTier2Page />
+              </>
+            }
+          />
+        )}
+
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/pre-tier-2-pool')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/pre-tier-2-pool"
+            element={
+              <>
+                <PageTitle title="Pre-Tier 2 Pool | NoExcuseChallenge" />
+                <AdminPreTier2PoolPage />
               </>
             }
           />
@@ -658,6 +707,51 @@ function App() {
                 </>
               }
             />
+            {(userInfo?.preTier2Status === 'APPROVED' ||
+              userInfo?.preTier2Status === 'ACHIEVED') && (
+              <Route
+                path="/user/payment-pre-tier-2"
+                element={
+                  <>
+                    <PageTitle title="Payment Pre-Tier 2 | NoExcuseChallenge" />
+                    <PreTier2PaymentPage />
+                  </>
+                }
+              />
+            )}
+
+            {userInfo?.preTier2Status === 'PASSED' && (
+              <Route
+                path="/user/payment-for-tier-with-pre-tier-2-pool"
+                element={
+                  <>
+                    <PageTitle title="Payment Tier 2 With Pre-Tier2 Pool | NoExcuseChallenge" />
+                    <PaymentTier2WithPrePool />
+                  </>
+                }
+              />
+            )}
+
+            <Route
+              path="/user/pre-tier-2-users"
+              element={
+                <>
+                  <PageTitle title="Users Pre-Tier 2 | NoExcuseChallenge" />
+                  <UsersPreTier2 />
+                </>
+              }
+            />
+
+            <Route
+              path="/user/pre-tier-2-pool"
+              element={
+                <>
+                  <PageTitle title="Pre-Tier 2 Pool | NoExcuseChallenge" />
+                  <PreTier2Pool />
+                </>
+              }
+            />
+
             <Route
               path="/user/system"
               element={

@@ -36,6 +36,7 @@ import MoveSystem from "../models/moveSystemModel.js";
 import { Types } from "mongoose";
 import moment from "moment";
 import { getPriceHewe } from "../utils/getPriceHewe.js";
+import PreTier2 from "../models/preTier2Model.js";
 
 dotenv.config();
 
@@ -119,6 +120,45 @@ const getAllUsersOver45 = asyncHandler(async (req, res) => {
   });
 });
 
+const getAllUsersPreTier2 = asyncHandler(async (req, res) => {
+  const { pageNumber, keyword, status } = req.query;
+  const page = Number(pageNumber) || 1;
+  const searchStatus = status === "all" ? "" : status;
+
+  const pageSize = 20;
+
+  const query = {
+    $and: [
+      {
+        $or: [
+          { userId: { $regex: keyword, $options: "i" } },
+          { email: { $regex: keyword, $options: "i" } },
+          { walletAddress: { $regex: keyword, $options: "i" } },
+        ],
+      },
+      { role: "user" },
+      { preTier2Status: { $nin: ["", "PASSED"] } },
+      { preTier2Status: { $regex: searchStatus, $options: "i" } },
+    ],
+  };
+
+  const count = await User.countDocuments(query);
+
+  // Xác định kiểu sort
+  let sortOption = { createdAt: -1 };
+
+  const allUsers = await User.find(query)
+    .limit(pageSize)
+    .skip(pageSize * (page - 1))
+    .sort(sortOption)
+    .select("-password");
+
+  res.json({
+    users: allUsers,
+    pages: Math.ceil(count / pageSize),
+  });
+});
+
 const getAllUsersWithKeyword = asyncHandler(async (req, res) => {
   const { keyword } = req.body;
   if (keyword) {
@@ -147,7 +187,6 @@ const getUserById = asyncHandler(async (req, res) => {
 
   if (user) {
     const tree = await Tree.findOne({ userId: user._id, tier: 1 });
-    console.log({ tree });
 
     const listDirectUser = [];
     const listRefIdOfUser = await Tree.find({ refId: tree._id, tier: 1 });
@@ -361,6 +400,7 @@ const getUserById = asyncHandler(async (req, res) => {
       subInfo,
       currentParent: parentTree ? parentTree.userName : null,
       timeRetryOver45: user.timeRetryOver45,
+      preTier2Status: user.preTier2Status,
     });
   } else {
     res.status(404);
@@ -473,6 +513,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
     const checkCanNextTier =
       user.currentLayer.slice(-1) >= 3 ? await checkUserCanNextTier(tree) : false;
 
+    const preTier2User = await PreTier2.findOne({ userId: user._id, status: "ACHIEVED" });
+
     res.json({
       id: user._id,
       email: user.email,
@@ -552,6 +594,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
       subUser,
       timeRetryOver45: user.timeRetryOver45,
       checkCanNextTier,
+      preTier2Status: user.preTier2Status,
+      preTier2User: preTier2User,
     });
   } else {
     res.status(404);
@@ -2646,4 +2690,5 @@ export {
   getSubUserProfile,
   getListChildOfSubUser,
   getAllUsersOver45,
+  getAllUsersPreTier2,
 };
