@@ -143,7 +143,7 @@ const getPreTier2UsersForUser = asyncHandler(async (req, res) => {
 
   // Thêm phân trang và sắp xếp (không dùng order trong document nữa, chỉ dùng createdAt)
   aggregationPipeline.push(
-    { $sort: { createdAt: 1 } }, // sắp xếp theo thời gian vào bảng
+    { $sort: { order: 1 } }, // sắp xếp theo thời gian vào bảng
     { $skip: pageSize * (page - 1) },
     { $limit: pageSize },
     {
