@@ -108,7 +108,7 @@ const getPreTier2UsersForUser = asyncHandler(async (req, res) => {
   const page = Number(pageNumber) || 1;
   const pageSize = 10;
 
-  const matchStage = { status: "PENDING" };
+  const matchStage = { status: { $in: ["PENDING", "ACHIEVED"] } };
 
   // Nếu có filter status
 
