@@ -110,8 +110,6 @@ const getPreTier2UsersForUser = asyncHandler(async (req, res) => {
 
   const matchStage = { status: { $in: ["PENDING", "ACHIEVED"] } };
 
-  // Nếu có filter status
-
   const keywordRegex = keyword ? { $regex: removeAccents(keyword), $options: "i" } : null;
 
   const aggregationPipeline = [
@@ -143,15 +141,14 @@ const getPreTier2UsersForUser = asyncHandler(async (req, res) => {
   const countAggregation = await PreTier2.aggregate([...aggregationPipeline, { $count: "total" }]);
   const count = countAggregation[0]?.total || 0;
 
-  // Thêm phân trang và sắp xếp
+  // Thêm phân trang và sắp xếp (không dùng order trong document nữa, chỉ dùng createdAt)
   aggregationPipeline.push(
-    { $sort: { order: 1 } },
+    { $sort: { createdAt: 1 } }, // sắp xếp theo thời gian vào bảng
     { $skip: pageSize * (page - 1) },
     { $limit: pageSize },
     {
       $project: {
         _id: 1,
-        order: 1,
         userId: 1,
         status: 1,
         createdAt: 1,
@@ -170,14 +167,25 @@ const getPreTier2UsersForUser = asyncHandler(async (req, res) => {
   const data = await PreTier2.aggregate(aggregationPipeline);
 
   const results = [];
-  for (let user of data) {
+  for (let index = 0; index < data.length; index++) {
+    const user = data[index];
     const tree = await Tree.findOne({
       userId: user.userId,
       isSubId: false,
       tier: 1,
     });
+
     const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(tree);
-    results.push({ ...user, countChild1: countChild1 + 7, countChild2: countChild2 + 7 });
+
+    // gán order động theo trang
+    const order = (page - 1) * pageSize + index;
+
+    results.push({
+      ...user,
+      order,
+      countChild1: countChild1 + 7,
+      countChild2: countChild2 + 7,
+    });
   }
 
   res.json({
