@@ -1080,7 +1080,7 @@ const getPaymentsOfUser = asyncHandler(async (req, res) => {
   for (let payment of allPayments) {
     if (payment.type.includes("REFERRAL") || payment.type.includes("DIRECT")) {
       const user = await User.findById(payment.userId_to);
-      results.push({ ...payment, username_to: user.walletAddress });
+      results.push({ ...payment });
     } else {
       results.push({ ...payment });
     }

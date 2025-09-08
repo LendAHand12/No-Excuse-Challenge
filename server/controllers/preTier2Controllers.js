@@ -256,7 +256,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           userCountPay: user.countPay,
           userId_to: admin._id,
           username_to: "Registration Fee",
-          tier: 1.5,
+          tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
           type: "REGISTER",
@@ -279,7 +279,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           userCountPay: user.countPay,
           userId_to: admin._id,
           username_to: "Pre-Tier2 Pool",
-          tier: 1.5,
+          tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
           type: "PRETIER2",
@@ -302,7 +302,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           userCountPay: user.countPay,
           userId_to: admin._id,
           username_to: "Purchased HEWE",
-          tier: 1.5,
+          tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
           type: "COMPANY",
@@ -343,7 +343,7 @@ const onDonePayment = asyncHandler(async (req, res) => {
     } else {
       for (let transId of transIdsList) {
         const trans = await Transaction.findOneAndUpdate(
-          { _id: transId.id, userId: user.id, tier: user.tier },
+          { _id: transId.id },
           { status: "SUCCESS", hash: transactionHash }
         );
       }

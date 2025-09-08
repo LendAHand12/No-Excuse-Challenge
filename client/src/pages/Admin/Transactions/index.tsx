@@ -310,6 +310,8 @@ const AdminTransactionsPage = () => {
                               'Registration Fee'
                             ) : ele.type === 'PIG' ? (
                               'DreamPool'
+                            ) : ele.type === 'PRETIER2' ? (
+                              'Pre-Tier 2 Pool'
                             ) : ele.type === 'COMPANY' ? (
                               'Purchase HEWE'
                             ) : ele.type === 'KYC' ? (
