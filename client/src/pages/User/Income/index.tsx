@@ -14,11 +14,12 @@ const Income = () => {
   const [totalPage, setTotalPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
+  const [coin, setCoin] = useState('usdt');
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      await Payment.getIncomeOfUser(pageNumber)
+      await Payment.getIncomeOfUser(pageNumber, coin)
         .then((response) => {
           const { payments, pages } = response.data;
           setData(payments);
@@ -36,6 +37,27 @@ const Income = () => {
     })();
   }, [pageNumber]);
 
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      await Payment.getIncomeOfUser(1, coin)
+        .then((response) => {
+          const { payments, pages } = response.data;
+          setData(payments);
+          setTotalPage(pages);
+          setLoading(false);
+        })
+        .catch((error) => {
+          let message =
+            error.response && error.response.data.error
+              ? error.response.data.error
+              : error.message;
+          toast.error(t(message));
+          setLoading(false);
+        });
+    })();
+  }, [coin]);
+
   const handleNextPage = () => {
     setPageNumber((pageNumber) => pageNumber + 1);
   };
@@ -48,24 +70,55 @@ const Income = () => {
     <DefaultLayout>
       <ToastContainer />
       <div className="relative overflow-x-auto py-24 px-10">
+        <div className="flex gap-10 items-center mb-10">
+          <button
+            className={`px-10 py-2 border border-gray-500 font-medium rounded-md ${
+              coin === 'usdt' ? 'bg-black text-NoExcuseChallenge' : ''
+            }`}
+            onClick={() => setCoin('usdt')}
+          >
+            USDT
+          </button>
+          <button
+            className={`px-10 py-2 border border-gray-500 font-medium rounded-md ${
+              coin === 'hewe' ? 'bg-black text-NoExcuseChallenge' : ''
+            }`}
+            onClick={() => setCoin('hewe')}
+          >
+            HEWE
+          </button>
+        </div>
         <table className="w-full text-sm text-left text-gray-500">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3">
-                From
-              </th>
-              {/* <th scope="col" className="px-6 py-3">
-                Hash
-              </th> */}
-              <th scope="col" className="px-6 py-3">
-                Amount
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Type
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Tier
-              </th>
+              {coin === 'usdt' && (
+                <>
+                  <th scope="col" className="px-6 py-3">
+                    From
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Amount
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Type
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Tier
+                  </th>
+                </>
+              )}
+
+              {coin === 'hewe' && (
+                <>
+                  <th scope="col" className="px-6 py-3">
+                    Type
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Amount
+                  </th>
+                </>
+              )}
+
               <th scope="col" className="px-6 py-3">
                 Time
               </th>
@@ -79,27 +132,30 @@ const Income = () => {
                   className="bg-white border-b hover:bg-gray-50"
                   key={ele._id}
                 >
-                  <td className="px-6 py-4">{ele.from}</td>
-                  {/* <td className="px-6 py-4 text-blue-600">
-                    <a
-                      href={`https://bscscan.com/tx/${ele.hash}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {shortenWalletAddress(ele.hash)}
-                    </a>
-                  </td> */}
-                  <td className="px-6 py-4">{ele.amount} USDT</td>
-                  <td className="px-6 py-4">
-                    <div
-                      className={`w-full text-white rounded-sm py-1 px-2 text-sm ${transStatus.find(
-                        (item) => item.status === ele.type,
-                      )?.color} mr-2`}
-                    >
-                      {t(ele.type)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">{ele.tier}</td>
+                  {coin === 'usdt' && (
+                    <>
+                      <td className="px-6 py-4">{ele.from}</td>
+                      <td className="px-6 py-4">{ele.amount} USDT</td>
+                      <td className="px-6 py-4">
+                        <div
+                          className={`w-full text-white rounded-sm py-1 px-2 text-sm ${transStatus.find(
+                            (item) => item.status === ele.type,
+                          )?.color} mr-2`}
+                        >
+                          {t(ele.type)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">{ele.tier}</td>
+                    </>
+                  )}
+
+                  {coin === 'hewe' && (
+                    <>
+                      <td className="px-6 py-4">{ele.from}</td>
+                      <td className="px-6 py-4">{ele.amount} HEWE</td>
+                    </>
+                  )}
+
                   <td className="px-6 py-4">
                     {new Date(ele.createdAt).toLocaleDateString('vi')}
                   </td>

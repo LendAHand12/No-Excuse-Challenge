@@ -15,6 +15,7 @@ import Transaction from "../models/transactionModel.js";
 import Honor from "../models/honorModel.js";
 import { getPriceHewe } from "../utils/getPriceHewe.js";
 import Config from "../models/configModel.js";
+import Income from "../models/incomeModel.js";
 
 export const deleteUser24hUnPay = asyncHandler(async () => {
   const listUser = await User.find({
@@ -178,8 +179,26 @@ export const distributionHewe = asyncHandler(async () => {
       if (u.currentLayer[0] >= 4 && u.totalHewe > 0) {
         u.availableHewe = u.availableHewe + u.totalHewe;
         u.totalHewe = 0;
+        const newIncome = new Income({
+          userId: u._id,
+          amount: u.totalHewe,
+          coin: "HEWE",
+          from: "Daily HEWE all",
+          type: "",
+        });
+
+        await newIncome.save();
       } else if (u.totalHewe > u.claimedHewe) {
         u.availableHewe = u.availableHewe + u.hewePerDay;
+        const newIncome = new Income({
+          userId: u._id,
+          amount: u.hewePerDay,
+          coin: "HEWE",
+          from: "Daily HEWE",
+          type: "",
+        });
+
+        await newIncome.save();
       }
       await u.save();
     } catch (error) {

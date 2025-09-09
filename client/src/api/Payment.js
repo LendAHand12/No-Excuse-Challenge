@@ -40,8 +40,8 @@ const Payment = {
   getAllTransForExport: (body) => {
     return API.post(`${URL_API_PAYMENT}/getAllTransForExport`, body);
   },
-  getIncomeOfUser: (pageNumber) => {
-    return API.get(`${URL_API_INCOME}/?pageNumber=${pageNumber}`);
+  getIncomeOfUser: (pageNumber, coin) => {
+    return API.get(`${URL_API_INCOME}/?pageNumber=${pageNumber}&coin=${coin}`);
   },
   payWithCash: (body) => {
     return API.post(`${URL_API_PAYMENT}/payWithCash`, body);
