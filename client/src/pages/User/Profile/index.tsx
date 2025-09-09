@@ -595,7 +595,7 @@ const Profile = () => {
       </Modal>
 
       <div className="px-2 lg:px-24 py-24 space-y-6 lg:space-y-8">
-        {tier === 1 &&
+        {/* {tier === 1 &&
           (preTier2Status === 'APPROVED' || preTier2Status === 'ACHIEVED') && (
             <div
               className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-5 font-medium"
@@ -640,7 +640,7 @@ const Profile = () => {
               </Link>
             </span>
           </div>
-        )}
+        )} */}
 
         {bonusRef && (
           <div
