@@ -8,8 +8,10 @@ import Loading from '@/components/Loading';
 import CustomPagination from '@/components/CustomPagination';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DefaultLayout from '@/layout/DefaultLayout';
+import { useSelector } from 'react-redux';
 
 const AdminPreTier2UsersPages = () => {
+  const { userInfo } = useSelector((state) => state.auth);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -245,44 +247,47 @@ const AdminPreTier2UsersPages = () => {
                   <td className="px-6 py-4">{ele.passedTime}</td>
 
                   <td className="px-6 py-4">
-                    {ele.status === 'PENDING' && (
-                      <div className="flex gap-6">
-                        <button
-                          onClick={() => handleChangeOrder(ele._id, 'down')}
-                          className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
-                        >
-                          <svg
-                            width="24"
-                            height="24"
-                            viewBox="0 0 15 15"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
+                    {userInfo?.permissions
+                      .find((p) => p.page.pageName === 'admin-user-pre-tier-2')
+                      ?.actions.includes('update') &&
+                      ele.status === 'PENDING' && (
+                        <div className="flex gap-6">
+                          <button
+                            onClick={() => handleChangeOrder(ele._id, 'down')}
+                            className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
                           >
-                            <path
-                              d="M7.49988 12L-0.00012207 4L14.9999 4L7.49988 12Z"
-                              fill="currentColor"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleChangeOrder(ele._id, 'up')}
-                          className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
-                        >
-                          <svg
-                            width="24"
-                            height="24"
-                            viewBox="0 0 15 15"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
+                            <svg
+                              width="24"
+                              height="24"
+                              viewBox="0 0 15 15"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M7.49988 12L-0.00012207 4L14.9999 4L7.49988 12Z"
+                                fill="currentColor"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleChangeOrder(ele._id, 'up')}
+                            className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
                           >
-                            <path
-                              d="M7.5 3L15 11H0L7.5 3Z"
-                              fill="currentColor"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    )}
+                            <svg
+                              width="24"
+                              height="24"
+                              viewBox="0 0 15 15"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M7.5 3L15 11H0L7.5 3Z"
+                                fill="currentColor"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
                   </td>
                 </tr>
               ))}

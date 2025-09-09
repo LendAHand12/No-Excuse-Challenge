@@ -385,7 +385,9 @@ const AdminEligiblePreTier2UsersPages = () => {
                       {ele.preTier2Status === 'PENDING' &&
                         userInfo?.permissions
                           .find(
-                            (p) => p.page.pageName === 'admin-user-pre-tier-2',
+                            (p) =>
+                              p.page.pageName ===
+                              'admin-user-eligible-pre-tier-2',
                           )
                           ?.actions.includes('update') && (
                           <button
