@@ -334,6 +334,7 @@ const authUser = asyncHandler(async (req, res) => {
         subUser,
         checkCanNextTier,
         preTier2Status: user.preTier2Status,
+        shortfallAmount: user.shortfallAmount,
       },
       accessToken,
       refreshToken,

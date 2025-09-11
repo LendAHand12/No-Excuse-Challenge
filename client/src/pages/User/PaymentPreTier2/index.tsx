@@ -66,19 +66,19 @@ const PaymentPage = () => {
   const paymentMetamask = useCallback(async () => {
     setLoadingPayment(true);
     try {
-      const referralTransaction = await transfer(
-        import.meta.env.VITE_MAIN_WALLET_ADDRESS,
-        total,
-      );
-      if (referralTransaction) {
-        const { transactionHash } = referralTransaction;
-        await donePayment(transactionHash);
-        setPaymentCompleted(true);
-        window.location.reload();
-      } else {
-        setLoadingPayment(false);
-        throw new Error(t('payment error'));
-      }
+      // const referralTransaction = await transfer(
+      //   import.meta.env.VITE_MAIN_WALLET_ADDRESS,
+      //   total,
+      // );
+      // if (referralTransaction) {
+      //   const { transactionHash } = referralTransaction;
+      await donePayment('transactionHash');
+      setPaymentCompleted(true);
+      // window.location.reload();
+      // } else {
+      //   setLoadingPayment(false);
+      //   throw new Error(t('payment error'));
+      // }
     } catch (error) {
       toast.error(t(error.message));
       setLoadingPayment(false);
@@ -120,7 +120,7 @@ const PaymentPage = () => {
                 <div className="w-full max-w-203 mx-auto rounded-lg bg-white p-10 text-gray-700 mt-4">
                   <div className="mb-10">
                     <h1 className="text-center font-bold text-4xl">
-                      {t('paymentTitle')}
+                      Pre-Tier 2 Payment
                     </h1>
                   </div>
 

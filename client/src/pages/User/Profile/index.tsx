@@ -66,6 +66,7 @@ const Profile = () => {
     checkCanNextTier,
     preTier2Status,
     preTier2User,
+    shortfallAmount,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -84,6 +85,12 @@ const Profile = () => {
   const [errAgrre, setErrAgrre] = useState(false);
   const [valueCheckAgrree, setValueCheckAgrree] = useState('');
   const [showNextTier, setShowNextTier] = useState(false);
+  const [showPreTier2Commit, setShowPreTier2Commit] = useState(
+    tier === 1 &&
+      (preTier2Status === 'APPROVED' || preTier2Status === 'ACHIEVED')
+      ? true
+      : false,
+  );
 
   const {
     register,
@@ -220,6 +227,9 @@ const Profile = () => {
           dispatch(UPDATE_USER_INFO(response.data));
           if (response.data.checkCanNextTier) {
             setShowNextTier(true);
+          }
+          if (response.data.preTier2Status === 'PASSED') {
+            setShowPreTier2Commit(false);
           }
         })
         .catch((error) => {
@@ -594,6 +604,103 @@ const Profile = () => {
         </div>
       </Modal>
 
+      <Modal
+        isOpen={showPreTier2Commit}
+        onRequestClose={() => setShowPreTier2Commit(false)}
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+          },
+        }}
+      >
+        <div className="overflow-y-auto overflow-x-hidden justify-center items-center w-full md:inset-0 h-modal md:h-full">
+          <div className="relative w-full max-w-md h-full md:h-auto">
+            <div className="relative text-center bg-white rounded-lg sm:p-5">
+              <button
+                onClick={() => setShowPreTier2Commit(false)}
+                className="text-gray-400 absolute top-2.5 right-2.5 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+                <span className="sr-only">Close modal</span>
+              </button>
+              <div className="pr-6 flex flex-col items-center">
+                <div
+                  className="text-left text-gray-900 rounded relative mb-5"
+                  role="alert"
+                >
+                  <div className="mb-4">
+                    <p className="text-center font-semibold text-lg mb-2">
+                      Pre-Tier 2 (Mutual Support Fund)
+                    </p>
+                    <ul className="list-disc">
+                      <li className="ml-4">
+                        To enter Pre-Tier 2, contribute 231 USDT to the Support
+                        Fund.
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-center font-semibold text-lg mb-2">
+                      Tier 2 (Global Fund)
+                    </p>
+                    <ul className="list-disc">
+                      <li className="ml-4">
+                        When you qualify for Tier 2, your{' '}
+                        <b>
+                          total package is 603 USDT for Tier 2 and recycle back
+                          to tier 1
+                        </b>
+                        , which includes a <b>402 USDT</b> Support Pool loan.
+                      </li>
+                      <li className="ml-4">
+                        The <b>402 USDT</b> loan will be{' '}
+                        <b>deducted from your Tier 2 benefits</b> until it’s
+                        fully repaid.
+                      </li>
+                      <li className="ml-4">
+                        After completing Tier 2, you{' '}
+                        <b>recycle back to Tier 1.</b>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="flex items-center gap-10">
+                  <button
+                    onClick={() => setShowPreTier2Commit(false)}
+                    className="flex items-center gap-2 px-6 py-2 bg-red-600 text-white rounded-md hover:opacity-70"
+                  >
+                    I DISAGREED
+                  </button>
+                  <button
+                    onClick={handleMoveSystem}
+                    className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:opacity-70"
+                  >
+                    <Link to="/user/payment-pre-tier-2">I AGREED</Link>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
       <div className="px-2 lg:px-24 py-24 space-y-6 lg:space-y-8">
         {/* {tier === 1 &&
           (preTier2Status === 'APPROVED' || preTier2Status === 'ACHIEVED') && (
@@ -609,9 +716,9 @@ const Profile = () => {
                 </Link>
               </span>
             </div>
-          )}
+          )} */}
 
-        {tier === 1 && preTier2Status === 'PASSED' && (
+        {tier === 1 && preTier2Status === 'PASSED' && !preTier2User && (
           <div
             className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-5 font-medium"
             role="alert"
@@ -640,7 +747,7 @@ const Profile = () => {
               </Link>
             </span>
           </div>
-        )} */}
+        )}
 
         {bonusRef && (
           <div
@@ -680,7 +787,7 @@ const Profile = () => {
           >
             <span className="block sm:inline">
               {tryToTier2 === 'YES'
-                ? `You have only ${countdown} days left to complete the 126
+                ? `You have only ${countdown} days left to complete the 62
               required IDs to be eligible for Tier 2 benefits.`
                 : `You have run out of sales compensation time.`}
             </span>
@@ -849,6 +956,16 @@ const Profile = () => {
                   {totalHold} USD
                 </div>
               </div>
+              {
+                <div className="flex items-center justify-between py-2 px-4 rounded-lg">
+                  <p>Outstanding Pre-Tier2 Pool Amount</p>
+                  <div
+                    className={`p-2 text-sm bg-green-600 text-white rounded-[50px]`}
+                  >
+                    {shortfallAmount} USD
+                  </div>
+                </div>
+              }
             </div>
 
             <div className="bg-[#FAFBFC] p-4 rounded-2xl">
@@ -910,15 +1027,15 @@ const Profile = () => {
                         let b1 = 0;
                         let b2 = 0;
 
-                        if (c1 > 89 || c2 > 89) {
+                        if (c1 > 20 || c2 > 42) {
                           b1 = 0;
                           b2 = 0;
-                        } else if (c1 < 23 || c2 < 23) {
-                          b1 = Math.max(23 - c1, 0);
-                          b2 = Math.max(89 - c2, 0);
+                        } else if (c1 < 20 || c2 < 20) {
+                          b1 = Math.max(20 - c1, 0);
+                          b2 = Math.max(42 - c2, 0);
                         } else {
-                          b1 = Math.max(89 - c1, 0);
-                          b2 = Math.max(23 - c2, 0);
+                          b1 = Math.max(42 - c1, 0);
+                          b2 = Math.max(20 - c2, 0);
                         }
 
                         return (

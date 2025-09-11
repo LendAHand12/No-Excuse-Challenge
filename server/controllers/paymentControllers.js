@@ -25,6 +25,7 @@ import {
 import Wallet from "../models/walletModel.js";
 import Tree from "../models/treeModel.js";
 import { getPriceHewe } from "../utils/getPriceHewe.js";
+import PreTier2Pool from "../models/preTier2PoolModel.js";
 
 const getPaymentInfo = asyncHandler(async (req, res) => {
   const { user } = req;
@@ -544,6 +545,17 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
         if (user.paymentStep === 0 && treeOfRefUser.disable) {
           haveRefNotPayEnough = true;
         }
+
+        let payOutForPool = false;
+        let rePaymentForPool = 0;
+        if (
+          directCommissionUser.shortfallAmount > 0 &&
+          directCommissionUser.shortfallAmount >= directCommissionFee
+        ) {
+          payOutForPool = true;
+          rePaymentForPool += directCommissionFee;
+        }
+
         const transactionDirect = await Transaction.create({
           userId: user.id,
           amount: directCommissionFee,
@@ -553,7 +565,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           tier: user.tier + 1 - user.paymentStep,
           buyPackage: user.buyPackage,
           hash: "",
-          type: haveRefNotPayEnough ? "DIRECTHOLD" : "DIRECT",
+          type: payOutForPool ? "POOLREPAYMENT" : haveRefNotPayEnough ? "DIRECTHOLD" : "DIRECT",
           status: "PENDING",
           refBuyPackage: refUser.buyPackage,
         });
@@ -627,6 +639,14 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           if (user.paymentStep === 0 && p.disable) {
             haveParentNotPayEnough = true;
           }
+          let rePayForPoolRef = false;
+          if (
+            receiveUser.shortfallAmount > 0 &&
+            receiveUser.shortfallAmount >= referralCommissionFee + rePaymentForPool
+          ) {
+            rePayForPoolRef = true;
+          }
+
           payments.push({
             userName: p.userName,
             amount: referralCommissionFee,
@@ -640,7 +660,11 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
             tier: user.tier + 1 - user.paymentStep,
             buyPackage: user.buyPackage,
             hash: "",
-            type: haveParentNotPayEnough ? "REFERRALHOLD" : "REFERRAL",
+            type: rePayForPoolRef
+              ? "POOLREPAYMENT"
+              : haveParentNotPayEnough
+              ? "REFERRALHOLD"
+              : "REFERRAL",
             status: "PENDING",
           });
           paymentIds.push({
@@ -752,8 +776,14 @@ const onDonePayment = asyncHandler(async (req, res) => {
           { _id: transId.id, userId: user.id, tier: user.tier },
           { status: "SUCCESS", hash: transactionHash }
         );
-
-        if (!trans.type.includes("HOLD")) {
+        if (trans.type.includes("POOLREPAYMENT")) {
+          const newPreTier2Pool = new PreTier2Pool({
+            userId: trans.userId_to,
+            amount: trans.amount,
+            status: "IN",
+          });
+          await newPreTier2Pool.save();
+        } else if (!trans.type.includes("HOLD")) {
           let userReceive = await User.findById(trans.userId_to);
           userReceive.availableUsdt = userReceive.availableUsdt + trans.amount;
           await userReceive.save();
@@ -824,7 +854,18 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
           { status: "SUCCESS", hash: transactionHash }
         );
 
-        if (!trans.type.includes("HOLD")) {
+        if (trans.type.includes("POOLREPAYMENT")) {
+          const newPreTier2Pool = new PreTier2Pool({
+            userId: trans.userId_to,
+            amount: trans.amount,
+            status: "IN",
+          });
+          await newPreTier2Pool.save();
+
+          let userReceive = await User.findOne({ _id: trans.userId_to });
+          userReceive.shortfallAmount = userReceive.shortfallAmount - trans.amount;
+          await userReceive.save();
+        } else if (!trans.type.includes("HOLD")) {
           let userReceive = await User.findOne({ _id: trans.userId_to });
           userReceive.availableUsdt = userReceive.availableUsdt + trans.amount;
           await userReceive.save();

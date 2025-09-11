@@ -253,6 +253,10 @@ const userSchema = mongoose.Schema(
     timeOkPreTier2: {
       type: Date,
     },
+    shortfallAmount: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

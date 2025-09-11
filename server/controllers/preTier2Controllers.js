@@ -417,11 +417,10 @@ const onDonePayment = asyncHandler(async (req, res) => {
 const onUserPassTier2 = async () => {
   try {
     // Đếm số user hiện tại trong bảng
-    const totalUsersPreTier2 = await PreTier2.countDocuments();
-    console.log({ totalUsersPreTier2 });
+    const balanceOfPool = await getBalanceOfPreTier2Pool();
 
     // Nếu chia hết cho 3 thì xoá user có order nhỏ nhất
-    if (totalUsersPreTier2 > 0 && totalUsersPreTier2 % 3 === 0) {
+    if (totalUsersPreTier2 > 0 && balanceOfPool > 402) {
       // tìm user có order nhỏ nhất (trên cùng)
       const topUser = await PreTier2.findOne({ status: "PENDING" }).sort({ order: 1 });
 
@@ -720,6 +719,16 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
         if (user.paymentStep === 0 && treeOfRefUser.disable) {
           haveRefNotPayEnough = true;
         }
+
+        let payOutForPool = false;
+        let rePaymentForPool = 0;
+        if (
+          directCommissionUser.shortfallAmount > 0 &&
+          directCommissionUser.shortfallAmount >= directCommissionFee
+        ) {
+          payOutForPool = true;
+          rePaymentForPool += directCommissionFee;
+        }
         const transactionDirect = await Transaction.create({
           userId: user.id,
           amount: directCommissionFee,
@@ -729,7 +738,7 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
           tier: user.tier + 1 - user.paymentStep,
           buyPackage: user.buyPackage,
           hash: "",
-          type: haveRefNotPayEnough ? "DIRECTHOLD" : "DIRECT",
+          type: payOutForPool ? "POOLREPAYMENT" : haveRefNotPayEnough ? "DIRECTHOLD" : "DIRECT",
           status: "PENDING",
           refBuyPackage: refUser.buyPackage,
         });
@@ -803,6 +812,13 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
           if (user.paymentStep === 0 && p.disable) {
             haveParentNotPayEnough = true;
           }
+          let rePayForPoolRef = false;
+          if (
+            receiveUser.shortfallAmount > 0 &&
+            receiveUser.shortfallAmount >= referralCommissionFee + rePaymentForPool
+          ) {
+            rePayForPoolRef = true;
+          }
           payments.push({
             userName: p.userName,
             amount: referralCommissionFee,
@@ -816,7 +832,11 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
             tier: user.tier + 1 - user.paymentStep,
             buyPackage: user.buyPackage,
             hash: "",
-            type: haveParentNotPayEnough ? "REFERRALHOLD" : "REFERRAL",
+            type: rePayForPoolRef
+              ? "POOLREPAYMENT"
+              : haveParentNotPayEnough
+              ? "REFERRALHOLD"
+              : "REFERRAL",
             status: "PENDING",
           });
           paymentIds.push({
@@ -858,8 +878,18 @@ const onDoneTier2Payment = asyncHandler(async (req, res) => {
           { _id: transId.id, userId: user.id },
           { status: "SUCCESS", hash: transactionHash }
         );
+        if (trans.type.includes("POOLREPAYMENT")) {
+          const newPreTier2Pool = new PreTier2Pool({
+            userId: trans.userId_to,
+            amount: trans.amount,
+            status: "IN",
+          });
+          await newPreTier2Pool.save();
 
-        if (!trans.type.includes("HOLD")) {
+          let userReceive = await User.findOne({ _id: trans.userId_to });
+          userReceive.shortfallAmount = userReceive.shortfallAmount - trans.amount;
+          await userReceive.save();
+        } else if (!trans.type.includes("HOLD")) {
           let userReceive = await User.findOne({ _id: trans.userId_to });
           userReceive.availableUsdt = userReceive.availableUsdt + trans.amount;
           await userReceive.save();
@@ -929,6 +959,7 @@ const onDoneTier2Payment = asyncHandler(async (req, res) => {
 
         user.tier = user.tier + 1;
         user.paymentStep = 0;
+        user.shortfallAmount = 402;
         message = "Payment successful";
 
         const preTier2User = await PreTier2.findOne({ userId: user._id, status: "ACHIEVED" });
@@ -1018,6 +1049,14 @@ const getInfoPreTier2Pool = asyncHandler(async (req, res) => {
 
   const results = await PreTier2Pool.aggregate(aggregationPipeline);
 
+  res.json({
+    results,
+    pages: Math.ceil(count / pageSize),
+    totalAmount: await getBalanceOfPreTier2Pool(),
+  });
+});
+
+export const getBalanceOfPreTier2Pool = async () => {
   const totalAggregation = await PreTier2Pool.aggregate([
     {
       $group: {
@@ -1030,14 +1069,8 @@ const getInfoPreTier2Pool = asyncHandler(async (req, res) => {
       },
     },
   ]);
-  const totalAmount = totalAggregation[0]?.total || 0;
-
-  res.json({
-    results,
-    pages: Math.ceil(count / pageSize),
-    totalAmount,
-  });
-});
+  return totalAggregation[0]?.total || 0;
+};
 
 export {
   getAllPreTier2Users,

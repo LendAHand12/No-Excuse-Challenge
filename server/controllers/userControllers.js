@@ -401,6 +401,7 @@ const getUserById = asyncHandler(async (req, res) => {
       currentParent: parentTree ? parentTree.userName : null,
       timeRetryOver45: user.timeRetryOver45,
       preTier2Status: user.preTier2Status,
+      shortfallAmount: user.shortfallAmount,
     });
   } else {
     res.status(404);
@@ -596,6 +597,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       checkCanNextTier,
       preTier2Status: user.preTier2Status,
       preTier2User: preTier2User,
+      shortfallAmount: user.shortfallAmount,
     });
   } else {
     res.status(404);
