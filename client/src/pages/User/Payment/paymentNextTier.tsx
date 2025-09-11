@@ -113,22 +113,22 @@ const PaymentNextTierPage = () => {
   const paymentMetamask = useCallback(async () => {
     setLoadingPayment(true);
     try {
-      // const referralTransaction = await transfer(
-      //   import.meta.env.VITE_MAIN_WALLET_ADDRESS,
-      //   total,
-      // );
-      // if (referralTransaction) {
-      //   const { transactionHash } = referralTransaction;
-      await doneNextTierPayment({
-        transactionHash: 'transactionHash',
-        childId,
-      });
-      setLoadingPayment(false);
-      setStep(step + 1);
-      // } else {
-      //   setLoadingPayment(false);
-      //   throw new Error(t('payment error'));
-      // }
+      const referralTransaction = await transfer(
+        import.meta.env.VITE_MAIN_WALLET_ADDRESS,
+        total,
+      );
+      if (referralTransaction) {
+        const { transactionHash } = referralTransaction;
+        await doneNextTierPayment({
+          transactionHash: transactionHash,
+          childId,
+        });
+        setLoadingPayment(false);
+        setStep(step + 1);
+      } else {
+        setLoadingPayment(false);
+        throw new Error(t('payment error'));
+      }
     } catch (error) {
       toast.error(t(error.message));
       setLoadingPayment(false);
