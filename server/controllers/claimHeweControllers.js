@@ -75,89 +75,83 @@ var processingUserIds = [];
 
 const claimUsdt = asyncHandler(async (req, res) => {
   const { token, amount } = req.body;
-
   const decode = decodeCallbackToken(token);
-  if (decode) {
-    const { userId } = decode;
-    const user = await User.findById(userId);
 
-    if (user) {
-      if (processingUserIds.includes(user._id)) {
-        return res.status(400).json({
-          error: "Your withdraw request is already being processed. Please wait!",
+  if (!decode) {
+    throw new Error("Internal Error");
+  }
+
+  const { userId } = decode;
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new Error("Unknown User");
+  }
+
+  // Nếu user đang xử lý claim rồi thì reject luôn
+  if (user.isClaiming) {
+    return res.status(400).json({
+      error: "Your withdraw request is already being processed. Please wait!",
+    });
+  }
+
+  try {
+    // Đặt trạng thái đang xử lý
+    user.isClaiming = true;
+    await user.save();
+
+    if (user.status !== "APPROVED" || user.facetecTid === "") {
+      throw new Error("Please verify your account");
+    }
+    if (user.errLahCode === "OVER45") {
+      throw new Error("Request denied");
+    }
+
+    if (user.availableUsdt > 0 && user.availableUsdt >= parseInt(amount)) {
+      if (parseInt(amount) < 200 && user.paymentMethod === "") {
+        const receipt = await sendUsdt({
+          amount: amount - 1,
+          receiverAddress: user.walletAddress,
         });
-      }
 
-      processingUserIds.push(user._id);
+        await Claim.create({
+          userId: user.id,
+          amount: parseInt(amount),
+          hash: receipt.hash,
+          coin: "USDT",
+        });
 
-      try {
-        if (user.status !== "APPROVED" || user.facetecTid === "") {
-          throw new Error("Please verify your account");
-        }
-        if (user.errLahCode === "OVER45") {
-          throw new Error("Request denied");
-        }
-        if (user.availableUsdt > 0 && user.availableUsdt >= parseInt(amount)) {
-          if (parseInt(amount) < 200 && user.paymentMethod === "") {
-            const receipt = await sendUsdt({
-              amount: amount - 1,
-              receiverAddress: user.walletAddress,
-            });
+        user.claimedUsdt += parseInt(amount);
+        user.availableUsdt -= parseInt(amount);
+        await user.save();
 
-            const claimed = await Claim.create({
-              userId: user.id,
-              amount: parseInt(amount),
-              hash: receipt.hash,
-              coin: "USDT",
-            });
-            user.claimedUsdt = user.claimedUsdt + parseInt(amount);
-            user.availableUsdt = user.availableUsdt - parseInt(amount);
+        res.status(200).json({ message: "claim USDT successful" });
+      } else {
+        await Withdraw.create({
+          userId: user.id,
+          amount: parseInt(amount),
+          method: user.paymentMethod,
+          accountName: user.accountName,
+          accountNumber: user.accountNumber,
+        });
 
-            await user.save();
+        user.availableUsdt -= parseInt(amount);
+        await user.save();
 
-            const index = processingUserIds.indexOf(user.id);
-            if (index !== -1) {
-              processingUserIds.splice(index, 1);
-            }
-            res.status(200).json({
-              message: "claim USDT successful",
-            });
-          } else {
-            const withdraw = await Withdraw.create({
-              userId: user.id,
-              amount: parseInt(amount),
-              method: user.paymentMethod,
-              accountName: user.accountName,
-              accountNumber: user.accountNumber,
-            });
-            user.availableUsdt = user.availableUsdt - parseInt(amount);
-            await user.save();
-            // await sendTelegramMessage({ userName: user.userId });
-            const index = processingUserIds.indexOf(user._id);
-            if (index !== -1) {
-              processingUserIds.splice(index, 1);
-            }
-            res.status(200).json({
-              message: "Withdrawal request has been sent to Admin. Please wait!",
-            });
-          }
-        } else {
-          throw new Error("Insufficient balance in account");
-        }
-      } catch (err) {
-        const index = processingUserIds.indexOf(user._id);
-        if (index !== -1) {
-          processingUserIds.splice(index, 1);
-        }
-        res.status(400).json({
-          error: err.message ? err.message.split(",")[0] : "Internal Error",
+        res.status(200).json({
+          message: "Withdrawal request has been sent to Admin. Please wait!",
         });
       }
     } else {
-      throw new Error("Unknow User");
+      throw new Error("Insufficient balance in account");
     }
-  } else {
-    throw new Error("Internal Error");
+  } catch (err) {
+    res.status(400).json({
+      error: err.message ? err.message.split(",")[0] : "Internal Error",
+    });
+  } finally {
+    // Reset trạng thái sau khi xử lý xong (dù success hay error)
+    await User.findByIdAndUpdate(userId, { isClaiming: false });
   }
 });
 

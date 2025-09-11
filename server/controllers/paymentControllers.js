@@ -935,6 +935,8 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
 
         user.tier = user.tier + 1;
         user.paymentStep = 0;
+
+        await Pre;
         message = "Payment successful";
       }
 

@@ -257,6 +257,10 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
+    isClaiming: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
