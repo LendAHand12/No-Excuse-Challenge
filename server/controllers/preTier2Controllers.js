@@ -420,7 +420,7 @@ const onUserPassTier2 = async () => {
     const balanceOfPool = await getBalanceOfPreTier2Pool();
     console.log({ balanceOfPool });
     // Nếu chia hết cho 3 thì xoá user có order nhỏ nhất
-    if (totalUsersPreTier2 > 0 && balanceOfPool >= 603) {
+    if (balanceOfPool >= 603) {
       // tìm user có order nhỏ nhất (trên cùng)
       const topUser = await PreTier2.findOne({ status: "PENDING" }).sort({ order: 1 });
 

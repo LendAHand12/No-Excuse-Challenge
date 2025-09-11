@@ -11,23 +11,20 @@ import mongoose from "mongoose";
 import { getPriceHewe } from "../utils/getPriceHewe.js";
 import { getPriceAmc } from "../utils/getPriceAmc.js";
 
-var processingHeweUserIds = [];
-
 const claimHewe = asyncHandler(async (req, res) => {
   const { user } = req;
 
-  if (processingHeweUserIds.includes(user._id)) {
+  // Nếu user đang xử lý claim HEWE rồi thì reject luôn
+  if (user.isClaimingHewe) {
     return res.status(400).json({
-      error: "Your withdraw request is already being processed. Please wait!",
+      error: "Your HEWE claim is already being processed. Please wait!",
     });
   }
 
-  processingHeweUserIds.push(user._id);
-
   try {
-    // if (user.status !== "APPROVED" || user.facetecTid === "") {
-    //   throw new Error("Please verify your account");
-    // }
+    // Đặt trạng thái đang xử lý
+    user.isClaiming = true;
+    await user.save();
 
     if (user.availableHewe > 0) {
       const receipt = await sendHewe({
@@ -35,43 +32,32 @@ const claimHewe = asyncHandler(async (req, res) => {
         receiverAddress: user.walletAddress,
       });
 
-      const claimed = await Claim.create({
+      await Claim.create({
         userId: user.id,
         amount: user.availableHewe,
         hash: receipt.hash,
         coin: "HEWE",
       });
 
-      user.claimedHewe = user.claimedHewe + user.availableHewe;
+      user.claimedHewe += user.availableHewe;
       user.availableHewe = 0;
       await user.save();
 
-      const index = processingHeweUserIds.indexOf(user.id);
-      if (index !== -1) {
-        processingHeweUserIds.splice(index, 1);
-      }
-
       res.status(200).json({
-        message: "claim HEWE successful",
+        message: "Claim HEWE successful",
       });
     } else {
-      const index = processingHeweUserIds.indexOf(user._id);
-      if (index !== -1) {
-        processingHeweUserIds.splice(index, 1);
-      }
-
       throw new Error("Insufficient balance in account");
     }
   } catch (err) {
-    const index = processingHeweUserIds.indexOf(user._id);
-    if (index !== -1) {
-      processingHeweUserIds.splice(index, 1);
-    }
-    res.status(400).json({ error: err.message });
+    res.status(400).json({
+      error: err.message || "Internal error",
+    });
+  } finally {
+    // Reset lại trạng thái dù thành công hay lỗi
+    await User.findByIdAndUpdate(user.id, { isClaiming: false });
   }
 });
-
-var processingUserIds = [];
 
 const claimUsdt = asyncHandler(async (req, res) => {
   const { token, amount } = req.body;
