@@ -504,9 +504,9 @@ export const checkUserCanNextTier = async (treeOfUser) => {
   const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(treeOfUser);
   // console.log({ countChild1, countChild2 });
 
-  if (treeOfUser.countChild >= 126) {
+  if (treeOfUser.countChild >= 62) {
     // if (treeOfUser.countChild >= 126) {
-    if ((countChild1 >= 23 && countChild2 >= 89) || (countChild1 >= 89 && countChild2 >= 23)) {
+    if ((countChild1 >= 20 && countChild2 >= 42) || (countChild1 >= 42 && countChild2 >= 20)) {
       // if (countChild1 >= 0 && countChild2 >= 0) {
       return true;
     } else {

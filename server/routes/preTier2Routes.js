@@ -9,6 +9,7 @@ import {
   onDoneTier2Payment,
   getInfoPreTier2Pool,
   getPreTier2UsersForUser,
+  achievedUserTier2
 } from "../controllers/preTier2Controllers.js";
 import { isAdmin, protectRoute } from "../middleware/authMiddleware.js";
 
@@ -22,6 +23,7 @@ router.route("/done-payment").post(protectRoute, onDonePayment);
 router.route("/payment-tier-2-info").get(protectRoute, getPaymentTier2Info);
 router.route("/done-payment-tier-2").post(protectRoute, onDoneTier2Payment);
 router.route("/change-order").post(protectRoute, isAdmin, changeOrderByAdmin);
+router.route("/achieve-user/:id").put(protectRoute, isAdmin, achievedUserTier2);
 router.route("/:id").put(protectRoute, isAdmin, approveUserPreTier2);
 
 export default router;

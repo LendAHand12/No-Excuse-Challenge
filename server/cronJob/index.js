@@ -451,13 +451,13 @@ export const checkUserPreTier2 = asyncHandler(async () => {
         });
         const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(treeOfUser);
 
-        if ((countChild1 >= 13 && countChild2 >= 35) || (countChild1 >= 35 && countChild2 >= 13)) {
+        if ((countChild1 >= 20 && countChild2 >= 42) || (countChild1 >= 42 && countChild2 >= 20)) {
           console.log({ userACHIEVED: u.userId, countChild1, countChild2 });
           u.preTier2Status = "ACHIEVED";
           u.timeOkPreTier2 = new Date();
         } else if (
-          (countChild1 >= 1 && countChild2 >= 21) ||
-          (countChild1 >= 21 && countChild2 >= 1)
+          (countChild1 >= 8 && countChild2 >= 28) ||
+          (countChild1 >= 28 && countChild2 >= 8)
         ) {
           console.log({ userPENDING: u.userId, countChild1, countChild2 });
           u.preTier2Status = "PENDING";

@@ -787,10 +787,10 @@ const UserProfile = () => {
                   <div className="lg:py-2">
                     <ul className="flex flex-col list-disc">
                       <li className="ml-4">
-                        Branch 1 : {data.notEnoughtChild?.countChild1 + 1} IDs
+                        Branch 1 : {data.notEnoughtChild?.countChild1} IDs
                       </li>
                       <li className="ml-4">
-                        Branch 2 : {data.notEnoughtChild?.countChild2 + 1} IDs
+                        Branch 2 : {data.notEnoughtChild?.countChild2} IDs
                       </li>
                     </ul>
                   </div>
@@ -799,28 +799,28 @@ const UserProfile = () => {
                       {t('NUMBERS OF ID REQUIRE')}
                     </p>
                     <div className="lg:py-2">
-                      <ul className="flex flex-col list-disc">
-                        <li className="ml-4">
-                          Branch 1 :{' '}
-                          {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                            data.notEnoughtChild?.countChild1 >
-                          0
-                            ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                              data.notEnoughtChild?.countChild1
-                            : 0 || 0}{' '}
-                          IDs
-                        </li>
-                        <li className="ml-4">
-                          Branch 2 :{' '}
-                          {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                            data.notEnoughtChild?.countChild2 >
-                          0
-                            ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                              data.notEnoughtChild?.countChild2
-                            : 0 || 0}{' '}
-                          IDs
-                        </li>
-                      </ul>
+                    <ul className="flex flex-col list-disc">
+                      {(() => {
+                        const c1 = data?.notEnoughtChild?.countChild1 ?? 0;
+                        const c2 = data?.notEnoughtChild?.countChild2 ?? 0;
+
+                        // Xác định nhánh mạnh / yếu
+                        const isBranch1Strong = c1 >= c2;
+
+                        const target1 = isBranch1Strong ? 42 : 20;
+                        const target2 = isBranch1Strong ? 20 : 42;
+
+                        const b1 = Math.max(target1 - c1, 0);
+                        const b2 = Math.max(target2 - c2, 0);
+
+                        return (
+                          <>
+                            <li className="ml-4">Branch 1 : {b1} IDs</li>
+                            <li className="ml-4">Branch 2 : {b2} IDs</li>
+                          </>
+                        );
+                      })()}
+                    </ul>
                     </div>
                   </div>
                 </div>
@@ -1273,6 +1273,10 @@ const UserProfile = () => {
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">Total Hold</div>
                       <div className="px-4 py-2">{data.totalHold} USDT</div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">Outstanding Pre-Tier2 Pool Amount</div>
+                      <div className="px-4 py-2">{data.shortfallAmount} USDT</div>
                     </div>
                     {data.city === 'US' && (
                       <>

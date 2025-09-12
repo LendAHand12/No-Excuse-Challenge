@@ -11,6 +11,9 @@ const PreTier2 = {
   approve: (id) => {
     return API.put(`${URL_API_PRE_TIER_2}/${id}`);
   },
+  achieveUserTier2: (id) => {
+    return API.put(`${URL_API_PRE_TIER_2}/achieve-user/${id}`);
+  },
   donePayment: (body) => {
     return API.post(`${URL_API_PRE_TIER_2}/done-payment`, body);
   },

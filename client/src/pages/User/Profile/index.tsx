@@ -702,7 +702,7 @@ const Profile = () => {
       </Modal>
 
       <div className="px-2 lg:px-24 py-24 space-y-6 lg:space-y-8">
-        {tier === 1 &&
+        {/* {tier === 1 &&
           (preTier2Status === 'APPROVED' || preTier2Status === 'ACHIEVED') && (
             <div
               className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-5 font-medium"
@@ -716,11 +716,11 @@ const Profile = () => {
                 </Link>
               </span>
             </div>
-          )}
+          )} */}
 
         {tier === 1 && preTier2Status === 'PASSED' && !preTier2User && (
           <div
-            className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-5 font-medium"
+            className="bg-blue-100 border w-fit border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-5 font-medium"
             role="alert"
           >
             <span className="block sm:inline">
@@ -732,7 +732,7 @@ const Profile = () => {
 
         {preTier2User && (
           <div
-            className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-5 font-medium"
+            className="bg-blue-100 w-fit border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-5 font-medium"
             role="alert"
           >
             <span className="block sm:inline">
@@ -751,7 +751,7 @@ const Profile = () => {
 
         {bonusRef && (
           <div
-            className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-5"
+            className="bg-green-100 w-fit border border-green-400 text-green-700 px-4 py-3 rounded relative mb-5"
             role="alert"
           >
             <span className="block sm:inline">
@@ -762,7 +762,7 @@ const Profile = () => {
 
         {pendingUpdateInfo && (
           <div
-            className="bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded relative mb-5"
+            className="bg-orange-100 w-fit border border-orange-400 text-orange-700 px-4 py-3 rounded relative mb-5"
             role="alert"
           >
             <span className="block sm:inline">
@@ -773,16 +773,16 @@ const Profile = () => {
 
         {(phone === '' || idCode === '') && (
           <div
-            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-5"
+            className="bg-red-100 border w-fit border-red-400 text-red-700 px-4 py-3 rounded relative mb-5"
             role="alert"
           >
             <span className="block sm:inline">{t('infoAccountAlert')}</span>
           </div>
         )}
 
-        {tryToTier2 !== '' && tryToTier2 !== 'DONE' && (
+        {tier === 2 && tryToTier2 !== '' && tryToTier2 !== 'DONE' && (
           <div
-            className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
+            className="text-lg w-fit bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
             role="alert"
           >
             <span className="block sm:inline">
@@ -1007,10 +1007,10 @@ const Profile = () => {
                   <div className="lg:py-2">
                     <ul className="flex flex-col list-disc">
                       <li className="ml-4">
-                        Branch 1 : {notEnoughtChild?.countChild1 + 1} IDs
+                        Branch 1 : {notEnoughtChild?.countChild1} IDs
                       </li>
                       <li className="ml-4">
-                        Branch 2 : {notEnoughtChild?.countChild2 + 1} IDs
+                        Branch 2 : {notEnoughtChild?.countChild2} IDs
                       </li>
                     </ul>
                   </div>
@@ -1024,19 +1024,15 @@ const Profile = () => {
                       {(() => {
                         const c1 = notEnoughtChild?.countChild1 ?? 0;
                         const c2 = notEnoughtChild?.countChild2 ?? 0;
-                        let b1 = 0;
-                        let b2 = 0;
 
-                        if (c1 > 20 || c2 > 42) {
-                          b1 = 0;
-                          b2 = 0;
-                        } else if (c1 < 20 || c2 < 20) {
-                          b1 = Math.max(20 - c1, 0);
-                          b2 = Math.max(42 - c2, 0);
-                        } else {
-                          b1 = Math.max(42 - c1, 0);
-                          b2 = Math.max(20 - c2, 0);
-                        }
+                        // Xác định nhánh mạnh / yếu
+                        const isBranch1Strong = c1 >= c2;
+
+                        const target1 = isBranch1Strong ? 42 : 20;
+                        const target2 = isBranch1Strong ? 20 : 42;
+
+                        const b1 = Math.max(target1 - c1, 0);
+                        const b2 = Math.max(target2 - c2, 0);
 
                         return (
                           <>

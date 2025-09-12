@@ -231,7 +231,6 @@ const getUserById = asyncHandler(async (req, res) => {
     const withdraws = await Withdraw.find({
       userId: user._id,
     });
-    const totalWithdraws = withdraws.reduce((sum, withdraw) => sum + withdraw.amount, 0);
     const withdrawPending = withdraws
       .filter((ele) => ele.status === "PENDING")
       .reduce((sum, withdraw) => sum + withdraw.amount, 0);
@@ -252,7 +251,7 @@ const getUserById = asyncHandler(async (req, res) => {
 
     let countdown = 0;
     if (user.tryToTier2 === "YES") {
-      const tier2Deadline = moment(user.timeToTry).add(45, "days"); // ngày tier2Time + 45 ngày
+      const tier2Deadline = moment(user.timeToTry).add(user.preTier2Status === "PASSED" ? 0 : 45, "days"); // ngày tier2Time + 45 ngày
       const currentDay = moment(); // ngày hiện tại
       countdown = tier2Deadline.diff(currentDay, "days"); // số ngày còn lại
     }
@@ -455,7 +454,6 @@ const getUserInfo = asyncHandler(async (req, res) => {
     const withdraws = await Withdraw.find({
       userId: user._id,
     });
-    const totalWithdraws = withdraws.reduce((sum, withdraw) => sum + withdraw.amount, 0);
     const withdrawPending = withdraws
       .filter((ele) => ele.status === "PENDING")
       .reduce((sum, withdraw) => sum + withdraw.amount, 0);
@@ -486,7 +484,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
     }
     let countdown = 0;
     if (user.tryToTier2 === "YES") {
-      const tier2Deadline = moment(user.timeToTry).add(45, "days"); // ngày tier2Time + 45 ngày
+      const tier2Deadline = moment(user.timeToTry).add(user.preTier2Status === "PASSED" ? 0 : 45, "days"); // ngày tier2Time + 45 ngày
       const currentDay = moment(); // ngày hiện tại
       countdown = tier2Deadline.diff(currentDay, "days"); // số ngày còn lại
     }

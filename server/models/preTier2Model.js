@@ -14,6 +14,10 @@ const PreTier2Schema = mongoose.Schema(
     achievedTime: {
       type: Date,
     },
+    achievedBy: {
+      type: String,
+      default: "AUTO",
+    },
     passedTime: {
       type: Date,
     },

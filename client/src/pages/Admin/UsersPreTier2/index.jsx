@@ -9,6 +9,7 @@ import CustomPagination from '@/components/CustomPagination';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DefaultLayout from '@/layout/DefaultLayout';
 import { useSelector } from 'react-redux';
+import Modal from 'react-modal';
 
 const AdminPreTier2UsersPages = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -29,6 +30,8 @@ const AdminPreTier2UsersPages = () => {
     keyword: key,
     status,
   });
+  const [showAchieveModal, setShowAchieveModal] = useState(false);
+  const [currentAchieveId, setCurrentAchieveId] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -63,7 +66,7 @@ const AdminPreTier2UsersPages = () => {
       searchParams.set('keyword', searchKey);
     }
     if (pageNumber) {
-      searchParams.set('page', pageNumber);
+      searchParams.set('page', parseInt(pageNumber));
     }
     if (searchStatus) {
       searchParams.set('status', searchStatus);
@@ -76,7 +79,7 @@ const AdminPreTier2UsersPages = () => {
   };
 
   const handleChangePage = useCallback(
-    (page) => setObjectFilter({ ...objectFilter, pageNumber: page }),
+    (page) => setObjectFilter({ ...objectFilter, pageNumber: parseInt(page) }),
     [objectFilter],
   );
 
@@ -110,9 +113,92 @@ const AdminPreTier2UsersPages = () => {
     [objectFilter],
   );
 
+  const handleAchieve = async (userId) => {
+    setCurrentAchieveId(userId);
+    setShowAchieveModal(true);
+  };
+
+  const handleAchieveUser = useCallback(async () => {
+    await PreTier2.achieveUserTier2(currentAchieveId)
+      .then((response) => {
+        toast.success(t(response.data.message));
+        setShowAchieveModal(false);
+        setRefresh(!refresh);
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.error
+            ? error.response.data.error
+            : error.message;
+        toast.error(t(message));
+        setLoading(false);
+      });
+  }, [currentAchieveId]);
+
+  const closeModal = () => {
+    setShowAchieveModal(false);
+  };
+
   return (
     <DefaultLayout>
       <ToastContainer />
+      <Modal
+        isOpen={showAchieveModal}
+        onRequestClose={closeModal}
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+          },
+        }}
+      >
+        <div className="overflow-y-auto overflow-x-hidden justify-center items-center w-full md:inset-0 h-modal md:h-full">
+          <div className="relative w-full max-w-md h-full md:h-auto">
+            <div className="relative text-center bg-white rounded-lg sm:p-5">
+              <button
+                onClick={closeModal}
+                className="text-gray-400 absolute top-0 right-2 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+                <span className="sr-only">Close modal</span>
+              </button>
+              <p className="mb-4 text-gray-500">
+                Are you sure you want to approve this user to Tier 2?
+              </p>
+              <div className="flex justify-center items-center space-x-4">
+                <button
+                  onClick={closeModal}
+                  className="py-2 px-3 text-sm font-medium text-gray-500 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+                >
+                  No, cancel
+                </button>
+                <button
+                  onClick={handleAchieveUser}
+                  className="py-2 px-3 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900"
+                >
+                  Yes, I'm sure
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
       <div className="relative overflow-x-auto py-24 px-10">
         <div className="flex items-center justify-between pb-4 bg-white">
           <div className="flex gap-4">
@@ -286,6 +372,28 @@ const AdminPreTier2UsersPages = () => {
                               />
                             </svg>
                           </button>
+                          {ele.status === 'PENDING' &&
+                            userInfo?.permissions
+                              .find(
+                                (p) =>
+                                  p.page.pageName === 'admin-user-pre-tier-2',
+                              )
+                              ?.actions.includes('update') && (
+                              <button
+                                onClick={() => handleAchieve(ele._id)}
+                                className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
+                              >
+                                <svg
+                                  fill="currentColor"
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 -4.5 33 33"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path d="m0 10.909 4.364-4.364 8.727 8.727 15.273-15.273 4.364 4.364-19.636 19.636z" />
+                                </svg>
+                              </button>
+                            )}
                         </div>
                       )}
                   </td>
@@ -301,7 +409,7 @@ const AdminPreTier2UsersPages = () => {
         {!loading && data.length === 0 && <NoContent />}
         {!loading && data.length > 0 && (
           <CustomPagination
-            currentPage={objectFilter.pageNumber}
+            currentPage={parseInt(objectFilter.pageNumber)}
             totalPages={totalPage}
             onPageChange={handleChangePage}
           />
