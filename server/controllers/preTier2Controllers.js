@@ -723,6 +723,7 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
         let payOutForPool = false;
         let rePaymentForPool = 0;
         if (
+          user.paymentStep === 0 &&
           directCommissionUser.shortfallAmount > 0 &&
           directCommissionUser.shortfallAmount >= directCommissionFee
         ) {
@@ -814,6 +815,7 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
           }
           let rePayForPoolRef = false;
           if (
+            user.paymentStep === 0 &&
             receiveUser.shortfallAmount > 0 &&
             receiveUser.shortfallAmount >= referralCommissionFee + rePaymentForPool
           ) {
@@ -878,7 +880,7 @@ const onDoneTier2Payment = asyncHandler(async (req, res) => {
           { _id: transId.id, userId: user.id },
           { status: "SUCCESS", hash: transactionHash }
         );
-        if (trans.type.includes("POOLREPAYMENT")) {
+        if (user.paymentStep === 0 && trans.type.includes("POOLREPAYMENT")) {
           const newPreTier2Pool = new PreTier2Pool({
             userId: trans.userId_to,
             amount: trans.amount,
