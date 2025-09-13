@@ -506,7 +506,7 @@ export const checkUserPreTier2 = asyncHandler(async () => {
           u.preTier2Status = "ACHIEVED";
           u.timeOkPreTier2 = new Date();
         } else {
-          const countChildLevel4ToLevel10 = await getTotalLevel6ToLevel10OfUser(
+          const countChildLevel4ToLevel10 = await getTotalLevel1ToLevel10OfUser(
             treeOfUser
           );
           if (
