@@ -4,6 +4,7 @@ import User from "../models/userModel.js";
 import {
   findHighestIndexOfLevel,
   findNextUser,
+  getTotalLevel1ToLevel10OfUser,
   getTotalLevel6ToLevel10OfUser,
   removeAccents,
 } from "../utils/methods.js";
@@ -99,7 +100,7 @@ const getAllPreTier2Users = asyncHandler(async (req, res) => {
       isSubId: false,
       tier: 1,
     });
-    const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(
+    const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(
       tree
     );
     results.push({
@@ -192,7 +193,7 @@ const getPreTier2UsersForUser = asyncHandler(async (req, res) => {
       tier: 1,
     });
 
-    const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(
+    const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(
       tree
     );
 
@@ -630,6 +631,9 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
     if (checkCanNextTier) {
       goNextTier = true;
       holdForNotEnoughLevel = true;
+      if(checkCanNextTier.achievedBy === "AUTO") {
+        holdForNotEnoughLevel = false;
+      }
     } else {
       res.status(200).json({
         status: "PENDING",
@@ -970,7 +974,7 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
         userStepPayment: user.paymentStep,
         holdForNotEnoughLevel,
         notEnoughtChild: holdForNotEnoughLevel
-          ? await getTotalLevel6ToLevel10OfUser(treeOfUser)
+          ? await getTotalLevel1ToLevel10OfUser(treeOfUser)
           : {},
       });
     }

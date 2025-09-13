@@ -3,10 +3,17 @@ import moment from "moment";
 import fs from "fs";
 
 import User from "../models/userModel.js";
-import { sendMailGetHewePrice, sendMailUpdateLayerForAdmin } from "../utils/sendMailCustom.js";
-import { getCountAllChildren, getCountIncome } from "../controllers/userControllers.js";
+import {
+  sendMailGetHewePrice,
+  sendMailUpdateLayerForAdmin,
+} from "../utils/sendMailCustom.js";
+import {
+  getCountAllChildren,
+  getCountIncome,
+} from "../controllers/userControllers.js";
 import {
   findRootLayer,
+  getTotalLevel1ToLevel10OfUser,
   getTotalLevel6ToLevel10OfUser,
   getUserClosestToNow,
 } from "../utils/methods.js";
@@ -19,7 +26,12 @@ import Income from "../models/incomeModel.js";
 
 export const deleteUser24hUnPay = asyncHandler(async () => {
   const listUser = await User.find({
-    $and: [{ tier: 1 }, { countPay: 0 }, { isAdmin: false }, { status: { $ne: "DELETED" } }],
+    $and: [
+      { tier: 1 },
+      { countPay: 0 },
+      { isAdmin: false },
+      { status: { $ne: "DELETED" } },
+    ],
   });
   for (let u of listUser) {
     const currentDay = moment();
@@ -44,30 +56,48 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
         });
         parent.children = [...newChilds];
         const updatedParent = await parent.save();
-        if (treeOfUser.children.length === 1 && updatedParent.children.length < 2) {
+        if (
+          treeOfUser.children.length === 1 &&
+          updatedParent.children.length < 2
+        ) {
           const firstChild = await Tree.findById(treeOfUser.children[0]);
           firstChild.parentId = updatedParent._id;
           firstChild.refId =
-            firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
+            firstChild.refId === treeOfUser._id
+              ? "64cd449ec75ae7bc7ebbab03"
+              : firstChild.refId;
           await firstChild.save();
-          const newUpdatedParentChildren = [...updatedParent.children, firstChild._id];
+          const newUpdatedParentChildren = [
+            ...updatedParent.children,
+            firstChild._id,
+          ];
           updatedParent.children = newUpdatedParentChildren;
           await updatedParent.save();
         }
-        if (treeOfUser.children.length === 2 && updatedParent.children.length === 0) {
+        if (
+          treeOfUser.children.length === 2 &&
+          updatedParent.children.length === 0
+        ) {
           const firstChild = await Tree.findById(treeOfUser.children[0]);
           firstChild.parentId = updatedParent._id;
-          firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
+          firstChild.refId === treeOfUser._id
+            ? "64cd449ec75ae7bc7ebbab03"
+            : firstChild.refId;
           await firstChild.save();
           const secondChild = await Tree.findById(treeOfUser.children[1]);
           secondChild.parentId = updatedParent._id;
-          secondChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : secondChild.refId;
+          secondChild.refId === treeOfUser._id
+            ? "64cd449ec75ae7bc7ebbab03"
+            : secondChild.refId;
           await secondChild.save();
           const newUpdatedParentChildren = [firstChild._id, secondChild._id];
           updatedParent.children = newUpdatedParentChildren;
           await updatedParent.save();
         }
-        if (treeOfUser.children.length === 2 && updatedParent.children.length === 1) {
+        if (
+          treeOfUser.children.length === 2 &&
+          updatedParent.children.length === 1
+        ) {
           console.log({ TH333333: u.userId });
           const firstChild = await Tree.findById(treeOfUser.children[0]);
           const secondChild = await Tree.findById(treeOfUser.children[1]);
@@ -91,7 +121,9 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
 });
 
 export const countChildToData = asyncHandler(async () => {
-  const listTrees = await Tree.find({}).select("tier countChild userId userName");
+  const listTrees = await Tree.find({}).select(
+    "tier countChild userId userName"
+  );
 
   for (let t of listTrees) {
     try {
@@ -172,7 +204,9 @@ export const areArraysEqual = (arr1, arr2) => {
 export const distributionHewe = asyncHandler(async () => {
   const listUser = await User.find({
     $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }, { countPay: 13 }],
-  }).select("userId totalHewe availableHewe hewePerDay claimedHewe currentLayer");
+  }).select(
+    "userId totalHewe availableHewe hewePerDay claimedHewe currentLayer"
+  );
 
   for (let u of listUser) {
     try {
@@ -349,9 +383,13 @@ export const checkUserTryToTier2 = asyncHandler(async () => {
           tier: 1,
           isSubId: false,
         });
-        const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(treeOfUser);
+        const { countChild1, countChild2 } =
+          await getTotalLevel1ToLevel10OfUser(treeOfUser);
         // console.log({ user: u.userId, countChild1, countChild2 });
-        if ((countChild1 >= 19 && countChild2 >= 77) || (countChild1 >= 77 && countChild2 >= 19)) {
+        if (
+          (countChild1 >= 20 && countChild2 >= 42) ||
+          (countChild1 >= 42 && countChild2 >= 20)
+        ) {
           u.tryToTier2 = "DONE";
           u.timeToTry = null;
         } else {
@@ -424,9 +462,13 @@ export const checkRefUserHaveChildOver45 = asyncHandler(async () => {
           await u.save();
 
           // Thêm thông tin vào logData
-          logData += `UserID: ${u.userId}, EligibleCount: ${eligibleCount}, TotalChild: ${
+          logData += `UserID: ${
+            u.userId
+          }, EligibleCount: ${eligibleCount}, TotalChild: ${
             listRefId.length
-          }, NewTimeRetry: ${moment(u.timeRetryOver45).format("YYYY-MM-DD HH:mm:ss")}\n`;
+          }, NewTimeRetry: ${moment(u.timeRetryOver45).format(
+            "YYYY-MM-DD HH:mm:ss"
+          )}\n`;
         }
       }
     }
@@ -439,7 +481,11 @@ export const checkRefUserHaveChildOver45 = asyncHandler(async () => {
 });
 
 export const checkUserPreTier2 = asyncHandler(async () => {
-  const listUser = await User.find({ tier: 1, preTier2Status: "" });
+  const listUser = await User.find({
+    tier: 1,
+    preTier2Status: "",
+    errLahCode: "",
+  });
 
   for (let u of listUser) {
     try {
@@ -449,18 +495,33 @@ export const checkUserPreTier2 = asyncHandler(async () => {
           tier: 1,
           isSubId: false,
         });
-        const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(treeOfUser);
+        const { countChild1, countChild2 } =
+          await getTotalLevel1ToLevel10OfUser(treeOfUser);
 
-        if ((countChild1 >= 20 && countChild2 >= 42) || (countChild1 >= 42 && countChild2 >= 20)) {
+        if (
+          (countChild1 >= 20 && countChild2 >= 42) ||
+          (countChild1 >= 42 && countChild2 >= 20)
+        ) {
           console.log({ userACHIEVED: u.userId, countChild1, countChild2 });
           u.preTier2Status = "ACHIEVED";
           u.timeOkPreTier2 = new Date();
-        } else if (
-          (countChild1 >= 8 && countChild2 >= 28) ||
-          (countChild1 >= 28 && countChild2 >= 8)
-        ) {
-          console.log({ userPENDING: u.userId, countChild1, countChild2 });
-          u.preTier2Status = "PENDING";
+        } else {
+          const countChildLevel4ToLevel10 = await getTotalLevel6ToLevel10OfUser(
+            treeOfUser
+          );
+          if (
+            (countChildLevel4ToLevel10.countChild1 >= 8 &&
+              countChildLevel4ToLevel10.countChild2 >= 28) ||
+            (countChildLevel4ToLevel10.countChild1 >= 28 &&
+              countChildLevel4ToLevel10.countChild2 >= 8)
+          ) {
+            console.log({
+              userPENDING: u.userId,
+              countChild1: countChildLevel4ToLevel10.countChild1,
+              countChild2: countChildLevel4ToLevel10.countChild2,
+            });
+            u.preTier2Status = "PENDING";
+          }
         }
         await u.save();
       }

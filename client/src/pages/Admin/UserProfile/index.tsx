@@ -472,7 +472,7 @@ const UserProfile = () => {
             >
               <span className="block sm:inline">
                 You have only <b>{data.countdown}</b> days left to complete the
-                126 required IDs to be eligible for Tier 2 benefits.
+                62 required IDs to be eligible for Tier 2 benefits.
               </span>
             </div>
           )}

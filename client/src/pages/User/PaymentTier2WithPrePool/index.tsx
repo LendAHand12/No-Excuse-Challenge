@@ -59,11 +59,11 @@ const PaymentTier2WithPrePoolPage = () => {
           notEnoughtChild,
         } = response.data;
         setResMessage(message);
-        // if (userStepPayment === 0 && holdForNotEnoughLevel) {
-        //   setShowCommit(holdForNotEnoughLevel);
-        //   setNotEnoughtChild1(notEnoughtChild.countChild1);
-        //   setNotEnoughtChild2(notEnoughtChild.countChild2);
-        // }
+        if (userStepPayment === 0 && holdForNotEnoughLevel) {
+          setShowCommit(holdForNotEnoughLevel);
+          setNotEnoughtChild1(notEnoughtChild.countChild1);
+          setNotEnoughtChild2(notEnoughtChild.countChild2);
+        }
         setResStatus(status);
 
         if (status === 'OK') {
@@ -195,8 +195,8 @@ const PaymentTier2WithPrePoolPage = () => {
                           ⚠️ Warning:
                         </div>
                         Please check the number of IDs in Tier 1 that need to be
-                        fulfilled within <b>45 days</b>. <br></br>
-                        <ul className="my-1 list-disc">
+                        fulfilled within <b>30 days</b>. <br></br>
+                        {/* <ul className="my-1 list-disc">
                           <li className="font-medium ml-4">
                             Branch 1 to fulfill :{' '}
                             {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
@@ -217,9 +217,31 @@ const PaymentTier2WithPrePoolPage = () => {
                               : 0}{' '}
                             IDs
                           </li>
-                        </ul>
+                        </ul> */}
+                        <ul className="flex flex-col list-disc">
+                      {(() => {
+                        const c1 = notEnoughtChild1 ?? 0;
+                        const c2 = notEnoughtChild2 ?? 0;
+
+                        // Xác định nhánh mạnh / yếu
+                        const isBranch1Strong = c1 >= c2;
+
+                        const target1 = isBranch1Strong ? 42 : 20;
+                        const target2 = isBranch1Strong ? 20 : 42;
+
+                        const b1 = Math.max(target1 - c1, 0);
+                        const b2 = Math.max(target2 - c2, 0);
+
+                        return (
+                          <>
+                            <li className="ml-4">Branch 1 : {b1} IDs</li>
+                            <li className="ml-4">Branch 2 : {b2} IDs</li>
+                          </>
+                        );
+                      })()}
+                    </ul>
                         By clicking <b>"Yes"</b>, the member agrees to complete
-                        <b> 128 active IDs</b> in both <b> Branch 1</b> and{' '}
+                        <b> 62 active IDs</b> in both <b> Branch 1</b> and{' '}
                         <b> Branch 2</b>.
                       </div>
                       <div className="w-full flex justify-around items-center">
