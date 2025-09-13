@@ -19,7 +19,7 @@ const AdminPreTier2UsersPages = () => {
   const searchParams = new URLSearchParams(location.search);
   const key = searchParams.get('keyword') || '';
   const page = searchParams.get('page') || 1;
-  const status = searchParams.get('status') || 'all';
+  const status = searchParams.get('status') || 'PENDING';
   const [totalPage, setTotalPage] = useState(0);
   const [keyword, setKeyword] = useState(key);
   const [loading, setLoading] = useState(true);

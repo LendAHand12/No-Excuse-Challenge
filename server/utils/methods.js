@@ -438,35 +438,53 @@ export const getFaceTecData = async (externalDatabaseRefID) => {
 export const countChildOfEachLevel = async (rootId) => {
   const result = { tier0: 1 }; // tầng 0 là node gốc
 
-  // Hàm đệ quy thật sự
   const recurse = async (ids, tier) => {
     if (!ids.length) return;
 
-    // Lấy các node tương ứng
+    // Lấy danh sách node 1 lượt
     const nodes = await Tree.find({ _id: { $in: ids } })
-      .select("children")
+      .select("children userId")
       .lean();
 
-    // Gom các _id của children
-    const childIds = [];
-    const workingChildIds = [];
-    for (const node of nodes) {
-      if (node.children?.length > 0) {
-        for (const childId of node.children) {
-          const tree = await Tree.findById(childId);
-          const child = await User.findById(tree.userId);
-          if (child.errLahCode !== "OVER45") {
-            workingChildIds.push(new mongoose.Types.ObjectId(childId));
-          }
-          childIds.push(new mongoose.Types.ObjectId(childId));
-        }
-      }
+    const allChildIds = nodes.flatMap((node) => node.children || []);
+
+    // Nếu không có children -> nghĩa là tất cả các node hiện tại là lá
+    if (!allChildIds.length) {
+      result[`level${tier}`] = (result[`level${tier}`] || 0) + nodes.length;
+      return;
     }
 
-    if (childIds.length > 0) {
-      result[`level${tier}`] = workingChildIds.length;
-      await recurse(childIds, tier + 1);
+    // Lấy tất cả user 1 lượt để check errLahCode
+    const trees = await Tree.find({ _id: { $in: allChildIds } })
+      .select("userId")
+      .lean();
+    const userIds = trees.map((t) => t.userId);
+
+    const users = await User.find({ _id: { $in: userIds } })
+      .select("errLahCode")
+      .lean();
+    const userMap = new Map(users.map((u) => [u._id.toString(), u]));
+
+    // Xác định con hợp lệ
+    const workingChildIds = [];
+    const nextLevelChildIds = [];
+
+    for (const tree of trees) {
+      const user = userMap.get(tree.userId.toString());
+      if (!user) continue;
+
+      if (user.errLahCode !== "OVER45") {
+        workingChildIds.push(tree._id);
+      }
+      // vẫn thêm vào nextLevelChildIds để duyệt xuống dưới
+      nextLevelChildIds.push(tree._id);
     }
+
+    // số lượng hợp lệ ở tầng này
+    result[`level${tier}`] =
+      (result[`level${tier}`] || 0) + workingChildIds.length;
+
+    await recurse(nextLevelChildIds, tier + 1);
   };
 
   await recurse([new mongoose.Types.ObjectId(rootId)], 1);

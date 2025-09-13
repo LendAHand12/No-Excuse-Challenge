@@ -51,6 +51,8 @@ import {
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 import { getNextUserTier2 } from "./common.js";
+import Tree from "./models/treeModel.js";
+import { getTotalLevel1ToLevel10OfUser, getTotalLevel6ToLevel10OfUser } from "./utils/methods.js";
 
 const app = express();
 
@@ -194,6 +196,10 @@ const cron7 = new CronJob("00 06 * * *", async () => {
 });
 
 // await test1();
+
+// const tree = await Tree.findById("68a7e4aebf9f7a0c21f6d39b");
+// const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(tree);
+// console.log({ countChild1, countChild2 });
 
 cron0.start();
 cron1.start();
