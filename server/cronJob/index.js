@@ -511,9 +511,10 @@ export const checkUserPreTier2 = asyncHandler(async () => {
             true
           );
           if (
-            (countChildLevel4ToLevel10.countChild1 >= 15 &&
-              countChildLevel4ToLevel10.countChild2 >= 35) ||
-            (countChildLevel4ToLevel10.countChild1 >= 35 &&
+            countChildLevel4ToLevel10.countChild1 +
+              countChildLevel4ToLevel10.countChild2 >=
+              50 &&
+            (countChildLevel4ToLevel10.countChild1 >= 15 ||
               countChildLevel4ToLevel10.countChild2 >= 15)
           ) {
             console.log({
