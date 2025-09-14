@@ -475,28 +475,28 @@ export const countChildOfEachLevel = async (rootId, includesDieId = false) => {
   const recurse = async (ids, tier) => {
     if (!ids.length) return;
 
-    // Lấy danh sách node hiện tại
     const nodes = await Tree.find({ _id: { $in: ids } })
       .select("children userId")
       .lean();
 
     const allChildIds = nodes.flatMap((node) => node.children || []);
 
-    // Nếu không có children thì đây là lá -> tính vào level này
     if (!allChildIds.length) {
-      result[`level${tier}`] = (result[`level${tier}`] || 0) + nodes.length;
+      // nếu không có children thì dừng, KHÔNG cộng thêm level nữa
       return;
     }
 
     let nextLevelChildIds = [];
 
     if (includesDieId) {
-      // Đếm tất cả children, không quan tâm errLahCode
-      result[`level${tier}`] =
-        (result[`level${tier}`] || 0) + allChildIds.length;
-      nextLevelChildIds = allChildIds.map((id) => new mongoose.Types.ObjectId(id));
+      // Đếm tất cả children ở level (tier + 1)
+      result[`level${tier + 1}`] =
+        (result[`level${tier + 1}`] || 0) + allChildIds.length;
+      nextLevelChildIds = allChildIds.map(
+        (id) => new mongoose.Types.ObjectId(id)
+      );
     } else {
-      // Chỉ đếm user hợp lệ (không có OVER45)
+      // Chỉ đếm user hợp lệ
       const trees = await Tree.find({ _id: { $in: allChildIds } })
         .select("userId")
         .lean();
@@ -512,22 +512,26 @@ export const countChildOfEachLevel = async (rootId, includesDieId = false) => {
       for (const tree of trees) {
         const user = userMap.get(tree.userId.toString());
         if (!user) continue;
-
         if (user.errLahCode !== "OVER45") {
           workingChildIds.push(tree._id);
         }
       }
 
-      result[`level${tier}`] =
-        (result[`level${tier}`] || 0) + workingChildIds.length;
+      // ✅ Đếm vào level (tier + 1)
+      result[`level${tier + 1}`] =
+        (result[`level${tier + 1}`] || 0) + workingChildIds.length;
 
-      nextLevelChildIds = allChildIds.map((id) => new mongoose.Types.ObjectId(id));
+      nextLevelChildIds = allChildIds.map(
+        (id) => new mongoose.Types.ObjectId(id)
+      );
     }
 
-    await recurse(nextLevelChildIds, tier + 1);
+    if (nextLevelChildIds.length > 0) {
+      await recurse(nextLevelChildIds, tier + 1);
+    }
   };
 
-  await recurse([new mongoose.Types.ObjectId(rootId)], 1);
+  await recurse([new mongoose.Types.ObjectId(rootId)], 0); // bắt đầu từ tier 0
 
   return result;
 };
@@ -598,15 +602,20 @@ export const getTotalLevel6ToLevel10OfUser = async (treeOfUser) => {
   return { countChild1, countChild2 };
 };
 
-export const getTotalLevel1ToLevel10OfUser = async (treeOfUser, includesDieId) => {
+export const getTotalLevel1ToLevel10OfUser = async (
+  treeOfUser,
+  includesDieId
+) => {
   const countWithLevelChild1 = await countChildOfEachLevel(
-    treeOfUser.children[0], includesDieId
+    treeOfUser.children[0],
+    includesDieId
   );
   const countWithLevelChild2 = await countChildOfEachLevel(
-    treeOfUser.children[1], includesDieId
+    treeOfUser.children[1],
+    includesDieId
   );
 
-  // console.log({ countWithLevelChild1, countWithLevelChild2 });
+  console.log({ countWithLevelChild1, countWithLevelChild2 });
 
   const countChild1 = sumLevels(countWithLevelChild1, 0, 9);
   const countChild2 = sumLevels(countWithLevelChild2, 0, 9);
