@@ -7,6 +7,7 @@ import {
   deleteUser24hUnPay,
   distributionHewe,
   rankingCalc,
+  checkUserPreTier2
 } from "../cronJob/index.js";
 
 const cronjobs = [
@@ -33,6 +34,10 @@ const cronjobs = [
   {
     title: "Check referral list",
     func: checkRefWithTime,
+  },
+  {
+    title: "Check Pre Tier 2 Pending List",
+    func: checkUserPreTier2,
   },
 ];
 

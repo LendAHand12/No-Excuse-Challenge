@@ -615,7 +615,7 @@ export const getTotalLevel1ToLevel10OfUser = async (
     includesDieId
   );
 
-  console.log({ countWithLevelChild1, countWithLevelChild2 });
+  // console.log({ countWithLevelChild1, countWithLevelChild2 });
 
   const countChild1 = sumLevels(countWithLevelChild1, 0, 9);
   const countChild2 = sumLevels(countWithLevelChild2, 0, 9);
