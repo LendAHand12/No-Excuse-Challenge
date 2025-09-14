@@ -197,9 +197,9 @@ const cron7 = new CronJob("00 06 * * *", async () => {
 
 // await test1();
 
-// const tree = await Tree.findById("68a7e4aebf9f7a0c21f6d39b");
-// const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(tree);
-// console.log({ countChild1, countChild2 });
+const tree = await Tree.findById("68072d90c841e907628576f9");
+const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(tree);
+console.log({ countChild1, countChild2 });
 
 cron0.start();
 cron1.start();

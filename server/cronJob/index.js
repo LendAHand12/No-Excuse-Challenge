@@ -507,7 +507,8 @@ export const checkUserPreTier2 = asyncHandler(async () => {
           u.timeOkPreTier2 = new Date();
         } else {
           const countChildLevel4ToLevel10 = await getTotalLevel1ToLevel10OfUser(
-            treeOfUser
+            treeOfUser,
+            true
           );
           if (
             (countChildLevel4ToLevel10.countChild1 >= 15 &&
