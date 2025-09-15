@@ -29,11 +29,7 @@ export const transferUserToTree = async () => {
 export const getParentWithCount = async (id) => {
   const user = await User.findById(id);
 
-  const parentWithCount = await getParentWithCountPay(
-    id,
-    user.countPay,
-    user.tier
-  );
+  const parentWithCount = await getParentWithCountPay(id, user.countPay, user.tier);
 
   console.log({ parentWithCount });
 };
@@ -127,10 +123,7 @@ export const addBuyPackageToTree = async () => {
   const listUser = await User.find({ isAdmin: false });
 
   for (let user of listUser) {
-    await Tree.updateMany(
-      { userName: user.userId },
-      { $set: { buyPackage: user.buyPackage } }
-    );
+    await Tree.updateMany({ userName: user.userId }, { $set: { buyPackage: user.buyPackage } });
   }
 
   console.log("addBuyPackageToTree done");
@@ -235,11 +228,7 @@ export const countIndexTree = async () => {
       console.log({ name: treeOfUser.userName });
       let level, listUserOfLevel;
       level = await findLevelById(treeOfUser.userId, 2);
-      listUserOfLevel = await findUsersAtLevel(
-        "6494e9101e2f152a593b66f2",
-        level + 1,
-        2
-      );
+      listUserOfLevel = await findUsersAtLevel("6494e9101e2f152a593b66f2", level + 1, 2);
       listUserOfLevel.sort((a, b) => {
         return new Date(a.createdAt) - new Date(b.createdAt);
       });
@@ -248,8 +237,7 @@ export const countIndexTree = async () => {
           { userId: childId, tier: 2 },
           {
             $set: {
-              indexOnLevel:
-                listUserOfLevel.findIndex((ele) => ele.userId === childId) + 1,
+              indexOnLevel: listUserOfLevel.findIndex((ele) => ele.userId === childId) + 1,
             },
           }
         );
@@ -317,4 +305,22 @@ export const getNextUserTier2 = async () => {
   const nextUserId = await findNextUser(2);
   const user = await User.findById(nextUserId);
   console.log({ name: user.userId });
+};
+
+export const check = async () => {
+  const fortyFiveDaysAgo = new Date();
+  fortyFiveDaysAgo.setDate(fortyFiveDaysAgo.getDate() - 45);
+
+  const listTreeUser = await Tree.find({
+    $and: [{ isSubId: false }, { tier: 1 }, { createdAt: { $gte: fortyFiveDaysAgo } }],
+  });
+
+  for (let tree of listTreeUser) {
+    const user = await User.findById(tree.userId);
+    if (user.errLahCode !== "") {
+      console.log({ name: tree.userName, create: tree.createdAt, errLahCode: user.errLahCode });
+      // user.errLahCode = "";
+      // await user.save();
+    }
+  }
 };
