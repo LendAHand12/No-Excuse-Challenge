@@ -31,9 +31,7 @@ const getAllPreTier2Users = asyncHandler(async (req, res) => {
 
   // Nếu có filter status
 
-  const keywordRegex = keyword
-    ? { $regex: removeAccents(keyword), $options: "i" }
-    : null;
+  const keywordRegex = keyword ? { $regex: removeAccents(keyword), $options: "i" } : null;
 
   const aggregationPipeline = [
     { $match: matchStage },
@@ -61,10 +59,7 @@ const getAllPreTier2Users = asyncHandler(async (req, res) => {
   }
 
   // Đếm số bản ghi sau khi lọc
-  const countAggregation = await PreTier2.aggregate([
-    ...aggregationPipeline,
-    { $count: "total" },
-  ]);
+  const countAggregation = await PreTier2.aggregate([...aggregationPipeline, { $count: "total" }]);
   const count = countAggregation[0]?.total || 0;
 
   // Thêm phân trang và sắp xếp
@@ -100,9 +95,7 @@ const getAllPreTier2Users = asyncHandler(async (req, res) => {
       isSubId: false,
       tier: 1,
     });
-    const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(
-      tree
-    );
+    const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(tree);
     results.push({
       ...user,
       countChild1: countChild1,
@@ -123,9 +116,7 @@ const getPreTier2UsersForUser = asyncHandler(async (req, res) => {
 
   const matchStage = { status: { $in: ["PENDING", "ACHIEVED"] } };
 
-  const keywordRegex = keyword
-    ? { $regex: removeAccents(keyword), $options: "i" }
-    : null;
+  const keywordRegex = keyword ? { $regex: removeAccents(keyword), $options: "i" } : null;
 
   const aggregationPipeline = [
     { $match: matchStage },
@@ -153,10 +144,7 @@ const getPreTier2UsersForUser = asyncHandler(async (req, res) => {
   }
 
   // Đếm số bản ghi sau khi lọc
-  const countAggregation = await PreTier2.aggregate([
-    ...aggregationPipeline,
-    { $count: "total" },
-  ]);
+  const countAggregation = await PreTier2.aggregate([...aggregationPipeline, { $count: "total" }]);
   const count = countAggregation[0]?.total || 0;
 
   // Thêm phân trang và sắp xếp (không dùng order trong document nữa, chỉ dùng createdAt)
@@ -193,9 +181,7 @@ const getPreTier2UsersForUser = asyncHandler(async (req, res) => {
       tier: 1,
     });
 
-    const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(
-      tree
-    );
+    const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(tree);
 
     // gán order động theo trang
     const order = (page - 1) * pageSize + index;
@@ -264,10 +250,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
   const { user } = req;
 
   if (user) {
-    if (
-      user.preTier2Status === "APPROVED" ||
-      user.preTier2Status === "ACHIEVED"
-    ) {
+    if (user.preTier2Status === "APPROVED" || user.preTier2Status === "ACHIEVED") {
       await Transaction.deleteMany({
         $and: [
           {
@@ -415,8 +398,7 @@ const onDonePayment = asyncHandler(async (req, res) => {
         await sendMailGetHewePrice();
       }
       const hewePriceConfig = await Config.findOne({ label: "HEWE_PRICE" });
-      const hewePrice =
-        responseHewe?.data?.ticker?.latest || hewePriceConfig.value;
+      const hewePrice = responseHewe?.data?.ticker?.latest || hewePriceConfig.value;
       const totalHewe = Math.round(20 / hewePrice);
 
       user.availableHewe = user.availableHewe + totalHewe;
@@ -432,9 +414,7 @@ const onDonePayment = asyncHandler(async (req, res) => {
 
       await newIncome.save();
 
-      const lastUserPreTier2 = await PreTier2.findOne()
-        .sort({ order: -1 })
-        .lean();
+      const lastUserPreTier2 = await PreTier2.findOne().sort({ order: -1 }).lean();
 
       const newPreTier2User = new PreTier2({
         userId: user.id,
@@ -481,14 +461,9 @@ const onUserPassTier2 = async () => {
         tier: 1,
         isSubId: false,
       });
-      const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(
-        treeOfUser
-      );
+      const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(treeOfUser);
 
-      if (
-        (countChild1 >= 20 && countChild2 >= 42) ||
-        (countChild1 >= 42 && countChild2 >= 20)
-      ) {
+      if ((countChild1 >= 20 && countChild2 >= 42) || (countChild1 >= 42 && countChild2 >= 20)) {
         pre.status = "ACHIEVED";
         pre.achievedTime = new Date();
       }
@@ -539,9 +514,7 @@ const changeOrderByAdmin = asyncHandler(async (req, res) => {
     }
 
     if (docFrom.status !== "PENDING") {
-      return res
-        .status(400)
-        .json({ error: "Only PENDING users can change order" });
+      return res.status(400).json({ error: "Only PENDING users can change order" });
     }
 
     const currentOrder = docFrom.order;
@@ -572,9 +545,7 @@ const changeOrderByAdmin = asyncHandler(async (req, res) => {
     }
 
     if (!docTo) {
-      return res
-        .status(404)
-        .json({ error: "Target document not found or not PENDING" });
+      return res.status(404).json({ error: "Target document not found or not PENDING" });
     }
 
     // hoán đổi order
@@ -631,15 +602,13 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
     if (checkCanNextTier) {
       goNextTier = true;
       holdForNotEnoughLevel = true;
-      if(checkCanNextTier.achievedBy === "AUTO") {
+      if (checkCanNextTier.achievedBy === "AUTO") {
         holdForNotEnoughLevel = false;
       }
     } else {
       res.status(200).json({
         status: "PENDING",
-        message: `Your current level is insufficient to upgrade to the tier ${
-          user.tier + 1
-        }`,
+        message: `Your current level is insufficient to upgrade to the tier ${user.tier + 1}`,
       });
     }
 
@@ -685,9 +654,7 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
           process.env[`REGISTER_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
         );
         let pigFee = parseInt(
-          process.env[
-            `DREAMPOOL_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`
-          ]
+          process.env[`DREAMPOOL_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
         );
         let companyFee = parseInt(
           process.env[`HEWE_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
@@ -696,9 +663,7 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
           process.env[`DIRECT_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
         );
         let referralCommissionFee = parseInt(
-          process.env[
-            `CONTRIBUTE_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`
-          ]
+          process.env[`CONTRIBUTE_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
         );
         // giao dich dang ky
         payments.push({
@@ -807,16 +772,13 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
         // giao dich hoa hong truc tiep
         if (refUser.closeLah) {
           haveRefNotPayEnough = true;
-        } else if (
-          refUser.openLah ||
-          refUser.adminChangeTier ||
-          refUser.createBy === "ADMIN"
-        ) {
+        } else if (refUser.openLah || refUser.adminChangeTier || refUser.createBy === "ADMIN") {
           haveRefNotPayEnough = false;
         } else {
           if (
             refUser.status === "LOCKED" ||
             refUser.tier < user.tier ||
+            refUser.errLahCode === "OVER45" ||
             (refUser.tier === user.tier && refUser.countPay < 13)
           ) {
             haveRefNotPayEnough = true;
@@ -848,11 +810,7 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
           tier: user.tier + 1 - user.paymentStep,
           buyPackage: user.buyPackage,
           hash: "",
-          type: payOutForPool
-            ? "POOLREPAYMENT"
-            : haveRefNotPayEnough
-            ? "DIRECTHOLD"
-            : "DIRECT",
+          type: payOutForPool ? "POOLREPAYMENT" : haveRefNotPayEnough ? "DIRECTHOLD" : "DIRECT",
           status: "PENDING",
           refBuyPackage: refUser.buyPackage,
         });
@@ -907,9 +865,7 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
             if (
               receiveUser.status === "LOCKED" ||
               receiveUser.errLahCode === "OVER45" ||
-              receiveUser.tier < user.tier ||
-              (receiveUser.tier === user.tier &&
-                receiveUser.countPay < user.countPay + 1)
+              receiveUser.tier < user.tier
             ) {
               haveParentNotPayEnough = true;
             } else {
@@ -931,8 +887,7 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
           if (
             user.paymentStep === 0 &&
             receiveUser.shortfallAmount > 0 &&
-            receiveUser.shortfallAmount >=
-              referralCommissionFee + rePaymentForPool
+            receiveUser.shortfallAmount >= referralCommissionFee + rePaymentForPool
           ) {
             rePayForPoolRef = true;
           }
@@ -940,6 +895,7 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
             userName: p.userName,
             amount: referralCommissionFee,
           });
+
           const transactionReferral = await Transaction.create({
             userId: user.id,
             amount: referralCommissionFee,
@@ -1004,8 +960,7 @@ const onDoneTier2Payment = asyncHandler(async (req, res) => {
           await newPreTier2Pool.save();
 
           let userReceive = await User.findOne({ _id: trans.userId_to });
-          userReceive.shortfallAmount =
-            userReceive.shortfallAmount - trans.amount;
+          userReceive.shortfallAmount = userReceive.shortfallAmount - trans.amount;
           await userReceive.save();
         } else if (!trans.type.includes("HOLD")) {
           let userReceive = await User.findOne({ _id: trans.userId_to });
@@ -1022,8 +977,7 @@ const onDoneTier2Payment = asyncHandler(async (req, res) => {
         let responseHewe = await getPriceHewe();
         const hewePrice = responseHewe?.data?.ticker?.latest || 0.0005287;
         const totalHewe = Math.round(
-          (parseInt(process.env[`HEWE_AMOUNT_TIER${user.tier + 1}`]) + 25) /
-            hewePrice
+          (parseInt(process.env[`HEWE_AMOUNT_TIER${user.tier + 1}`]) + 25) / hewePrice
         );
 
         user.availableHewe = user.totalHewe + user.availableHewe + totalHewe;
@@ -1065,9 +1019,7 @@ const onDoneTier2Payment = asyncHandler(async (req, res) => {
           tier: user.tier + 1,
         });
 
-        const highestIndexOfLevel = await findHighestIndexOfLevel(
-          user.tier + 1
-        );
+        const highestIndexOfLevel = await findHighestIndexOfLevel(user.tier + 1);
         const treeOfUserTier2 = await Tree.create({
           userName: user.userId,
           userId: user._id,
@@ -1130,9 +1082,7 @@ const getInfoPreTier2Pool = asyncHandler(async (req, res) => {
 
   const matchStage = {};
 
-  const keywordRegex = keyword
-    ? { $regex: removeAccents(keyword), $options: "i" }
-    : null;
+  const keywordRegex = keyword ? { $regex: removeAccents(keyword), $options: "i" } : null;
 
   const aggregationPipeline = [
     { $match: matchStage },
@@ -1199,11 +1149,7 @@ export const getBalanceOfPreTier2Pool = async () => {
         _id: null,
         total: {
           $sum: {
-            $cond: [
-              { $eq: ["$status", "IN"] },
-              "$amount",
-              { $multiply: ["$amount", -1] },
-            ],
+            $cond: [{ $eq: ["$status", "IN"] }, "$amount", { $multiply: ["$amount", -1] }],
           },
         },
       },

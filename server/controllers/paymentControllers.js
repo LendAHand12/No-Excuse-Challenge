@@ -26,6 +26,7 @@ import Wallet from "../models/walletModel.js";
 import Tree from "../models/treeModel.js";
 import { getPriceHewe } from "../utils/getPriceHewe.js";
 import PreTier2Pool from "../models/preTier2PoolModel.js";
+import { getListChildNotEnoughBranchOfUser } from "./userControllers.js";
 
 const getPaymentInfo = asyncHandler(async (req, res) => {
   const { user } = req;
@@ -534,6 +535,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           if (
             refUser.status === "LOCKED" ||
             refUser.tier < user.tier ||
+            refUser.errLahCode === "OVER45" ||
             (refUser.tier === user.tier && refUser.countPay < 13)
           ) {
             haveRefNotPayEnough = true;
@@ -620,8 +622,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
             if (
               receiveUser.status === "LOCKED" ||
               receiveUser.errLahCode === "OVER45" ||
-              receiveUser.tier < user.tier ||
-              (receiveUser.tier === user.tier && receiveUser.countPay < user.countPay + 1)
+              receiveUser.tier < user.tier
             ) {
               haveParentNotPayEnough = true;
             } else {
@@ -1056,7 +1057,7 @@ const getAllPayments = asyncHandler(async (req, res) => {
         if (userReceive) {
           const treeOfReceiveUser = await Tree.findOne({
             userId: pay.userId_to,
-            tier: 1,
+            tier: pay.tier,
           });
           const listRefOfReceiver = await Tree.find({
             refId: treeOfReceiveUser._id,
@@ -1205,7 +1206,7 @@ const checkCanRefundPayment = asyncHandler(async (req, res) => {
     if (userReceive) {
       const treeOfReceiveUser = await Tree.findOne({
         userId: userId_to,
-        tier: 1,
+        tier: trans.tier,
       });
       const listRefOfReceiver = await Tree.find({
         refId: treeOfReceiveUser._id,
@@ -1244,6 +1245,8 @@ const checkCanRefund = async ({
   const hasTwoRef = await hasTwoBranches(treeOfReceiveUser._id);
   if (hasTwoRef === false) {
     return `Payment blocked because there are not enough 2 branch`;
+  } else if (treeOfReceiveUser.disable) {
+    return `User have disabled`;
   } else if (userReceive.status === "LOCKED") {
     return `User parent locked`;
   } else if (userReceive.closeLah) {

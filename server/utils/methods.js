@@ -47,39 +47,21 @@ export const findNextUser = async (tier) => {
   const admin = await User.findById("6494e9101e2f152a593b66f2");
   if (!admin) throw "Unknow admin";
   const adminTree = await Tree.findOne({ userId: admin._id, tier });
-  const listUserLevel = await findUsersAtLevel(
-    adminTree._id,
-    admin.currentLayer[tier - 1],
-    2,
-    1
-  );
+  const listUserLevel = await findUsersAtLevel(adminTree._id, admin.currentLayer[tier - 1], 2, 1);
 
-  const sortedData = listUserLevel.sort(
-    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-  );
+  const sortedData = listUserLevel.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
   const itemWithMinLength = sortedData.reduce((minItem, currentItem) => {
-    return currentItem.children.length < minItem.children.length
-      ? currentItem
-      : minItem;
+    return currentItem.children.length < minItem.children.length ? currentItem : minItem;
   }, sortedData[0]);
-  return itemWithMinLength
-    ? itemWithMinLength.userId
-    : "6494e9101e2f152a593b66f2";
+  return itemWithMinLength ? itemWithMinLength.userId : "6494e9101e2f152a593b66f2";
 };
 
 export const findNextUserNotIncludeNextUserTier = async (tier) => {
   const admin = await User.findById("6494e9101e2f152a593b66f2");
   if (!admin) throw "Unknow admin";
-  const listUserLevel = await findUsersAtLevel(
-    admin._id,
-    admin.currentLayer[tier - 1],
-    2,
-    1
-  );
-  const sortedData = listUserLevel.sort(
-    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-  );
+  const listUserLevel = await findUsersAtLevel(admin._id, admin.currentLayer[tier - 1], 2, 1);
+  const sortedData = listUserLevel.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
   // for (let user of sortedData) {
   //   console.log({
   //     userName: user.userName,
@@ -89,13 +71,9 @@ export const findNextUserNotIncludeNextUserTier = async (tier) => {
   // }
 
   const itemWithMinLength = sortedData.reduce((minItem, currentItem) => {
-    return currentItem.children.length < minItem.children.length
-      ? currentItem
-      : minItem;
+    return currentItem.children.length < minItem.children.length ? currentItem : minItem;
   }, sortedData[0]);
-  return itemWithMinLength
-    ? itemWithMinLength.userId
-    : "6494e9101e2f152a593b66f2";
+  return itemWithMinLength ? itemWithMinLength.userId : "6494e9101e2f152a593b66f2";
 };
 
 // export const findUsersAtLevel = async (
@@ -131,12 +109,7 @@ export const findNextUserNotIncludeNextUserTier = async (tier) => {
 //   return usersAtLevel;
 // };
 
-export const findUsersAtLevel = async (
-  rootTreeId,
-  targetLevel,
-  tier,
-  currentLevel = 1
-) => {
+export const findUsersAtLevel = async (rootTreeId, targetLevel, tier, currentLevel = 1) => {
   if (currentLevel > targetLevel) {
     return [];
   }
@@ -158,12 +131,7 @@ export const findUsersAtLevel = async (
   let treesAtTargetLevel = [];
 
   for (const childId of rootTree.children) {
-    const treesFromChild = await findUsersAtLevel(
-      childId,
-      targetLevel,
-      tier,
-      currentLevel + 1
-    );
+    const treesFromChild = await findUsersAtLevel(childId, targetLevel, tier, currentLevel + 1);
     treesAtTargetLevel = treesAtTargetLevel.concat(treesFromChild);
   }
 
@@ -371,9 +339,7 @@ export const mergeIntoThreeGroups = (A) => {
   // Assign groups
   const group1 = sorted[0].countChild;
   const group2 = sorted[1]?.countChild || 0;
-  const group3 = sorted
-    .slice(2)
-    .reduce((sum, item) => sum + item.countChild, 0);
+  const group3 = sorted.slice(2).reduce((sum, item) => sum + item.countChild, 0);
 
   return [group1, group2, group3];
 };
@@ -490,11 +456,8 @@ export const countChildOfEachLevel = async (rootId, includesDieId = false) => {
 
     if (includesDieId) {
       // Đếm tất cả children ở level (tier + 1)
-      result[`level${tier + 1}`] =
-        (result[`level${tier + 1}`] || 0) + allChildIds.length;
-      nextLevelChildIds = allChildIds.map(
-        (id) => new mongoose.Types.ObjectId(id)
-      );
+      result[`level${tier + 1}`] = (result[`level${tier + 1}`] || 0) + allChildIds.length;
+      nextLevelChildIds = allChildIds.map((id) => new mongoose.Types.ObjectId(id));
     } else {
       // Chỉ đếm user hợp lệ
       const trees = await Tree.find({ _id: { $in: allChildIds } })
@@ -512,18 +475,15 @@ export const countChildOfEachLevel = async (rootId, includesDieId = false) => {
       for (const tree of trees) {
         const user = userMap.get(tree.userId.toString());
         if (!user) continue;
-        if (user.errLahCode !== "OVER45") {
+        if (user.errLahCode !== "OVER45" && user.countPay === 13) {
           workingChildIds.push(tree._id);
         }
       }
 
       // ✅ Đếm vào level (tier + 1)
-      result[`level${tier + 1}`] =
-        (result[`level${tier + 1}`] || 0) + workingChildIds.length;
+      result[`level${tier + 1}`] = (result[`level${tier + 1}`] || 0) + workingChildIds.length;
 
-      nextLevelChildIds = allChildIds.map(
-        (id) => new mongoose.Types.ObjectId(id)
-      );
+      nextLevelChildIds = allChildIds.map((id) => new mongoose.Types.ObjectId(id));
     }
 
     if (nextLevelChildIds.length > 0) {
@@ -563,17 +523,12 @@ export const sumLevels = (obj, fromLevel = 5, toLevel = 9) => {
 };
 
 export const checkUserCanNextTier = async (treeOfUser) => {
-  const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(
-    treeOfUser
-  );
+  const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(treeOfUser);
   // console.log({ countChild1, countChild2 });
 
   if (treeOfUser.countChild >= 62) {
     // if (treeOfUser.countChild >= 126) {
-    if (
-      (countChild1 >= 20 && countChild2 >= 42) ||
-      (countChild1 >= 42 && countChild2 >= 20)
-    ) {
+    if ((countChild1 >= 20 && countChild2 >= 42) || (countChild1 >= 42 && countChild2 >= 20)) {
       // if (countChild1 >= 0 && countChild2 >= 0) {
       return true;
     } else {
@@ -585,12 +540,8 @@ export const checkUserCanNextTier = async (treeOfUser) => {
 };
 
 export const getTotalLevel6ToLevel10OfUser = async (treeOfUser) => {
-  const countWithLevelChild1 = await countChildOfEachLevel(
-    treeOfUser.children[0]
-  );
-  const countWithLevelChild2 = await countChildOfEachLevel(
-    treeOfUser.children[1]
-  );
+  const countWithLevelChild1 = await countChildOfEachLevel(treeOfUser.children[0]);
+  const countWithLevelChild2 = await countChildOfEachLevel(treeOfUser.children[1]);
 
   // console.log({ countWithLevelChild1, countWithLevelChild2 });
 
@@ -602,18 +553,9 @@ export const getTotalLevel6ToLevel10OfUser = async (treeOfUser) => {
   return { countChild1, countChild2 };
 };
 
-export const getTotalLevel1ToLevel10OfUser = async (
-  treeOfUser,
-  includesDieId
-) => {
-  const countWithLevelChild1 = await countChildOfEachLevel(
-    treeOfUser.children[0],
-    includesDieId
-  );
-  const countWithLevelChild2 = await countChildOfEachLevel(
-    treeOfUser.children[1],
-    includesDieId
-  );
+export const getTotalLevel1ToLevel10OfUser = async (treeOfUser, includesDieId) => {
+  const countWithLevelChild1 = await countChildOfEachLevel(treeOfUser.children[0], includesDieId);
+  const countWithLevelChild2 = await countChildOfEachLevel(treeOfUser.children[1], includesDieId);
 
   // console.log({ countWithLevelChild1, countWithLevelChild2 });
 
@@ -627,11 +569,7 @@ export const getTotalLevel1ToLevel10OfUser = async (
 
 const getBranchRoot = async (nodeId, rootId) => {
   let current = await Tree.findById(nodeId).lean();
-  while (
-    current &&
-    current.parentId &&
-    String(current.parentId) !== String(rootId)
-  ) {
+  while (current && current.parentId && String(current.parentId) !== String(rootId)) {
     current = await Tree.findById(current.parentId).lean();
   }
   return current ? String(current._id) : null;
