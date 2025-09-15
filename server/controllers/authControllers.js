@@ -13,6 +13,7 @@ import {
   checkSerepayWallet,
   checkUserCanNextTier,
   findNextReferrer,
+  getAllDescendantsTier2Users,
   mergeIntoThreeGroups,
 } from "../utils/methods.js";
 import axios from "axios";
@@ -273,6 +274,8 @@ const authUser = asyncHandler(async (req, res) => {
     const checkCanNextTier =
       user.currentLayer.slice(-1) >= 3 ? await checkUserCanNextTier(tree) : false;
 
+    const tier2Users = await getAllDescendantsTier2Users(user._id);
+
     res.status(200).json({
       userInfo: {
         id: user._id,
@@ -335,6 +338,7 @@ const authUser = asyncHandler(async (req, res) => {
         checkCanNextTier,
         preTier2Status: user.preTier2Status,
         shortfallAmount: user.shortfallAmount,
+        tier2ChildUsers: tier2Users.length > 0 ? tier2Users.map((ele) => ele.userId) : [],
       },
       accessToken,
       refreshToken,

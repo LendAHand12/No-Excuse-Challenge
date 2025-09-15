@@ -781,6 +781,39 @@ const UserProfile = () => {
                   </ul>
                 </div>
               </div>
+              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                <p className="uppercase mt-2 font-bold">Tier 2 Users</p>
+                <div className="py-2">
+                  <ul className="flex flex-wrap gap-2">
+                    {data.tier2ChildUsers.map((ele) => (
+                      <li
+                        className="bg-white border-b hover:bg-gray-50"
+                        key={ele}
+                      >
+                        <div className="py-2">
+                          <div className="text-base">
+                            <span
+                              className={`${
+                                ele.isRed
+                                  ? 'bg-[#b91c1c]'
+                                  : ele.isBlue
+                                  ? 'bg-[#0000ff]'
+                                  : ele.isYellow
+                                  ? 'bg-[#F4B400]'
+                                  : ele.isPink
+                                  ? 'bg-[#e600769c]'
+                                  : 'bg-[#16a34a]'
+                              } py-1 px-2 rounded text-white text-sm`}
+                            >
+                              {ele}
+                            </span>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
               {data.tier === 2 && (
                 <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                   <p className="uppercase mt-2 font-bold">{t('ACTIVE ID')}</p>
@@ -799,28 +832,28 @@ const UserProfile = () => {
                       {t('NUMBERS OF ID REQUIRE')}
                     </p>
                     <div className="lg:py-2">
-                    <ul className="flex flex-col list-disc">
-                      {(() => {
-                        const c1 = data?.notEnoughtChild?.countChild1 ?? 0;
-                        const c2 = data?.notEnoughtChild?.countChild2 ?? 0;
+                      <ul className="flex flex-col list-disc">
+                        {(() => {
+                          const c1 = data?.notEnoughtChild?.countChild1 ?? 0;
+                          const c2 = data?.notEnoughtChild?.countChild2 ?? 0;
 
-                        // Xác định nhánh mạnh / yếu
-                        const isBranch1Strong = c1 >= c2;
+                          // Xác định nhánh mạnh / yếu
+                          const isBranch1Strong = c1 >= c2;
 
-                        const target1 = isBranch1Strong ? 42 : 20;
-                        const target2 = isBranch1Strong ? 20 : 42;
+                          const target1 = isBranch1Strong ? 42 : 20;
+                          const target2 = isBranch1Strong ? 20 : 42;
 
-                        const b1 = Math.max(target1 - c1, 0);
-                        const b2 = Math.max(target2 - c2, 0);
+                          const b1 = Math.max(target1 - c1, 0);
+                          const b2 = Math.max(target2 - c2, 0);
 
-                        return (
-                          <>
-                            <li className="ml-4">Branch 1 : {b1} IDs</li>
-                            <li className="ml-4">Branch 2 : {b2} IDs</li>
-                          </>
-                        );
-                      })()}
-                    </ul>
+                          return (
+                            <>
+                              <li className="ml-4">Branch 1 : {b1} IDs</li>
+                              <li className="ml-4">Branch 2 : {b2} IDs</li>
+                            </>
+                          );
+                        })()}
+                      </ul>
                     </div>
                   </div>
                 </div>
@@ -1275,8 +1308,12 @@ const UserProfile = () => {
                       <div className="px-4 py-2">{data.totalHold} USDT</div>
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">Outstanding Pre-Tier2 Pool Amount</div>
-                      <div className="px-4 py-2">{data.shortfallAmount} USDT</div>
+                      <div className="px-4 py-2 font-semibold">
+                        Outstanding Pre-Tier2 Pool Amount
+                      </div>
+                      <div className="px-4 py-2">
+                        {data.shortfallAmount} USDT
+                      </div>
                     </div>
                     {data.city === 'US' && (
                       <>

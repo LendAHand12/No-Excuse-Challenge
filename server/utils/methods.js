@@ -608,3 +608,44 @@ export const hasTwoBranches = async (refId) => {
     return false;
   }
 };
+
+export const getAllDescendantsTier2Users = async (userId) => {
+  // tìm node gốc trong Tree
+  const rootTree = await Tree.findOne({ userId }).lean();
+  if (!rootTree) {
+    throw new Error("Root user not found in Tree");
+  }
+
+  let result = [];
+  let queue = [...(rootTree.children || [])]; // bắt đầu với con trực tiếp của node gốc
+
+  while (queue.length > 0) {
+    // lấy 1 batch id để query
+    const batchIds = queue.splice(0, queue.length);
+
+    // lấy các Tree document con
+    const childTrees = await Tree.find({
+      _id: { $in: batchIds.map((id) => new mongoose.Types.ObjectId(id)) },
+    }).lean();
+
+    // gom các children tiếp theo vào queue (cháu chắt)
+    childTrees.forEach((t) => {
+      if (t.children && t.children.length > 0) {
+        queue.push(...t.children);
+      }
+    });
+
+    // lấy danh sách userId từ các Tree này
+    const childUserIds = childTrees.map((t) => new mongoose.Types.ObjectId(t.userId));
+
+    // tìm user tier = 2
+    const users = await User.find({
+      _id: { $in: childUserIds },
+      tier: 2,
+    }).lean();
+
+    result.push(...users);
+  }
+
+  return result;
+};

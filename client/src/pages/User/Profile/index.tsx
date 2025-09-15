@@ -67,6 +67,7 @@ const Profile = () => {
     preTier2Status,
     preTier2User,
     shortfallAmount,
+    tier2ChildUsers,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -991,6 +992,38 @@ const Profile = () => {
                               } py-1 px-2 rounded text-white text-sm min-w-fit`}
                             >
                               {ele.userId}
+                            </span>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div className="bg-[#FAFBFC] p-4 rounded-2xl">
+              <div className="py-2 px-4">
+                <p className="uppercase mt-2 font-bold">Tier 2 Users</p>
+                <div className="lg:py-2">
+                  <ul className="flex flex-row flex-wrap gap-2">
+                    {tier2ChildUsers.map((ele) => (
+                      <li className="" key={ele}>
+                        <div className="py-2">
+                          <div className="text-base w-full">
+                            <span
+                              className={`${
+                                ele.isRed
+                                  ? 'bg-[#b91c1c]'
+                                  : ele.isBlue
+                                  ? 'bg-[#0000ff]'
+                                  : ele.isYellow
+                                  ? 'bg-[#F4B400]'
+                                  : ele.isPink
+                                  ? 'bg-[#e600769c]'
+                                  : 'bg-[#16a34a]'
+                              } py-1 px-2 rounded text-white text-sm min-w-fit`}
+                            >
+                              {ele}
                             </span>
                           </div>
                         </div>

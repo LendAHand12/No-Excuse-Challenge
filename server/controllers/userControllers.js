@@ -21,6 +21,7 @@ import {
   getTotalLevel6ToLevel10OfUser,
   checkUserCanNextTier,
   getTotalLevel1ToLevel10OfUser,
+  getAllDescendantsTier2Users,
 } from "../utils/methods.js";
 import { areArraysEqual } from "../cronJob/index.js";
 import {
@@ -252,7 +253,10 @@ const getUserById = asyncHandler(async (req, res) => {
 
     let countdown = 0;
     if (user.tryToTier2 === "YES") {
-      const tier2Deadline = moment(user.timeToTry).add(user.preTier2Status === "PASSED" ? 0 : 45, "days"); // ngày tier2Time + 45 ngày
+      const tier2Deadline = moment(user.timeToTry).add(
+        user.preTier2Status === "PASSED" ? 0 : 45,
+        "days"
+      ); // ngày tier2Time + 45 ngày
       const currentDay = moment(); // ngày hiện tại
       countdown = tier2Deadline.diff(currentDay, "days"); // số ngày còn lại
     }
@@ -321,6 +325,8 @@ const getUserById = asyncHandler(async (req, res) => {
     if (tree.parentId) {
       parentTree = await Tree.findById(tree.parentId);
     }
+
+    const tier2Users = await getAllDescendantsTier2Users(user.id);
 
     res.json({
       id: user._id,
@@ -402,6 +408,7 @@ const getUserById = asyncHandler(async (req, res) => {
       timeRetryOver45: user.timeRetryOver45,
       preTier2Status: user.preTier2Status,
       shortfallAmount: user.shortfallAmount,
+      tier2ChildUsers: tier2Users.length > 0 ? tier2Users.map((ele) => ele.userId) : [],
     });
   } else {
     res.status(404);
@@ -485,7 +492,10 @@ const getUserInfo = asyncHandler(async (req, res) => {
     }
     let countdown = 0;
     if (user.tryToTier2 === "YES") {
-      const tier2Deadline = moment(user.timeToTry).add(user.preTier2Status === "PASSED" ? 0 : 45, "days"); // ngày tier2Time + 45 ngày
+      const tier2Deadline = moment(user.timeToTry).add(
+        user.preTier2Status === "PASSED" ? 0 : 45,
+        "days"
+      ); // ngày tier2Time + 45 ngày
       const currentDay = moment(); // ngày hiện tại
       countdown = tier2Deadline.diff(currentDay, "days"); // số ngày còn lại
     }
@@ -514,6 +524,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
       user.currentLayer.slice(-1) >= 3 ? await checkUserCanNextTier(tree) : false;
 
     const preTier2User = await PreTier2.findOne({ userId: user._id, status: "ACHIEVED" });
+
+    const tier2Users = await getAllDescendantsTier2Users(user.id);
 
     res.json({
       id: user._id,
@@ -597,6 +609,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       preTier2Status: user.preTier2Status,
       preTier2User: preTier2User,
       shortfallAmount: user.shortfallAmount,
+      tier2ChildUsers: tier2Users.length > 0 ? tier2Users.map((ele) => ele.userId) : [],
     });
   } else {
     res.status(404);
