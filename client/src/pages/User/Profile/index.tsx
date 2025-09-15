@@ -1006,7 +1006,7 @@ const Profile = () => {
                 <p className="uppercase mt-2 font-bold">Tier 2 Users</p>
                 <div className="lg:py-2">
                   <ul className="flex flex-row flex-wrap gap-2">
-                    {tier2ChildUsers.map((ele) => (
+                    {tier2ChildUsers?.map((ele) => (
                       <li className="" key={ele}>
                         <div className="py-2">
                           <div className="text-base w-full">
