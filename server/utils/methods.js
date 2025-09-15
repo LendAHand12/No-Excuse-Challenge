@@ -466,7 +466,7 @@ export const countChildOfEachLevel = async (rootId, includesDieId = false) => {
 
       const userIds = trees.map((t) => t.userId);
       const users = await User.find({ _id: { $in: userIds } })
-        .select("errLahCode")
+        .select("errLahCode countPay")
         .lean();
       const userMap = new Map(users.map((u) => [u._id.toString(), u]));
 
