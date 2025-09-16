@@ -616,36 +616,57 @@ export const getAllDescendantsTier2Users = async (userId) => {
     throw new Error("Root user not found in Tree");
   }
 
-  let result = [];
-  let queue = [...(rootTree.children || [])]; // bắt đầu với con trực tiếp của node gốc
-
-  while (queue.length > 0) {
-    // lấy 1 batch id để query
-    const batchIds = queue.splice(0, queue.length);
-
-    // lấy các Tree document con
-    const childTrees = await Tree.find({
-      _id: { $in: batchIds.map((id) => new mongoose.Types.ObjectId(id)) },
-    }).lean();
-
-    // gom các children tiếp theo vào queue (cháu chắt)
-    childTrees.forEach((t) => {
-      if (t.children && t.children.length > 0) {
-        queue.push(...t.children);
-      }
-    });
-
-    // lấy danh sách userId từ các Tree này
-    const childUserIds = childTrees.map((t) => new mongoose.Types.ObjectId(t.userId));
-
-    // tìm user tier = 2
-    const users = await User.find({
-      _id: { $in: childUserIds },
-      tier: 2,
-    }).lean();
-
-    result.push(...users);
+  // nếu không có children thì trả về rỗng
+  if (!rootTree.children || rootTree.children.length === 0) {
+    return { branch1: [], branch2: [] };
   }
 
-  return result;
+  // lấy ra tối đa 2 nhánh
+  const [branch1Root, branch2Root] = rootTree.children;
+
+  // hàm lấy tất cả tier2 userId trong 1 nhánh
+  const collectTier2FromBranch = async (rootId) => {
+    const resultSet = new Set();
+    let queue = [rootId];
+
+    while (queue.length > 0) {
+      const batchIds = queue.splice(0, queue.length);
+
+      const childTrees = await Tree.find({
+        _id: { $in: batchIds.map((id) => new mongoose.Types.ObjectId(id)) },
+      }).lean();
+
+      // gom children vào queue
+      childTrees.forEach((t) => {
+        if (t.children && t.children.length > 0) {
+          queue.push(...t.children);
+        }
+      });
+
+      // tìm user tier = 2, chỉ lấy _id
+      const childUserIds = childTrees.map((t) => new mongoose.Types.ObjectId(t.userId));
+      const users = await User.find({
+        _id: { $in: childUserIds },
+        tier: 2,
+      })
+        .select("_id userId")
+        .lean();
+
+      users.forEach((u) => resultSet.add(u.userId));
+    }
+
+    return Array.from(resultSet);
+  };
+
+  let branch1UserIds = [];
+  let branch2UserIds = [];
+
+  if (branch1Root) branch1UserIds = await collectTier2FromBranch(branch1Root);
+  if (branch2Root) branch2UserIds = await collectTier2FromBranch(branch2Root);
+
+  // loại trùng userId giữa 2 nhánh (ưu tiên giữ ở branch1)
+  const branch1Set = new Set(branch1UserIds);
+  branch2UserIds = branch2UserIds.filter((id) => !branch1Set.has(id));
+
+  return { branch1: Array.from(branch1Set), branch2: branch2UserIds };
 };

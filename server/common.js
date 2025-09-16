@@ -307,7 +307,7 @@ export const getNextUserTier2 = async () => {
   console.log({ name: user.userId });
 };
 
-export const check = async () => {
+export const checkUserErrLahCodeDuoi45Ngay = async () => {
   const fortyFiveDaysAgo = new Date();
   fortyFiveDaysAgo.setDate(fortyFiveDaysAgo.getDate() - 45);
 

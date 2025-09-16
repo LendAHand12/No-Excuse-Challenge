@@ -1261,6 +1261,12 @@ const checkCanRefund = async ({
     listRefOfReceiver.length === 0 ||
     (treeOfReceiveUser.children.length === 2 && listRefOfReceiver.length < 2)
   ) {
+    for (let tree of listRefOfReceiver) {
+      let u = await User.findOne({ _id: tree.userId, countPay: 13 });
+      if (!u) {
+        return `Payment blocked because there are not enough 2 redirect user (Not Pay Child)`;
+      }
+    }
     return `Payment blocked because there are not enough 2 redirect user`;
   } else {
     return "";

@@ -408,7 +408,7 @@ const getUserById = asyncHandler(async (req, res) => {
       timeRetryOver45: user.timeRetryOver45,
       preTier2Status: user.preTier2Status,
       shortfallAmount: user.shortfallAmount,
-      tier2ChildUsers: tier2Users.length > 0 ? tier2Users.map((ele) => ele.userId) : [],
+      tier2ChildUsers: tier2Users,
     });
   } else {
     res.status(404);
@@ -609,7 +609,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       preTier2Status: user.preTier2Status,
       preTier2User: preTier2User,
       shortfallAmount: user.shortfallAmount,
-      tier2ChildUsers: tier2Users.length > 0 ? tier2Users.map((ele) => ele.userId) : [],
+      tier2ChildUsers: tier2Users,
     });
   } else {
     res.status(404);

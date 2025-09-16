@@ -784,8 +784,40 @@ const UserProfile = () => {
               <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                 <p className="uppercase mt-2 font-bold">Tier 2 Users</p>
                 <div className="py-2">
+                  <p className="font-medium">Branch 1 :</p>
                   <ul className="flex flex-wrap gap-2">
-                    {data.tier2ChildUsers.map((ele) => (
+                    {data?.tier2ChildUsers?.branch1?.map((ele) => (
+                      <li
+                        className="bg-white border-b hover:bg-gray-50"
+                        key={ele}
+                      >
+                        <div className="py-2">
+                          <div className="text-base">
+                            <span
+                              className={`${
+                                ele.isRed
+                                  ? 'bg-[#b91c1c]'
+                                  : ele.isBlue
+                                  ? 'bg-[#0000ff]'
+                                  : ele.isYellow
+                                  ? 'bg-[#F4B400]'
+                                  : ele.isPink
+                                  ? 'bg-[#e600769c]'
+                                  : 'bg-[#16a34a]'
+                              } py-1 px-2 rounded text-white text-sm`}
+                            >
+                              {ele}
+                            </span>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="py-2">
+                  <p className="font-medium">Branch 2 :</p>
+                  <ul className="flex flex-wrap gap-2">
+                    {data?.tier2ChildUsers?.branch2?.map((ele) => (
                       <li
                         className="bg-white border-b hover:bg-gray-50"
                         key={ele}
