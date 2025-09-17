@@ -270,15 +270,19 @@ export const checkRefWithTime = asyncHandler(async () => {
 
         if (diffDays < 0 && diffDays >= -10) {
           u.errLahCode = "OVER35";
+          console.log({ user1Over35: u.userId });
         } else if (diffDays >= 0) {
           u.errLahCode = "OVER45";
+          console.log({ user1Over45: u.userId });
         }
       } else {
         let diffDays = currentDay.diff(tree.createdAt, "days");
         if (diffDays > 45) {
           u.errLahCode = "OVER45";
+          console.log({ user2Over45: u.userId });
         } else if (diffDays > 35) {
           u.errLahCode = "OVER35";
+          console.log({ user2Over35: u.userId });
         }
       }
     } else {
@@ -389,7 +393,7 @@ export const checkUserTryToTier2 = asyncHandler(async () => {
 
 export const checkRefUserHaveChildOver45 = asyncHandler(async () => {
   const fortyFiveDaysAgo = new Date();
-  fortyFiveDaysAgo.setDate(fortyFiveDaysAgo.getDate() - 45);
+  fortyFiveDaysAgo.setDate(fortyFiveDaysAgo.getDate() - 30);
 
   const listTreeUser = await Tree.find({
     $and: [{ isSubId: false }, { tier: 1 }, { createdAt: { $lte: fortyFiveDaysAgo } }],

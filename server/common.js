@@ -309,7 +309,7 @@ export const getNextUserTier2 = async () => {
 
 export const checkUserErrLahCodeDuoi45Ngay = async () => {
   const fortyFiveDaysAgo = new Date();
-  fortyFiveDaysAgo.setDate(fortyFiveDaysAgo.getDate() - 45);
+  fortyFiveDaysAgo.setDate(fortyFiveDaysAgo.getDate() - 30);
 
   const listTreeUser = await Tree.find({
     $and: [{ isSubId: false }, { tier: 1 }, { createdAt: { $gte: fortyFiveDaysAgo } }],
@@ -317,10 +317,13 @@ export const checkUserErrLahCodeDuoi45Ngay = async () => {
 
   for (let tree of listTreeUser) {
     const user = await User.findById(tree.userId);
+    console.log({ name: tree.userName, create: tree.createdAt, errLahCode: user.errLahCode });
     if (user.errLahCode !== "") {
-      console.log({ name: tree.userName, create: tree.createdAt, errLahCode: user.errLahCode });
-      // user.errLahCode = "";
-      // await user.save();
+      user.errLahCode = "";
     }
+    if (user.timeRetryOver45) {
+      user.timeRetryOver45 = null;
+    }
+    await user.save();
   }
 };

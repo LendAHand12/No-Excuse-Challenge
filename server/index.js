@@ -201,7 +201,7 @@ const cron7 = new CronJob("00 06 * * *", async () => {
 // const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(tree, true);
 // console.log({ countChild1, countChild2 });
 
-await checkUserErrLahCodeDuoi45Ngay();
+// await checkUserErrLahCodeDuoi45Ngay();
 
 cron0.start();
 cron1.start();
