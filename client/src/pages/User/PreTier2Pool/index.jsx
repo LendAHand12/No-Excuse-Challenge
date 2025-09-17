@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ToastContainer, toast } from 'react-toastify';
 import NoContent from '@/components/NoContent';
 import Loading from '@/components/Loading';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import DefaultLayout from '@/layout/DefaultLayout';
 import PreTier2 from '@/api/PreTier2';
 import { shortenWalletAddress } from '@/utils';
@@ -99,9 +99,17 @@ const AdminPreTier2Pool = () => {
         <div className="flex items-center justify-between pb-4 bg-white">
           <h1 className="text-2xl font-bold">Pre-Tier 2 Pool</h1>
         </div>
-        <h1 className="text-xl my-4 font-medium">
-          Balance in pool : <span className="font-bold">{total}</span> USDT{' '}
-        </h1>
+        <div className="flex items-center justify-between my-4">
+          <h1 className="text-3xl font-bold">
+            Balance in pool : <span className="font-extrabold">{total}</span>{' '}
+            USDT{' '}
+          </h1>
+          <Link to="/user/users-passed-tier-2">
+            <button className="border px-10 py-4 rounded-lg bg-blue-500 text-white font-medium">
+              Passed Users
+            </button>
+          </Link>
+        </div>
         <table className="w-full text-sm text-left text-gray-500">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>

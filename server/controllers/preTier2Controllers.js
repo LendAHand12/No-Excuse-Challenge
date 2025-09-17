@@ -1158,6 +1158,86 @@ export const getBalanceOfPreTier2Pool = async () => {
   return totalAggregation[0]?.total || 0;
 };
 
+const getPassedUsers = asyncHandler(async (req, res) => {
+  let { pageNumber = 1, limit = 10, keyword = "" } = req.query;
+
+  pageNumber = parseInt(pageNumber);
+  limit = parseInt(limit);
+
+  const query = { status: "PASSED" };
+
+  if (keyword) {
+    // lọc theo userId string -> cần join qua User
+    const usersFound = await User.find({
+      userId: { $regex: removeAccents(keyword), $options: "i" },
+    })
+      .select("_id")
+      .lean();
+    const ids = usersFound.map((u) => u._id);
+    query.userId = { $in: ids };
+  }
+
+  const total = await PreTier2.countDocuments(query);
+
+  const preTier2Users = await PreTier2.find(query)
+    .select("userId order achievedTime passedTime")
+    .skip((parseInt(pageNumber) - 1) * limit)
+    .limit(limit)
+    .sort({ passedTime: -1 })
+    .lean();
+
+  if (!preTier2Users.length) {
+    return res.json({
+      pages: Math.ceil(total / limit),
+      users: [],
+    });
+  }
+
+  // Lấy danh sách user _id từ PreTier2
+  const userObjectIds = preTier2Users.map((p) => p.userId);
+
+  // Lấy thông tin user từ bảng User (theo _id)
+  const users = await User.find({ _id: { $in: userObjectIds } })
+    .select("_id userId email shortfallAmount")
+    .lean();
+  const userMap = new Map(users.map((u) => [u._id.toString(), u]));
+
+  // Lấy lịch sử pool (theo user ObjectId)
+  const pools = await PreTier2Pool.find({ userId: { $in: userObjectIds } })
+    .select("userId amount status createdAt")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  const poolMap = new Map();
+  for (const pool of pools) {
+    const uid = pool.userId.toString();
+    if (!poolMap.has(uid)) poolMap.set(uid, []);
+    poolMap.get(uid).push(pool);
+  }
+
+  const data = preTier2Users.map((pre) => {
+    const uid = pre.userId.toString();
+    const user = userMap.get(uid);
+
+    return {
+      userId: user?.userId || null, // <-- đây là string userId của bảng User
+      email: user?.email || null,
+      shortfallAmount: user?.shortfallAmount ?? 0,
+      preTier2: {
+        order: pre.order,
+        achievedTime: pre.achievedTime,
+        passedTime: pre.passedTime,
+      },
+      poolHistory: poolMap.get(uid) || [],
+    };
+  });
+
+  res.json({
+    pages: Math.ceil(total / limit),
+    users: data,
+  });
+});
+
 export {
   getAllPreTier2Users,
   approveUserPreTier2,
@@ -1169,4 +1249,5 @@ export {
   getInfoPreTier2Pool,
   getPreTier2UsersForUser,
   achievedUserTier2,
+  getPassedUsers,
 };

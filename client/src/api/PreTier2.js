@@ -22,6 +22,11 @@ const PreTier2 = {
       `${URL_API_PRE_TIER_2}/?pageNumber=${pageNumber}&keyword=${keyword}&status=${statusSearch}`,
     );
   },
+  getAllUsersPassed: (pageNumber, keyword) => {
+    return API.get(
+      `${URL_API_PRE_TIER_2}/pre-tier-2-passed-list?pageNumber=${pageNumber}&keyword=${keyword}`,
+    );
+  },
   getUsersPreTier2: (pageNumber, keyword) => {
     return API.get(
       `${URL_API_PRE_TIER_2}/pre-tier-2-list?pageNumber=${pageNumber}&keyword=${keyword}`,

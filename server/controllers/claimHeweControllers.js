@@ -388,8 +388,7 @@ const getAllClaimsOfUser = asyncHandler(async (req, res) => {
 });
 
 const resetProcessing = asyncHandler(async (req, res) => {
-  processingHeweUserIds = [];
-  processingUserIds = [];
+  await User.updateMany({}, { $set: { isClaiming: false } });
 
   res.json({
     message: "Reset black list successfully",

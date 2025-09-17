@@ -85,6 +85,7 @@ import PreTier2PaymentPage from './pages/User/PaymentPreTier2';
 import PaymentTier2WithPrePool from './pages/User/PaymentTier2WithPrePool';
 import AdminPreTier2PoolPage from './pages/Admin/PreTier2Pool';
 import PreTier2Pool from './pages/User/PreTier2Pool';
+import UsersPassedTier2Page from './pages/User/UsersPassedTier2';
 
 function App() {
   const { pathname } = useLocation();
@@ -241,6 +242,20 @@ function App() {
               <>
                 <PageTitle title="Users Pre-Tier 2 | NoExcuseChallenge" />
                 <UsersPreTier2Page />
+              </>
+            }
+          />
+        )}
+
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/users-passed-tier-2')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/users-passed-tier-2"
+            element={
+              <>
+                <PageTitle title="Users Passed Tier 2 | NoExcuseChallenge" />
+                <UsersPassedTier2Page />
               </>
             }
           />
@@ -731,6 +746,16 @@ function App() {
                 }
               />
             )}
+
+            <Route
+              path="/user/users-passed-tier-2"
+              element={
+                <>
+                  <PageTitle title="Users Passed Tier 2 | NoExcuseChallenge" />
+                  <UsersPassedTier2Page />
+                </>
+              }
+            />
 
             <Route
               path="/user/pre-tier-2-users"
