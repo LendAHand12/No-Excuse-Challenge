@@ -99,15 +99,15 @@ const claimUsdt = asyncHandler(async (req, res) => {
     if (user.availableUsdt > 0 && user.availableUsdt >= parseInt(amount)) {
       if (parseInt(amount) < 200 && user.paymentMethod === "") {
         // Gửi trực tiếp USDT
-        // const receipt = await sendUsdt({
-        //   amount: amount - 1,
-        //   receiverAddress: user.walletAddress,
-        // });
+        const receipt = await sendUsdt({
+          amount: amount - 1,
+          receiverAddress: user.walletAddress,
+        });
 
         await Claim.create({
           userId: user.id,
           amount: parseInt(amount),
-          hash: "receipt.hash",
+          hash: receipt.hash,
           coin: "USDT",
         });
 
