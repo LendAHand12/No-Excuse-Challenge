@@ -10,6 +10,9 @@ const UserHistory = {
   update: (body) => {
     return API.put(`${URL_API_USER_HISTORY}`, body);
   },
+  connectWallet: (body) => {
+    return API.post(`${URL_API_USER_HISTORY}/connect-wallet`, body);
+  },
 };
 
 export default UserHistory;

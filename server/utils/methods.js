@@ -567,46 +567,43 @@ export const getTotalLevel1ToLevel10OfUser = async (treeOfUser, includesDieId) =
   return { countChild1, countChild2 };
 };
 
-const getBranchRoot = async (nodeId, rootId) => {
-  let current = await Tree.findById(nodeId).lean();
-  while (current && current.parentId && String(current.parentId) !== String(rootId)) {
-    current = await Tree.findById(current.parentId).lean();
+// Lấy root branch con trực tiếp của refId (B hoặc C)
+const getBranchRoot = (nodeId, rootId, parentMap) => {
+  let currentId = nodeId;
+  while (currentId && parentMap[currentId] && String(parentMap[currentId]) !== String(rootId)) {
+    currentId = parentMap[currentId];
   }
-  return current ? String(current._id) : null;
+  return currentId ? String(currentId) : null;
 };
 
 export const hasTwoBranches = async (refId) => {
-  if (!mongoose.Types.ObjectId.isValid(refId)) {
-    return { valid: false, error: "Invalid ObjectId" };
-  }
-
   const refTree = await Tree.findById(refId).lean();
   if (!refTree) {
     return { valid: false, error: "Ref not found" };
   }
 
-  // Lấy tất cả F1 của A (do A trực tiếp giới thiệu)
+  // Lấy tất cả F1
   const f1s = await Tree.find({ refId }).lean();
-
   if (f1s.length < 2) {
-    // return { valid: false, count: f1s.length, message: "Chưa đủ 2 F1" };
-    return false;
+    return false; // chưa đủ 2 F1
   }
 
-  // Lấy root branch (B hoặc C) mà mỗi F1 nằm dưới
+  // Lấy parentId cho toàn bộ cây con (chỉ cần _id và parentId)
+  const allNodes = await Tree.find({}).select("_id parentId").lean();
+  const parentMap = {};
+  for (let n of allNodes) {
+    parentMap[n._id.toString()] = n.parentId ? n.parentId.toString() : null;
+  }
+
+  // Tìm branch root của mỗi F1
   const branches = new Set();
   for (let f1 of f1s) {
-    const branchRoot = await getBranchRoot(f1._id, refId);
+    const branchRoot = getBranchRoot(f1._id.toString(), refId.toString(), parentMap);
     if (branchRoot) branches.add(branchRoot);
+    if (branches.size >= 2) return true; // tối ưu: có đủ 2 nhánh thì dừng luôn
   }
 
-  if (branches.size >= 2) {
-    // return { valid: true, count: f1s.length, message: "Đã có 2 F1 ở 2 nhánh khác nhau" };
-    return true;
-  } else {
-    // return { valid: false, count: f1s.length, message: "Chưa đủ F1 ở 2 nhánh khác nhau" };
-    return false;
-  }
+  return false;
 };
 
 export const getAllDescendantsTier2Users = async (userId) => {
@@ -636,23 +633,20 @@ export const getAllDescendantsTier2Users = async (userId) => {
         _id: { $in: batchIds.map((id) => new mongoose.Types.ObjectId(id)) },
       }).lean();
 
-      // gom children vào queue
-      childTrees.forEach((t) => {
+      for (const t of childTrees) {
+        // Bỏ qua node con có isSubId = true
+        if (t.isSubId) continue;
+
+        // gom children hợp lệ vào queue
         if (t.children && t.children.length > 0) {
           queue.push(...t.children);
         }
-      });
 
-      // tìm user tier = 2, chỉ lấy _id
-      const childUserIds = childTrees.map((t) => new mongoose.Types.ObjectId(t.userId));
-      const users = await User.find({
-        _id: { $in: childUserIds },
-        tier: 2,
-      })
-        .select("_id userId")
-        .lean();
+        // tìm user tier = 2, chỉ lấy userId
+        const u = await User.findOne({ _id: t.userId, tier: 2 }).select("userId").lean();
 
-      users.forEach((u) => resultSet.add(u.userId));
+        if (u) resultSet.add(u.userId);
+      }
     }
 
     return Array.from(resultSet);

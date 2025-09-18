@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
 import { removeAccents } from "../utils/methods.js";
 import UserHistory from "../models/userHistoryModel.js";
+import WalletConnectionHistory from "../models/walletConnectHistoryModel.js";
 
 const getAllUserHisotry = asyncHandler(async (req, res) => {
   let { pageNumber, status, keyword } = req.query;
@@ -108,4 +109,20 @@ const updateUserHistory = asyncHandler(async (req, res) => {
   }
 });
 
-export { getAllUserHisotry, updateUserHistory };
+const connectWallet = asyncHandler(async (req, res) => {
+  const user = req.user;
+  const { walletAddress, desc } = req.body;
+  await WalletConnectionHistory.create({
+    userId: user.id,
+    walletAddress,
+    userWalletAddress: user.walletAddress,
+    ipAddress: req.ip,
+    userAgent: req.headers["user-agent"] || "",
+    status: "SUCCESS",
+    desc,
+  });
+
+  res.json({ message: "Wallet connected successfully" });
+});
+
+export { getAllUserHisotry, updateUserHistory, connectWallet };

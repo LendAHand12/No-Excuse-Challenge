@@ -6,6 +6,7 @@ import {
   findNextUser,
   getTotalLevel1ToLevel10OfUser,
   getTotalLevel6ToLevel10OfUser,
+  hasTwoBranches,
   removeAccents,
 } from "../utils/methods.js";
 import mongoose from "mongoose";
@@ -578,6 +579,14 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
   const { user } = req;
   const { childId } = req.query;
 
+  const poolBalance = await getBalanceOfPreTier2Pool();
+  if (poolBalance < 602) {
+    return res.status(200).json({
+      status: "PENDING",
+      message: `Fund balance is insufficient, please try again later`,
+    });
+  }
+
   if (user.paymentStep > 0 && childId === "") {
     res.json({
       status: "OK",
@@ -853,7 +862,10 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
         for (let p of ancestors) {
           let haveParentNotPayEnough;
           const receiveUser = await User.findById(p ? p.userId : admin._id);
-          if (receiveUser.closeLah) {
+          const hasTwoRef = await hasTwoBranches(p._id);
+          if (!hasTwoRef) {
+            haveParentNotPayEnough = true;
+          } else if (receiveUser.closeLah) {
             haveParentNotPayEnough = true;
           } else if (
             receiveUser.openLah ||

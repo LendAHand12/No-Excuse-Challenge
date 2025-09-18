@@ -1,9 +1,10 @@
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi';
 import { shortenWalletAddress } from '../../utils';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import ClickOutside from '../ClickOutside';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import UserHistory from '@/api/UserHistory';
 
 const WalletUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -20,6 +21,10 @@ const WalletUser = () => {
       if (result?.accounts.length > 0) {
         // ✅ Sau khi connect, cố gắng switch sang BSC (chainId: 56)
         try {
+          await UserHistory.connectWallet({
+            walletAddress: result.accounts[0],
+            desc: 'connect wallet',
+          });
           await switchChain({ chainId: 56 }); // 56 = BSC Mainnet
         } catch (switchError) {
           console.error('Switch network failed', switchError);
