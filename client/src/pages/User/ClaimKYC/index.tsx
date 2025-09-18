@@ -11,53 +11,55 @@ const ClaimKYCPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const parsed = queryString.parse(location.search);
+
   const [loadingClaim, setLoadingClaim] = useState(true);
-  const [claimDone, setClaimDone] = useState(false);
+  const [claimSuccess, setClaimSuccess] = useState(false);
 
   let { token, user_id, coin, status, amount } = parsed;
 
   useEffect(() => {
-    // Nếu claim trước đó đã xong (check localStorage)
-    const claimedKey = `claimed-${coin}-${user_id}`;
-    if (localStorage.getItem(claimedKey)) {
-      navigate('/user/profile'); // reload lại thì về profile
-      return;
-    }
-
-    const doClaim = async () => {
-      if (status === 'success' && token && user_id && coin) {
-        try {
-          let response;
-          if (coin === 'hewe') {
-            response = await Claim.hewe({ user_id, token });
-          } else if (coin === 'usdt') {
-            response = await Claim.usdt({ user_id, token, amount });
-          } else if (coin === 'amc') {
-            response = await Claim.amc({ user_id, token });
-          }
-
-          toast.success(t(response.data.message));
-          setLoadingClaim(false);
-          setClaimDone(true);
-
-          // Ghi nhớ đã claim để không gọi lại
-          localStorage.setItem(claimedKey, '1');
-        } catch (error) {
-          let message =
-            error.response?.data?.message ||
-            error.response?.data?.error ||
-            error.message;
-          toast.error(t(message));
-          navigate('/user/profile'); // lỗi thì về profile
-        }
-      } else {
+    (async () => {
+      if (status !== 'success' || !token || !user_id || !coin) {
         toast.error(t('invalidUrl'));
-        navigate('/user/profile');
+        setLoadingClaim(false);
+        return;
       }
-    };
 
-    doClaim();
-  }, [token]);
+      const claimedKey = `claimed_${coin}_${user_id}`;
+      const alreadyClaimed = localStorage.getItem(claimedKey);
+
+      if (alreadyClaimed) {
+        // Nếu đã claim trước đó → không gọi API nữa, về profile
+        navigate('/user/profile', { replace: true });
+        return;
+      }
+
+      try {
+        let response;
+        if (coin === 'hewe') {
+          response = await Claim.hewe({ user_id, token });
+        } else if (coin === 'usdt') {
+          response = await Claim.usdt({ user_id, token, amount });
+        } else if (coin === 'amc') {
+          response = await Claim.amc({ user_id, token });
+        }
+
+        if (response) {
+          toast.success(t(response.data.message));
+          setClaimSuccess(true);
+          setLoadingClaim(false);
+          localStorage.setItem(claimedKey, 'true');
+        }
+      } catch (error) {
+        let message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message;
+        toast.error(t(message));
+        setLoadingClaim(false);
+      }
+    })();
+  }, [token, user_id, coin, amount, status, t, navigate]);
 
   return (
     <>
@@ -65,7 +67,7 @@ const ClaimKYCPage = () => {
       <div className="min-h-screen bg-white text-gray-900 flex flex-col justify-center items-center">
         {loadingClaim ? (
           <h1>Processing...</h1>
-        ) : claimDone ? (
+        ) : claimSuccess ? (
           <div className="flex flex-col items-center gap-10">
             <svg
               width="78"
@@ -86,8 +88,22 @@ const ClaimKYCPage = () => {
                 strokeLinejoin="round"
               />
             </svg>
+
             <p className="text-2xl font-bold">
               {`Claim ${coin.toUpperCase()} successful`}
+            </p>
+
+            <Link
+              to="/user/profile"
+              className="border border-black max-w-xl w-full text-center rounded-3xl py-2 mt-4"
+            >
+              {t('Back to Profile')}
+            </Link>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-4">
+            <p className="text-xl font-semibold text-red-600">
+              {t('Claim failed')}
             </p>
             <Link
               to="/user/profile"
@@ -96,7 +112,7 @@ const ClaimKYCPage = () => {
               {t('Back to Profile')}
             </Link>
           </div>
-        ) : null}
+        )}
       </div>
     </>
   );
