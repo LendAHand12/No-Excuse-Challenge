@@ -355,8 +355,8 @@ export const checkUserTryToTier2 = asyncHandler(async () => {
           isSubId: false,
         });
         const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(treeOfUser);
-        // console.log({ user: u.userId, countChild1, countChild2 });
-        if ((countChild1 >= 20 && countChild2 >= 42) || (countChild1 >= 42 && countChild2 >= 20)) {
+        console.log({ user: u.userId, countChild1, countChild2 });
+        if (countChild1 + countChild2 >= 60 && countChild1 >= 19 && countChild2 >= 19) {
           u.tryToTier2 = "DONE";
           u.timeToTry = null;
         } else {
@@ -464,7 +464,7 @@ export const checkUserPreTier2 = asyncHandler(async () => {
         });
         const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(treeOfUser);
 
-        if ((countChild1 >= 20 && countChild2 >= 42) || (countChild1 >= 42 && countChild2 >= 20)) {
+        if (countChild1 + countChild2 >= 60 && countChild1 >= 19 && countChild2 >= 19) {
           console.log({ userACHIEVED: u.userId, countChild1, countChild2 });
           u.preTier2Status = "ACHIEVED";
           u.timeOkPreTier2 = new Date();

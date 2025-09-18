@@ -1087,7 +1087,7 @@ const Profile = () => {
                   </p>
                   <div className="lg:py-2">
                     <ul className="flex flex-col list-disc">
-                      {(() => {
+                      {/* {(() => {
                         const c1 = notEnoughtChild?.countChild1 ?? 0;
                         const c2 = notEnoughtChild?.countChild2 ?? 0;
 
@@ -1099,6 +1099,36 @@ const Profile = () => {
 
                         const b1 = Math.max(target1 - c1, 0);
                         const b2 = Math.max(target2 - c2, 0);
+
+                        return (
+                          <>
+                            <li className="ml-4">Branch 1 : {b1} IDs</li>
+                            <li className="ml-4">Branch 2 : {b2} IDs</li>
+                          </>
+                        );
+                      })()} */}
+                      {(() => {
+                        const c1 = notEnoughtChild?.countChild1 ?? 0;
+                        const c2 = notEnoughtChild?.countChild2 ?? 0;
+
+                        let b1 = 0;
+                        let b2 = 0;
+
+                        if (c1 + c2 >= 62 && c1 >= 20 && c2 >= 20) {
+                          // ✅ Đủ điều kiện -> không cần bù
+                          b1 = 0;
+                          b2 = 0;
+                        } else if (c1 + c2 < 62) {
+                          // ✅ Tổng < 62 -> phân số thiếu ngẫu nhiên
+                          const missing = 62 - (c1 + c2);
+                          if (Math.random() < 0.5) {
+                            b1 = missing;
+                            b2 = 0;
+                          } else {
+                            b1 = 0;
+                            b2 = missing;
+                          }
+                        }
 
                         return (
                           <>

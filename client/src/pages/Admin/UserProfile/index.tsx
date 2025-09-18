@@ -869,14 +869,24 @@ const UserProfile = () => {
                           const c1 = data?.notEnoughtChild?.countChild1 ?? 0;
                           const c2 = data?.notEnoughtChild?.countChild2 ?? 0;
 
-                          // Xác định nhánh mạnh / yếu
-                          const isBranch1Strong = c1 >= c2;
+                          let b1 = 0;
+                          let b2 = 0;
 
-                          const target1 = isBranch1Strong ? 42 : 20;
-                          const target2 = isBranch1Strong ? 20 : 42;
-
-                          const b1 = Math.max(target1 - c1, 0);
-                          const b2 = Math.max(target2 - c2, 0);
+                          if (c1 + c2 >= 62 && c1 >= 20 && c2 >= 20) {
+                            // ✅ Đủ điều kiện -> không cần bù
+                            b1 = 0;
+                            b2 = 0;
+                          } else if (c1 + c2 < 62) {
+                            // ✅ Tổng < 62 -> phân số thiếu ngẫu nhiên
+                            const missing = 62 - (c1 + c2);
+                            if (Math.random() < 0.5) {
+                              b1 = missing;
+                              b2 = 0;
+                            } else {
+                              b1 = 0;
+                              b2 = missing;
+                            }
+                          }
 
                           return (
                             <>
