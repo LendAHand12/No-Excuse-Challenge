@@ -14,34 +14,37 @@ import { getPriceAmc } from "../utils/getPriceAmc.js";
 const claimHewe = asyncHandler(async (req, res) => {
   const { user } = req;
 
-  // Nếu user đang xử lý claim HEWE rồi thì reject luôn
-  if (user.isClaimingHewe) {
+  // Dùng findOneAndUpdate để set isClaimingHewe = true
+  const lockedUser = await User.findOneAndUpdate(
+    { _id: user._id, isClaiming: false },
+    { $set: { isClaiming: true } },
+    { new: true }
+  );
+
+  if (!lockedUser) {
     return res.status(400).json({
       error: "Your HEWE claim is already being processed. Please wait!",
     });
   }
 
   try {
-    // Đặt trạng thái đang xử lý
-    user.isClaiming = true;
-    await user.save();
-
-    if (user.availableHewe > 0) {
+    if (lockedUser.availableHewe > 0) {
+      // Gửi token HEWE
       const receipt = await sendHewe({
-        amount: user.availableHewe,
-        receiverAddress: user.walletAddress,
+        amount: lockedUser.availableHewe,
+        receiverAddress: lockedUser.walletAddress,
       });
 
       await Claim.create({
-        userId: user.id,
-        amount: user.availableHewe,
+        userId: lockedUser.id,
+        amount: lockedUser.availableHewe,
         hash: receipt.hash,
         coin: "HEWE",
       });
 
-      user.claimedHewe += user.availableHewe;
-      user.availableHewe = 0;
-      await user.save();
+      lockedUser.claimedHewe += lockedUser.availableHewe;
+      lockedUser.availableHewe = 0;
+      await lockedUser.save();
 
       res.status(200).json({
         message: "Claim HEWE successful",
@@ -54,38 +57,37 @@ const claimHewe = asyncHandler(async (req, res) => {
       error: err.message || "Internal error",
     });
   } finally {
-    // Reset lại trạng thái dù thành công hay lỗi
-    await User.findByIdAndUpdate(user.id, { isClaiming: false });
+    // Reset lại trạng thái để lần sau vẫn claim được
+    await User.findByIdAndUpdate(lockedUser._id, { isClaiming: false });
   }
 });
 
 const claimUsdt = asyncHandler(async (req, res) => {
   const { token, amount } = req.body;
   const decode = decodeCallbackToken(token);
+  console.log({ decode });
 
   if (!decode) {
     throw new Error("Internal Error");
   }
 
   const { userId } = decode;
-  const user = await User.findById(userId);
+
+  // Bước 1: Set isClaiming = true chỉ khi hiện tại nó = false
+  const user = await User.findOneAndUpdate(
+    { _id: userId, isClaiming: false },
+    { $set: { isClaiming: true } },
+    { new: true }
+  );
 
   if (!user) {
-    throw new Error("Unknown User");
-  }
-
-  // Nếu user đang xử lý claim rồi thì reject luôn
-  if (user.isClaiming) {
     return res.status(400).json({
       error: "Your withdraw request is already being processed. Please wait!",
     });
   }
 
   try {
-    // Đặt trạng thái đang xử lý
-    user.isClaiming = true;
-    await user.save();
-
+    // Bước 2: Validate user
     if (user.status !== "APPROVED" || user.facetecTid === "") {
       throw new Error("Please verify your account");
     }
@@ -93,17 +95,19 @@ const claimUsdt = asyncHandler(async (req, res) => {
       throw new Error("Request denied");
     }
 
+    // Bước 3: Check balance
     if (user.availableUsdt > 0 && user.availableUsdt >= parseInt(amount)) {
       if (parseInt(amount) < 200 && user.paymentMethod === "") {
-        const receipt = await sendUsdt({
-          amount: amount - 1,
-          receiverAddress: user.walletAddress,
-        });
+        // Gửi trực tiếp USDT
+        // const receipt = await sendUsdt({
+        //   amount: amount - 1,
+        //   receiverAddress: user.walletAddress,
+        // });
 
         await Claim.create({
           userId: user.id,
           amount: parseInt(amount),
-          hash: receipt.hash,
+          hash: "receipt.hash",
           coin: "USDT",
         });
 
@@ -113,6 +117,7 @@ const claimUsdt = asyncHandler(async (req, res) => {
 
         res.status(200).json({ message: "claim USDT successful" });
       } else {
+        // Tạo yêu cầu withdraw chờ admin xử lý
         await Withdraw.create({
           userId: user.id,
           amount: parseInt(amount),

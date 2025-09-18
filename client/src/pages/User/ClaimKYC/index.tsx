@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
@@ -13,65 +12,51 @@ const ClaimKYCPage = () => {
   const navigate = useNavigate();
   const parsed = queryString.parse(location.search);
   const [loadingClaim, setLoadingClaim] = useState(true);
+  const [claimDone, setClaimDone] = useState(false);
+
   let { token, user_id, coin, status, amount } = parsed;
-  if (status !== 'success' || !token || !user_id || !coin) {
-    toast.error(t('invalidUrl'));
-  }
 
   useEffect(() => {
-    (async () => {
+    // Nếu claim trước đó đã xong (check localStorage)
+    const claimedKey = `claimed-${coin}-${user_id}`;
+    if (localStorage.getItem(claimedKey)) {
+      navigate('/user/profile'); // reload lại thì về profile
+      return;
+    }
+
+    const doClaim = async () => {
       if (status === 'success' && token && user_id && coin) {
-        if (coin === 'hewe') {
-          await Claim.hewe({ user_id, token })
-            .then((response) => {
-              toast.success(t(response.data.message));
-              setLoadingClaim(false);
-              navigate('/user/profile');
-            })
-            .catch((error) => {
-              let message =
-                error.response && error.response.data.message
-                  ? error.response.data.message
-                  : error.response.data.error
-                  ? error.response.data.error
-                  : error.message;
-              toast.error(t(message));
-            });
-        } else if (coin === 'usdt') {
-          await Claim.usdt({ user_id, token, amount })
-            .then((response) => {
-              toast.success(t(response.data.message));
-              setLoadingClaim(false);
-              navigate('/user/profile');
-            })
-            .catch((error) => {
-              let message =
-                error.response && error.response.data.message
-                  ? error.response.data.message
-                  : error.response.data.error
-                  ? error.response.data.error
-                  : error.message;
-              toast.error(t(message));
-            });
-        } else if (coin === 'amc') {
-          await Claim.amc({ user_id, token })
-            .then((response) => {
-              toast.success(t(response.data.message));
-              setLoadingClaim(false);
-              navigate('/user/profile');
-            })
-            .catch((error) => {
-              let message =
-                error.response && error.response.data.message
-                  ? error.response.data.message
-                  : error.response.data.error
-                  ? error.response.data.error
-                  : error.message;
-              toast.error(t(message));
-            });
+        try {
+          let response;
+          if (coin === 'hewe') {
+            response = await Claim.hewe({ user_id, token });
+          } else if (coin === 'usdt') {
+            response = await Claim.usdt({ user_id, token, amount });
+          } else if (coin === 'amc') {
+            response = await Claim.amc({ user_id, token });
+          }
+
+          toast.success(t(response.data.message));
+          setLoadingClaim(false);
+          setClaimDone(true);
+
+          // Ghi nhớ đã claim để không gọi lại
+          localStorage.setItem(claimedKey, '1');
+        } catch (error) {
+          let message =
+            error.response?.data?.message ||
+            error.response?.data?.error ||
+            error.message;
+          toast.error(t(message));
+          navigate('/user/profile'); // lỗi thì về profile
         }
+      } else {
+        toast.error(t('invalidUrl'));
+        navigate('/user/profile');
       }
-    })();
+    };
+
+    doClaim();
   }, [token]);
 
   return (
@@ -80,7 +65,7 @@ const ClaimKYCPage = () => {
       <div className="min-h-screen bg-white text-gray-900 flex flex-col justify-center items-center">
         {loadingClaim ? (
           <h1>Processing...</h1>
-        ) : (
+        ) : claimDone ? (
           <div className="flex flex-col items-center gap-10">
             <svg
               width="78"
@@ -101,18 +86,17 @@ const ClaimKYCPage = () => {
                 strokeLinejoin="round"
               />
             </svg>
-
             <p className="text-2xl font-bold">
               {`Claim ${coin.toUpperCase()} successful`}
             </p>
+            <Link
+              to="/user/profile"
+              className="border border-black max-w-xl w-full text-center rounded-3xl py-2 mt-4"
+            >
+              {t('Back to Profile')}
+            </Link>
           </div>
-        )}
-        <Link
-          to="/user/profile"
-          className="border border-black max-w-xl w-full text-center rounded-3xl py-2 mt-4"
-        >
-          {t('Back to Profile')}
-        </Link>
+        ) : null}
       </div>
     </>
   );
