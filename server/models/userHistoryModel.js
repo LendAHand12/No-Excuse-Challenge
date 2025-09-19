@@ -3,9 +3,9 @@ import { Schema, model, Types } from "mongoose";
 
 const userHistorySchema = new Schema({
   userId: { type: Types.ObjectId, ref: "User", required: true },
-  field: { type: String, enum: ["email", "phone", "walletAddress"], required: true },
-  oldValue: { type: String, required: true },
-  newValue: { type: String, required: true },
+  field: { type: String, required: true },
+  oldValue: { type: Schema.Types.Mixed, required: true },
+  newValue: { type: Schema.Types.Mixed, required: true },
   status: {
     type: String,
     enum: ["pending", "approved", "rejected"],
