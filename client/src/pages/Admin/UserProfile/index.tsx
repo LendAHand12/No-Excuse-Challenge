@@ -872,19 +872,20 @@ const UserProfile = () => {
                           let b1 = 0;
                           let b2 = 0;
 
-                          if (c1 + c2 >= 62 && c1 >= 20 && c2 >= 20) {
-                            // ✅ Đủ điều kiện -> không cần bù
+                          if (c1 >= 20 && c2 >= 20 && c1 + c2 >= 62) {
+                            // ✅ Đủ điều kiện, không cần bù
                             b1 = 0;
                             b2 = 0;
-                          } else if (c1 + c2 < 62) {
-                            // ✅ Tổng < 62 -> phân số thiếu ngẫu nhiên
-                            const missing = 62 - (c1 + c2);
-                            if (Math.random() < 0.5) {
-                              b1 = missing;
-                              b2 = 0;
+                          } else {
+                            // ✅ Xác định nhánh mạnh và nhánh yếu
+                            if (c1 >= c2) {
+                              // Nhánh 1 mạnh (quota 42), nhánh 2 yếu (quota 20)
+                              b1 = Math.max(42 - c1, 0);
+                              b2 = Math.max(20 - c2, 0);
                             } else {
-                              b1 = 0;
-                              b2 = missing;
+                              // Nhánh 2 mạnh (quota 42), nhánh 1 yếu (quota 20)
+                              b1 = Math.max(20 - c1, 0);
+                              b2 = Math.max(42 - c2, 0);
                             }
                           }
 
