@@ -277,10 +277,10 @@ export const checkRefWithTime = asyncHandler(async () => {
         }
       } else {
         let diffDays = currentDay.diff(tree.createdAt, "days");
-        if (diffDays > 45) {
+        if (diffDays > 30) {
           u.errLahCode = "OVER45";
           console.log({ user2Over45: u.userId });
-        } else if (diffDays > 35) {
+        } else if (diffDays > 20) {
           u.errLahCode = "OVER35";
           console.log({ user2Over35: u.userId });
         }
