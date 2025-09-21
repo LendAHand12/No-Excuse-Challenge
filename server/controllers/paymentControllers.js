@@ -1251,10 +1251,8 @@ const checkCanRefund = async ({
     return `User parent locked`;
   } else if (userReceive.closeLah) {
     return `User is being blocked from trading`;
-  } else if (userReceive.countPay - 1 < userCountPay) {
-    return userReceive.countPay === 0
-      ? `User parent NOT FINISHED REGISTER`
-      : `User parent pay = ${userReceive.countPay - 1} time but user pay = ${userCountPay} time`;
+  } else if (userReceive.countPay === 0) {
+    return `User parent NOT FINISHED REGISTER`;
   } else if (trans.type === "REFERRALHOLD" && userReceive.errLahCode === "OVER45") {
     return `User has not had 2 child within 45 days`;
   } else if (

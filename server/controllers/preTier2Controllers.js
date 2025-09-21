@@ -773,22 +773,21 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
           directCommissionUser = refUser;
         }
 
-        // console.log({
-        //   refUser: treeOfRefUser.userName,
-        //   directCommissionUser: directCommissionUser.userId,
-        // });
-
         // giao dich hoa hong truc tiep
-        if (refUser.closeLah) {
+        if (directCommissionUser.closeLah) {
           haveRefNotPayEnough = true;
-        } else if (refUser.openLah || refUser.adminChangeTier || refUser.createBy === "ADMIN") {
+        } else if (
+          directCommissionUser.openLah ||
+          directCommissionUser.adminChangeTier ||
+          directCommissionUser.createBy === "ADMIN"
+        ) {
           haveRefNotPayEnough = false;
         } else {
           if (
-            refUser.status === "LOCKED" ||
-            refUser.tier < user.tier ||
-            refUser.errLahCode === "OVER45" ||
-            (refUser.tier === user.tier && refUser.countPay < 13)
+            directCommissionUser.status === "LOCKED" ||
+            directCommissionUser.tier < user.tier ||
+            directCommissionUser.errLahCode === "OVER45" ||
+            (directCommissionUser.tier === user.tier && directCommissionUser.countPay < 13)
           ) {
             haveRefNotPayEnough = true;
           } else {
@@ -810,12 +809,13 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
           payOutForPool = true;
           rePaymentForPool += directCommissionFee;
         }
+
         const transactionDirect = await Transaction.create({
           userId: user.id,
           amount: directCommissionFee,
           userCountPay: user.countPay,
           userId_to: directCommissionUser._id,
-          username_to: treeOfRefUser.userName,
+          username_to: directCommissionUser.userId,
           tier: user.tier + 1 - user.paymentStep,
           buyPackage: user.buyPackage,
           hash: "",
@@ -907,6 +907,9 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
             userName: p.userName,
             amount: referralCommissionFee,
           });
+
+          if (p.userName === "") {
+          }
 
           const transactionReferral = await Transaction.create({
             userId: user.id,
