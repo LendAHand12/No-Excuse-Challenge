@@ -125,4 +125,118 @@ const connectWallet = asyncHandler(async (req, res) => {
   res.json({ message: "Wallet connected successfully" });
 });
 
-export { getAllUserHisotry, updateUserHistory, connectWallet };
+const getAllConnectWallets = asyncHandler(async (req, res) => {
+  let { pageNumber, keyword } = req.query;
+  const page = Number(pageNumber) || 1;
+  const pageSize = 10;
+
+  const matchStage = {};
+
+  const keywordRegex = keyword ? { $regex: removeAccents(keyword), $options: "i" } : null;
+
+  const pipeline = [
+    { $match: matchStage },
+
+    // accountUser: chủ tài khoản (theo userId)
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "accountUser",
+      },
+    },
+    {
+      $unwind: {
+        path: "$accountUser",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+
+    // connectorUser: người connect ví (theo walletAddress)
+    {
+      $lookup: {
+        from: "users",
+        localField: "walletAddress",
+        foreignField: "walletAddress",
+        as: "connectorUser",
+      },
+    },
+    {
+      $unwind: {
+        path: "$connectorUser",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+  ];
+
+  if (keywordRegex) {
+    pipeline.push({
+      $match: {
+        $or: [
+          { "accountUser.userId": keywordRegex },
+          { "accountUser.email": keywordRegex },
+          { "accountUser.walletAddress": keywordRegex },
+          { "connectorUser.userId": keywordRegex },
+          { "connectorUser.email": keywordRegex },
+          { "connectorUser.walletAddress": keywordRegex },
+          { walletAddress: keywordRegex },
+          { userWalletAddress: keywordRegex },
+        ],
+      },
+    });
+  }
+
+  // Count trước khi phân trang
+  const countAggregation = await WalletConnectionHistory.aggregate([
+    ...pipeline,
+    { $count: "total" },
+  ]);
+  const total = countAggregation[0]?.total || 0;
+
+  pipeline.push(
+    { $sort: { createdAt: -1 } },
+    { $skip: pageSize * (page - 1) },
+    { $limit: pageSize },
+    {
+      $project: {
+        _id: 1,
+        userId: 1,
+        userWalletAddress: 1,
+        walletAddress: 1,
+        ipAddress: 1,
+        userAgent: 1,
+        desc: 1,
+        status: 1,
+        connectedAt: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        accountUser: {
+          _id: 1,
+          userId: 1,
+          email: 1,
+          walletAddress: 1,
+          phone: 1,
+          status: 1,
+        },
+        connectorUser: {
+          _id: 1,
+          userId: 1,
+          email: 1,
+          walletAddress: 1,
+          phone: 1,
+          status: 1,
+        },
+      },
+    }
+  );
+
+  const list = await WalletConnectionHistory.aggregate(pipeline);
+
+  res.json({
+    list,
+    pages: Math.ceil(total / pageSize),
+  });
+});
+
+export { getAllUserHisotry, updateUserHistory, connectWallet, getAllConnectWallets };
