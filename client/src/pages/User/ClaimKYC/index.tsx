@@ -25,15 +25,6 @@ const ClaimKYCPage = () => {
         return;
       }
 
-      const claimedKey = `claimed_${coin}_${user_id}`;
-      const alreadyClaimed = localStorage.getItem(claimedKey);
-
-      if (alreadyClaimed) {
-        // Nếu đã claim trước đó → không gọi API nữa, về profile
-        navigate('/user/profile', { replace: true });
-        return;
-      }
-
       try {
         let response;
         if (coin === 'hewe') {
@@ -47,8 +38,6 @@ const ClaimKYCPage = () => {
         if (response) {
           toast.success(t(response.data.message));
           setClaimSuccess(true);
-          setLoadingClaim(false);
-          localStorage.setItem(claimedKey, 'true');
         }
       } catch (error) {
         let message =
@@ -56,10 +45,21 @@ const ClaimKYCPage = () => {
           error.response?.data?.error ||
           error.message;
         toast.error(t(message));
+      } finally {
         setLoadingClaim(false);
       }
     })();
-  }, [token, user_id, coin, amount, status, t, navigate]);
+  }, [token, user_id, coin, amount, status, t]);
+
+  // Tự động redirect sau 3 giây
+  useEffect(() => {
+    if (!loadingClaim) {
+      const timer = setTimeout(() => {
+        navigate('/user/profile', { replace: true });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [loadingClaim, navigate]);
 
   return (
     <>
@@ -92,6 +92,7 @@ const ClaimKYCPage = () => {
             <p className="text-2xl font-bold">
               {`Claim ${coin.toUpperCase()} successful`}
             </p>
+            <p className="text-gray-600">{t('Redirecting to profile...')}</p>
 
             <Link
               to="/user/profile"
@@ -105,6 +106,7 @@ const ClaimKYCPage = () => {
             <p className="text-xl font-semibold text-red-600">
               {t('Claim failed')}
             </p>
+            <p className="text-gray-600">{t('Redirecting to profile...')}</p>
             <Link
               to="/user/profile"
               className="border border-black max-w-xl w-full text-center rounded-3xl py-2 mt-4"
