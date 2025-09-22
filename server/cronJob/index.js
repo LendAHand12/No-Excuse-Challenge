@@ -287,6 +287,7 @@ export const checkRefWithTime = asyncHandler(async () => {
       }
     } else {
       u.errLahCode = "";
+      u.timeRetryOver45 = null;
     }
 
     await u.save();
