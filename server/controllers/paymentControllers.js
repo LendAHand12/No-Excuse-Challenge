@@ -1059,33 +1059,35 @@ const getAllPayments = asyncHandler(async (req, res) => {
             userId: pay.userId_to,
             tier: pay.tier,
           });
-          const listRefOfReceiver = await Tree.find({
-            refId: treeOfReceiveUser._id,
-          });
-          const checkResult = await checkCanRefund({
-            userReceive,
-            listRefOfReceiver,
-            userCountPay: pay.userCountPay,
-            trans: pay,
-            treeOfReceiveUser,
-          });
+          if (treeOfReceiveUser) {
+            const listRefOfReceiver = await Tree.find({
+              refId: treeOfReceiveUser._id,
+            });
+            const checkResult = await checkCanRefund({
+              userReceive,
+              listRefOfReceiver,
+              userCountPay: pay.userCountPay,
+              trans: pay,
+              treeOfReceiveUser,
+            });
 
-          result.push({
-            _id: pay._id,
-            address_from: pay.address_from,
-            tier: pay.tier,
-            // hash: pay.hash,
-            amount: pay.amount,
-            userId: user.userId,
-            email: user.email,
-            userReceiveId: userReceive ? userReceive.userId : "Unknow",
-            userReceiveEmail: userReceive ? userReceive.email : "Unknow",
-            type: pay.type,
-            userCountPay: pay.userCountPay,
-            createdAt: pay.createdAt,
-            isHoldRefund: pay.isHoldRefund,
-            isOk: checkResult === "" ? true : false,
-          });
+            result.push({
+              _id: pay._id,
+              address_from: pay.address_from,
+              tier: pay.tier,
+              // hash: pay.hash,
+              amount: pay.amount,
+              userId: user.userId,
+              email: user.email,
+              userReceiveId: userReceive ? userReceive.userId : "Unknow",
+              userReceiveEmail: userReceive ? userReceive.email : "Unknow",
+              type: pay.type,
+              userCountPay: pay.userCountPay,
+              createdAt: pay.createdAt,
+              isHoldRefund: pay.isHoldRefund,
+              isOk: checkResult === "" ? true : false,
+            });
+          }
         }
       }
     }
