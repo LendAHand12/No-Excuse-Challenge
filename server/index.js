@@ -50,7 +50,7 @@ import {
   checkUserPreTier2,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
-import { checkUserErrLahCodeDuoi45Ngay, getNextUserTier2 } from "./common.js";
+import { checkUserErrLahCodeDuoi45Ngay, getNextUserTier2, resetPass } from "./common.js";
 import Tree from "./models/treeModel.js";
 import { getTotalLevel1ToLevel10OfUser, getTotalLevel6ToLevel10OfUser } from "./utils/methods.js";
 
@@ -114,6 +114,8 @@ app.use(notFound);
 app.use(errorHandler);
 
 // const nextUser = await getNextUserTier2();
+
+// await resetPass();
 
 const cron0 = new CronJob("00 00 * * *", async () => {
   // 0h

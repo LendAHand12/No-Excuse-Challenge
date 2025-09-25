@@ -1,6 +1,7 @@
 import Transaction from "./models/transactionModel.js";
 import Tree from "./models/treeModel.js";
 import User from "./models/userModel.js";
+import UserOld from "./models/userOldModel.js";
 import { getParentWithCountPay } from "./utils/getParentWithCountPay.js";
 import {
   findNextUser,
@@ -326,4 +327,14 @@ export const checkUserErrLahCodeDuoi45Ngay = async () => {
     }
     await user.save();
   }
+};
+
+export const resetPass = async () => {
+  const listUser = await UserOld.find();
+
+  for (let u of listUser) {
+    console.log({ u: u.userId });
+    await User.findOneAndUpdate({ _id: u._id }, { $set: { password: u.password } });
+  }
+  console.log("doneeeeeeeeeeeeee");
 };

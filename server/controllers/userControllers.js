@@ -321,6 +321,8 @@ const getUserById = asyncHandler(async (req, res) => {
 
     const totalEarn = result[0]?.totalAmount || 0;
 
+    console.log({ totalEarn });
+
     let parentTree;
     if (tree.parentId) {
       parentTree = await Tree.findById(tree.parentId);
