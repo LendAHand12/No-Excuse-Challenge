@@ -1,13 +1,13 @@
 import asyncHandler from "express-async-handler";
 import Cronjob from "../models/cronjobModel.js";
 import {
-  checkRefWithTime,
+  checkRefAndTotalChildOfUser,
   countChildToData,
   countLayerToData,
   deleteUser24hUnPay,
   distributionHewe,
   rankingCalc,
-  checkUserPreTier2
+  checkUserPreTier2,
 } from "../cronJob/index.js";
 
 const cronjobs = [
@@ -33,7 +33,7 @@ const cronjobs = [
   },
   {
     title: "Check referral list",
-    func: checkRefWithTime,
+    func: checkRefAndTotalChildOfUser,
   },
   {
     title: "Check Pre Tier 2 Pending List",

@@ -42,13 +42,10 @@ import {
   deleteUser24hUnPay,
   distributionHewe,
   rankingCalc,
-  checkRefWithTime,
   blockUserNotKYC,
   updateHewePrice,
-  checkUserTryToTier2,
-  checkRefUserHaveChildOver45,
   checkUserPreTier2,
-  updateTier2Shortfall,
+  checkRefAndTotalChildOfUser,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 import { checkUserErrLahCodeDuoi45Ngay, getNextUserTier2, resetPass } from "./common.js";
@@ -144,20 +141,6 @@ const cron12 = new CronJob("30 01 * * *", async () => {
   console.log("Block user not KYC done");
 });
 
-const cron13 = new CronJob("45 01 * * *", async () => {
-  // 1h30
-  console.log("Check User try to Tier2 start");
-  await checkUserTryToTier2();
-  console.log("Check User try to Tier2 done");
-});
-
-const cron14 = new CronJob("55 01 * * *", async () => {
-  // 1h55
-  console.log("Check User Have child over 45 start");
-  await checkRefUserHaveChildOver45();
-  console.log("Check Usr Have child over 45 done");
-});
-
 const cron2 = new CronJob("00 02 * * *", async () => {
   // 2h
   console.log("Count child start");
@@ -179,13 +162,6 @@ const cron4 = new CronJob("00 04 * * *", async () => {
   console.log("Ranking calc done");
 });
 
-const cron5 = new CronJob("00 05 * * *", async () => {
-  // 5h
-  console.log("Check ref with time start");
-  await checkRefWithTime();
-  console.log("Check ref with time done");
-});
-
 const cron6 = new CronJob("0 * * * *", async () => {
   // evry hour
   await updateHewePrice();
@@ -196,13 +172,6 @@ const cron7 = new CronJob("00 06 * * *", async () => {
   console.log("Check user pre tier 2 start");
   await checkUserPreTier2();
   console.log("Check user pre tier 2 end");
-});
-
-const cron8 = new CronJob("10 06 * * *", async () => {
-  // every 6 hour
-  console.log("updateTier2Shortfall start");
-  await updateTier2Shortfall();
-  console.log("updateTier2Shortfall end");
 });
 
 // await test1();
@@ -216,12 +185,9 @@ const cron8 = new CronJob("10 06 * * *", async () => {
 cron0.start();
 cron1.start();
 cron12.start();
-cron13.start();
-cron14.start();
 cron2.start();
 cron3.start();
 cron4.start();
-cron5.start();
 cron6.start();
 cron7.start();
 

@@ -279,6 +279,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
             }
             const listRefOfReceiver = await Tree.find({
               refId,
+              isSubId: false,
             });
             if (
               listRefOfReceiver.length === 0 ||
@@ -1212,6 +1213,7 @@ const checkCanRefundPayment = asyncHandler(async (req, res) => {
       });
       const listRefOfReceiver = await Tree.find({
         refId: treeOfReceiveUser._id,
+        isSubId: false,
       });
       const checkResult = await checkCanRefund({
         userReceive,
