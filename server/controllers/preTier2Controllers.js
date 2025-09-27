@@ -290,7 +290,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
       } else {
         let registerFee = 10;
         let companyFee = 20;
-        let preTier2Pool = 201;
+        let preTier2Pool = 302;
         // giao dich dang ky
         payments.push({
           userName: "Registration Fee",
@@ -427,7 +427,7 @@ const onDonePayment = asyncHandler(async (req, res) => {
 
       const newPreTier2Pool = new PreTier2Pool({
         userId: user.id,
-        amount: 201,
+        amount: 302,
         status: "IN",
       });
 
@@ -908,12 +908,38 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
             amount: referralCommissionFee,
           });
 
-          if (p.userName === "") {
+          let lastPrePoolShortfallAmount = false;
+          if (receiveUser.shortfallAmount > 0 && receiveUser.shortfallAmount < 25) {
+            console.log({ receiveUser: receiveUser.userId, amount: receiveUser.shortfallAmount });
+            lastPrePoolShortfallAmount = true;
+          }
+
+          if (lastPrePoolShortfallAmount) {
+            const transactionReferral = await Transaction.create({
+              userId: user.id,
+              amount: receiveUser.shortfallAmount,
+              userCountPay: countPayUser,
+              userId_to: receiveUser._id,
+              username_to: p.userName,
+              tier: user.tier + 1 - user.paymentStep,
+              buyPackage: user.buyPackage,
+              hash: "",
+              type: "POOLREPAYMENT",
+              status: "PENDING",
+            });
+            paymentIds.push({
+              type: "REFERRAL",
+              id: transactionReferral._id,
+              amount: receiveUser.shortfallAmount,
+              to: p.userName,
+            });
           }
 
           const transactionReferral = await Transaction.create({
             userId: user.id,
-            amount: referralCommissionFee,
+            amount: lastPrePoolShortfallAmount
+              ? referralCommissionFee - receiveUser.shortfallAmount
+              : referralCommissionFee,
             userCountPay: countPayUser,
             userId_to: receiveUser._id,
             username_to: p.userName,
@@ -930,7 +956,9 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
           paymentIds.push({
             type: "REFERRAL",
             id: transactionReferral._id,
-            amount: referralCommissionFee,
+            amount: lastPrePoolShortfallAmount
+              ? referralCommissionFee - receiveUser.shortfallAmount
+              : referralCommissionFee,
             to: p.userName,
           });
           countPayUser = countPayUser + 1;

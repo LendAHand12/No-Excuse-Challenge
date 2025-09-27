@@ -652,7 +652,7 @@ const Profile = () => {
                     </p>
                     <ul className="list-disc">
                       <li className="ml-4">
-                        To enter Pre-Tier 2, contribute 231 USDT to the Support
+                        To enter Pre-Tier 2, contribute 332 USDT to the Support
                         Fund.
                       </li>
                     </ul>
@@ -668,10 +668,10 @@ const Profile = () => {
                           total package is 603 USDT for Tier 2 and recycle back
                           to tier 1
                         </b>
-                        , which includes a <b>402 USDT</b> Support Pool loan.
+                        , which includes a <b>302 USDT</b> Support Pool loan.
                       </li>
                       <li className="ml-4">
-                        The <b>402 USDT</b> loan will be{' '}
+                        The <b>302 USDT</b> loan will be{' '}
                         <b>deducted from your Tier 2 benefits</b> until it’s
                         fully repaid.
                       </li>
@@ -1087,37 +1087,37 @@ const Profile = () => {
                   </p>
                   <div className="lg:py-2">
                     <ul className="flex flex-col list-disc">
-                    {(() => {
-                          const c1 = notEnoughtChild?.countChild1 ?? 0;
-                          const c2 = notEnoughtChild?.countChild2 ?? 0;
+                      {(() => {
+                        const c1 = notEnoughtChild?.countChild1 ?? 0;
+                        const c2 = notEnoughtChild?.countChild2 ?? 0;
 
-                          let b1 = 0;
-                          let b2 = 0;
+                        let b1 = 0;
+                        let b2 = 0;
 
-                          if (c1 >= 20 && c2 >= 20 && c1 + c2 >= 62) {
-                            // ✅ Đủ điều kiện, không cần bù
-                            b1 = 0;
-                            b2 = 0;
+                        if (c1 >= 20 && c2 >= 20 && c1 + c2 >= 62) {
+                          // ✅ Đủ điều kiện, không cần bù
+                          b1 = 0;
+                          b2 = 0;
+                        } else {
+                          // ✅ Xác định nhánh mạnh và nhánh yếu
+                          if (c1 >= c2) {
+                            // Nhánh 1 mạnh (quota 42), nhánh 2 yếu (quota 20)
+                            b1 = Math.max(42 - c1, 0);
+                            b2 = Math.max(20 - c2, 0);
                           } else {
-                            // ✅ Xác định nhánh mạnh và nhánh yếu
-                            if (c1 >= c2) {
-                              // Nhánh 1 mạnh (quota 42), nhánh 2 yếu (quota 20)
-                              b1 = Math.max(42 - c1, 0);
-                              b2 = Math.max(20 - c2, 0);
-                            } else {
-                              // Nhánh 2 mạnh (quota 42), nhánh 1 yếu (quota 20)
-                              b1 = Math.max(20 - c1, 0);
-                              b2 = Math.max(42 - c2, 0);
-                            }
+                            // Nhánh 2 mạnh (quota 42), nhánh 1 yếu (quota 20)
+                            b1 = Math.max(20 - c1, 0);
+                            b2 = Math.max(42 - c2, 0);
                           }
+                        }
 
-                          return (
-                            <>
-                              <li className="ml-4">Branch 1 : {b1} IDs</li>
-                              <li className="ml-4">Branch 2 : {b2} IDs</li>
-                            </>
-                          );
-                        })()}
+                        return (
+                          <>
+                            <li className="ml-4">Branch 1 : {b1} IDs</li>
+                            <li className="ml-4">Branch 2 : {b2} IDs</li>
+                          </>
+                        );
+                      })()}
                     </ul>
                   </div>
                 </div>
