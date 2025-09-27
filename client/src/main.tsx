@@ -20,7 +20,11 @@ const projectId = '1b15f85b4e2f0c6f99354a3f49fe7660';
 
 const config = createConfig({
   chains: [bsc],
-  connectors: [metaMask(), safe(), walletConnect({ projectId })],
+  connectors: [
+    metaMask(),
+    safe(),
+    walletConnect({ projectId, relayUrl: 'wss://relay.walletconnect.org' }),
+  ],
   transports: {
     [bsc.id]: http(),
   },
