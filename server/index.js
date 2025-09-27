@@ -48,6 +48,7 @@ import {
   checkUserTryToTier2,
   checkRefUserHaveChildOver45,
   checkUserPreTier2,
+  updateTier2Shortfall,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 import { checkUserErrLahCodeDuoi45Ngay, getNextUserTier2, resetPass } from "./common.js";
@@ -195,6 +196,13 @@ const cron7 = new CronJob("00 06 * * *", async () => {
   console.log("Check user pre tier 2 start");
   await checkUserPreTier2();
   console.log("Check user pre tier 2 end");
+});
+
+const cron8 = new CronJob("10 06 * * *", async () => {
+  // every 6 hour
+  console.log("updateTier2Shortfall start");
+  await updateTier2Shortfall();
+  console.log("updateTier2Shortfall end");
 });
 
 // await test1();

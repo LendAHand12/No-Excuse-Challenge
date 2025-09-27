@@ -2,6 +2,7 @@ import detectEthereumProvider from '@metamask/detect-provider';
 import { toast } from 'react-toastify';
 import Web3 from 'web3';
 import ContractToken from '@/abis/BEP20USDT.json';
+import UserHistory from '@/api/UserHistory';
 
 export const loadWeb3 = async () => {
   let web3;
@@ -9,7 +10,6 @@ export const loadWeb3 = async () => {
   if (provider) {
     web3 = new Web3(provider);
     const netId = await web3.eth.getChainId();
-    console.log({ netId });
     if (parseInt(netId) !== 56) {
       toast.error('Please switch your wallet to BSC network manually.');
       return false;
@@ -49,7 +49,20 @@ export const getAccount = async () => {
   const accounts = await web3.eth.getAccounts();
 
   if (accounts.length > 0) {
-    return accounts[0];
+    const walletAddress = accounts[0];
+
+    try {
+      // gọi API để lưu lịch sử kết nối ví
+      await UserHistory.connectWallet({
+        walletAddress,
+        desc: 'connect payment',
+      });
+    } catch (err) {
+      console.error('Không thể lưu lịch sử connect wallet:', err);
+      // vẫn return account cho flow chính
+    }
+
+    return walletAddress;
   } else {
     throw new Error('Please connect your wallet');
   }

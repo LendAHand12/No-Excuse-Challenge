@@ -832,7 +832,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
   }
   if (phone) {
     const userExistsPhone = await User.findOne({
-      $and: [{ phone: { $ne: "" } }, { phone }],
+      $and: [{ phone: { $ne: "" } }, { phone }, { status: { $ne: "DELETED" } }],
     });
     if (userExistsPhone) {
       let message = "Dupplicate phone";
@@ -862,7 +862,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
   }
   if (idCode) {
     const userExistsIdCode = await User.findOne({
-      $and: [{ idCode: { $ne: "" } }, { idCode }],
+      $and: [{ idCode: { $ne: "" } }, { idCode }, { status: { $ne: "DELETED" } }],
     });
     if (userExistsIdCode) {
       let message = "duplicateInfoIdCode";

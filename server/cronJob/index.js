@@ -17,6 +17,7 @@ import Honor from "../models/honorModel.js";
 import { getPriceHewe } from "../utils/getPriceHewe.js";
 import Config from "../models/configModel.js";
 import Income from "../models/incomeModel.js";
+import PreTier2 from "../models/preTier2Model.js";
 
 export const deleteUser24hUnPay = asyncHandler(async () => {
   const listUser = await User.find({
@@ -486,6 +487,62 @@ export const checkUserPreTier2 = asyncHandler(async () => {
         }
         await u.save();
       }
+    } catch (error) {
+      console.log({ error });
+    }
+  }
+});
+
+export const updateTier2Shortfall = asyncHandler(async () => {
+  const listUserPreTier2 = await PreTier2.find({
+    status: "PASSED",
+  });
+
+  for (let u of listUserPreTier2) {
+    try {
+      const user = await User.findById(u.userId);
+      if (!user) continue;
+
+      const treeOfUser = await Tree.findOne({ userId: u.userId, tier: 1, isSubId: false });
+      if (!treeOfUser) continue;
+
+      let { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(treeOfUser);
+      const totalChild = countChild1 + countChild2;
+
+      if (totalChild < 60) {
+        const missingIds = 60 - totalChild; // số id thiếu
+        console.log({ name: user.userId, countChild1, countChild2, missingIds });
+        // user.tryToTier2 = "YES";
+
+        // if (!user.timeToTry) {
+        //   // lần đầu tiên phát hiện thiếu → set deadline luôn
+        //   const deadline = moment()
+        //     .add(missingIds * 15, "days")
+        //     .toDate();
+        //   user.timeToTry = deadline;
+        //   user.currentShortfall = missingIds;
+        // } else {
+        //   // đã có deadline từ trước → so sánh với số thiếu hôm nay
+        //   const oldShortfall = user.currentShortfall || 0;
+
+        //   if (missingIds > oldShortfall) {
+        //     // thiếu nhiều hơn → cộng thêm số ngày tương ứng cho phần chênh lệch
+        //     const diff = missingIds - oldShortfall;
+        //     const extraDays = diff * 15;
+
+        //     user.timeToTry = moment(user.timeToTry).add(extraDays, "days").toDate();
+        //     user.currentShortfall = missingIds;
+        //   }
+        //   // nếu thiếu ít hơn hoặc bằng hôm qua thì không cộng thêm ngày
+        // }
+      } else {
+        // đủ hoặc dư 60 → reset
+        user.tryToTier2 = "DONE";
+        user.timeToTry = null;
+        user.currentShortfall = 0;
+      }
+
+      // await user.save();
     } catch (error) {
       console.log({ error });
     }

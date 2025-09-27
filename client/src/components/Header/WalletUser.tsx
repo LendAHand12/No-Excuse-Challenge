@@ -23,7 +23,7 @@ const WalletUser = () => {
         try {
           await UserHistory.connectWallet({
             walletAddress: result.accounts[0],
-            desc: 'connect wallet',
+            desc: 'connect on header',
           });
           await switchChain({ chainId: 56 }); // 56 = BSC Mainnet
         } catch (switchError) {
