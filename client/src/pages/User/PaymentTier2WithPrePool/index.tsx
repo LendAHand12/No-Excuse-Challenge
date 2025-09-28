@@ -34,6 +34,22 @@ const PaymentTier2WithPrePoolPage = () => {
   const [showCommit, setShowCommit] = useState(false);
   const [notEnoughtChild1, setNotEnoughtChild1] = useState(0);
   const [notEnoughtChild2, setNotEnoughtChild2] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(0); // đổi sang giây
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
 
   const topRef = useRef(null);
 
@@ -57,6 +73,7 @@ const PaymentTier2WithPrePoolPage = () => {
           userStepPayment,
           holdForNotEnoughLevel,
           notEnoughtChild,
+          time,
         } = response.data;
         setResMessage(message);
         if (userStepPayment === 0 && holdForNotEnoughLevel) {
@@ -65,6 +82,9 @@ const PaymentTier2WithPrePoolPage = () => {
           setNotEnoughtChild2(notEnoughtChild.countChild2);
         }
         setResStatus(status);
+        if (time) {
+          setTimeLeft(parseInt(time) * 60);
+        }
 
         if (status === 'OK') {
           const totalPayment = paymentIds.reduce(
@@ -219,27 +239,27 @@ const PaymentTier2WithPrePoolPage = () => {
                           </li>
                         </ul> */}
                         <ul className="flex flex-col list-disc">
-                      {(() => {
-                        const c1 = notEnoughtChild1 ?? 0;
-                        const c2 = notEnoughtChild2 ?? 0;
+                          {(() => {
+                            const c1 = notEnoughtChild1 ?? 0;
+                            const c2 = notEnoughtChild2 ?? 0;
 
-                        // Xác định nhánh mạnh / yếu
-                        const isBranch1Strong = c1 >= c2;
+                            // Xác định nhánh mạnh / yếu
+                            const isBranch1Strong = c1 >= c2;
 
-                        const target1 = isBranch1Strong ? 42 : 20;
-                        const target2 = isBranch1Strong ? 20 : 42;
+                            const target1 = isBranch1Strong ? 42 : 20;
+                            const target2 = isBranch1Strong ? 20 : 42;
 
-                        const b1 = Math.max(target1 - c1, 0);
-                        const b2 = Math.max(target2 - c2, 0);
+                            const b1 = Math.max(target1 - c1, 0);
+                            const b2 = Math.max(target2 - c2, 0);
 
-                        return (
-                          <>
-                            <li className="ml-4">Branch 1 : {b1} IDs</li>
-                            <li className="ml-4">Branch 2 : {b2} IDs</li>
-                          </>
-                        );
-                      })()}
-                    </ul>
+                            return (
+                              <>
+                                <li className="ml-4">Branch 1 : {b1} IDs</li>
+                                <li className="ml-4">Branch 2 : {b2} IDs</li>
+                              </>
+                            );
+                          })()}
+                        </ul>
                         By clicking <b>"Yes"</b>, the member agrees to complete
                         <b> 62 active IDs</b> in both <b> Branch 1</b> and{' '}
                         <b> Branch 2</b>.
@@ -269,6 +289,11 @@ const PaymentTier2WithPrePoolPage = () => {
                 role="alert"
               >
                 <span className="block sm:inline">{resMessage}</span>
+                {timeLeft > 0 && (
+                  <span className="ml-3 font-semibold">
+                    (Countdown: {formatTime(timeLeft)})
+                  </span>
+                )}
               </div>
             )}
             {resStatus === 'OK' && (

@@ -9,6 +9,7 @@ import DefaultLayout from '@/layout/DefaultLayout';
 import PreTier2 from '@/api/PreTier2';
 import { shortenWalletAddress } from '@/utils';
 import CustomPagination from '@/components/CustomPagination';
+import Modal from 'react-modal';
 
 const AdminPreTier2Pool = () => {
   const { t } = useTranslation();
@@ -29,6 +30,8 @@ const AdminPreTier2Pool = () => {
   });
   const [keyword, setKeyword] = useState(key);
   const [total, setTotal] = useState(0);
+  const [showAddPool, setShowAddPool] = useState(false);
+  const [amount, setAmount] = useState(0);
 
   const onSearch = (e) => {
     setKeyword(e.target.value);
@@ -92,9 +95,83 @@ const AdminPreTier2Pool = () => {
     setObjectFilter({ ...objectFilter, keyword, pageNumber: 1 });
   }, [keyword, objectFilter]);
 
+  const addToPool = useCallback(async () => {
+    if (amount <= 0) {
+      toast.error('Amount must be greater than 0');
+      return;
+    } else {
+      await PreTier2.adminAddToPool({ amount })
+        .then((response) => {
+          const { message } = response.data;
+          toast.success(message);
+          setShowAddPool(false);
+          setRefresh(!refresh);
+        })
+        .catch((error) => {
+          let message =
+            error.response && error.response.data.mesage
+              ? error.response.data.message
+              : error.message;
+          toast.error(t(message));
+          setLoading(false);
+        });
+    }
+  }, [amount]);
+
   return (
     <DefaultLayout>
       <ToastContainer />
+      <Modal
+        isOpen={showAddPool}
+        onRequestClose={() => setShowAddPool(false)}
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+          },
+        }}
+      >
+        <div className="overflow-y-auto overflow-x-hidden justify-center items-center w-full md:inset-0 h-modal md:h-full">
+          <div className="relative w-full max-w-md h-full md:h-auto">
+            <div className="relative text-center bg-white rounded-lg sm:p-5">
+              {/* Tiêu đề */}
+              <h2 className="text-xl font-semibold mb-4">
+                Enter the amount to add to the pool
+              </h2>
+
+              {/* Input số tiền */}
+              <input
+                type="number"
+                placeholder="Ex: 100..."
+                className="w-full p-2 mb-4 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+
+              {/* Nút hành động */}
+              <div className="flex justify-center items-center space-x-4">
+                <button
+                  onClick={() => setShowAddPool(false)}
+                  className="py-2 px-4 text-sm font-medium text-gray-500 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={addToPool}
+                  className="py-2 px-4 text-sm font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
       <div className="relative overflow-x-auto py-24 px-10">
         <div className="flex items-center justify-between pb-4 bg-white">
           <div className="flex items-center gap-4">
@@ -156,11 +233,19 @@ const AdminPreTier2Pool = () => {
             Balance in pool : <span className="font-extrabold">{total}</span>{' '}
             USDT{' '}
           </h1>
-          <Link to="/admin/users-passed-tier-2">
-            <button className="border px-10 py-4 rounded-lg bg-blue-500 text-white font-medium">
-              Passed Users
+          <div>
+            <button
+              onClick={() => setShowAddPool(true)}
+              className="border px-10 py-4 rounded-lg bg-green-500 text-white font-medium"
+            >
+              Add To Pool
             </button>
-          </Link>
+            <Link to="/admin/users-passed-tier-2">
+              <button className="border px-10 py-4 rounded-lg bg-blue-500 text-white font-medium">
+                Passed Users
+              </button>
+            </Link>
+          </div>
         </div>
         <table className="w-full text-sm text-left text-gray-500">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">

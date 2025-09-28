@@ -752,32 +752,71 @@ const UserProfile = () => {
                 <p className="uppercase mt-2 font-bold">{t('children')}</p>
                 <div className="py-2">
                   <ul>
-                    {data.listDirectUser.map((ele) => (
-                      <li
-                        className="bg-white border-b hover:bg-gray-50"
-                        key={ele.userId}
-                      >
-                        <div className="py-2">
-                          <div className="text-base">
-                            <span
-                              className={`${
-                                ele.isRed
-                                  ? 'bg-[#b91c1c]'
-                                  : ele.isBlue
-                                  ? 'bg-[#0000ff]'
-                                  : ele.isYellow
-                                  ? 'bg-[#F4B400]'
-                                  : ele.isPink
-                                  ? 'bg-[#e600769c]'
-                                  : 'bg-[#16a34a]'
-                              } py-1 px-2 rounded text-white text-sm`}
-                            >
-                              {ele.userId}
-                            </span>
+                    {data.listDirectUser
+                      .filter((ele) => !ele.isSubId)
+                      .map((ele) => (
+                        <li
+                          className="bg-white border-b hover:bg-gray-50"
+                          key={ele.userId}
+                        >
+                          <div className="py-2">
+                            <div className="text-base">
+                              <span
+                                className={`${
+                                  ele.isRed
+                                    ? 'bg-[#b91c1c]'
+                                    : ele.isBlue
+                                    ? 'bg-[#0000ff]'
+                                    : ele.isYellow
+                                    ? 'bg-[#F4B400]'
+                                    : ele.isPink
+                                    ? 'bg-[#e600769c]'
+                                    : 'bg-[#16a34a]'
+                                } py-1 px-2 rounded text-white text-sm`}
+                              >
+                                {ele.userId}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </li>
-                    ))}
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              </div>
+              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                <p className="uppercase mt-2 font-bold">
+                  direct referral sub member{' '}
+                </p>
+                <div className="py-2">
+                  <ul>
+                    {data.listDirectUser
+                      .filter((ele) => ele.isSubId)
+                      .map((ele) => (
+                        <li
+                          className="bg-white border-b hover:bg-gray-50"
+                          key={ele.userId}
+                        >
+                          <div className="py-2">
+                            <div className="text-base">
+                              <span
+                                className={`${
+                                  ele.isRed
+                                    ? 'bg-[#b91c1c]'
+                                    : ele.isBlue
+                                    ? 'bg-[#0000ff]'
+                                    : ele.isYellow
+                                    ? 'bg-[#F4B400]'
+                                    : ele.isPink
+                                    ? 'bg-[#e600769c]'
+                                    : 'bg-[#16a34a]'
+                                } py-1 px-2 rounded text-white text-sm`}
+                              >
+                                {ele.userId}
+                              </span>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
                   </ul>
                 </div>
               </div>

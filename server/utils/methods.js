@@ -7,6 +7,7 @@ import ADMIN_ID from "../constants/AdminId.js";
 import { areArraysEqual } from "../cronJob/index.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import PreTier2 from "../models/preTier2Model.js";
 
 export const getParentUser = async (userId, tier) => {
   const tree = await Tree.findOne({ userId, tier });
@@ -663,4 +664,16 @@ export const getAllDescendantsTier2Users = async (userId) => {
   branch2UserIds = branch2UserIds.filter((id) => !branch1Set.has(id));
 
   return { branch1: Array.from(branch1Set), branch2: branch2UserIds };
+};
+
+export const isLowestAchievedUser = async (userId) => {
+  // Tìm document ACHIEVED có order thấp nhất
+  const lowestAchieved = await PreTier2.findOne({ status: "ACHIEVED" })
+    .sort({ order: 1 }) // sắp xếp tăng dần order
+    .lean();
+
+  if (!lowestAchieved) return false; // chưa có ai ACHIEVED
+
+  // So sánh userId
+  return lowestAchieved.userId.toString() === userId.toString();
 };

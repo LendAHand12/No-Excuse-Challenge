@@ -336,7 +336,7 @@ const AdminPreTier2UsersPages = () => {
                     {userInfo?.permissions
                       .find((p) => p.page.pageName === 'admin-user-pre-tier-2')
                       ?.actions.includes('update') &&
-                      ele.status === 'PENDING' && (
+                      ele.status !== 'PASSED' && (
                         <div className="flex gap-6">
                           <button
                             onClick={() => handleChangeOrder(ele._id, 'down')}

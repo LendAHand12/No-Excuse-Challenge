@@ -7,6 +7,7 @@ import {
   getTotalLevel1ToLevel10OfUser,
   getTotalLevel6ToLevel10OfUser,
   hasTwoBranches,
+  isLowestAchievedUser,
   removeAccents,
 } from "../utils/methods.js";
 import mongoose from "mongoose";
@@ -514,8 +515,8 @@ const changeOrderByAdmin = asyncHandler(async (req, res) => {
       return res.status(404).json({ error: "Document not found" });
     }
 
-    if (docFrom.status !== "PENDING") {
-      return res.status(400).json({ error: "Only PENDING users can change order" });
+    if (docFrom.status === "PASSED") {
+      return res.status(400).json({ error: "Only PENDING or ACHIEVED users can change order" });
     }
 
     const currentOrder = docFrom.order;
@@ -527,7 +528,7 @@ const changeOrderByAdmin = asyncHandler(async (req, res) => {
       // tìm doc PENDING gần nhất phía trên
       docTo = await PreTier2.findOne({
         order: { $lt: currentOrder },
-        status: "PENDING",
+        status: { $ne: "PASSED" },
       }).sort({ order: -1 });
       if (!docTo) {
         return res.status(400).json({ error: "Already at the top" });
@@ -536,7 +537,7 @@ const changeOrderByAdmin = asyncHandler(async (req, res) => {
       // tìm doc PENDING gần nhất phía dưới
       docTo = await PreTier2.findOne({
         order: { $gt: currentOrder },
-        status: "PENDING",
+        status: { $ne: "PASSED" },
       }).sort({ order: 1 });
       if (!docTo) {
         return res.status(400).json({ error: "Already at the bottom" });
@@ -585,6 +586,21 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
       status: "PENDING",
       message: `Fund balance is insufficient, please try again later`,
     });
+  }
+
+  const isOrder0 = await isLowestAchievedUser(user._id);
+  if (!isOrder0) {
+    const currentConfigTime = await Config.findOne({ label: "TIME_PRE_TO_TIER_2" });
+    const timeToPassTier2 = parseInt(currentConfigTime.value);
+    const preTier2Data = await PreTier2.findOne({ userId: user._id });
+    const diffMinute = moment().diff(preTier2Data.achievedTime, "minutes");
+    if (diffMinute < timeToPassTier2) {
+      return res.status(200).json({
+        status: "PENDING",
+        message: `Please wait until the scheduled time for your payment`,
+        time: timeToPassTier2 - diffMinute,
+      });
+    }
   }
 
   if (user.paymentStep > 0 && childId === "") {
@@ -1281,6 +1297,24 @@ const getPassedUsers = asyncHandler(async (req, res) => {
   });
 });
 
+const adminAddToPool = asyncHandler(async (req, res) => {
+  let { amount } = req.body;
+  if (amount > 0) {
+    await PreTier2Pool.create({
+      userId: "6494e9101e2f152a593b66f2",
+      amount,
+      status: "IN",
+      createdAt: new Date(),
+    });
+
+    res.json({
+      message: "Pool added!",
+    });
+  } else {
+    throw new Error("Amount must be greater than 0");
+  }
+});
+
 export {
   getAllPreTier2Users,
   approveUserPreTier2,
@@ -1293,4 +1327,5 @@ export {
   getPreTier2UsersForUser,
   achievedUserTier2,
   getPassedUsers,
+  adminAddToPool,
 };

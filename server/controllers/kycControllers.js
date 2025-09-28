@@ -75,24 +75,22 @@ const register = expressAsyncHandler(async (req, res) => {
         let externalRefID = enroll.externalDatabaseRefID;
         let userId = externalRefID.split("_")[1];
 
-        if (isValidObjectId(userId)) {
-          let dupUser = await User.findOne({
-            _id: userId,
-            status: { $ne: "DELETED" },
-            status: { $ne: "REJECTED" },
+        let dupUser = await User.findOne({
+          _id: userId,
+          status: { $ne: "DELETED" },
+          status: { $ne: "REJECTED" },
+        });
+
+        if (dupUser) {
+          await DoubleKyc.create({
+            userIdFrom: user._id,
+            userIdTo: userId,
           });
 
-          if (dupUser) {
-            await DoubleKyc.create({
-              userIdFrom: user._id,
-              userIdTo: userId,
-            });
-
-            return res.status(200).json({
-              success: false,
-              message: "Your face has been registered to another account.",
-            });
-          }
+          return res.status(200).json({
+            success: false,
+            message: "Your face has been registered to another account.",
+          });
         }
       }
     }

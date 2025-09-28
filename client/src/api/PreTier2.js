@@ -48,6 +48,9 @@ const PreTier2 = {
       `${URL_API_PRE_TIER_2}/pool?pageNumber=${pageNumber}&keyword=${keyword}`,
     );
   },
+  adminAddToPool: (body) => {
+    return API.post(`${URL_API_PRE_TIER_2}/add-pool`, body);
+  },
 };
 
 export default PreTier2;
