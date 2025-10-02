@@ -188,7 +188,7 @@ const getUserById = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id).select("-password");
 
   if (user) {
-    const tree = await Tree.findOne({ userId: user._id, tier: 1 });
+    const tree = await Tree.findOne({ userId: user._id, tier: 1, isSubId: false });
 
     const listDirectUser = [];
     const listRefIdOfUser = await Tree.find({ refId: tree._id, tier: 1 });

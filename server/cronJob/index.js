@@ -3,7 +3,11 @@ import moment from "moment";
 import fs from "fs";
 
 import User from "../models/userModel.js";
-import { sendMailGetHewePrice, sendMailUpdateLayerForAdmin } from "../utils/sendMailCustom.js";
+import {
+  sendMailChangeSystemForUser,
+  sendMailGetHewePrice,
+  sendMailUpdateLayerForAdmin,
+} from "../utils/sendMailCustom.js";
 import { getCountAllChildren, getCountIncome } from "../controllers/userControllers.js";
 import {
   findRootLayer,
@@ -29,65 +33,66 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
     const diffHours = currentDay.diff(u.createdAt, "hours", true);
 
     if (diffHours >= 24) {
+      console.log({ user: u.userId, diffHours });
       const treeOfUser = await Tree.findOne({ userId: u._id });
       if (treeOfUser.children.length === 2) {
         console.log({ userId2: u.userId });
       } else if (treeOfUser.children.length === 1) {
         console.log({ userId1: u.userId });
-      }
-      await Tree.updateMany(
-        { refId: treeOfUser._id },
-        { $set: { refId: "64cd449ec75ae7bc7ebbab03" } }
-      );
-      let parent = await Tree.findById(treeOfUser.parentId);
-      if (parent) {
-        let childs = parent.children;
-        let newChilds = childs.filter((item) => {
-          if (item.toString() !== treeOfUser._id.toString()) return item;
-        });
-        parent.children = [...newChilds];
-        const updatedParent = await parent.save();
-        if (treeOfUser.children.length === 1 && updatedParent.children.length < 2) {
-          const firstChild = await Tree.findById(treeOfUser.children[0]);
-          firstChild.parentId = updatedParent._id;
-          firstChild.refId =
-            firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
-          await firstChild.save();
-          const newUpdatedParentChildren = [...updatedParent.children, firstChild._id];
-          updatedParent.children = newUpdatedParentChildren;
-          await updatedParent.save();
-        }
-        if (treeOfUser.children.length === 2 && updatedParent.children.length === 0) {
-          const firstChild = await Tree.findById(treeOfUser.children[0]);
-          firstChild.parentId = updatedParent._id;
-          firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
-          await firstChild.save();
-          const secondChild = await Tree.findById(treeOfUser.children[1]);
-          secondChild.parentId = updatedParent._id;
-          secondChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : secondChild.refId;
-          await secondChild.save();
-          const newUpdatedParentChildren = [firstChild._id, secondChild._id];
-          updatedParent.children = newUpdatedParentChildren;
-          await updatedParent.save();
-        }
-        if (treeOfUser.children.length === 2 && updatedParent.children.length === 1) {
-          console.log({ TH333333: u.userId });
-          const firstChild = await Tree.findById(treeOfUser.children[0]);
-          const secondChild = await Tree.findById(treeOfUser.children[1]);
-          const userListString = `${firstChild.userName}, ${secondChild.userName}`;
-          await sendMailChangeSystemForUser(userListString);
-        }
-        u.status = "DELETED";
-        u.deletedTime = new Date();
-        u.oldParents = [parent.userId, ...u.oldParents];
-        await u.save();
-        await Tree.deleteOne({ userId: u._id });
       } else {
-        u.status = "DELETED";
-        u.deletedTime = new Date();
-        u.oldParents = [parent.userId, ...u.oldParents];
-        await u.save();
-        await Tree.deleteOne({ userId: u._id });
+        await Tree.updateMany(
+          { refId: treeOfUser._id },
+          { $set: { refId: "64cd449ec75ae7bc7ebbab03" } }
+        );
+        let parent = await Tree.findById(treeOfUser.parentId);
+        if (parent) {
+          let childs = parent.children;
+          let newChilds = childs.filter((item) => {
+            if (item.toString() !== treeOfUser._id.toString()) return item;
+          });
+          parent.children = [...newChilds];
+          const updatedParent = await parent.save();
+          if (treeOfUser.children.length === 1 && updatedParent.children.length < 2) {
+            const firstChild = await Tree.findById(treeOfUser.children[0]);
+            firstChild.parentId = updatedParent._id;
+            firstChild.refId =
+              firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
+            await firstChild.save();
+            const newUpdatedParentChildren = [...updatedParent.children, firstChild._id];
+            updatedParent.children = newUpdatedParentChildren;
+            await updatedParent.save();
+          }
+          if (treeOfUser.children.length === 2 && updatedParent.children.length === 0) {
+            const firstChild = await Tree.findById(treeOfUser.children[0]);
+            firstChild.parentId = updatedParent._id;
+            firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
+            await firstChild.save();
+            const secondChild = await Tree.findById(treeOfUser.children[1]);
+            secondChild.parentId = updatedParent._id;
+            secondChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : secondChild.refId;
+            await secondChild.save();
+            const newUpdatedParentChildren = [firstChild._id, secondChild._id];
+            updatedParent.children = newUpdatedParentChildren;
+            await updatedParent.save();
+          }
+          if (treeOfUser.children.length === 2 && updatedParent.children.length === 1) {
+            console.log({ TH333333: u.userId });
+            const firstChild = await Tree.findById(treeOfUser.children[0]);
+            const secondChild = await Tree.findById(treeOfUser.children[1]);
+            const userListString = `${firstChild.userName}, ${secondChild.userName}`;
+            await sendMailChangeSystemForUser(userListString);
+          }
+          u.status = "DELETED";
+          u.deletedTime = new Date();
+          u.oldParents = [parent.userId, ...u.oldParents];
+          await u.save();
+          await Tree.deleteOne({ userId: u._id });
+        } else {
+          u.status = "DELETED";
+          u.deletedTime = new Date();
+          await u.save();
+          await Tree.deleteOne({ userId: u._id });
+        }
       }
     }
   }
@@ -256,46 +261,6 @@ export const rankingCalc = asyncHandler(async () => {
   }
 });
 
-// export const checkRefWithTime = asyncHandler(async () => {
-//   const currentDay = moment();
-//   const listTreeUser = await Tree.find({
-//     $and: [{ isSubId: false }, { tier: 1 }],
-//   });
-
-//   for (let tree of listTreeUser) {
-//     const u = await User.findById(tree.userId);
-
-//     const listRefId = await Tree.find({ refId: tree._id });
-//     if (listRefId.length < 2) {
-//       if (u.timeRetryOver45) {
-//         let diffDays = currentDay.diff(u.timeRetryOver45, "days");
-
-//         if (diffDays < 0 && diffDays >= -10) {
-//           u.errLahCode = "OVER35";
-//           console.log({ user1Over35: u.userId });
-//         } else if (diffDays >= 0) {
-//           u.errLahCode = "OVER45";
-//           console.log({ user1Over45: u.userId });
-//         }
-//       } else {
-//         let diffDays = currentDay.diff(tree.createdAt, "days");
-//         if (diffDays > 30) {
-//           u.errLahCode = "OVER45";
-//           console.log({ user2Over45: u.userId });
-//         } else if (diffDays > 20) {
-//           u.errLahCode = "OVER35";
-//           console.log({ user2Over35: u.userId });
-//         }
-//       }
-//     } else {
-//       u.errLahCode = "";
-//       u.timeRetryOver45 = null;
-//     }
-
-//     await u.save();
-//   }
-// });
-
 export const blockUserNotKYC = asyncHandler(async () => {
   const listUser = await User.find({
     $and: [{ isAdmin: false }, { status: "UNVERIFY" }],
@@ -344,112 +309,6 @@ export const test1 = asyncHandler(async () => {
   }
 });
 
-// export const checkUserTryToTier2 = asyncHandler(async () => {
-//   const listUser = await User.find({ tier: 2 });
-
-//   const INGNORE_USERID = ["Olivia", "Jay12", "Noah32", "James87", "Jake2000"];
-
-//   for (let u of listUser) {
-//     try {
-//       if (!INGNORE_USERID.includes(u.userId)) {
-//         const treeOfUser = await Tree.findOne({
-//           userId: u._id,
-//           tier: 1,
-//           isSubId: false,
-//         });
-//         const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(treeOfUser);
-//         console.log({ user: u.userId, countChild1, countChild2 });
-//         if (countChild1 + countChild2 >= 60 && countChild1 >= 19 && countChild2 >= 19) {
-//           u.tryToTier2 = "DONE";
-//           u.timeToTry = null;
-//         } else {
-//           if (u.timeToTry) {
-//             let currentDay = moment();
-//             const diffDay = currentDay.diff(u.timeToTry, "days");
-//             if (diffDay >= 45) {
-//               console.log({ over45: u.userId });
-//               u.tryToTier2 = "REDO";
-//               u.tier = 1;
-//               const treeOfUser = await Tree.findOne({
-//                 userId: u._id,
-//                 tier: 2,
-//                 isSubId: false,
-//               });
-//               treeOfUser.disable = true;
-//               await treeOfUser.save();
-//             }
-//           } else {
-//             u.tryToTier2 = "YES";
-//             u.timeToTry = new Date();
-//           }
-//         }
-//       } else {
-//         console.log({ userIngonre: u.userId });
-//       }
-
-//       await u.save();
-//     } catch (error) {
-//       console.log({ error });
-//     }
-//   }
-// });
-
-// export const checkRefUserHaveChildOver45 = asyncHandler(async () => {
-//   const fortyFiveDaysAgo = new Date();
-//   fortyFiveDaysAgo.setDate(fortyFiveDaysAgo.getDate() - 30);
-
-//   const listTreeUser = await Tree.find({
-//     $and: [{ isSubId: false }, { tier: 1 }, { createdAt: { $lte: fortyFiveDaysAgo } }],
-//   });
-
-//   let logData = "";
-
-//   for (let tree of listTreeUser) {
-//     console.log({ tree: tree.userName, create: tree.createdAt });
-//     const u = await User.findById(tree.userId);
-
-//     if (u && u.errLahCode === "" && !u.timeRetryOver45) {
-//       const listRefId = await Tree.find({ refId: tree._id });
-
-//       if (listRefId.length > 0) {
-//         let eligibleCount = 0;
-
-//         for (let childTree of listRefId) {
-//           let child = await User.findById(childTree.userId);
-//           if (child && child.errLahCode !== "OVER45") {
-//             eligibleCount++;
-//           }
-//         }
-
-//         // Kiểm tra số lượng user đủ điều kiện
-//         if (eligibleCount < 2) {
-//           let addDays = eligibleCount === 1 ? 15 : 30;
-
-//           u.timeRetryOver45 = moment().add(addDays, "days").toDate();
-
-//           console.log({
-//             userId: u.userId,
-//             length: listRefId.length,
-//             eligibleCount,
-//           });
-
-//           await u.save();
-
-//           // Thêm thông tin vào logData
-//           logData += `UserID: ${u.userId}, EligibleCount: ${eligibleCount}, TotalChild: ${
-//             listRefId.length
-//           }, NewTimeRetry: ${moment(u.timeRetryOver45).format("YYYY-MM-DD HH:mm:ss")}\n`;
-//         }
-//       }
-//     }
-//   }
-
-//   if (logData) {
-//     fs.writeFileSync("users_not_enough_children.txt", logData, "utf8");
-//     console.log("Đã ghi thông tin vào file users_not_enough_children.txt");
-//   }
-// });
-
 export const checkUserPreTier2 = asyncHandler(async () => {
   const listUser = await User.find({
     tier: 1,
@@ -494,182 +353,132 @@ export const checkUserPreTier2 = asyncHandler(async () => {
   }
 });
 
-// export const updateTier2Shortfall = asyncHandler(async () => {
-//   const listUserPreTier2 = await PreTier2.find({
-//     status: "PASSED",
-//   });
-
-//   for (let u of listUserPreTier2) {
-//     try {
-//       const user = await User.findById(u.userId);
-//       if (!user) continue;
-
-//       const treeOfUser = await Tree.findOne({ userId: u.userId, tier: 1, isSubId: false });
-//       if (!treeOfUser) continue;
-
-//       let { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(treeOfUser);
-//       const totalChild = countChild1 + countChild2;
-
-//       if (totalChild < 60) {
-//         const missingIds = 60 - totalChild; // số id thiếu
-//         console.log({ name: user.userId, countChild1, countChild2, missingIds });
-//         // user.tryToTier2 = "YES";
-
-//         // if (!user.timeToTry) {
-//         //   // lần đầu tiên phát hiện thiếu → set deadline luôn
-//         //   const deadline = moment()
-//         //     .add(missingIds * 15, "days")
-//         //     .toDate();
-//         //   user.timeToTry = deadline;
-//         //   user.currentShortfall = missingIds;
-//         // } else {
-//         //   // đã có deadline từ trước → so sánh với số thiếu hôm nay
-//         //   const oldShortfall = user.currentShortfall || 0;
-
-//         //   if (missingIds > oldShortfall) {
-//         //     // thiếu nhiều hơn → cộng thêm số ngày tương ứng cho phần chênh lệch
-//         //     const diff = missingIds - oldShortfall;
-//         //     const extraDays = diff * 15;
-
-//         //     user.timeToTry = moment(user.timeToTry).add(extraDays, "days").toDate();
-//         //     user.currentShortfall = missingIds;
-//         //   }
-//         //   // nếu thiếu ít hơn hoặc bằng hôm qua thì không cộng thêm ngày
-//         // }
-//       } else {
-//         // đủ hoặc dư 60 → reset
-//         user.tryToTier2 = "DONE";
-//         user.timeToTry = null;
-//         user.currentShortfall = 0;
-//       }
-
-//       // await user.save();
-//     } catch (error) {
-//       console.log({ error });
-//     }
-//   }
-// });
-
 export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
-  return;
-  // try {
-  //   const listUsers = await User.find({ isAdmin: false, status: { $ne: "DELETED" } });
-  //   const currentDay = moment();
+  try {
+    const listUsers = await User.find({ isAdmin: false, status: { $ne: "DELETED" } }).sort({
+      createdAt: -1,
+    });
+    const currentDay = moment();
 
-  //   for (let user of listUsers) {
-  //     const treeOfUser = await Tree.findOne({ userId: user._id, isSubId: false });
+    for (let user of listUsers) {
+      const treeOfUser = await Tree.findOne({ userId: user._id, isSubId: false });
 
-  //     if (user.tier === 1) {
-  //       const listRefTrees = await Tree.find({ refId: treeOfUser._id, isSubId: false });
-  //       const diffDateFromCreated = currentDay.diff(user.createdAt, "days");
+      if (user.tier === 1) {
+        const listRefTrees = await Tree.find({ refId: treeOfUser._id, isSubId: false });
+        const diffDateFromCreated = currentDay.diff(user.createdAt, "days");
 
-  //       const listRefUsers = [];
-  //       for (let tree of listRefTrees) {
-  //         const refUser = await User.findById(tree.userId);
-  //         if (refUser && refUser.errLahCode === "") {
-  //           listRefUsers.push(tree);
-  //         }
-  //       }
+        const listRefUsers = [];
+        for (let tree of listRefTrees) {
+          const refUser = await User.findById(tree.userId);
+          if (refUser && refUser.errLahCode !== "OVER45") {
+            listRefUsers.push(tree);
+          }
+        }
 
-  //       if (listRefTrees.length <= 2) {
-  //         if (listRefUsers.length < 2) {
-  //           if (diffDateFromCreated > 30) {
-  //             user.errLahCode = "OVER45";
-  //           } else if (diffDateFromCreated > 20) {
-  //             user.errLahCode = "OVER35";
-  //           }
-  //         }
-  //       } else {
-  //         // cần bổ sung
-  //         if (listRefUsers.length < 2) {
-  //           const missing = 2 - listRefUsers.length; // số người còn thiếu
-  //           const extraDays = missing * 15;
+        if (listRefTrees.length < 2) {
+          if (listRefUsers.length < 2) {
+            if (diffDateFromCreated > 30) {
+              user.errLahCode = "OVER45";
+            } else if (diffDateFromCreated > 20) {
+              user.errLahCode = "OVER35";
+            }
+          }
+        } else {
+          // cần bổ sung
+          if (listRefUsers.length < 2) {
+            const missing = 2 - listRefUsers.length; // số người còn thiếu
+            const extraDays = missing * 15;
 
-  //           if (!user.timeRetryOver45) {
-  //             // lần đầu bị thiếu → đặt hạn mới
-  //             user.timeRetryOver45 = moment().add(extraDays, "days").toDate();
-  //           } else {
-  //             const currentDeadline = moment(user.timeRetryOver45);
+            if (!user.timeRetryOver45) {
+              // lần đầu bị thiếu → đặt hạn mới
+              user.timeRetryOver45 = moment().add(extraDays, "days").toDate();
+            } else {
+              const currentDeadline = moment(user.timeRetryOver45);
 
-  //             if (moment().isAfter(currentDeadline)) {
-  //               // đã quá hạn deadline
-  //               user.errLahCode = "OVER45";
-  //             } else {
-  //               // còn hạn thì không update thêm (tránh cộng dồn)
-  //             }
-  //           }
-  //         } else {
-  //           // đã đủ >= 2 người → reset deadline và errLahCode
-  //           if (user.timeRetryOver45) {
-  //             user.timeRetryOver45 = null;
-  //           }
-  //           if (user.errLahCode === "OVER45") {
-  //             user.errLahCode = "";
-  //           }
-  //         }
-  //       }
-  //     } else if (user.tier === 2) {
-  //       const INGNORE_USERID = ["Olivia", "Jay12", "Noah32", "James87", "Jake2000"];
+              if (moment().isAfter(currentDeadline)) {
+                // đã quá hạn deadline
+                user.errLahCode = "OVER45";
+              } else {
+                // còn hạn thì không update thêm (tránh cộng dồn)
+              }
+            }
+          } else {
+            // đã đủ >= 2 người → reset deadline và errLahCode
+            if (user.timeRetryOver45) {
+              user.timeRetryOver45 = null;
+            }
+            if (user.errLahCode === "OVER45") {
+              user.errLahCode = "";
+            }
+          }
+        }
+      } else if (user.tier === 2) {
+        const INGNORE_USERID = ["Olivia", "Jay12", "Noah32", "James87", "Jake2000"];
 
-  //       if (!INGNORE_USERID.includes(user.userId)) {
-  //         const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(treeOfUser);
-  //         const totalChild = countChild1 + countChild2;
+        if (!INGNORE_USERID.includes(user.userId)) {
+          const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(treeOfUser);
 
-  //         const diffDateFromTier2Date = currentDay.diff(user.tier2Time, "days");
-  //         if (diffDateFromTier2Date <= 30) {
-  //           if (totalChild < 60) {
-  //             user.tryToTier2 = "YES";
-  //             user.timeToTry = moment(user.tier2Time).add(30, "days").toDate();
-  //           }
-  //         } else {
-  //           console.log({ name: user.userId, countChild1, countChild2, diffDateFromTier2Date });
-  //           if (user.done62Id) {
-  //             if (totalChild < 60) {
-  //               const missingIds = 60 - totalChild; // số id thiếu
-  //               user.tryToTier2 = "YES";
+          const totalChild = countChild1 + countChild2;
 
-  //               if (!user.timeToTry) {
-  //                 // lần đầu tiên phát hiện thiếu → set deadline luôn
-  //                 const deadline = moment()
-  //                   .add(missingIds * 15, "days")
-  //                   .toDate();
-  //                 user.timeToTry = deadline;
-  //                 user.currentShortfall = missingIds;
-  //               } else {
-  //                 // đã có deadline từ trước → so sánh với số thiếu hôm nay
-  //                 const oldShortfall = user.currentShortfall || 0;
+          const diffDateFromTier2Date = currentDay.diff(user.tier2Time, "days");
+          if (diffDateFromTier2Date <= 30) {
+            if (totalChild < 60 || countChild1 < 19 || countChild2 < 19) {
+              user.tryToTier2 = "YES";
+              user.timeToTry = moment(user.tier2Time).add(30, "days").toDate();
+            } else if (totalChild >= 60 && countChild1 >= 19 && countChild2 >= 19) {
+              user.tryToTier2 = "DONE";
+              user.timeToTry = null;
+              user.done62Id = true;
+            }
+          } else {
+            if (user.done62Id) {
+              if (totalChild < 60) {
+                const missingIds = 60 - totalChild; // số id thiếu
+                user.tryToTier2 = "YES";
 
-  //                 if (missingIds > oldShortfall) {
-  //                   // thiếu nhiều hơn → cộng thêm số ngày tương ứng cho phần chênh lệch
-  //                   const diff = missingIds - oldShortfall;
-  //                   const extraDays = diff * 15;
+                if (!user.timeToTry) {
+                  // lần đầu tiên phát hiện thiếu → set deadline luôn
+                  const deadline = moment()
+                    .add(missingIds * 15, "days")
+                    .toDate();
+                  user.timeToTry = deadline;
+                  user.currentShortfall = missingIds;
+                } else {
+                  // đã có deadline từ trước → so sánh với số thiếu hôm nay
+                  const oldShortfall = user.currentShortfall || 0;
 
-  //                   user.timeToTry = moment(user.timeToTry).add(extraDays, "days").toDate();
-  //                   user.currentShortfall = missingIds;
-  //                 }
-  //                 // nếu thiếu ít hơn hoặc bằng hôm qua thì không cộng thêm ngày
-  //               }
-  //             } else {
-  //               user.tryToTier2 = "DONE";
-  //               user.timeToTry = null;
-  //               user.done62Id = true;
-  //             }
-  //           } else {
-  //             if (totalChild >= 60 && countChild1 >= 19 && countChild2 >= 19) {
-  //               user.tryToTier2 = "DONE";
-  //               user.timeToTry = null;
-  //               user.done62Id = true;
-  //             } else {
-  //               console.log(`mai hỏi chỗ này, nếu user qua tier 2 quá 30 ngày bù chưa đủ 32 id`);
-  //               treeOfUser.disable = true;
-  //               await treeOfUser.save();
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // } catch (err) {
-  //   console.log({ err });
-  // }
+                  if (missingIds > oldShortfall) {
+                    // thiếu nhiều hơn → cộng thêm số ngày tương ứng cho phần chênh lệch
+                    const diff = missingIds - oldShortfall;
+                    const extraDays = diff * 15;
+
+                    user.timeToTry = moment(user.timeToTry).add(extraDays, "days").toDate();
+                    user.currentShortfall = missingIds;
+                  }
+                  // nếu thiếu ít hơn hoặc bằng hôm qua thì không cộng thêm ngày
+                }
+              } else {
+                user.tryToTier2 = "DONE";
+                user.timeToTry = null;
+                user.done62Id = true;
+              }
+            } else {
+              if (totalChild >= 60 && countChild1 >= 19 && countChild2 >= 19) {
+                user.tryToTier2 = "DONE";
+                user.timeToTry = null;
+                user.done62Id = true;
+              } else {
+                treeOfUser.disable = true;
+                await treeOfUser.save();
+              }
+            }
+          }
+        }
+      }
+
+      await user.save();
+    }
+  } catch (err) {
+    console.log({ err });
+  }
 });

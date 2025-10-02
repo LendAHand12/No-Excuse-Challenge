@@ -265,7 +265,7 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
-    done63Id: {
+    done62Id: {
       type: Boolean,
       default: false,
     },

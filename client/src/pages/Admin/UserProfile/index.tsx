@@ -1490,6 +1490,38 @@ const UserProfile = () => {
                         <div className="px-4 py-2">{data.note}</div>
                       )}
                     </div>
+                    {/* <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        ID Image Front
+                      </div>
+                      <div className="px-4 py-2">
+                        {data.imgFront !== '' ? (
+                          <img
+                            src={`${
+                              import.meta.env.VITE_API_URL
+                            }/uploads/CCCD/${data.imgFront}`}
+                          />
+                        ) : (
+                          'No data'
+                        )}
+                      </div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        ID Image Back
+                      </div>
+                      <div className="px-4 py-2">
+                        {data.imgBack !== '' ? (
+                          <img
+                            src={`${
+                              import.meta.env.VITE_API_URL
+                            }/uploads/CCCD/${data.imgBack}`}
+                          />
+                        ) : (
+                          'No data'
+                        )}
+                      </div>
+                    </div> */}
                     <div className="w-full flex justify-center">
                       <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
                         <p className="font-semibold"> FaceTec Image :</p>
