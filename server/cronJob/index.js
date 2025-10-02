@@ -362,6 +362,7 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
 
     for (let user of listUsers) {
       const treeOfUser = await Tree.findOne({ userId: user._id, isSubId: false });
+      console.log({ user: user.userId });
 
       if (user.tier === 1) {
         const listRefTrees = await Tree.find({ refId: treeOfUser._id, isSubId: false });
