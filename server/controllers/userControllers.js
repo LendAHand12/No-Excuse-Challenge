@@ -810,6 +810,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     accountName,
     accountNumber,
     timeRetryOver45,
+    termDie,
   } = req.body;
   if (userId) {
     const userExistsUserId = await User.findOne({
@@ -910,6 +911,13 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     user.status = newStatus || user.status;
     if (newStatus === "LOCKED") {
       user.lockedTime = new Date();
+    }
+    if (termDie) {
+      user.errLahCode = "OVER45";
+      user.dieTime = new Date();
+    } else {
+      user.errLahCode = "";
+      user.dieTime = null;
     }
     user.fine = newFine || user.fine;
     user.note = note || user.note;

@@ -36,6 +36,7 @@ const UserProfile = () => {
   const [currentOpenLah, setCurrentOpenLah] = useState(null);
   const [currentCloseLah, setCurrentCloseLah] = useState(null);
   const [currentLockKyc, setCurrentLockKyc] = useState(null);
+  const [currentTermDie, setCurrentTermDie] = useState(null);
   const [phone, setPhone] = useState('');
   const [errorPhone, setErrPhone] = useState(false);
   const [isBonusRef, setIsBonusRef] = useState(false);
@@ -72,6 +73,7 @@ const UserProfile = () => {
             changeCreatedAt,
             lockKyc,
             timeRetryOver45,
+            errLahCode,
           } = response.data;
           setValue('userId', userId);
           setValue('email', email);
@@ -84,6 +86,7 @@ const UserProfile = () => {
           setCurrentOpenLah(openLah);
           setCurrentCloseLah(closeLah);
           setCurrentLockKyc(lockKyc);
+          setCurrentTermDie(errLahCode === 'OVER45' ? true : false);
           setIsBonusRef(bonusRef);
           setKycFee(kycFee);
         })
@@ -137,6 +140,9 @@ const UserProfile = () => {
       }
       if (currentLockKyc !== data.lockKyc) {
         formData.append('lockKyc', currentLockKyc);
+      }
+      if (currentTermDie) {
+        formData.append('termDie', currentTermDie);
       }
       if (currentCloseLah !== data.closeLah) {
         formData.append('closeLah', currentCloseLah);
@@ -198,7 +204,14 @@ const UserProfile = () => {
           setEditting(false);
         });
     },
-    [data, currentCloseLah, currentOpenLah, phone, currentLockKyc],
+    [
+      data,
+      currentCloseLah,
+      currentOpenLah,
+      phone,
+      currentLockKyc,
+      currentTermDie,
+    ],
   );
 
   const handleDeleteUser = async (onClose) => {
@@ -421,6 +434,11 @@ const UserProfile = () => {
     [currentLockKyc],
   );
 
+  const handleChangeTermDie = useCallback(
+    () => setCurrentTermDie(!currentTermDie),
+    [currentTermDie],
+  );
+
   const renderRank = (level) => {
     return USER_RANKINGS.find((ele) => level <= ele.value)?.label;
   };
@@ -614,6 +632,21 @@ const UserProfile = () => {
                           onChange={handleChangeLockKyc}
                         />
                       ) : currentLockKyc ? (
+                        'True'
+                      ) : (
+                        'False'
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>Temporary Die</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Switch
+                          checked={currentTermDie}
+                          onChange={handleChangeTermDie}
+                        />
+                      ) : currentTermDie ? (
                         'True'
                       ) : (
                         'False'

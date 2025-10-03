@@ -355,7 +355,11 @@ export const checkUserPreTier2 = asyncHandler(async () => {
 
 export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
   try {
-    const listUsers = await User.find({ isAdmin: false, status: { $ne: "DELETED" } }).sort({
+    const listUsers = await User.find({
+      isAdmin: false,
+      status: { $ne: "DELETED" },
+      errLahCode: { $ne: "OVER45" },
+    }).sort({
       createdAt: -1,
     });
     const currentDay = moment();
@@ -380,6 +384,7 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
           if (listRefUsers.length < 2) {
             if (diffDateFromCreated > 30) {
               user.errLahCode = "OVER45";
+              user.dieTime = new Date();
             } else if (diffDateFromCreated > 20) {
               user.errLahCode = "OVER35";
             }
@@ -399,17 +404,10 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
               if (moment().isAfter(currentDeadline)) {
                 // đã quá hạn deadline
                 user.errLahCode = "OVER45";
+                user.dieTime = new Date();
               } else {
                 // còn hạn thì không update thêm (tránh cộng dồn)
               }
-            }
-          } else {
-            // đã đủ >= 2 người → reset deadline và errLahCode
-            if (user.timeRetryOver45) {
-              user.timeRetryOver45 = null;
-            }
-            if (user.errLahCode === "OVER45") {
-              user.errLahCode = "";
             }
           }
         }

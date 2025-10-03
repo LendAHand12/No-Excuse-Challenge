@@ -269,6 +269,9 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    dieTime: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
