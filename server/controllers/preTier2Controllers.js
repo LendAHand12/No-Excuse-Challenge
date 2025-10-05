@@ -442,7 +442,7 @@ const onDonePayment = asyncHandler(async (req, res) => {
 
       setImmediate(async () => {
         try {
-          await onUserPassTier2();
+          // await onUserPassTier2(); khong chay ham nay vi de admin duyet moi duoc chay
           await reorderPreTier2Orders();
         } catch (err) {
           console.error("Error in post-response function:", err);
