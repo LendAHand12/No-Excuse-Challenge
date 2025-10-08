@@ -43,6 +43,7 @@ const UserProfile = () => {
   const [kycFee, setKycFee] = useState(false);
   const [walletChange, setWalletChange] = useState('');
   const [loadingChangeWallet, setLoadingChangeWallet] = useState(false);
+  const [loadingPushToPreTier2, setLoadingPushToPreTier2] = useState(false);
 
   const {
     register,
@@ -408,6 +409,29 @@ const UserProfile = () => {
             : error.message;
         toast.error(t(message));
         setLoadingCheckKyc(false);
+      });
+  };
+
+  const handlePushToPreTier2 = async () => {
+    setLoadingPushToPreTier2(true);
+
+    var formData = new FormData();
+
+    formData.append('preTier2Status', 'PENDING');
+
+    await User.adminUpdateUser(id, formData)
+      .then((response) => {
+        setLoadingPushToPreTier2(false);
+        toast.success(t(response.data.message));
+        setRefresh(!refresh);
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message;
+        toast.error(t(message));
+        setLoadingPushToPreTier2(false);
       });
   };
 
@@ -1671,6 +1695,20 @@ const UserProfile = () => {
                     >
                       {loadingCheckKyc && <Loading />}
                       Check KYC
+                    </div>
+                  )}
+
+                {userInfo?.permissions
+                  .find((p) => p.page.pageName === 'admin-users-details')
+                  ?.actions.includes('update') &&
+                  data.preTier2Status === '' &&
+                  data.status === 'APPROVED' && (
+                    <div
+                      onClick={handlePushToPreTier2}
+                      className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-purple-500 text-white"
+                    >
+                      {loadingPushToPreTier2 && <Loading />}
+                      Push to Pre Tier 2
                     </div>
                   )}
               </div>

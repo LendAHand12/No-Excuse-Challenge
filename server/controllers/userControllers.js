@@ -811,6 +811,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     accountNumber,
     timeRetryOver45,
     termDie,
+    preTier2Status,
   } = req.body;
   if (userId) {
     const userExistsUserId = await User.findOne({
@@ -891,6 +892,9 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     user.totalHewe = rewardHewe || user.totalHewe;
     user.accountName = accountName || user.accountName;
     user.accountNumber = accountNumber || user.accountNumber;
+    if (preTier2Status) {
+      user.preTier2Status = preTier2Status;
+    }
     if (changeCreatedAt) {
       user.changeCreatedAt = new Date(changeCreatedAt).toISOString() || user.changeCreatedAt;
     }
