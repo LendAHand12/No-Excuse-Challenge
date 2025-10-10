@@ -39,6 +39,7 @@ import { Types } from "mongoose";
 import moment from "moment";
 import { getPriceHewe } from "../utils/getPriceHewe.js";
 import PreTier2 from "../models/preTier2Model.js";
+import Honor from "../models/honorModel.js";
 
 dotenv.config();
 
@@ -188,7 +189,11 @@ const getUserById = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id).select("-password");
 
   if (user) {
-    const tree = await Tree.findOne({ userId: user._id, tier: 1, isSubId: false });
+    const tree = await Tree.findOne({
+      userId: user._id,
+      tier: 1,
+      isSubId: false,
+    });
 
     const listDirectUser = [];
     const listRefIdOfUser = await Tree.find({ refId: tree._id, tier: 1 });
@@ -204,7 +209,9 @@ const getUserById = asyncHandler(async (req, res) => {
           isRed:
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "A" && refedUser.countPay < 13
+              : refedUser.tier === 1 &&
+                refedUser.buyPackage === "A" &&
+                refedUser.countPay < 13
               ? true
               : false,
           isYellow: refedUser.errLahCode === "OVER35",
@@ -216,7 +223,9 @@ const getUserById = asyncHandler(async (req, res) => {
     const listOldParent = [];
     if (user.oldParents && user.oldParents.length > 0) {
       for (let parentId of user.oldParents) {
-        const oldParent = await User.findById(parentId).select("userId email walletAddress");
+        const oldParent = await User.findById(parentId).select(
+          "userId email walletAddress"
+        );
         listOldParent.push(oldParent);
       }
     }
@@ -248,7 +257,11 @@ const getUserById = asyncHandler(async (req, res) => {
     const totalHold = listTransHold.reduce((sum, ele) => sum + ele.amount, 0);
 
     let notEnoughtChild = { countChild1: 0, countChild2: 0 };
-    if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 3 || user.tier > 1) {
+    if (
+      user.tryToTier2 === "YES" ||
+      user.currentLayer.slice(-1)[0] === 3 ||
+      user.tier > 1
+    ) {
       notEnoughtChild = await getTotalLevel1ToLevel10OfUser(tree);
     }
 
@@ -301,7 +314,10 @@ const getUserById = asyncHandler(async (req, res) => {
         let docs = await Transaction.find({
           username_to: tree.userName,
         }).lean();
-        let totalAmountUsdt = docs.reduce((sum, item) => sum + (item.amount || 0), 0);
+        let totalAmountUsdt = docs.reduce(
+          (sum, item) => sum + (item.amount || 0),
+          0
+        );
 
         // let responseHewe = await getPriceHewe();
         // let hewePrice = responseHewe?.data?.ticker?.latest || 0.0005287;
@@ -329,6 +345,8 @@ const getUserById = asyncHandler(async (req, res) => {
     }
 
     const tier2Users = await getAllDescendantsTier2Users(user.id);
+
+    const hornor = await Honor.findOne({ userId: user.id });
 
     res.json({
       id: user._id,
@@ -381,7 +399,7 @@ const getUserById = asyncHandler(async (req, res) => {
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
-      totalEarning: totalEarn + (listRefIdOfUser.length >= 2 ? 10 : 0),
+      totalEarning: totalEarn + (hornor ? 10 : 0),
       withdrawPending: withdrawPending,
       chartData: mergeIntoThreeGroups(listDirectUser),
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
@@ -453,7 +471,9 @@ const getUserInfo = asyncHandler(async (req, res) => {
     const listOldParent = [];
     if (user.oldParents && user.oldParents.length > 0) {
       for (let parentId of user.oldParents) {
-        const oldParent = await User.findById(parentId).select("userId email walletAddress");
+        const oldParent = await User.findById(parentId).select(
+          "userId email walletAddress"
+        );
         listOldParent.push(oldParent);
       }
     }
@@ -490,7 +510,11 @@ const getUserInfo = asyncHandler(async (req, res) => {
     });
 
     let notEnoughtChild = { countChild1: 0, countChild2: 0 };
-    if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 3 || user.tier > 1) {
+    if (
+      user.tryToTier2 === "YES" ||
+      user.currentLayer.slice(-1)[0] === 3 ||
+      user.tier > 1
+    ) {
       notEnoughtChild = await getTotalLevel1ToLevel10OfUser(tree);
     }
     let countdown = 0;
@@ -524,7 +548,9 @@ const getUserInfo = asyncHandler(async (req, res) => {
     const totalEarn = result[0]?.totalAmount || 0;
 
     const checkCanNextTier =
-      user.currentLayer.slice(-1) >= 3 ? await checkUserCanNextTier(tree) : false;
+      user.currentLayer.slice(-1) >= 3
+        ? await checkUserCanNextTier(tree)
+        : false;
 
     const preTier2User = await PreTier2.findOne({
       userId: user._id,
@@ -532,6 +558,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
     });
 
     const tier2Users = await getAllDescendantsTier2Users(user.id);
+
+    const hornor = await Honor.findOne({ userId: user.id });
 
     res.json({
       id: user._id,
@@ -584,7 +612,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
-      totalEarning: totalEarn + (listRefIdOfUser.length >= 2 ? 10 : 0),
+      totalEarning: totalEarn + (hornor ? 10 : 0),
       withdrawPending: withdrawPending,
       chartData: mergeIntoThreeGroups(listDirectUser),
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
@@ -628,16 +656,28 @@ const updateUser = asyncHandler(async (req, res) => {
 
   const user = await User.findOne({ _id: req.params.id }).select("-password");
   const userHavePhone = await User.find({
-    $and: [{ phone: `+${phone}` }, { userId: { $ne: user.userId } }, { isAdmin: false }],
+    $and: [
+      { phone: `+${phone}` },
+      { userId: { $ne: user.userId } },
+      { isAdmin: false },
+    ],
   });
   const userHaveWalletAddress = await User.find({
-    $and: [{ walletAddress }, { userId: { $ne: user.userId } }, { isAdmin: false }],
+    $and: [
+      { walletAddress },
+      { userId: { $ne: user.userId } },
+      { isAdmin: false },
+    ],
   });
   const userHaveEmail = await User.find({
     $and: [{ email }, { userId: { $ne: user.userId } }, { isAdmin: false }],
   });
 
-  if (userHavePhone.length >= 1 || userHaveWalletAddress.length >= 1 || userHaveEmail.length >= 1) {
+  if (
+    userHavePhone.length >= 1 ||
+    userHaveWalletAddress.length >= 1 ||
+    userHaveEmail.length >= 1
+  ) {
     res.status(400).json({ error: "duplicateInfo" });
   }
   if (user) {
@@ -647,7 +687,8 @@ const updateUser = asyncHandler(async (req, res) => {
     for (const field of ["email", "phone", "walletAddress"]) {
       if (
         req.body[field] &&
-        user[field] !== (field === "phone" ? `+${req.body[field]}` : req.body[field])
+        user[field] !==
+          (field === "phone" ? `+${req.body[field]}` : req.body[field])
       ) {
         changes.push({
           userId: user._id,
@@ -694,7 +735,8 @@ const updateUser = asyncHandler(async (req, res) => {
           );
           listDirectUser.push({
             userId: refedUser.userId,
-            isRed: refedUser.tier === 1 && refedUser.countPay === 0 ? true : false,
+            isRed:
+              refedUser.tier === 1 && refedUser.countPay === 0 ? true : false,
             isYellow: refedUser.errLahCode === "OVER30",
             countChild: refedUser.countChild[0] + 1,
           });
@@ -704,7 +746,10 @@ const updateUser = asyncHandler(async (req, res) => {
       const withdraws = await Withdraw.find({
         userId: user._id,
       });
-      const totalWithdraws = withdraws.reduce((sum, withdraw) => sum + withdraw.amount, 0);
+      const totalWithdraws = withdraws.reduce(
+        (sum, withdraw) => sum + withdraw.amount,
+        0
+      );
       const withdrawPending = withdraws
         .filter((ele) => ele.status === "PENDING")
         .reduce((sum, withdraw) => sum + withdraw.amount, 0);
@@ -723,7 +768,9 @@ const updateUser = asyncHandler(async (req, res) => {
         role: user.role,
       }).populate("pagePermissions.page");
       res.status(200).json({
-        message: kycConfig.value ? "Updated successfully" : "Change request submitted for approval",
+        message: kycConfig.value
+          ? "Updated successfully"
+          : "Change request submitted for approval",
         data: {
           id: updatedUser._id,
           email: updatedUser.email,
@@ -865,7 +912,11 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
   }
   if (idCode) {
     const userExistsIdCode = await User.findOne({
-      $and: [{ idCode: { $ne: "" } }, { idCode }, { status: { $ne: "DELETED" } }],
+      $and: [
+        { idCode: { $ne: "" } },
+        { idCode },
+        { status: { $ne: "DELETED" } },
+      ],
     });
     if (userExistsIdCode) {
       let message = "duplicateInfoIdCode";
@@ -896,13 +947,16 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
       user.preTier2Status = preTier2Status;
     }
     if (changeCreatedAt) {
-      user.changeCreatedAt = new Date(changeCreatedAt).toISOString() || user.changeCreatedAt;
+      user.changeCreatedAt =
+        new Date(changeCreatedAt).toISOString() || user.changeCreatedAt;
     }
     if (timeRetryOver45) {
-      user.timeRetryOver45 = new Date(timeRetryOver45).toISOString() || user.timeRetryOver45;
+      user.timeRetryOver45 =
+        new Date(timeRetryOver45).toISOString() || user.timeRetryOver45;
     }
     if (level) {
-      const newLevel = user.currentLayer.length > 0 ? [...user.currentLayer] : [0];
+      const newLevel =
+        user.currentLayer.length > 0 ? [...user.currentLayer] : [0];
       updateValueAtIndex(newLevel, user.tier - 1, level);
       user.currentLayer = [...newLevel];
     }
@@ -935,12 +989,19 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
       user.imgBack = req.files.imgBack[0].filename || user.imgBack;
     }
     const listTransSuccess = await Transaction.find({
-      $and: [{ userId: user._id }, { status: "SUCCESS" }, { type: { $ne: "REGISTER" } }],
+      $and: [
+        { userId: user._id },
+        { status: "SUCCESS" },
+        { type: { $ne: "REGISTER" } },
+      ],
     });
     if (buyPackage && buyPackage !== user.buyPackage) {
       if (listTransSuccess.length === 0) {
         user.buyPackage = buyPackage || user.buyPackage;
-        await Tree.updateMany({ $and: [{ userId: user._id }, { tier: 1 }] }, { buyPackage });
+        await Tree.updateMany(
+          { $and: [{ userId: user._id }, { tier: 1 }] },
+          { buyPackage }
+        );
       } else {
         res.status(400).json({ error: "User has generated a transaction" });
       }
@@ -948,7 +1009,11 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     if (isRegistered && isRegistered === "on" && user.countPay === 0) {
       user.countPay = 13;
     }
-    if (removeErrLahCode && removeErrLahCode === "on" && user.errLahCode !== "") {
+    if (
+      removeErrLahCode &&
+      removeErrLahCode === "on" &&
+      user.errLahCode !== ""
+    ) {
       user.errLahCode = "";
     }
     if (tier && user.tier !== tier && tier >= 2) {
@@ -986,8 +1051,10 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
         const newVal = newUser[key];
 
         // Chuẩn hóa để so sánh
-        const oldStr = oldVal instanceof Date ? oldVal.getTime() : String(oldVal ?? "");
-        const newStr = newVal instanceof Date ? newVal.getTime() : String(newVal ?? "");
+        const oldStr =
+          oldVal instanceof Date ? oldVal.getTime() : String(oldVal ?? "");
+        const newStr =
+          newVal instanceof Date ? newVal.getTime() : String(newVal ?? "");
 
         if (oldStr !== newStr) {
           await UserHistory.create({
@@ -1104,7 +1171,9 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
       tier: currentTier,
     }).select("userId tier userName children countChild createdAt income");
   } else {
-    user = await User.findOne({ _id: treeOfUser.userId }).select("userId createdAt");
+    user = await User.findOne({ _id: treeOfUser.userId }).select(
+      "userId createdAt"
+    );
   }
 
   if (treeOfUser.children.length === 0) {
@@ -1230,9 +1299,13 @@ const getUserProfile = asyncHandler(async (req, res) => {
           isRed:
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "B" && refedUser.countPay < 7
+              : refedUser.tier === 1 &&
+                refedUser.buyPackage === "B" &&
+                refedUser.countPay < 7
               ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "A" && refedUser.countPay < 13
+              : refedUser.tier === 1 &&
+                refedUser.buyPackage === "A" &&
+                refedUser.countPay < 13
               ? true
               : false,
           isYellow: refedUser.errLahCode === "OVER30",
@@ -1327,7 +1400,10 @@ const getListChildOfUser = asyncHandler(async (req, res) => {
     listRef.length === 1 &&
     !parent.children.includes(listRef[0]._id.toString())
   ) {
-    const branchFirstChildId = await findParentTreePath(listRef[0]._id, parent._id);
+    const branchFirstChildId = await findParentTreePath(
+      listRef[0]._id,
+      parent._id
+    );
     const firstChildId =
       parent.children[0] === branchFirstChildId.toString()
         ? parent.children[1]
@@ -1359,7 +1435,10 @@ const getListChildOfSubUser = asyncHandler(async (req, res) => {
   }).lean();
   const listRef = await Tree.find({ refId: parent._id });
   if (parent.children.length === 2 && listRef.length === 1) {
-    const branchFirstChildId = await findParentTreePath(listRef[0]._id, parent._id);
+    const branchFirstChildId = await findParentTreePath(
+      listRef[0]._id,
+      parent._id
+    );
     const firstChildId =
       parent.children[0] === branchFirstChildId.toString()
         ? parent.children[1]
@@ -1435,7 +1514,9 @@ async function getAllDescendants(targetUserTreeId, currentTier) {
       for (const childId of node.children) {
         const child = await Tree.findById(childId).lean();
         if (child) {
-          const childCount = Array.isArray(child.children) ? child.children.length : 0;
+          const childCount = Array.isArray(child.children)
+            ? child.children.length
+            : 0;
 
           // ✅ Chỉ push nếu số lượng con < 2 và tier === currentTier
           if (childCount < 2 && child.tier === currentTier) {
@@ -1525,7 +1606,10 @@ const changeSystem = asyncHandler(async (req, res) => {
     } else {
       const parentOfMoveChild = await Tree.findById(movePersonTree.parentId);
 
-      if (movePersonTree.children.length === 2 && parentOfMoveChild.children.length >= 1) {
+      if (
+        movePersonTree.children.length === 2 &&
+        parentOfMoveChild.children.length >= 1
+      ) {
         const child1 = await Tree.findById(movePersonTree.children[0]);
         const child2 = await Tree.findById(movePersonTree.children[1]);
 
@@ -1649,7 +1733,10 @@ const getAllUsersForExport = asyncHandler(async (req, res) => {
           {
             $match: {
               $expr: {
-                $and: [{ $eq: ["$userId", { $toString: "$$userId" }] }, { $eq: ["$tier", 1] }],
+                $and: [
+                  { $eq: ["$userId", { $toString: "$$userId" }] },
+                  { $eq: ["$tier", 1] },
+                ],
               },
             },
           },
@@ -1668,7 +1755,10 @@ const getAllUsersForExport = asyncHandler(async (req, res) => {
           {
             $match: {
               $expr: {
-                $and: [{ $eq: ["$userId", { $toString: "$$parentId" }] }, { $eq: ["$tier", 1] }],
+                $and: [
+                  { $eq: ["$userId", { $toString: "$$parentId" }] },
+                  { $eq: ["$tier", 1] },
+                ],
               },
             },
           },
@@ -1768,8 +1858,12 @@ const mailForChangeWallet = asyncHandler(async (req, res) => {
 });
 
 const changeWallet = asyncHandler(async (req, res) => {
-  const { token, newWallet1, newWallet2, newWallet3, newWallet4, newWallet5 } = req.body;
-  const decodedToken = jwt.verify(token, process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET);
+  const { token, newWallet1, newWallet2, newWallet3, newWallet4, newWallet5 } =
+    req.body;
+  const decodedToken = jwt.verify(
+    token,
+    process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET
+  );
   if (decodedToken) {
     const user = await User.findById(decodedToken.id);
 
@@ -1875,27 +1969,42 @@ const adminDeleteUser = asyncHandler(async (req, res) => {
       parent.children = [...newChilds];
       const updatedParent = await parent.save();
 
-      if (treeOfUser.children.length === 1 && updatedParent.children.length < 2) {
+      if (
+        treeOfUser.children.length === 1 &&
+        updatedParent.children.length < 2
+      ) {
         const firstChild = await Tree.findById(treeOfUser.children[0]);
         firstChild.parentId = updatedParent._id;
         firstChild.refId =
-          firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
+          firstChild.refId === treeOfUser._id
+            ? "64cd449ec75ae7bc7ebbab03"
+            : firstChild.refId;
         await firstChild.save();
 
-        const newUpdatedParentChildren = [...updatedParent.children, firstChild._id];
+        const newUpdatedParentChildren = [
+          ...updatedParent.children,
+          firstChild._id,
+        ];
         updatedParent.children = newUpdatedParentChildren;
         await updatedParent.save();
       }
 
-      if (treeOfUser.children.length === 2 && updatedParent.children.length === 0) {
+      if (
+        treeOfUser.children.length === 2 &&
+        updatedParent.children.length === 0
+      ) {
         const firstChild = await Tree.findById(treeOfUser.children[0]);
         firstChild.parentId = updatedParent._id;
-        firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
+        firstChild.refId === treeOfUser._id
+          ? "64cd449ec75ae7bc7ebbab03"
+          : firstChild.refId;
         await firstChild.save();
 
         const secondChild = await Tree.findById(treeOfUser.children[1]);
         secondChild.parentId = updatedParent._id;
-        secondChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : secondChild.refId;
+        secondChild.refId === treeOfUser._id
+          ? "64cd449ec75ae7bc7ebbab03"
+          : secondChild.refId;
         await secondChild.save();
 
         const newUpdatedParentChildren = [firstChild._id, secondChild._id];
@@ -1903,7 +2012,10 @@ const adminDeleteUser = asyncHandler(async (req, res) => {
         await updatedParent.save();
       }
 
-      if (treeOfUser.children.length === 2 && updatedParent.children.length === 1) {
+      if (
+        treeOfUser.children.length === 2 &&
+        updatedParent.children.length === 1
+      ) {
         const firstChild = await Tree.findById(treeOfUser.children[0]);
         const secondChild = await Tree.findById(treeOfUser.children[1]);
         const userListString = `${firstChild.userName}, ${secondChild.userName}`;
@@ -1957,7 +2069,8 @@ const pushChildrent1ToUp = async (userTree, parentTree) => {
   userUp.oldParents = [childTree.parentId, ...userUp.oldParents];
   await userUp.save();
   childTree.parentId = parentTree._id;
-  childTree.refId = childTree.refId === userTree._id ? parentTree._id : childTree.refId;
+  childTree.refId =
+    childTree.refId === userTree._id ? parentTree._id : childTree.refId;
   await childTree.save();
   parentTree.children.push(childTree._id);
   await parentTree.save();
@@ -2068,7 +2181,10 @@ const checkCanIncreaseNextTier = async (u) => {
             }
           }
 
-          if (highestChildSales >= 0.4 * u.countChild && lowestChildSales >= 0.2 * u.countChild) {
+          if (
+            highestChildSales >= 0.4 * u.countChild &&
+            lowestChildSales >= 0.2 * u.countChild
+          ) {
             // const haveC = await doesAnyUserInHierarchyHaveBuyPackageC(u.id, 1);
             return true;
           }
@@ -2121,8 +2237,17 @@ const doesAnyUserInHierarchyHaveBuyPackageC = async (userId) => {
 };
 
 const adminCreateUser = asyncHandler(async (req, res) => {
-  const { userId, walletAddress, email, password, phone, idCode, tier, parentTier1, parentTier2 } =
-    req.body;
+  const {
+    userId,
+    walletAddress,
+    email,
+    password,
+    phone,
+    idCode,
+    tier,
+    parentTier1,
+    parentTier2,
+  } = req.body;
 
   const userExistsUserId = await User.findOne({
     userId,
@@ -2574,7 +2699,9 @@ const getAdminById = asyncHandler(async (req, res) => {
 
 const adminChangeWalletUser = asyncHandler(async (req, res) => {
   const { userId } = req.body;
-  const user = await User.findOne({ _id: userId }).select("walletAddress walletAddressChange");
+  const user = await User.findOne({ _id: userId }).select(
+    "walletAddress walletAddressChange"
+  );
   if (user) {
     user.walletAddress = user.walletAddressChange;
     user.walletAddressChange = "";
@@ -2678,7 +2805,10 @@ const getSubUserProfile = asyncHandler(async (req, res) => {
     }
 
     const docs = await Transaction.find({ username_to: tree.userName }).lean();
-    const totalAmountUsdt = docs.reduce((sum, item) => sum + (item.amount || 0), 0);
+    const totalAmountUsdt = docs.reduce(
+      (sum, item) => sum + (item.amount || 0),
+      0
+    );
 
     // let responseHewe = await getPriceHewe();
     // const hewePrice = responseHewe?.data?.ticker?.latest || 0.0005287;
