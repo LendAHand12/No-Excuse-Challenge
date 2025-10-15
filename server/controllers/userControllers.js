@@ -429,6 +429,7 @@ const getUserById = asyncHandler(async (req, res) => {
       preTier2Status: user.preTier2Status,
       shortfallAmount: user.shortfallAmount,
       tier2ChildUsers: tier2Users,
+      dieTime: user.dieTime,
     });
   } else {
     res.status(404);
@@ -644,6 +645,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       preTier2User: preTier2User,
       shortfallAmount: user.shortfallAmount,
       tier2ChildUsers: tier2Users,
+      dieTime: user.dieTime,
     });
   } else {
     res.status(404);

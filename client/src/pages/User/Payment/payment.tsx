@@ -192,9 +192,7 @@ const PaymentPage = () => {
                           <div className="">
                             <span className="mx-2 text-black">
                               <span className="font-medium mr-2">To : </span>
-                              <span className="">
-                                {shortenWalletAddress(payment.to, 10)}
-                              </span>
+                              <span className="">{payment.to}</span>
                             </span>
                           </div>
                         </div>

@@ -343,6 +343,7 @@ const authUser = asyncHandler(async (req, res) => {
         preTier2Status: user.preTier2Status,
         shortfallAmount: user.shortfallAmount,
         tier2ChildUsers: tier2Users.length > 0 ? tier2Users.map((ele) => ele.userId) : [],
+        dieTime: user.dieTime,
       },
       accessToken,
       refreshToken,

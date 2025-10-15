@@ -716,6 +716,14 @@ const UserProfile = () => {
                     </span>
                   </li>
                   <li className="flex items-center py-3">
+                    <span>Die Time</span>
+                    <span className="ml-auto">
+                      {data.dieTime
+                        ? new Date(data.dieTime).toLocaleDateString('vi')
+                        : ''}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
                     <span>{t('Time try referral')}</span>
                     <span className="ml-auto">
                       {isEditting ? (
