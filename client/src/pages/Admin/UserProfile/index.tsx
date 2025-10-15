@@ -715,21 +715,31 @@ const UserProfile = () => {
                       )}
                     </span>
                   </li>
-                  <li className="flex items-center py-3">
-                    <span>Die Time</span>
-                    <span className="ml-auto">
-                      {data.dieTime
-                        ? new Date(data.dieTime).toLocaleDateString('vi')
-                        : ''}
-                    </span>
+                  <li className="flex justify-between items-center py-3">
+                    <span>Current Color</span>
+                    <div
+                      className={`w-10 h-5 rounded-md ${
+                        data.isRed
+                          ? 'bg-[#ee0000]'
+                          : data.isBlue
+                          ? 'bg-[#0033ff]'
+                          : data.isBrown
+                          ? 'bg-[#663300]'
+                          : data.isYellow
+                          ? 'bg-[#ffcc00]'
+                          : data.isPink
+                          ? 'bg-[#ff3399]'
+                          : 'bg-[#009933]'
+                      }`}
+                    ></div>
                   </li>
                   <li className="flex items-center py-3">
-                    <span>{t('Time try referral')}</span>
+                    <span>Missing ID Time</span>
                     <span className="ml-auto">
                       {isEditting ? (
                         <Controller
                           control={control}
-                          name="timeRetryOver45"
+                          name="missingIdTime"
                           render={({ field }) => (
                             <DatePicker
                               placeholderText={t('fromDate')}
@@ -740,8 +750,32 @@ const UserProfile = () => {
                             />
                           )}
                         />
-                      ) : data.timeRetryOver45 ? (
-                        new Date(data.timeRetryOver45).toLocaleDateString('vi')
+                      ) : data.missingIdTime ? (
+                        new Date(data.missingIdTime).toLocaleDateString('vi')
+                      ) : (
+                        ''
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>Die Time</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Controller
+                          control={control}
+                          name="dieTime"
+                          render={({ field }) => (
+                            <DatePicker
+                              placeholderText={t('fromDate')}
+                              onChange={(date) => field.onChange(date)}
+                              selected={field.value}
+                              dateFormat="dd/MM/yyyy"
+                              className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            />
+                          )}
+                        />
+                      ) : data.dieTime ? (
+                        new Date(data.dieTime).toLocaleDateString('vi')
                       ) : (
                         ''
                       )}

@@ -635,17 +635,16 @@ export const getAllDescendantsTier2Users = async (userId) => {
       }).lean();
 
       for (const t of childTrees) {
-        // Bỏ qua node con có isSubId = true
-        if (t.isSubId) continue;
-
-        // gom children hợp lệ vào queue
+        // luôn gom children vào queue để duyệt tiếp
         if (t.children && t.children.length > 0) {
           queue.push(...t.children);
         }
 
+        // nếu node là subId thì bỏ qua, không lấy user tier2
+        if (t.isSubId) continue;
+
         // tìm user tier = 2, chỉ lấy userId
         const u = await User.findOne({ _id: t.userId, tier: 2 }).select("userId").lean();
-
         if (u) resultSet.add(u.userId);
       }
     }
