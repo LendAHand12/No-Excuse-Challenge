@@ -1427,11 +1427,27 @@ const UserProfile = () => {
                           <input
                             className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                             {...register('rewardHewe')}
-                            defaultValue={data.totalHewe}
+                            defaultValue={
+                              data.tier > 1
+                                ? 0
+                                : data.totalHewe > 0
+                                ? data.totalHewe -
+                                  data.claimedHewe -
+                                  data.availableHewe
+                                : data.availableHewe
+                            }
                           />
                         </div>
                       ) : (
-                        <div className="px-4 py-2">{data.totalHewe}</div>
+                        <div className="px-4 py-2">
+                          {data.tier > 1
+                            ? 0
+                            : data.totalHewe > 0
+                            ? data.totalHewe -
+                              data.claimedHewe -
+                              data.availableHewe
+                            : data.availableHewe}
+                        </div>
                       )}
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
