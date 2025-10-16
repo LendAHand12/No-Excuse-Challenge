@@ -949,7 +949,9 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     user.note = note || user.note;
     user.openLah = openLah;
     user.closeLah = closeLah;
-    user.lockKyc = lockKyc;
+    if (lockKyc) {
+      user.lockKyc = lockKyc;
+    }
     if (req.files && req.files.imgFront && req.files.imgFront[0]) {
       user.imgFront = req.files.imgFront[0].filename || user.imgFront;
     }
