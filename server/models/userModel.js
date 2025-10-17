@@ -272,8 +272,9 @@ const userSchema = mongoose.Schema(
     dieTime: {
       type: Date,
     },
-    missingIdTime: {
-      type: Date,
+    addDieDay: {
+      type: Number,
+      default: 0
     },
   },
   {

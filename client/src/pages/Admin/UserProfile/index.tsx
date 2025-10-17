@@ -159,12 +159,12 @@ const UserProfile = () => {
         formData.append('hold', values.hold);
       }
 
-      if (values.changeCreatedAt !== data.changeCreatedAt) {
-        formData.append('changeCreatedAt', values.changeCreatedAt);
+      if (values.addDieDay !== data.addDieDay) {
+        formData.append('addDieDay', values.addDieDay);
       }
 
-      if (values.timeRetryOver45 !== data.timeRetryOver45) {
-        formData.append('timeRetryOver45', values.timeRetryOver45);
+      if (values.changeCreatedAt !== data.changeCreatedAt) {
+        formData.append('changeCreatedAt', values.changeCreatedAt);
       }
 
       if (values.availableHewe !== data.availableHewe) {
@@ -734,50 +734,41 @@ const UserProfile = () => {
                     ></div>
                   </li>
                   <li className="flex items-center py-3">
-                    <span>Missing ID Time</span>
+                    <span>Time try referral</span>
                     <span className="ml-auto">
-                      {isEditting ? (
-                        <Controller
-                          control={control}
-                          name="missingIdTime"
-                          render={({ field }) => (
-                            <DatePicker
-                              placeholderText={t('fromDate')}
-                              onChange={(date) => field.onChange(date)}
-                              selected={field.value}
-                              dateFormat="dd/MM/yyyy"
-                              className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                            />
-                          )}
-                        />
-                      ) : data.missingIdTime ? (
-                        new Date(data.missingIdTime).toLocaleDateString('vi')
-                      ) : (
-                        ''
-                      )}
+                      {data.timeRetryOver45
+                        ? new Date(data.timeRetryOver45).toLocaleDateString(
+                            'vi',
+                          )
+                        : data.timeToTry
+                        ? new Date(data.timeToTry).toLocaleDateString('vi')
+                        : ''}
                     </span>
                   </li>
                   <li className="flex items-center py-3">
                     <span>Die Time</span>
                     <span className="ml-auto">
+                      {data.dieTime
+                        ? new Date(data.dieTime).toLocaleDateString('vi')
+                        : ''}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>Compensation Time Limit</span>
+                    <span className="ml-auto">
                       {isEditting ? (
                         <Controller
                           control={control}
-                          name="dieTime"
+                          name="addDieDay"
                           render={({ field }) => (
-                            <DatePicker
-                              placeholderText={t('fromDate')}
+                            <input
                               onChange={(date) => field.onChange(date)}
-                              selected={field.value}
-                              dateFormat="dd/MM/yyyy"
                               className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                             />
                           )}
                         />
-                      ) : data.dieTime ? (
-                        new Date(data.dieTime).toLocaleDateString('vi')
                       ) : (
-                        ''
+                        data.addDieDay
                       )}
                     </span>
                   </li>

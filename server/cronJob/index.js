@@ -8,12 +8,16 @@ import {
   sendMailGetHewePrice,
   sendMailUpdateLayerForAdmin,
 } from "../utils/sendMailCustom.js";
-import { getCountAllChildren, getCountIncome } from "../controllers/userControllers.js";
+import {
+  getCountAllChildren,
+  getCountIncome,
+} from "../controllers/userControllers.js";
 import {
   findRootLayer,
   getTotalLevel1ToLevel10OfUser,
   getTotalLevel6ToLevel10OfUser,
   getUserClosestToNow,
+  hasTwoBranches,
 } from "../utils/methods.js";
 import Tree from "../models/treeModel.js";
 import Transaction from "../models/transactionModel.js";
@@ -26,7 +30,12 @@ import mongoose from "mongoose";
 
 export const deleteUser24hUnPay = asyncHandler(async () => {
   const listUser = await User.find({
-    $and: [{ tier: 1 }, { countPay: 0 }, { isAdmin: false }, { status: { $ne: "DELETED" } }],
+    $and: [
+      { tier: 1 },
+      { countPay: 0 },
+      { isAdmin: false },
+      { status: { $ne: "DELETED" } },
+    ],
   });
   for (let u of listUser) {
     const currentDay = moment();
@@ -52,30 +61,48 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
           });
           parent.children = [...newChilds];
           const updatedParent = await parent.save();
-          if (treeOfUser.children.length === 1 && updatedParent.children.length < 2) {
+          if (
+            treeOfUser.children.length === 1 &&
+            updatedParent.children.length < 2
+          ) {
             const firstChild = await Tree.findById(treeOfUser.children[0]);
             firstChild.parentId = updatedParent._id;
             firstChild.refId =
-              firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
+              firstChild.refId === treeOfUser._id
+                ? "64cd449ec75ae7bc7ebbab03"
+                : firstChild.refId;
             await firstChild.save();
-            const newUpdatedParentChildren = [...updatedParent.children, firstChild._id];
+            const newUpdatedParentChildren = [
+              ...updatedParent.children,
+              firstChild._id,
+            ];
             updatedParent.children = newUpdatedParentChildren;
             await updatedParent.save();
           }
-          if (treeOfUser.children.length === 2 && updatedParent.children.length === 0) {
+          if (
+            treeOfUser.children.length === 2 &&
+            updatedParent.children.length === 0
+          ) {
             const firstChild = await Tree.findById(treeOfUser.children[0]);
             firstChild.parentId = updatedParent._id;
-            firstChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : firstChild.refId;
+            firstChild.refId === treeOfUser._id
+              ? "64cd449ec75ae7bc7ebbab03"
+              : firstChild.refId;
             await firstChild.save();
             const secondChild = await Tree.findById(treeOfUser.children[1]);
             secondChild.parentId = updatedParent._id;
-            secondChild.refId === treeOfUser._id ? "64cd449ec75ae7bc7ebbab03" : secondChild.refId;
+            secondChild.refId === treeOfUser._id
+              ? "64cd449ec75ae7bc7ebbab03"
+              : secondChild.refId;
             await secondChild.save();
             const newUpdatedParentChildren = [firstChild._id, secondChild._id];
             updatedParent.children = newUpdatedParentChildren;
             await updatedParent.save();
           }
-          if (treeOfUser.children.length === 2 && updatedParent.children.length === 1) {
+          if (
+            treeOfUser.children.length === 2 &&
+            updatedParent.children.length === 1
+          ) {
             console.log({ TH333333: u.userId });
             const firstChild = await Tree.findById(treeOfUser.children[0]);
             const secondChild = await Tree.findById(treeOfUser.children[1]);
@@ -99,7 +126,9 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
 });
 
 export const countChildToData = asyncHandler(async () => {
-  const listTrees = await Tree.find({}).select("tier countChild userId userName");
+  const listTrees = await Tree.find({}).select(
+    "tier countChild userId userName"
+  );
 
   for (let t of listTrees) {
     try {
@@ -180,7 +209,9 @@ export const areArraysEqual = (arr1, arr2) => {
 export const distributionHewe = asyncHandler(async () => {
   const listUser = await User.find({
     $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }, { countPay: 13 }],
-  }).select("userId totalHewe availableHewe hewePerDay claimedHewe currentLayer");
+  }).select(
+    "userId totalHewe availableHewe hewePerDay claimedHewe currentLayer"
+  );
 
   for (let u of listUser) {
     try {
@@ -324,16 +355,26 @@ export const checkUserPreTier2 = asyncHandler(async () => {
           tier: 1,
           isSubId: false,
         });
-        const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(treeOfUser);
+        const { countChild1, countChild2 } =
+          await getTotalLevel1ToLevel10OfUser(treeOfUser);
 
-        if (countChild1 + countChild2 >= 60 && countChild1 >= 19 && countChild2 >= 19) {
+        if (
+          countChild1 + countChild2 >= 60 &&
+          countChild1 >= 19 &&
+          countChild2 >= 19
+        ) {
           console.log({ userACHIEVED: u.userId, countChild1, countChild2 });
           u.preTier2Status = "ACHIEVED";
           u.timeOkPreTier2 = new Date();
         } else {
-          const countChildLevel4ToLevel10 = await getTotalLevel1ToLevel10OfUser(treeOfUser, true);
+          const countChildLevel4ToLevel10 = await getTotalLevel1ToLevel10OfUser(
+            treeOfUser,
+            true
+          );
           if (
-            countChildLevel4ToLevel10.countChild1 + countChildLevel4ToLevel10.countChild2 >= 48 &&
+            countChildLevel4ToLevel10.countChild1 +
+              countChildLevel4ToLevel10.countChild2 >=
+              48 &&
             countChildLevel4ToLevel10.countChild1 >= 14 &&
             countChildLevel4ToLevel10.countChild2 >= 14
           ) {
@@ -365,10 +406,18 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
     const currentDay = moment();
 
     for (let user of listUsers) {
-      const treeOfUser = await Tree.findOne({ userId: user._id, isSubId: false });
+      console.log({ userName: user.userId });
+      const treeOfUser = await Tree.findOne({
+        userId: user._id,
+        isSubId: false,
+        tier: 1,
+      });
 
       if (user.tier === 1) {
-        const listRefTrees = await Tree.find({ refId: treeOfUser._id, isSubId: false });
+        const listRefTrees = await Tree.find({
+          refId: treeOfUser._id,
+          isSubId: false,
+        });
         const diffDateFromCreated = currentDay.diff(user.createdAt, "days");
 
         const listRefUsers = [];
@@ -379,14 +428,13 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
           }
         }
 
-        if (listRefTrees.length < 2) {
-          if (listRefUsers.length < 2) {
-            if (diffDateFromCreated > 30) {
-              user.errLahCode = "OVER45";
-              user.dieTime = new Date();
-            } else if (diffDateFromCreated > 20) {
-              user.errLahCode = "OVER35";
-            }
+        const hasTwoRef = await hasTwoBranches(treeOfUser._id);
+        if (!hasTwoRef) {
+          if (diffDateFromCreated > 30 + parseInt(user.addDieDay)) {
+            user.errLahCode = "OVER45";
+            user.dieTime = new Date();
+          } else if (diffDateFromCreated > 20) {
+            user.errLahCode = "OVER35";
           }
         } else {
           // cần bổ sung
@@ -413,10 +461,17 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
           }
         }
       } else if (user.tier === 2) {
-        const INGNORE_USERID = ["Olivia", "Jay12", "Noah32", "James87", "Jake2000"];
+        const INGNORE_USERID = [
+          "Olivia",
+          "Jay12",
+          "Noah32",
+          "James87",
+          "Jake2000",
+        ];
 
         if (!INGNORE_USERID.includes(user.userId)) {
-          const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(treeOfUser);
+          const { countChild1, countChild2 } =
+            await getTotalLevel1ToLevel10OfUser(treeOfUser);
 
           const totalChild = countChild1 + countChild2;
 
@@ -425,7 +480,11 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
             if (totalChild < 60 || countChild1 < 19 || countChild2 < 19) {
               user.tryToTier2 = "YES";
               user.timeToTry = moment(user.tier2Time).add(30, "days").toDate();
-            } else if (totalChild >= 60 && countChild1 >= 19 && countChild2 >= 19) {
+            } else if (
+              totalChild >= 60 &&
+              countChild1 >= 19 &&
+              countChild2 >= 19
+            ) {
               user.tryToTier2 = "DONE";
               user.timeToTry = null;
               user.done62Id = true;
@@ -439,7 +498,7 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
                 if (!user.timeToTry) {
                   // lần đầu tiên phát hiện thiếu → set deadline luôn
                   const deadline = moment()
-                    .add(missingIds * 15, "days")
+                    .add(missingIds * 15 + parseInt(user.addDieDay), "days")
                     .toDate();
                   user.timeToTry = deadline;
                   user.currentShortfall = missingIds;
@@ -450,9 +509,11 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
                   if (missingIds > oldShortfall) {
                     // thiếu nhiều hơn → cộng thêm số ngày tương ứng cho phần chênh lệch
                     const diff = missingIds - oldShortfall;
-                    const extraDays = diff * 15;
+                    const extraDays = diff * 15 + parseInt(user.addDieDay);
 
-                    user.timeToTry = moment(user.timeToTry).add(extraDays, "days").toDate();
+                    user.timeToTry = moment(user.timeToTry)
+                      .add(extraDays, "days")
+                      .toDate();
                     user.currentShortfall = missingIds;
                   }
                   // nếu thiếu ít hơn hoặc bằng hôm qua thì không cộng thêm ngày
@@ -468,8 +529,16 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
                 user.timeToTry = null;
                 user.done62Id = true;
               } else {
-                treeOfUser.disable = true;
-                await treeOfUser.save();
+                user.tryToTier2 = "REDO";
+                user.timeToTry = null;
+                user.timeRetryOver45 = null;
+                const treeTier2OfUser = await Tree.findOne({
+                  userId: user._id,
+                  tier: 2,
+                });
+
+                treeTier2OfUser.disable = true;
+                await treeTier2OfUser.save();
               }
             }
           }
