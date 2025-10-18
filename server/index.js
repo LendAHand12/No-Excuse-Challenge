@@ -48,7 +48,7 @@ import {
   checkRefAndTotalChildOfUser,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
-import { checkUserErrLahCodeDuoi45Ngay, getNextUserTier2, resetPass } from "./common.js";
+import { checkUserErrLahCodeDuoi45Ngay, getNextUserTier2, resetPass, resetErrLahCode } from "./common.js";
 import Tree from "./models/treeModel.js";
 import { getTotalLevel1ToLevel10OfUser, getTotalLevel6ToLevel10OfUser } from "./utils/methods.js";
 
@@ -174,7 +174,7 @@ const cron7 = new CronJob("00 06 * * *", async () => {
   console.log("Check user pre tier 2 end");
 });
 
-// await test1();
+// await resetErrLahCode();
 
 // const tree = await Tree.findById("67e54106fe1364e3848c714b");
 // const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(tree, true);

@@ -338,3 +338,20 @@ export const resetPass = async () => {
   }
   console.log("doneeeeeeeeeeeeee");
 };
+
+export const resetErrLahCode = async () => {
+  const listUser = await User.find();
+
+  for (let u of listUser) {
+    console.log({ u: u.userId });
+    const oldUser = await UserOld.findById(u._id);
+    if(oldUser) {
+      u.errLahCode = oldUser.errLahCode;
+      u.dieTime = oldUser.dieTime;
+      u.timeRetryOver45 = oldUser.timeRetryOver45;
+      u.timeToTry = oldUser.timeToTry;
+      await u.save();
+    }
+  }
+  console.log("doneeeeeeeeeeeeee");
+};
