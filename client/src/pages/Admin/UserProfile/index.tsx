@@ -73,7 +73,7 @@ const UserProfile = () => {
             kycFee,
             changeCreatedAt,
             lockKyc,
-            timeRetryOver45,
+            dieTime,
             errLahCode,
           } = response.data;
           setValue('userId', userId);
@@ -83,7 +83,7 @@ const UserProfile = () => {
           setValue('tier', tier);
           setValue('walletAddress', walletAddress);
           setValue('changeCreatedAt', changeCreatedAt);
-          setValue('timeRetryOver45', timeRetryOver45);
+          setValue('dieTime', dieTime);
           setCurrentOpenLah(openLah);
           setCurrentCloseLah(closeLah);
           setCurrentLockKyc(lockKyc);
@@ -159,8 +159,8 @@ const UserProfile = () => {
         formData.append('hold', values.hold);
       }
 
-      if (values.addDieDay !== data.addDieDay) {
-        formData.append('addDieDay', values.addDieDay);
+      if (values.dieTime && values.dieTime !== data.dieTime) {
+        formData.append('dieTime', values.dieTime);
       }
 
       if (values.changeCreatedAt !== data.changeCreatedAt) {
@@ -507,7 +507,7 @@ const UserProfile = () => {
             </div>
           )} */}
 
-          {data.tier === 2 && data.tryToTier2 === 'YES' && (
+          {data.tier === 2 && data.dieTime && (
             <div
               className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
               role="alert"
@@ -515,6 +515,18 @@ const UserProfile = () => {
               <span className="block sm:inline">
                 You have only <b>{data.countdown}</b> days left to complete the
                 62 required IDs to be eligible for Tier 2 benefits.
+              </span>
+            </div>
+          )}
+
+          {data.tier === 1 && data.dieTime && (
+            <div
+              className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
+              role="alert"
+            >
+              <span className="block sm:inline">
+                You have only <b>{data.countdown}</b> days left to complete
+                referring at least 2 people in 2 different branches.
               </span>
             </div>
           )}
@@ -715,60 +727,61 @@ const UserProfile = () => {
                       )}
                     </span>
                   </li>
-                  <li className="flex justify-between items-center py-3">
-                    <span>Current Color</span>
-                    <div
-                      className={`w-10 h-5 rounded-md ${
-                        data.isRed
-                          ? 'bg-[#ee0000]'
-                          : data.isBlue
-                          ? 'bg-[#0033ff]'
-                          : data.isBrown
-                          ? 'bg-[#663300]'
-                          : data.isYellow
-                          ? 'bg-[#ffcc00]'
-                          : data.isPink
-                          ? 'bg-[#ff3399]'
-                          : 'bg-[#009933]'
-                      }`}
-                    ></div>
-                  </li>
-                  <li className="flex items-center py-3">
-                    <span>Time try referral</span>
-                    <span className="ml-auto">
-                      {data.timeRetryOver45
-                        ? new Date(data.timeRetryOver45).toLocaleDateString(
-                            'vi',
-                          )
-                        : data.timeToTry
-                        ? new Date(data.timeToTry).toLocaleDateString('vi')
-                        : ''}
-                    </span>
+                  <li className="flex flex-col justify-between py-3">
+                    <div className="flex items-center justify-between">
+                      <div>Tier 1 :</div>
+                      <div
+                        className={`w-10 h-5 rounded-md ${
+                          data.isRed
+                            ? 'bg-[#ee0000]'
+                            : data.isBlue
+                            ? 'bg-[#0033ff]'
+                            : data.isBrown
+                            ? 'bg-[#663300]'
+                            : data.isYellow
+                            ? 'bg-[#ffcc00]'
+                            : data.isPink
+                            ? 'bg-[#ff3399]'
+                            : 'bg-[#009933]'
+                        }`}
+                      ></div>
+                    </div>
+                    {data.tier === 2 && (
+                      <div className="flex items-center justify-between">
+                        <div>Tier 2 :</div>
+                        {data.isDisableTier2 ? (
+                          <div
+                            className={`w-10 h-5 rounded-md bg-[#663300]`}
+                          ></div>
+                        ) : (
+                          <div
+                            className={`w-10 h-5 rounded-md bg-[#009933]`}
+                          ></div>
+                        )}
+                      </div>
+                    )}
                   </li>
                   <li className="flex items-center py-3">
                     <span>Die Time</span>
                     <span className="ml-auto">
-                      {data.dieTime
-                        ? new Date(data.dieTime).toLocaleDateString('vi')
-                        : ''}
-                    </span>
-                  </li>
-                  <li className="flex items-center py-3">
-                    <span>Compensation Time Limit</span>
-                    <span className="ml-auto">
                       {isEditting ? (
                         <Controller
                           control={control}
-                          name="addDieDay"
+                          name="dieTime"
                           render={({ field }) => (
-                            <input
+                            <DatePicker
+                              placeholderText={t('fromDate')}
                               onChange={(date) => field.onChange(date)}
+                              selected={field.value}
+                              dateFormat="dd/MM/yyyy"
                               className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                             />
                           )}
                         />
+                      ) : data.dieTime ? (
+                        new Date(data.dieTime).toLocaleDateString('vi')
                       ) : (
-                        data.addDieDay
+                        ''
                       )}
                     </span>
                   </li>

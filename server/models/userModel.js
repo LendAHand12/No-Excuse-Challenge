@@ -34,7 +34,14 @@ const userSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["UNVERIFY", "PENDING", "APPROVED", "LOCKED", "DELETED", "REJECTED"],
+      enum: [
+        "UNVERIFY",
+        "PENDING",
+        "APPROVED",
+        "LOCKED",
+        "DELETED",
+        "REJECTED",
+      ],
       default: "UNVERIFY",
     },
     imgFront: {
@@ -238,9 +245,6 @@ const userSchema = mongoose.Schema(
     accountNumber: {
       type: String,
     },
-    timeRetryOver45: {
-      type: Date,
-    },
     doneChangeToDie: {
       type: Boolean,
       default: false,
@@ -272,9 +276,9 @@ const userSchema = mongoose.Schema(
     dieTime: {
       type: Date,
     },
-    addDieDay: {
-      type: Number,
-      default: 0
+    adminChangeDieTime: {
+      type: Boolean,
+      default: false,
     },
   },
   {

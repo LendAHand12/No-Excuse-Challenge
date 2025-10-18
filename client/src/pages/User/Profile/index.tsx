@@ -68,6 +68,7 @@ const Profile = () => {
     preTier2User,
     shortfallAmount,
     tier2ChildUsers,
+    dieTime,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -781,7 +782,7 @@ const Profile = () => {
           </div>
         )}
 
-        {tier === 2 && tryToTier2 !== '' && tryToTier2 !== 'DONE' && (
+        {tier === 2 && dieTime && (
           <div
             className="text-lg w-fit bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
             role="alert"
@@ -791,6 +792,18 @@ const Profile = () => {
                 ? `You have only ${countdown} days left to complete the 62
               required IDs to be eligible for Tier 2 benefits.`
                 : `You have run out of sales compensation time.`}
+            </span>
+          </div>
+        )}
+
+        {tier === 1 && dieTime && (
+          <div
+            className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
+            role="alert"
+          >
+            <span className="block sm:inline">
+              You have only <b>{countdown}</b> days left to complete referring
+              at least 2 people in 2 different branches.
             </span>
           </div>
         )}

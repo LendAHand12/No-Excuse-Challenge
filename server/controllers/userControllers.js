@@ -266,13 +266,9 @@ const getUserById = asyncHandler(async (req, res) => {
     }
 
     let countdown = 0;
-    if (user.tryToTier2 === "YES") {
-      const tier2Deadline = moment(user.timeToTry).add(
-        user.preTier2Status === "PASSED" ? 0 : 45,
-        "days"
-      ); // ngày tier2Time + 45 ngày
+    if (user.dieTime) {
       const currentDay = moment(); // ngày hiện tại
-      countdown = tier2Deadline.diff(currentDay, "days"); // số ngày còn lại
+      countdown = moment(new Date(user.dieTime)).diff(currentDay, "days"); // số ngày còn lại
     }
 
     const isMoveSystem = await MoveSystem.find({
@@ -347,6 +343,12 @@ const getUserById = asyncHandler(async (req, res) => {
     const tier2Users = await getAllDescendantsTier2Users(user.id);
 
     const hornor = await Honor.findOne({ userId: user.id });
+
+    const treeTier2OfUser = await Tree.findOne({
+      userId: user.id,
+      tier: 2,
+      isSubId: false,
+    });
 
     res.json({
       id: user._id,
@@ -425,7 +427,6 @@ const getUserById = asyncHandler(async (req, res) => {
       claimedAmc: user.claimedAmc,
       subInfo,
       currentParent: parentTree ? parentTree.userName : null,
-      timeRetryOver45: user.timeRetryOver45,
       preTier2Status: user.preTier2Status,
       shortfallAmount: user.shortfallAmount,
       tier2ChildUsers: tier2Users,
@@ -439,6 +440,7 @@ const getUserById = asyncHandler(async (req, res) => {
       isYellow: user.errLahCode === "OVER35",
       isBlue: user.errLahCode === "OVER45",
       isPink: user.countPay === 13 && listDirectUser.length < 2,
+      isDisableTier2: treeTier2OfUser ? treeTier2OfUser.disable : false,
       addDieDay: user.addDieDay,
       timeToTry: user.timeToTry,
     });
@@ -530,13 +532,9 @@ const getUserInfo = asyncHandler(async (req, res) => {
       notEnoughtChild = await getTotalLevel1ToLevel10OfUser(tree);
     }
     let countdown = 0;
-    if (user.tryToTier2 === "YES") {
-      const tier2Deadline = moment(user.timeToTry).add(
-        user.preTier2Status === "PASSED" ? 0 : 45,
-        "days"
-      ); // ngày tier2Time + 45 ngày
+    if (user.dieTime) {
       const currentDay = moment(); // ngày hiện tại
-      countdown = tier2Deadline.diff(currentDay, "days"); // số ngày còn lại
+      countdown = moment(new Date(user.dieTime)).diff(currentDay, "days"); // số ngày còn lại
     }
 
     const isMoveSystem = await MoveSystem.find({
@@ -871,7 +869,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     lockKyc,
     accountName,
     accountNumber,
-    timeRetryOver45,
+    dieTime,
     termDie,
     preTier2Status,
     addDieDay,
@@ -949,7 +947,6 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     }
     user.phone = phone || user.phone;
     user.email = email || user.email;
-    user.addDieDay = addDieDay || user.addDieDay;
     user.idCode = idCode || user.idCode;
     user.hold = hold || user.hold;
     user.holdLevel = holdLevel || user.holdLevel;
@@ -966,10 +963,6 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     if (changeCreatedAt) {
       user.changeCreatedAt =
         new Date(changeCreatedAt).toISOString() || user.changeCreatedAt;
-    }
-    if (timeRetryOver45) {
-      user.timeRetryOver45 =
-        new Date(timeRetryOver45).toISOString() || user.timeRetryOver45;
     }
     if (level) {
       const newLevel =
@@ -990,10 +983,43 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     if (termDie) {
       user.errLahCode = "OVER45";
       user.dieTime = new Date();
-    } else {
-      user.errLahCode = "";
-      user.dieTime = null;
+      user.adminChangeToDie = true;
     }
+    if (addDieDay) {
+      user.addDieDay = addDieDay;
+    }
+    if (dieTime) {
+      user.dieTime = new Date(dieTime).toISOString() || user.dieTime;
+      user.adminChangeToDie = true;
+
+      const diffDays = moment(new Date(dieTime)).diff(moment(), "days");
+      console.log({
+        diffDays,
+        current: moment(),
+        dieTime: moment(new Date(dieTime)),
+      });
+
+      if (user.tier === 1) {
+        if (diffDays >= 1 && diffDays <= 10) {
+          user.errLahCode = "OVER35";
+        } else if (diffDays <= 0) {
+          user.errLahCode = "OVER45";
+        } else {
+          user.errLahCode = "";
+        }
+      }
+
+      if (user.tier === 2) {
+        if (diffDays >= 1 && diffDays <= 5) {
+          user.errLahCode = "OVER35";
+        } else if (diffDays <= 0) {
+          user.errLahCode = "OVER45";
+        } else {
+          user.errLahCode = "";
+        }
+      }
+    }
+
     user.fine = newFine || user.fine;
     user.note = note || user.note;
     user.openLah = openLah;
