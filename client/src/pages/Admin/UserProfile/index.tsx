@@ -507,7 +507,7 @@ const UserProfile = () => {
             </div>
           )} */}
 
-          {data.tier === 2 && data.dieTime && (
+          {data.tier === 2 && data.dieTime && data.countdown > 0 && (
             <div
               className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
               role="alert"
@@ -519,7 +519,7 @@ const UserProfile = () => {
             </div>
           )}
 
-          {data.tier === 1 && data.dieTime && (
+          {data.tier === 1 && data.dieTime && data.countdown > 0 && (
             <div
               className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
               role="alert"

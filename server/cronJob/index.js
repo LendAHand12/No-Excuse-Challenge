@@ -13,6 +13,7 @@ import {
   getCountIncome,
 } from "../controllers/userControllers.js";
 import {
+  addDays,
   findRootLayer,
   getTotalLevel1ToLevel10OfUser,
   getTotalLevel6ToLevel10OfUser,
@@ -400,6 +401,7 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
       isAdmin: false,
       status: { $ne: "DELETED" },
       errLahCode: { $ne: "OVER45" },
+      adminChangeToDie: false,
     }).sort({
       createdAt: -1,
     });
@@ -435,6 +437,7 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
             user.dieTime = new Date();
           } else if (diffDateFromCreated > 20) {
             user.errLahCode = "OVER35";
+            user.dieTime = addDays(new Date(), +10);
           }
         } else {
           // cần bổ sung
@@ -442,11 +445,11 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
             const missing = 2 - listRefUsers.length; // số người còn thiếu
             const extraDays = missing * 15;
 
-            if (!user.timeRetryOver45) {
+            if (!user.dieTime) {
               // lần đầu bị thiếu → đặt hạn mới
-              user.timeRetryOver45 = moment().add(extraDays, "days").toDate();
+              user.dieTime = moment().add(extraDays, "days").toDate();
             } else {
-              const currentDeadline = moment(user.timeRetryOver45);
+              const currentDeadline = moment(user.dieTime);
 
               if (moment().isAfter(currentDeadline)) {
                 // đã quá hạn deadline
@@ -479,26 +482,24 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
           if (diffDateFromTier2Date <= 30) {
             if (totalChild < 60 || countChild1 < 19 || countChild2 < 19) {
               user.tryToTier2 = "YES";
-              user.timeToTry = moment(user.tier2Time).add(30, "days").toDate();
+              user.dieTime = moment(user.tier2Time).add(30, "days").toDate();
             } else if (
               totalChild >= 60 &&
               countChild1 >= 19 &&
               countChild2 >= 19
             ) {
-              user.tryToTier2 = "DONE";
-              user.timeToTry = null;
+              user.dieTime = null;
               user.done62Id = true;
             }
           } else {
             if (user.done62Id) {
               if (totalChild < 60) {
                 const missingIds = 60 - totalChild; // số id thiếu
-                user.tryToTier2 = "YES";
 
                 if (!user.timeToTry) {
                   // lần đầu tiên phát hiện thiếu → set deadline luôn
                   const deadline = moment()
-                    .add(missingIds * 15 + parseInt(user.addDieDay), "days")
+                    .add(missingIds * 15)
                     .toDate();
                   user.timeToTry = deadline;
                   user.currentShortfall = missingIds;
@@ -509,7 +510,7 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
                   if (missingIds > oldShortfall) {
                     // thiếu nhiều hơn → cộng thêm số ngày tương ứng cho phần chênh lệch
                     const diff = missingIds - oldShortfall;
-                    const extraDays = diff * 15 + parseInt(user.addDieDay);
+                    const extraDays = diff * 15;
 
                     user.timeToTry = moment(user.timeToTry)
                       .add(extraDays, "days")
@@ -519,19 +520,15 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
                   // nếu thiếu ít hơn hoặc bằng hôm qua thì không cộng thêm ngày
                 }
               } else {
-                user.tryToTier2 = "DONE";
-                user.timeToTry = null;
+                user.dieTime = null;
                 user.done62Id = true;
               }
             } else {
               if (totalChild >= 60 && countChild1 >= 19 && countChild2 >= 19) {
-                user.tryToTier2 = "DONE";
-                user.timeToTry = null;
+                user.dieTime = null;
                 user.done62Id = true;
               } else {
-                user.tryToTier2 = "REDO";
-                user.timeToTry = null;
-                user.timeRetryOver45 = null;
+                user.dieTime = null;
                 const treeTier2OfUser = await Tree.findOne({
                   userId: user._id,
                   tier: 2,

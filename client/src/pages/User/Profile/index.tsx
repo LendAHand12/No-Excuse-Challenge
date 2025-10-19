@@ -788,10 +788,8 @@ const Profile = () => {
             role="alert"
           >
             <span className="block sm:inline">
-              {tryToTier2 === 'YES'
-                ? `You have only ${countdown} days left to complete the 62
-              required IDs to be eligible for Tier 2 benefits.`
-                : `You have run out of sales compensation time.`}
+              {`You have only ${countdown} days left to complete the 62
+              required IDs to be eligible for Tier 2 benefits.`}
             </span>
           </div>
         )}

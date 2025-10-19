@@ -276,7 +276,7 @@ const userSchema = mongoose.Schema(
     dieTime: {
       type: Date,
     },
-    adminChangeDieTime: {
+    adminChangeToDie: {
       type: Boolean,
       default: false,
     },

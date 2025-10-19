@@ -441,7 +441,6 @@ const getUserById = asyncHandler(async (req, res) => {
       isBlue: user.errLahCode === "OVER45",
       isPink: user.countPay === 13 && listDirectUser.length < 2,
       isDisableTier2: treeTier2OfUser ? treeTier2OfUser.disable : false,
-      addDieDay: user.addDieDay,
       timeToTry: user.timeToTry,
     });
   } else {
@@ -655,7 +654,6 @@ const getUserInfo = asyncHandler(async (req, res) => {
       shortfallAmount: user.shortfallAmount,
       tier2ChildUsers: tier2Users,
       dieTime: user.dieTime,
-      addDieDay: user.addDieDay,
       timeToTry: user.timeToTry,
     });
   } else {
@@ -872,7 +870,6 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     dieTime,
     termDie,
     preTier2Status,
-    addDieDay,
   } = req.body;
   if (userId) {
     const userExistsUserId = await User.findOne({
@@ -985,9 +982,6 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
       user.dieTime = new Date();
       user.adminChangeToDie = true;
     }
-    if (addDieDay) {
-      user.addDieDay = addDieDay;
-    }
     if (dieTime) {
       user.dieTime = new Date(dieTime).toISOString() || user.dieTime;
       user.adminChangeToDie = true;
@@ -1010,12 +1004,27 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
       }
 
       if (user.tier === 2) {
-        if (diffDays >= 1 && diffDays <= 5) {
-          user.errLahCode = "OVER35";
-        } else if (diffDays <= 0) {
-          user.errLahCode = "OVER45";
+        const treeTier2OfUser = await Tree.findOne({
+          userId: user.id,
+          tier: 2,
+        });
+
+        if (treeTier2OfUser) {
+          if (treeTier2OfUser.disable === false && diffDays <= 0) {
+            treeTier2OfUser.disable = true;
+            await treeTier2OfUser.save();
+          } else if (treeTier2OfUser.disable === true && diffDays > 0) {
+            treeTier2OfUser.disable = false;
+            await treeTier2OfUser.save();
+          }
         } else {
-          user.errLahCode = "";
+          if (diffDays >= 1 && diffDays <= 5) {
+            user.errLahCode = "OVER35";
+          } else if (diffDays <= 0) {
+            user.errLahCode = "OVER45";
+          } else {
+            user.errLahCode = "";
+          }
         }
       }
     }
