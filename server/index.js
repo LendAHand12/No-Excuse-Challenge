@@ -48,7 +48,7 @@ import {
   checkRefAndTotalChildOfUser,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
-import { checkUserErrLahCodeDuoi45Ngay, getNextUserTier2, resetPass, resetErrLahCode } from "./common.js";
+import { fixParentChildLinks } from "./common.js";
 import Tree from "./models/treeModel.js";
 import { getTotalLevel1ToLevel10OfUser, getTotalLevel6ToLevel10OfUser } from "./utils/methods.js";
 
@@ -181,6 +181,8 @@ const cron7 = new CronJob("00 06 * * *", async () => {
 // console.log({ countChild1, countChild2 });
 
 // await checkUserErrLahCodeDuoi45Ngay();
+
+await fixParentChildLinks();
 
 cron0.start();
 cron1.start();

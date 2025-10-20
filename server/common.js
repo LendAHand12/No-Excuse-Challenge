@@ -355,3 +355,29 @@ export const resetErrLahCode = async () => {
   }
   console.log("doneeeeeeeeeeeeee");
 };
+
+export const fixParentChildLinks = async () => {
+  const allTrees = await Tree.find({}).lean();
+  let fixedCount = 0;
+
+  for (const parent of allTrees) {
+    if (!parent.children || parent.children.length === 0) continue;
+
+    for (const childId of parent.children) {
+      const child = allTrees.find((t) => t._id.toString() === childId);
+      if (!child) continue;
+
+      // Nếu parentId của con khác với id của cha → sửa lại
+      if (child.parentId !== parent._id.toString()) {
+        await Tree.updateOne(
+          { _id: child._id },
+          { $set: { parentId: parent._id.toString() } }
+        );
+        fixedCount++;
+      }
+    }
+  }
+
+  console.log(`✅ Đã đồng bộ xong ${fixedCount} parentId bị sai.`);
+  return fixedCount;
+};
