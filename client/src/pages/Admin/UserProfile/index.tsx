@@ -1435,10 +1435,8 @@ const UserProfile = () => {
                               data.tier > 1
                                 ? 0
                                 : data.totalHewe > 0
-                                ? data.totalHewe -
-                                  data.claimedHewe -
-                                  data.availableHewe
-                                : data.availableHewe
+                                ? data.totalHewe - data.claimedHewe
+                                : 0
                             }
                           />
                         </div>

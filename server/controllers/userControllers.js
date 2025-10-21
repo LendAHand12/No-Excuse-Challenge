@@ -350,6 +350,8 @@ const getUserById = asyncHandler(async (req, res) => {
       isSubId: false,
     });
 
+    const diffDaySinceCreate = moment().diff(moment(user.createdAt), "days");
+
     res.json({
       id: user._id,
       email: user.email,
@@ -397,7 +399,8 @@ const getUserById = asyncHandler(async (req, res) => {
       hewePerDay: user.hewePerDay,
       availableHewe: user.availableHewe,
       availableUsdt: user.availableUsdt,
-      claimedHewe: user.claimedHewe,
+      claimedHewe:
+        user.hewePerDay > 0 ? diffDaySinceCreate * user.hewePerDay : 0,
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
@@ -570,6 +573,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
 
     const hornor = await Honor.findOne({ userId: user.id });
 
+    const diffDaySinceCreate = moment().diff(moment(user.createdAt), "days");
+
     res.json({
       id: user._id,
       email: user.email,
@@ -617,7 +622,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
       hewePerDay: user.hewePerDay,
       availableHewe: user.availableHewe,
       availableUsdt: user.availableUsdt,
-      claimedHewe: user.claimedHewe,
+      claimedHewe:
+        user.hewePerDay > 0 ? diffDaySinceCreate * user.hewePerDay : 0,
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
