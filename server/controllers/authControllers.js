@@ -19,6 +19,7 @@ import {
 import axios from "axios";
 import Honor from "../models/honorModel.js";
 import mongoose from "mongoose";
+import moment from "moment";
 
 const checkLinkRef = asyncHandler(async (req, res) => {
   const { ref, receiveId } = req.body;
@@ -280,6 +281,8 @@ const authUser = asyncHandler(async (req, res) => {
       tier2Users = await getAllDescendantsTier2Users(user._id);
     }
 
+    const diffDaySinceCreate = moment().diff(moment(user.createdAt), "days");
+
     res.status(200).json({
       userInfo: {
         id: user._id,
@@ -316,7 +319,7 @@ const authUser = asyncHandler(async (req, res) => {
         hewePerDay: user.hewePerDay,
         availableHewe: user.availableHewe,
         availableUsdt: user.availableUsdt,
-        claimedHewe: user.claimedHewe,
+        claimedHewe: user.hewePerDay > 0 ? diffDaySinceCreate * user.hewePerDay : 0,
         claimedUsdt: user.claimedUsdt,
         heweWallet: user.heweWallet,
         ranking: user.ranking,

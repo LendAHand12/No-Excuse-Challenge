@@ -1446,9 +1446,8 @@ const UserProfile = () => {
                             ? 0
                             : data.totalHewe > 0
                             ? data.totalHewe -
-                              data.claimedHewe -
-                              data.availableHewe
-                            : data.availableHewe}
+                              data.claimedHewe
+                            : 0}
                         </div>
                       )}
                     </div>
