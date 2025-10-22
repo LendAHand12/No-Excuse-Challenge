@@ -367,8 +367,8 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
     });
     const currentDay = moment();
 
-    // for (let user of listUsers) {
-      const user = await User.findById("685a52269fd2c5445f1cfd50");
+    for (let user of listUsers) {
+      // const user = await User.findById("685a52269fd2c5445f1cfd50");
       console.log({ userName: user.userId });
       const treeOfUser = await Tree.findOne({
         userId: user._id,
@@ -484,15 +484,15 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
                 });
 
                 treeTier2OfUser.disable = true;
-                // await treeTier2OfUser.save();
+                await treeTier2OfUser.save();
               }
             }
           }
         }
       }
 
-      // await user.save();
-    // }
+      await user.save();
+    }
   } catch (err) {
     console.log({ err });
   }
