@@ -83,10 +83,24 @@ const SignInLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
                 </div>
 
                 <div className="hidden lg:flex items-center border gap-2 bg-white rounded-3xl px-4 py-2 font-medium">
-                  <div className="text-black font-medium">
-                    {/* <button onClick={() => onChangeLanguage('vi')}>Vie</button>
-                    <span>/</span> */}
-                    <button onClick={() => onChangeLanguage('en')}>En</button>
+                  <div className="text-black font-medium flex items-center gap-2">
+                    <button 
+                      onClick={() => onChangeLanguage('vi')}
+                      className={`px-2 py-1 rounded ${
+                        i18n.language.includes('vi') ? 'bg-black text-white' : 'hover:bg-gray-100'
+                      }`}
+                    >
+                      Vie
+                    </button>
+                    <span>/</span>
+                    <button 
+                      onClick={() => onChangeLanguage('en')}
+                      className={`px-2 py-1 rounded ${
+                        i18n.language.includes('en') ? 'bg-black text-white' : 'hover:bg-gray-100'
+                      }`}
+                    >
+                      En
+                    </button>
                   </div>
                 </div>
               </div>

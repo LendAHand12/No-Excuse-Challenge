@@ -213,7 +213,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, routes }: SidebarProps) => {
                     }`}
                   >
                     {route.icon}
-                    {t(route.title)}
+                    {t(`sidebar.menu.${route.title}`)}
                   </NavLink>
                 </li>
               ))}
@@ -332,7 +332,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, routes }: SidebarProps) => {
                     to="/signin"
                     className="rounded-lg shadow-NoExcuseChallenge text-center bg-NoExcuseChallenge px-4 py-3 shadow-1 font-medium text-sm block"
                   >
-                    Sign in
+                    {t('sidebar.signIn')}
                   </Link>
                 </li>
               )}
@@ -345,22 +345,23 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, routes }: SidebarProps) => {
         <img src={COVER3} />
         <div className="flex items-center justify-between">
           <p className="w-1/2 text-white">
-            ©2024 NoExcuseChallenge. All Rights Reserved.
+            {t('sidebar.copyright')}
           </p>
           <div className="flex text-gray-500 lg:hidden items-center gap-2 font-medium">
             <div className="flex gap-2">
-              {/* <span
+              <span
                 onClick={() => onChangeLanguage('vi')}
                 className={`${
-                  i18n.language === 'vi' ? 'text-NoExcuseChallenge' : ''
+                  i18n.language.includes('vi') ? 'text-NoExcuseChallenge' : ''
                 } cursor-pointer`}
               >
                 Vie
-              </span> */}
+              </span>
+              <span>/</span>
               <span
                 onClick={() => onChangeLanguage('en')}
                 className={`${
-                  i18n.language === 'en' ? 'text-NoExcuseChallenge' : ''
+                  i18n.language.includes('en') ? 'text-NoExcuseChallenge' : ''
                 } cursor-pointer`}
               >
                 Eng

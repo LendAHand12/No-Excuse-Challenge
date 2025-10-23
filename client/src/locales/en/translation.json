@@ -381,5 +381,239 @@
   "addNewPermissions": "Create new permission",
   "permissions": "Permissions",
   "createAdmin": "Create new Admin",
-  "admin-admin-detail": "Admin Detail"
+  "admin-admin-detail": "Admin Detail",
+
+  "homepage": {
+    "aboutUs": "About us",
+    "title": "No Excuse Challenge",
+    "subtitle": "Get Up. Shut Up. Take Action. No More Excuses. Welcome to the No Excuse Challenge – where weakness gets crushed, and winners are made. You've been soft for too long. Excuses won't pay your bills, won't build your dreams, and won't make you stronger. Stop talking. Stop waiting. Stop blaming. It's time to wake up, put in the work, and take full control of your life – NOW!",
+    "quote1": "Excuses don't pay. Effort does. Get to work.",
+    "whatIsTitle": "What is the No Excuse Challenge?",
+    "whatIsDesc": "This isn't some feel-good, pat-on-the-back motivation speech. This is a reality check. The No Excuse Challenge is here to shake you, break your old habits, and force you to take responsibility. Success isn't given—it's taken. And if you're not willing to take it, step aside for those who will. Ready to own your life? Prove it.",
+    "quote2": "Nobody's coming to save you. Get up and do it yourself.",
+    "whyJoinTitle": "Why Join the No Excuse Challenge?",
+    "whyJoinDesc": "• No More Excuses – You're either all in or out. There's no in-between.\n• Get Uncomfortable – Growth happens when you push past your limits. No pain, no gain.\n• Prove Yourself – Talk is cheap. Show up, work hard, and earn your success.\n• Join a Relentless Community – Winners only. If you're looking for sympathy, look else where.",
+    "quote3": "Soft people make excuses. Strong people make moves.",
+    "howItWorksTitle": "How It Works",
+    "howItWorksDesc": "• Stop Complaining – Nobody cares about your excuses. Nobody. Get up and get to work.\n• Set a Goal – Make it real. Make it tough. No easy wins.\n• Do the Work – No skipping. No shortcuts. No giving up.\n• Own Your Results – Win or lose, it's on YOU. No blaming. No whining.",
+    "quote4": "You either suffer the pain of discipline or the pain of regret. Choose.",
+    "takeActionTitle": "Enough Talk. Take Action.",
+    "takeActionDesc": "This isn't for the weak. It's for those who refuse to stay stuck in the same cycle of failure. It's time to push harder, level up, and MAKE THINGS HAPPEN. If you can't handle it, move aside. Join the No Excuse Challenge today. No more whining. No more waiting. Just results.",
+    "quote5": "Success isn't for crybabies. Step up or step aside."
+  },
+
+  "payment": {
+    "warning": "⚠️ Warning:",
+    "checkIds": "Please check the number of IDs in Tier 1 that need to be fulfilled within",
+    "days": "days",
+    "branch1ToFulfill": "Branch 1 to fulfill :",
+    "branch2ToFulfill": "Branch 2 to fulfill :",
+    "ids": "IDs",
+    "agreeToComplete": "By clicking \"Yes\", the member agrees to complete",
+    "activeIds": "active IDs",
+    "inBoth": "in both",
+    "branch1": "Branch 1",
+    "branch2": "Branch 2"
+  },
+
+  "status": {
+    "unverify": "Unverify",
+    "approved": "Approved", 
+    "locked": "Locked"
+  },
+
+  "signin": {
+    "title": "Login",
+    "emailPlaceholder": "Email/User Name",
+    "passwordPlaceholder": "Password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "confirm": "Confirm",
+    "backToHomepage": "Back to Homepage",
+    "emailRequired": "Email/User Name is required",
+    "passwordRequired": "Password is required",
+    "passwordPattern": "Password must contain at least 8 characters and a number"
+  },
+
+  "sidebar": {
+    "signIn": "Sign in",
+    "copyright": "©2024 NoExcuseChallenge. All Rights Reserved.",
+    "menu": {
+      "Users": "Users",
+      "Transactions": "Transactions",
+      "Get link active": "Get link active",
+      "Withdraw request": "Withdraw request",
+      "Claims": "Claims",
+      "News": "News",
+      "Permissions": "Permissions",
+      "Cronjob": "Cronjob",
+      "Admins": "Admins",
+      "Double KYC": "Double KYC",
+      "DreamPool": "DreamPool",
+      "Config": "Config",
+      "User History": "User History",
+      "Basic Members": "Basic Members",
+      "Pre-Tier 2 Pending": "Pre-Tier 2 Pending",
+      "Pre-Tier 2 Users": "Pre-Tier 2 Users",
+      "Pre-Tier 2 Pool": "Pre-Tier 2 Pool",
+      "Wallet Connect History": "Wallet Connect History",
+      "Profile": "Profile",
+      "Payment": "Payment",
+      "System": "System",
+      "Income": "Income",
+      "Withdraws": "Withdraws",
+      "Referral": "Referral"
+    }
+  },
+
+  "adminUsers": {
+    "table": {
+      "username": "Username",
+      "age": "Age",
+      "usdt": "USDT",
+      "hewe": "HEWE",
+      "walletAddress": "Wallet Address",
+      "paymentPending": "Payment Pending",
+      "status": "Status",
+      "action": "Action"
+    },
+    "buttons": {
+      "exportData": "Export Data",
+      "createUser": "Create user",
+      "search": "Search",
+      "approve": "Approve",
+      "all": "All"
+    },
+    "placeholders": {
+      "searchUser": "Search with user name or email or wallet"
+    },
+    "modals": {
+      "approvePayment": "Are you sure you want to approve transactions for this user?",
+      "approveButton": "Approve"
+    },
+    "actions": {
+      "approve": "Approve",
+      "view": "View Details",
+      "tree": "View Tree",
+      "move": "Move System",
+      "delete": "Delete"
+    }
+  },
+
+  "userProfile": {
+    "title": "User Profile",
+         "fields": {
+           "userName": "User Name",
+           "email": "Email",
+           "phone": "Phone",
+           "idCode": "ID Code",
+           "walletAddress": "Wallet Address",
+           "isRegistered": "Is Registered",
+           "countPay": "Count Pay",
+           "tier": "Tier",
+           "buyPackage": "Buy Package",
+           "rank": "Rank",
+           "availableHewe": "Available HEWE",
+           "rewardHewe": "Reward HEWE",
+           "hewePerDay": "HEWE Per Day",
+           "availableUsdt": "Available USDT",
+           "processingUsdt": "Processing USDT",
+           "totalEarned": "Total Earned",
+           "totalHold": "Total Hold",
+           "outstandingPreTier2": "Outstanding Pre-Tier2 Pool Amount",
+           "payoutGateway": "Payout Gateway",
+           "payoutDisplayName": "Payout Display Name",
+           "payoutEmailOrPhone": "Payout Email or Phone Number",
+           "overdueReferral": "Overdue referral",
+           "fine": "Fine",
+           "level": "Level",
+           "note": "Note",
+           "changeCreatedAt": "Change Created At",
+           "dieTime": "Die Time",
+           "status": "Status",
+           "holdTier": "Hold Tier",
+           "holdLevel": "Hold Level",
+           "lockedTime": "Locked Time",
+           "deletedTime": "Deleted Time",
+           "memberSince": "Member Since",
+           "tier1Time": "Tier 1 Time",
+           "tier2Time": "Tier 2 Time",
+           "tier3Time": "Tier 3 Time",
+           "tier4Time": "Tier 4 Time",
+           "tier5Time": "Tier 5 Time",
+           "oldUserName": "Old User Name",
+           "oldEmail": "Old Email",
+           "changeDate": "Change Date",
+           "temporaryDie": "Temporary Die",
+           "activeId": "Active ID",
+           "numbersOfIdRequire": "Numbers of ID Require",
+           "branch1": "Branch 1",
+           "branch2": "Branch 2"
+         },
+    "status": {
+      "finished": "Finished",
+      "unfinished": "Unfinished",
+      "times": "times"
+    },
+    "buttons": {
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "approve": "Approve",
+      "reset": "Reset",
+      "checkKyc": "Check KYC",
+      "lockKyc": "Lock KYC",
+      "unlockKyc": "Unlock KYC",
+      "pushToPreTier2": "Push to Pre-Tier 2",
+      "changeWallet": "Change Wallet"
+    },
+    "switches": {
+      "openLah": "Open LAH",
+      "closeLah": "Close LAH",
+      "lockKyc": "Lock KYC",
+      "termDie": "Term Die",
+      "bonusRef": "Bonus Ref",
+      "kycFee": "KYC Fee"
+    },
+         "sections": {
+           "userInfo": "User Information",
+           "financialInfo": "Financial Information",
+           "referralInfo": "Referral Information",
+           "notEnoughChild": "Not Enough Child",
+           "numbersOfIdRequire": "Numbers of ID Require",
+           "refUserName": "Referral User Name",
+           "oldParent": "Old Parent",
+           "branch1": "Branch 1",
+           "branch2": "Branch 2",
+           "totalEarnedUsdt": "Total Earned USDT",
+           "totalEarnedHewe": "Total Earned HEWE",
+           "directReferralMembers": "Direct Referral Members",
+           "directReferralSubMembers": "Direct Referral Sub Members",
+           "tier2Users": "Tier 2 Users",
+           "referer": "Referer",
+           "missingUsers": "Missing Users",
+           "totalChild": "Total Child",
+           "subInfo": "Sub Information"
+         },
+    "modals": {
+      "deleteConfirm": "Are you sure to do this?",
+      "changeWalletConfirm": "Are you sure to do this",
+      "updating": "Updating...",
+      "deleting": "Deleting..."
+    },
+    "validation": {
+      "userNameRequired": "User ID is required",
+      "emailRequired": "Email is required",
+      "phoneRequired": "Phone is required",
+      "idCodeRequired": "ID code is required",
+      "walletAddressRequired": "Wallet address is required",
+      "walletFormatError": "Please enter the correct wallet format",
+      "tierRequired": "Tier is required",
+      "availableHeweRequired": "Available HEWE is required",
+      "availableUsdtRequired": "Available USDT is required",
+      "fineRequired": "Fine is required",
+      "levelRequired": "Level is required"
+    }
+  }
 }

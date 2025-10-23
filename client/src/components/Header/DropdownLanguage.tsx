@@ -15,8 +15,7 @@ const DropdownLanguage = () => {
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <Link onClick={() => setDropdownOpen(!dropdownOpen)} className="" to="#">
-        {/* {i18n.language.includes('vi') ? 'Vie' : 'Eng'} */}
-        Eng
+        {i18n.language.includes('vi') ? 'Vie' : 'Eng'}
       </Link>
 
       {/* <!-- Dropdown Start --> */}
@@ -25,7 +24,7 @@ const DropdownLanguage = () => {
           className={`absolute right-0 mt-4 flex-col rounded-xl bg-[#F2F4F7] `}
         >
           <ul className="flex flex-col gap-2 border-stroke px-2 py-2">
-            {/* <li>
+            <li>
               <button
                 onClick={() => onChangeLanguage('vi')}
                 className={`flex items-center ${
@@ -34,7 +33,7 @@ const DropdownLanguage = () => {
               >
                 Vie
               </button>
-            </li> */}
+            </li>
             <li>
               <button
                 onClick={() => onChangeLanguage('en')}

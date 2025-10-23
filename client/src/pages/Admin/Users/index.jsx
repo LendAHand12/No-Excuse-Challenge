@@ -7,12 +7,17 @@ import { ToastContainer, toast } from 'react-toastify';
 import NoContent from '@/components/NoContent';
 import Loading from '@/components/Loading';
 import CustomPagination from '@/components/CustomPagination';
+import AdminUsersTable from '@/components/AdminUsersTable';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DefaultLayout from '@/layout/DefaultLayout';
 import Modal from 'react-modal';
 import { shortenWalletAddress } from '@/utils';
 import { useSelector } from 'react-redux';
 import Payment from '../../../api/Payment';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Download, Plus } from 'lucide-react';
 
 const AdminUserPages = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -87,25 +92,6 @@ const AdminUserPages = () => {
     })();
   }, [objectFilter, refresh]);
 
-  const onChangeStatus = useCallback(
-    (e) =>
-      setObjectFilter({
-        ...objectFilter,
-        status: e.target.value,
-        pageNumber: 1,
-      }),
-    [objectFilter],
-  );
-
-  const onChangeCoin = useCallback(
-    (e) =>
-      setObjectFilter({
-        ...objectFilter,
-        coin: e.target.value,
-        pageNumber: 1,
-      }),
-    [objectFilter],
-  );
 
   const onSearch = (e) => {
     setKeyword(e.target.value);
@@ -450,7 +436,7 @@ const AdminUserPages = () => {
                 <path d="M18.71,7.21a1,1,0,0,0-1.42,0L9.84,14.67,6.71,11.53A1,1,0,1,0,5.29,13l3.84,3.84a1,1,0,0,0,1.42,0l8.16-8.16A1,1,0,0,0,18.71,7.21Z" />
               </svg>
               <p className="mb-4 text-gray-500">
-                Are you sure you want to approve transactions for this user?
+                {t('adminUsers.modals.approvePayment')}
               </p>
               <div className="space-y-4">
                 <div className="flex justify-center items-center space-x-4">
@@ -458,7 +444,7 @@ const AdminUserPages = () => {
                     onClick={handleApprovePayment}
                     className="py-2 px-3 text-sm font-medium text-center text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-red-300 "
                   >
-                    Approve
+                    {t('adminUsers.modals.approveButton')}
                   </button>
                 </div>
               </div>
@@ -470,68 +456,67 @@ const AdminUserPages = () => {
         <div className="flex items-center justify-between pb-4 bg-white">
           <div className="flex gap-4">
             <div>
-              <select
-                className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
-                onChange={onChangeStatus}
-                defaultValue={objectFilter.status}
+              <Select
+                value={objectFilter.status}
+                onValueChange={(value) => setObjectFilter({
+                  ...objectFilter,
+                  status: value,
+                  pageNumber: 1,
+                })}
                 disabled={loading}
               >
-                <option value="all">All</option>
-                {userStatus.map((status) => (
-                  <option value={status.status} key={status.status}>
-                    {t(status.status)}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder={t('adminUsers.buttons.all')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t('adminUsers.buttons.all')}</SelectItem>
+                  {userStatus.map((status) => (
+                    <SelectItem value={status.status} key={status.status}>
+                      {t(status.status)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
-              <select
-                className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
-                onChange={onChangeCoin}
-                defaultValue={objectFilter.coin}
+              <Select
+                value={objectFilter.coin}
+                onValueChange={(value) => setObjectFilter({
+                  ...objectFilter,
+                  coin: value,
+                  pageNumber: 1,
+                })}
                 disabled={loading}
               >
-                <option value="all">All</option>
-                <option value="usdt" key="usdt">
-                  USDT
-                </option>
-                <option value="hewe" key="hewe">
-                  HEWE
-                </option>
-              </select>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue placeholder={t('adminUsers.buttons.all')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t('adminUsers.buttons.all')}</SelectItem>
+                  <SelectItem value="usdt">USDT</SelectItem>
+                  <SelectItem value="hewe">HEWE</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <svg
-                  className="w-5 h-5 text-gray-500"
-                  aria-hidden="true"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
                   type="text"
                   onChange={onSearch}
-                  className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50"
-                  placeholder={t('search with user name or email or wallet')}
+                  className="pl-10 w-80"
+                  placeholder={t('adminUsers.placeholders.searchUser')}
                   defaultValue={objectFilter.keyword}
                 />
-                <button
-                  onClick={handleSearch}
-                  disabled={loading}
-                  className="h-8 flex text-xs justify-center items-center hover:underline bg-black text-NoExcuseChallenge font-bold rounded-full py-1 px-4 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
-                >
-                  {t('search')}
-                </button>
               </div>
+              <Button
+                onClick={handleSearch}
+                disabled={loading}
+                className="bg-black text-white hover:bg-gray-800"
+              >
+                <Search className="w-4 h-4 mr-2" />
+                {t('adminUsers.buttons.search')}
+              </Button>
             </div>
           </div>
           <div className="flex flex-col items-center gap-2">
@@ -539,353 +524,30 @@ const AdminUserPages = () => {
               ?.find((p) => p.page.path === '/admin/users')
               ?.actions.includes('export') && (
               <div>
-                <button
+                <Button
                   onClick={handleExportUsers}
-                  className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm rounded-md hover:opacity-70"
+                  className="bg-green-600 text-white hover:bg-green-700"
                 >
-                  <svg
-                    fill="currentColor"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M8.71,7.71,11,5.41V15a1,1,0,0,0,2,0V5.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42l-4-4a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-4,4A1,1,0,1,0,8.71,7.71ZM21,14a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V15a1,1,0,0,0-2,0v4a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V15A1,1,0,0,0,21,14Z" />
-                  </svg>
-                  Export Data
-                </button>
+                  <Download className="w-4 h-4 mr-2" />
+                  {t('adminUsers.buttons.exportData')}
+                </Button>
               </div>
             )}
             {userInfo?.permissions
               ?.find((p) => p.page.path === '/admin/users')
               ?.actions.includes('create') && (
               <div>
-                <button
+                <Button
                   onClick={() => navigate('/admin/users/create')}
-                  className="flex items-center gap-2 px-6 py-2 bg-blue-500 text-white text-sm rounded-md hover:opacity-70"
+                  className="bg-blue-500 text-white hover:bg-blue-600"
                 >
-                  <svg
-                    fill="currentColor"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    id="plus"
-                    data-name="Flat Color"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      id="primary"
-                      d="M12,20a1,1,0,0,1-1-1V13H5a1,1,0,0,1,0-2h6V5a1,1,0,0,1,2,0v6h6a1,1,0,0,1,0,2H13v6A1,1,0,0,1,12,20Z"
-                    ></path>
-                  </svg>
-                  Create user
-                </button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  {t('adminUsers.buttons.createUser')}
+                </Button>
               </div>
             )}
           </div>
         </div>
-        <table className="w-full text-sm text-left text-gray-500">
-          <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-            <tr>
-              <th scope="col" className="px-6 py-3">
-                Username
-              </th>
-              <th scope="col" className="px-6 py-3">
-                {objectFilter.coin === 'usdt'
-                  ? 'usdt'
-                  : objectFilter.coin === 'hewe'
-                  ? 'hewe'
-                  : 'Age'}
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Wallet Address
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Payment Pending
-              </th>
-              <th scope="col" className="px-6 py-3">
-                {t('status')}
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.length > 0 &&
-              !loading &&
-              data.map((ele) => (
-                <tr
-                  className="bg-white border-b hover:bg-gray-50"
-                  key={ele._id}
-                >
-                  <th
-                    scope="row"
-                    className="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap "
-                  >
-                    <div className="">
-                      <div className="text-base font-semibold">
-                        {ele.userId}
-                      </div>
-                      <div className="font-normal text-gray-500">{ele._id}</div>
-                    </div>
-                  </th>
-                  <td className="px-6 py-4">
-                    {objectFilter.coin !== 'usdt' &&
-                      objectFilter.coin !== 'hewe' &&
-                      ele.ageEstimate && (
-                        <a
-                          className={`hover:underline ${
-                            ele.ageEstimate && ele.ageEstimate < 5
-                              ? 'text-red-500'
-                              : 'text-blue-500'
-                          }`}
-                          href={`http://3.107.26.68:3002/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${ele._id}`}
-                          target="_blank"
-                        >
-                          {ele.ageEstimate === 2
-                            ? '8+'
-                            : ele.ageEstimate === 3
-                            ? '13+'
-                            : ele.ageEstimate === 4
-                            ? '16+'
-                            : ele.ageEstimate === 5
-                            ? '18+'
-                            : ele.ageEstimate === 6
-                            ? '21+'
-                            : ele.ageEstimate === 7
-                            ? '25+'
-                            : ele.ageEstimate === 8
-                            ? '30+'
-                            : ''}
-                        </a>
-                      )}
-                    {objectFilter.coin !== 'usdt' &&
-                      objectFilter.coin !== 'hewe' &&
-                      !ele.ageEstimate && <p>N/A</p>}
-                    {objectFilter.coin === 'usdt' && <p>{ele.availableUsdt}</p>}
-                    {objectFilter.coin === 'hewe' && <p>{ele.availableHewe}</p>}
-                  </td>
-                  <td className="px-6 py-4">
-                    {shortenWalletAddress(ele.walletAddress, 12)}
-                  </td>
-                  <td className="px-6 py-4">
-                    {ele.paymentUUID.length > 0 ? (
-                      <div>
-                        <button
-                          onClick={() => {
-                            setShowApprovePayment(true);
-                            setCurrentApprovePaymentId(ele._id);
-                          }}
-                          className={`${
-                            ele.paymentProcessed
-                              ? 'bg-orange-400'
-                              : 'bg-green-500'
-                          } py-1 px-3 text-white text-lg max-w-fit rounded-lg`}
-                          disabled={!ele.paymentProcessed}
-                        >
-                          {ele.paymentUUID[ele.tier - 1]}
-                        </button>
-                      </div>
-                    ) : (
-                      ''
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div
-                      className={`max-w-fit text-white rounded-sm py-1 px-2 text-sm ${
-                        userStatus.find((item) => item.status === ele.status)
-                          .color
-                      } mr-2`}
-                    >
-                      {t(ele.status)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-6">
-                      {userInfo?.permissions
-                        .find((p) => p.page.pageName === 'admin-users-details')
-                        ?.actions.includes('approve') &&
-                        ele.status === 'PENDING' && (
-                          <button
-                            onClick={() => handleApprove(ele._id)}
-                            className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
-                          >
-                            <svg
-                              fill="currentColor"
-                              viewBox="0 0 24 24"
-                              id="check"
-                              data-name="Flat Line"
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="w-6 h-auto"
-                            >
-                              <polyline
-                                id="primary"
-                                points="5 12 10 17 19 8"
-                                style={{
-                                  fill: 'none',
-                                  stroke: 'currentColor',
-                                  strokeLinecap: 'round',
-                                  strokeLinejoin: 'round',
-                                  strokeWidth: 2,
-                                }}
-                              ></polyline>
-                            </svg>
-                          </button>
-                        )}
-
-                      {ele.status !== 'DELETED' &&
-                        userInfo?.permissions
-                          .find(
-                            (p) => p.page.pageName === 'admin-users-details',
-                          )
-                          ?.actions.includes('read') && (
-                          <button
-                            onClick={() => handleDetail(ele._id)}
-                            className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
-                          >
-                            <svg
-                              fill="currentColor"
-                              className="w-6 h-auto"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path d="M21.92,11.6C19.9,6.91,16.1,4,12,4S4.1,6.91,2.08,11.6a1,1,0,0,0,0,.8C4.1,17.09,7.9,20,12,20s7.9-2.91,9.92-7.6A1,1,0,0,0,21.92,11.6ZM12,18c-3.17,0-6.17-2.29-7.9-6C5.83,8.29,8.83,6,12,6s6.17,2.29,7.9,6C18.17,15.71,15.17,18,12,18ZM12,8a4,4,0,1,0,4,4A4,4,0,0,0,12,8Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,14Z" />
-                            </svg>
-                          </button>
-                        )}
-
-                      {ele.status !== 'DELETED' &&
-                        userInfo?.permissions
-                          .find((p) => p.page.pageName === 'admin-system')
-                          ?.actions.includes('read') && (
-                          <button
-                            onClick={() => handleTree(ele._id)}
-                            className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
-                          >
-                            <svg
-                              className="w-6 h-auto"
-                              viewBox="0 0 48 48"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <rect
-                                width="48"
-                                height="48"
-                                fill="white"
-                                fillOpacity="0.01"
-                              />
-                              <path
-                                d="M13.0448 14C13.5501 8.3935 18.262 4 24 4C29.738 4 34.4499 8.3935 34.9552 14H35C39.9706 14 44 18.0294 44 23C44 27.9706 39.9706 32 35 32H13C8.02944 32 4 27.9706 4 23C4 18.0294 8.02944 14 13 14H13.0448Z"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M24 28L29 23"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M24 25L18 19"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M24 44V18"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </button>
-                        )}
-
-                      {ele.status !== 'DELETED' &&
-                        userInfo?.permissions
-                          .find((p) => p.page.pageName === 'admin-move-system')
-                          ?.actions.includes('read') && (
-                          <button
-                            onClick={() => handleMoveSystem(ele._id)}
-                            className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
-                          >
-                            <svg
-                              width="24"
-                              height="24"
-                              viewBox="0 0 48 48"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <rect
-                                width="48"
-                                height="48"
-                                fill="white"
-                                fillpacity="0.01"
-                              />
-                              <path
-                                d="M18 31H38V5"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M30 21H10V43"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M44 11L38 5L32 11"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M16 37L10 43L4 37"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </button>
-                        )}
-
-                      {userInfo?.permissions
-                        .find((p) => p.page.pageName === 'admin-users-details')
-                        ?.actions.includes('delete') &&
-                        ele.countPay === 0 &&
-                        ele.status !== 'DELETED' && (
-                          <button
-                            onClick={() => handleDelete(ele._id)}
-                            className="font-medium text-gray-500 hover:text-NoExcuseChallenge"
-                          >
-                            <svg
-                              fill="currentColor"
-                              className="w-6 h-auto"
-                              viewBox="-3 -2 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
-                              preserveAspectRatio="xMinYMin"
-                            >
-                              <path d="M6 2V1a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1h4a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-.133l-.68 10.2a3 3 0 0 1-2.993 2.8H5.826a3 3 0 0 1-2.993-2.796L2.137 7H2a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4zm10 2H2v1h14V4zM4.141 7l.687 10.068a1 1 0 0 0 .998.932h6.368a1 1 0 0 0 .998-.934L13.862 7h-9.72zM7 8a1 1 0 0 1 1 1v7a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1zm4 0a1 1 0 0 1 1 1v7a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1z" />
-                            </svg>
-                          </button>
-                        )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
         {loading && (
           <div className="w-full flex justify-center my-4">
             <Loading />
@@ -893,11 +555,27 @@ const AdminUserPages = () => {
         )}
         {!loading && data.length === 0 && <NoContent />}
         {!loading && data.length > 0 && (
-          <CustomPagination
-            currentPage={objectFilter.pageNumber}
-            totalPages={totalPage}
-            onPageChange={handleChangePage}
-          />
+          <>
+            <AdminUsersTable
+              data={data}
+              loading={loading}
+              onApprove={handleApprove}
+              onDetail={handleDetail}
+              onTree={handleTree}
+              onMoveSystem={handleMoveSystem}
+              onDelete={handleDelete}
+              onApprovePayment={(id) => {
+                setShowApprovePayment(true);
+                setCurrentApprovePaymentId(id);
+              }}
+              objectFilter={objectFilter}
+            />
+            <CustomPagination
+              currentPage={objectFilter.pageNumber}
+              totalPages={totalPage}
+              onPageChange={handleChangePage}
+            />
+          </>
         )}
       </div>
     </DefaultLayout>

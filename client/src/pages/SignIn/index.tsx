@@ -52,15 +52,15 @@ const SignInPage: React.FC = () => {
             className="-mt-28 py-10 rounded-t-3xl bg-white flex w-full lg:max-w-150 flex-col justify-center gap-6 px-4"
           >
             <h1 className="text-4xl font-bold text-black text-center mb-10">
-              Login
+              {t('signin.title')}
             </h1>
             <div className="">
               <input
                 type="text"
                 className="bg-black px-4 py-3 shadow-xl rounded-lg w-full text-white"
-                placeholder="Email/User Name"
+                placeholder={t('signin.emailPlaceholder')}
                 {...register('code', {
-                  required: 'Email/User Name is required',
+                  required: t('signin.emailRequired'),
                 })}
               />
               <p className="text-red-500 mt-1 text-sm">
@@ -71,14 +71,12 @@ const SignInPage: React.FC = () => {
               <input
                 type={showPassword ? 'text' : 'password'}
                 className="bg-black px-4 shadow-xl py-3 rounded-lg w-full text-white"
-                placeholder="Password"
+                placeholder={t('signin.passwordPlaceholder')}
                 {...register('password', {
-                  required: t('Password is required'),
+                  required: t('signin.passwordRequired'),
                   pattern: {
                     value: /^(?=.*?[a-z])(?=.*?[0-9]).{8,}$/,
-                    message: t(
-                      'Password must contain at least 8 characters and a number',
-                    ),
+                    message: t('signin.passwordPattern'),
                   },
                 })}
               />
@@ -121,21 +119,21 @@ const SignInPage: React.FC = () => {
               <div className="flex gap-2">
                 <input type="checkbox" id="remember" />
                 <label htmlFor="remember" className="text-black font-medium">
-                  Remember me
+                  {t('signin.rememberMe')}
                 </label>
               </div>
               <Link
                 to="/forgot-password"
                 className="text-NoExcuseChallenge font-medium hover:underline"
               >
-                Forgot password?
+                {t('signin.forgotPassword')}
               </Link>
             </div>
             <button
               type="submit"
               className="font-semibold rounded-3xl border py-4 border-black text-black hover:bg-black hover:text-white duration-100 ease-linear"
             >
-              Confirm
+              {t('signin.confirm')}
             </button>
             <Link
               to="/"
@@ -155,7 +153,7 @@ const SignInPage: React.FC = () => {
                   d="M21,11H5.41l5.3-5.29A1,1,0,1,0,9.29,4.29l-7,7a1,1,0,0,0,0,1.42l7,7a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42L5.41,13H21a1,1,0,0,0,0-2Z"
                 ></path>
               </svg>
-              Back to Homepage
+              {t('signin.backToHomepage')}
             </Link>
           </form>
           <div className="lg:hidden w-full bg-black text-NoExcuseChallenge text-center py-2">

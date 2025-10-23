@@ -474,5 +474,239 @@
   "jwt expired": "Thời gian tạo mới hết hạn, Vui lòng thử lại",
 
   "congratPackageB": "Chúc mừng Bạn đã thanh toán thành công gói B",
-  "upgradeAPackage": "Nâng cấp lên gói A"
+  "upgradeAPackage": "Nâng cấp lên gói A",
+
+  "homepage": {
+    "aboutUs": "Về chúng tôi",
+    "title": "Thử Thách Không Có Lý Do",
+    "subtitle": "Đứng dậy. Im lặng. Hành động. Không còn lý do nào nữa. Chào mừng đến với Thử Thách Không Có Lý Do – nơi sự yếu đuối bị nghiền nát và những người chiến thắng được tạo ra. Bạn đã quá mềm yếu trong thời gian dài. Những lý do sẽ không trả hóa đơn của bạn, sẽ không xây dựng ước mơ của bạn, và sẽ không làm bạn mạnh mẽ hơn. Ngừng nói. Ngừng chờ đợi. Ngừng đổ lỗi. Đã đến lúc thức tỉnh, làm việc và kiểm soát hoàn toàn cuộc sống của bạn – NGAY BÂY GIỜ!",
+    "quote1": "Lý do không trả tiền. Nỗ lực mới trả tiền. Bắt đầu làm việc đi.",
+    "whatIsTitle": "Thử Thách Không Có Lý Do là gì?",
+    "whatIsDesc": "Đây không phải là một bài diễn văn động viên cảm tính, vỗ vai an ủi. Đây là một cuộc kiểm tra thực tế. Thử Thách Không Có Lý Do ở đây để lay động bạn, phá vỡ những thói quen cũ và buộc bạn phải chịu trách nhiệm. Thành công không được cho – nó được lấy. Và nếu bạn không sẵn sàng lấy nó, hãy nhường chỗ cho những người sẽ làm điều đó. Sẵn sàng làm chủ cuộc sống của bạn? Chứng minh đi.",
+    "quote2": "Không ai sẽ đến cứu bạn. Hãy đứng dậy và tự làm điều đó.",
+    "whyJoinTitle": "Tại sao tham gia Thử Thách Không Có Lý Do?",
+    "whyJoinDesc": "• Không Còn Lý Do – Bạn hoặc là toàn tâm toàn ý hoặc là ra ngoài. Không có trạng thái trung gian.\n• Hãy Cảm Thấy Khó Chịu – Sự phát triển xảy ra khi bạn vượt qua giới hạn của mình. Không đau đớn, không có thành công.\n• Chứng Minh Bản Thân – Nói thì dễ. Hãy xuất hiện, làm việc chăm chỉ và kiếm thành công của bạn.\n• Tham Gia Cộng Đồng Không Khoan Nhượng – Chỉ những người chiến thắng. Nếu bạn đang tìm kiếm sự thương hại, hãy tìm ở nơi khác.",
+    "quote3": "Người yếu đuối tạo ra lý do. Người mạnh mẽ tạo ra hành động.",
+    "howItWorksTitle": "Cách Thức Hoạt Động",
+    "howItWorksDesc": "• Ngừng Phàn Nàn – Không ai quan tâm đến lý do của bạn. Không ai cả. Hãy đứng dậy và làm việc.\n• Đặt Mục Tiêu – Hãy làm cho nó thực tế. Hãy làm cho nó khó khăn. Không có chiến thắng dễ dàng.\n• Làm Việc – Không bỏ qua. Không đường tắt. Không bỏ cuộc.\n• Sở Hữu Kết Quả Của Bạn – Thắng hay thua, đó là TRÁCH NHIỆM CỦA BẠN. Không đổ lỗi. Không than vãn.",
+    "quote4": "Bạn hoặc chịu đựng nỗi đau của kỷ luật hoặc nỗi đau của hối tiếc. Hãy chọn.",
+    "takeActionTitle": "Đủ Nói Rồi. Hãy Hành Động.",
+    "takeActionDesc": "Điều này không dành cho người yếu đuối. Nó dành cho những người từ chối bị mắc kẹt trong cùng một chu trình thất bại. Đã đến lúc đẩy mạnh hơn, nâng cấp và LÀM CHO MỌI THỨ XẢY RA. Nếu bạn không thể xử lý được, hãy nhường chỗ. Tham gia Thử Thách Không Có Lý Do ngay hôm nay. Không còn than vãn. Không còn chờ đợi. Chỉ có kết quả.",
+    "quote5": "Thành công không dành cho những đứa trẻ hay khóc. Hãy tiến lên hoặc nhường chỗ."
+  },
+
+  "payment": {
+    "warning": "⚠️ Cảnh báo:",
+    "checkIds": "Vui lòng kiểm tra số lượng ID trong Tier 1 cần được hoàn thành trong vòng",
+    "days": "ngày",
+    "branch1ToFulfill": "Nhánh 1 cần hoàn thành :",
+    "branch2ToFulfill": "Nhánh 2 cần hoàn thành :",
+    "ids": "ID",
+    "agreeToComplete": "Bằng cách nhấp \"Có\", thành viên đồng ý hoàn thành",
+    "activeIds": "ID hoạt động",
+    "inBoth": "trong cả hai",
+    "branch1": "Nhánh 1",
+    "branch2": "Nhánh 2"
+  },
+
+  "status": {
+    "unverify": "Chưa xác thực",
+    "approved": "Đã phê duyệt", 
+    "locked": "Đã khóa"
+  },
+
+  "signin": {
+    "title": "Đăng nhập",
+    "emailPlaceholder": "Email/Tên người dùng",
+    "passwordPlaceholder": "Mật khẩu",
+    "rememberMe": "Ghi nhớ đăng nhập",
+    "forgotPassword": "Quên mật khẩu?",
+    "confirm": "Xác nhận",
+    "backToHomepage": "Quay về trang chủ",
+    "emailRequired": "Email/Tên người dùng là bắt buộc",
+    "passwordRequired": "Mật khẩu là bắt buộc",
+    "passwordPattern": "Mật khẩu phải có ít nhất 8 ký tự và một số"
+  },
+
+  "sidebar": {
+    "signIn": "Đăng nhập",
+    "copyright": "©2024 NoExcuseChallenge. Tất cả quyền được bảo lưu.",
+    "menu": {
+      "Users": "Người dùng",
+      "Transactions": "Giao dịch",
+      "Get link active": "Lấy liên kết kích hoạt",
+      "Withdraw request": "Yêu cầu rút tiền",
+      "Claims": "Yêu cầu",
+      "News": "Tin tức",
+      "Permissions": "Quyền hạn",
+      "Cronjob": "Tác vụ tự động",
+      "Admins": "Quản trị viên",
+      "Double KYC": "KYC kép",
+      "DreamPool": "DreamPool",
+      "Config": "Cấu hình",
+      "User History": "Lịch sử người dùng",
+      "Basic Members": "Thành viên cơ bản",
+      "Pre-Tier 2 Pending": "Pre-Tier 2 chờ duyệt",
+      "Pre-Tier 2 Users": "Người dùng Pre-Tier 2",
+      "Pre-Tier 2 Pool": "Pool Pre-Tier 2",
+      "Wallet Connect History": "Lịch sử kết nối ví",
+      "Profile": "Hồ sơ",
+      "Payment": "Thanh toán",
+      "System": "Hệ thống",
+      "Income": "Thu nhập",
+      "Withdraws": "Rút tiền",
+      "Referral": "Giới thiệu"
+    }
+  },
+
+  "adminUsers": {
+    "table": {
+      "username": "Tên người dùng",
+      "age": "Tuổi",
+      "usdt": "USDT",
+      "hewe": "HEWE",
+      "walletAddress": "Địa chỉ ví",
+      "paymentPending": "Thanh toán chờ duyệt",
+      "status": "Trạng thái",
+      "action": "Hành động"
+    },
+    "buttons": {
+      "exportData": "Xuất dữ liệu",
+      "createUser": "Tạo người dùng",
+      "search": "Tìm kiếm",
+      "approve": "Phê duyệt",
+      "all": "Tất cả"
+    },
+    "placeholders": {
+      "searchUser": "Tìm kiếm theo tên người dùng, email hoặc ví"
+    },
+    "modals": {
+      "approvePayment": "Bạn có chắc chắn muốn phê duyệt giao dịch cho người dùng này?",
+      "approveButton": "Phê duyệt"
+    },
+    "actions": {
+      "approve": "Phê duyệt",
+      "view": "Xem chi tiết",
+      "tree": "Xem cây",
+      "move": "Di chuyển hệ thống",
+      "delete": "Xóa"
+    }
+  },
+
+  "userProfile": {
+    "title": "Hồ sơ người dùng",
+         "fields": {
+           "userName": "Tên người dùng",
+           "email": "Email",
+           "phone": "Số điện thoại",
+           "idCode": "Mã ID",
+           "walletAddress": "Địa chỉ ví",
+           "isRegistered": "Đã đăng ký",
+           "countPay": "Số lần thanh toán",
+           "tier": "Cấp độ",
+           "buyPackage": "Gói mua",
+           "rank": "Xếp hạng",
+           "availableHewe": "HEWE khả dụng",
+           "rewardHewe": "HEWE thưởng",
+           "hewePerDay": "HEWE mỗi ngày",
+           "availableUsdt": "USDT khả dụng",
+           "processingUsdt": "USDT đang xử lý",
+           "totalEarned": "Tổng thu nhập",
+           "totalHold": "Tổng giữ",
+           "outstandingPreTier2": "Số dư Pre-Tier2 Pool",
+           "payoutGateway": "Cổng thanh toán",
+           "payoutDisplayName": "Tên hiển thị thanh toán",
+           "payoutEmailOrPhone": "Email hoặc số điện thoại thanh toán",
+           "overdueReferral": "Giới thiệu quá hạn",
+           "fine": "Phạt",
+           "level": "Cấp",
+           "note": "Ghi chú",
+           "changeCreatedAt": "Ngày tạo thay đổi",
+           "dieTime": "Thời gian kết thúc",
+           "status": "Trạng thái",
+           "holdTier": "Giữ cấp độ",
+           "holdLevel": "Giữ cấp",
+           "lockedTime": "Thời gian khóa",
+           "deletedTime": "Thời gian xóa",
+           "memberSince": "Thành viên từ",
+           "tier1Time": "Thời gian Tier 1",
+           "tier2Time": "Thời gian Tier 2",
+           "tier3Time": "Thời gian Tier 3",
+           "tier4Time": "Thời gian Tier 4",
+           "tier5Time": "Thời gian Tier 5",
+           "oldUserName": "Tên người dùng cũ",
+           "oldEmail": "Email cũ",
+           "changeDate": "Ngày thay đổi",
+           "temporaryDie": "Tạm dừng",
+           "activeId": "ID Hoạt động",
+           "numbersOfIdRequire": "Số lượng ID yêu cầu",
+           "branch1": "Nhánh 1",
+           "branch2": "Nhánh 2"
+         },
+    "status": {
+      "finished": "Hoàn thành",
+      "unfinished": "Chưa hoàn thành",
+      "times": "lần"
+    },
+    "buttons": {
+      "edit": "Chỉnh sửa",
+      "save": "Lưu",
+      "cancel": "Hủy",
+      "delete": "Xóa",
+      "approve": "Phê duyệt",
+      "reset": "Đặt lại",
+      "checkKyc": "Kiểm tra KYC",
+      "lockKyc": "Khóa KYC",
+      "unlockKyc": "Mở khóa KYC",
+      "pushToPreTier2": "Đẩy lên Pre-Tier 2",
+      "changeWallet": "Đổi ví"
+    },
+    "switches": {
+      "openLah": "Mở LAH",
+      "closeLah": "Đóng LAH",
+      "lockKyc": "Khóa KYC",
+      "termDie": "Kết thúc",
+      "bonusRef": "Thưởng giới thiệu",
+      "kycFee": "Phí KYC"
+    },
+         "sections": {
+           "userInfo": "Thông tin người dùng",
+           "financialInfo": "Thông tin tài chính",
+           "referralInfo": "Thông tin giới thiệu",
+           "notEnoughChild": "Không đủ con",
+           "numbersOfIdRequire": "Số lượng ID yêu cầu",
+           "refUserName": "Tên người giới thiệu",
+           "oldParent": "Cha mẹ cũ",
+           "branch1": "Nhánh 1",
+           "branch2": "Nhánh 2",
+           "totalEarnedUsdt": "Tổng thu nhập USDT",
+           "totalEarnedHewe": "Tổng thu nhập HEWE",
+           "directReferralMembers": "Thành viên giới thiệu trực tiếp",
+           "directReferralSubMembers": "Thành viên phụ giới thiệu trực tiếp",
+           "tier2Users": "Người dùng Tier 2",
+           "referer": "Người giới thiệu",
+           "missingUsers": "Người dùng cần bù",
+           "totalChild": "Tổng số con",
+           "subInfo": "Thông tin phụ"
+         },
+    "modals": {
+      "deleteConfirm": "Bạn có chắc chắn muốn thực hiện điều này?",
+      "changeWalletConfirm": "Bạn có chắc chắn muốn thực hiện điều này",
+      "updating": "Đang cập nhật...",
+      "deleting": "Đang xóa..."
+    },
+    "validation": {
+      "userNameRequired": "Tên người dùng là bắt buộc",
+      "emailRequired": "Email là bắt buộc",
+      "phoneRequired": "Số điện thoại là bắt buộc",
+      "idCodeRequired": "Mã ID là bắt buộc",
+      "walletAddressRequired": "Địa chỉ ví là bắt buộc",
+      "walletFormatError": "Vui lòng nhập đúng định dạng ví",
+      "tierRequired": "Cấp độ là bắt buộc",
+      "availableHeweRequired": "HEWE khả dụng là bắt buộc",
+      "availableUsdtRequired": "USDT khả dụng là bắt buộc",
+      "fineRequired": "Phạt là bắt buộc",
+      "levelRequired": "Cấp là bắt buộc"
+    }
+  }
 }

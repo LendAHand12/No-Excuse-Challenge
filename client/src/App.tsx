@@ -87,7 +87,6 @@ import AdminPreTier2PoolPage from './pages/Admin/PreTier2Pool';
 import PreTier2Pool from './pages/User/PreTier2Pool';
 import UsersPassedTier2Page from './pages/User/UsersPassedTier2';
 import AdminWalletConnectHistoryPages from './pages/Admin/WalletConnectHistory';
-
 function App() {
   const { pathname } = useLocation();
   const { userInfo } = useSelector((state) => state.auth);
