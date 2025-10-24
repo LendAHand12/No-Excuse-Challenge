@@ -15,7 +15,8 @@ const router = express.Router();
 
 router.route("/hewe").post(protectRoute, claimHewe);
 router.route("/amc").post(protectRoute, claimAmc);
-router.route("/usdt").post(claimUsdt);
+// router.route("/usdt").post(claimUsdt);
+router.route("/usdt").post(protectRoute, claimUsdt);
 router.route("/list").get(protectRoute, isAdmin, getAllClaims);
 router.route("/export").post(protectRoute, isAdmin, getAllClaimsForExport);
 router.route("/user").get(protectRoute, getAllClaimsOfUser);

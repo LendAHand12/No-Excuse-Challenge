@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useForm, Controller } from 'react-hook-form';
+import 'react-day-picker/style.css';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +9,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { format } from 'date-fns';
 import {
   User as UserIcon,
   Mail,
@@ -23,11 +40,12 @@ import {
   Lock,
   Unlock,
   ArrowUp,
-  Calendar,
+  Calendar as CalendarIcon,
   FileText,
 } from 'lucide-react';
 import PhoneInput from '@/components/ui/phone-input';
 import moment from 'moment';
+import DatePickerCustom from '../DatePickerCustom';
 
 const UserProfileCard = ({
   data,
@@ -54,6 +72,7 @@ const UserProfileCard = ({
   userInfo,
 }) => {
   const { t } = useTranslation();
+  const { setValue, control } = useForm();
   const [activeTab, setActiveTab] = useState('tier1');
 
   // Determine available tabs based on user tier
@@ -75,15 +94,6 @@ const UserProfileCard = ({
 
   const availableTabs = getAvailableTabs();
 
-  // Debug: Log data to console
-  console.log('UserProfileCard Debug:', {
-    tier: data.tier,
-    availableTabs,
-    isBlue: data.isBlue,
-    isPink: data.isPink,
-    currentLayer: data.currentLayer,
-  });
-
   // Get color from API data
   const getTabColor = () => {
     if (data.isBlue) return '#3B82F6'; // Blue
@@ -97,7 +107,10 @@ const UserProfileCard = ({
       return {
         availableUsdt: data.availableUsdt,
         availableHewe: data.availableHewe,
-        rewardHewe: data.rewardHewe,
+        rewardHewe: Math.max(
+          0,
+          (data.totalHewe || 0) - (data.claimedHewe || 0),
+        ),
         hewePerDay: data.hewePerDay,
         level: data.currentLayer[0] || 0,
         rank: renderRank(data.currentLayer[0] || 0),
@@ -106,7 +119,10 @@ const UserProfileCard = ({
       return {
         availableUsdt: data.availableUsdt,
         availableHewe: data.availableHewe,
-        rewardHewe: data.rewardHewe,
+        rewardHewe: Math.max(
+          0,
+          (data.totalHewe || 0) - (data.claimedHewe || 0),
+        ),
         hewePerDay: data.hewePerDay,
         level: data.currentLayer[1] || 0,
         rank: renderRank(data.currentLayer[1] || 0),
@@ -138,57 +154,25 @@ const UserProfileCard = ({
 
   return (
     <div className="w-full max-w-none space-y-6">
-      {/* Important Alerts */}
-      {data.bonusRef && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
-          <span className="block sm:inline">
-            {t('You have received 10 USDT from DreamPool fund')}
-          </span>
-        </div>
-      )}
-
-      {walletChange && (
-        <div className="w-full bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded">
-          <span className="block sm:inline">
-            {t('Wallet information update is pending admin approval')}
-          </span>
-        </div>
-      )}
-
-      {data.tier === 2 && data.dieTime && data.countdown > 0 && (
-        <div className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <span className="block sm:inline">
-            You have only <b>{data.countdown}</b> days left to complete the 62
-            required IDs to be eligible for Tier 2 benefits.
-          </span>
-        </div>
-      )}
-
-      {data.tier === 1 && data.dieTime && data.countdown > 0 && (
-        <div className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <span className="block sm:inline">
-            You have only <b>{data.countdown}</b> days left to complete
-            referring at least 2 people in 2 different branches.
-          </span>
-        </div>
-      )}
-
       {/* Tier Tabs */}
       {availableTabs.length > 0 && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList
-            className="grid w-full grid-cols-3"
-            style={{ backgroundColor: '#f1f5f9' }}
-          >
+          <TabsList className="grid w-full grid-cols-3">
             {availableTabs.map((tab) => {
               const tabColor = getTabColor();
               return (
                 <TabsTrigger
                   key={tab.id}
                   value={tab.id}
-                  className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+                  className={`text-base font-medium transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? 'text-white shadow-lg'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
                   style={{
-                    color: activeTab === tab.id ? tabColor : '#64748b',
+                    backgroundColor:
+                      activeTab === tab.id ? tabColor : 'transparent',
+                    color: activeTab === tab.id ? 'white' : '#64748b',
                   }}
                 >
                   {tab.label}
@@ -197,14 +181,87 @@ const UserProfileCard = ({
             })}
           </TabsList>
 
+          {/* Important Alerts */}
+          <div className="space-y-2 mt-4">
+            {data.bonusRef && (
+              <div className="bg-green-50 border-l-4 border-green-400 p-3 rounded-r-md">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <CheckCircle className="h-5 w-5 text-green-400" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-green-700">
+                      {t('You have received 10 USDT from DreamPool fund')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {walletChange && (
+              <div className="bg-orange-50 border-l-4 border-orange-400 p-3 rounded-r-md">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <Settings className="h-5 w-5 text-orange-400" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-orange-700">
+                      {t('Wallet information update is pending admin approval')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {data.tier === 2 && data.dieTime && data.countdown > 0 && (
+              <div className="bg-red-50 border-l-4 border-red-400 p-3 rounded-r-md">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <CalendarIcon className="h-5 w-5 text-red-400" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-red-700">
+                      You have only{' '}
+                      <span className="font-semibold">{data.countdown}</span>{' '}
+                      days left to complete the 62 required IDs to be eligible
+                      for Tier 2 benefits.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {data.tier === 1 && data.dieTime && data.countdown > 0 && (
+              <div className="bg-red-50 border-l-4 border-red-400 p-3 rounded-r-md">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <CalendarIcon className="h-5 w-5 text-red-400" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-red-700">
+                      You have only{' '}
+                      <span className="font-semibold">{data.countdown}</span>{' '}
+                      days left to complete referring at least 2 people in 2
+                      different branches.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           {availableTabs.map((tab) => (
-             <TabsContent key={tab.id} value={tab.id} className="mt-6 space-y-6">
-               {/* User Header Card */}
-               <Card>
+            <TabsContent key={tab.id} value={tab.id} className="mt-6 space-y-6">
+              {/* User Header Card */}
+              <Card>
                 <CardHeader className="pb-4">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                     <Avatar className="h-20 w-20 flex-shrink-0">
-                      <AvatarImage src={getAvatarSrc()} alt={data.userId} />
+                      <AvatarImage
+                        src={getAvatarSrc()}
+                        alt={data.userId}
+                        className="object-cover"
+                      />
                       <AvatarFallback className="text-lg font-semibold">
                         {getInitials()}
                       </AvatarFallback>
@@ -213,39 +270,39 @@ const UserProfileCard = ({
                       <CardTitle className="text-2xl truncate">
                         {data.userId}
                       </CardTitle>
-                       <div className="flex flex-wrap items-center gap-2 mt-2">
-                         <Badge
-                           className={`${
-                             data.status === 'UNVERIFY'
-                               ? 'bg-red-600'
-                               : data.status === 'PENDING'
-                               ? 'bg-yellow-600'
-                               : data.status === 'APPROVED'
-                               ? 'bg-green-600'
-                               : data.status === 'REJECTED'
-                               ? 'bg-red-600'
-                               : data.status === 'LOCKED'
-                               ? 'bg-red-600'
-                               : data.status === 'DELETED'
-                               ? 'bg-red-600'
-                               : 'bg-gray-600'
-                           } text-white`}
-                         >
-                           {t(data.status)}
-                         </Badge>
-                         <Badge variant="outline">Tier {data.tier}</Badge>
-                         {data.countPay > 0 && (
-                           <Badge
-                             variant="secondary"
-                             className="bg-blue-100 text-blue-800"
-                           >
-                             {currentTierData.rank ||
-                               renderRank(
-                                 data.currentLayer[0] ? data.currentLayer[0] : 0,
-                               )}
-                           </Badge>
-                         )}
-                       </div>
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
+                        <Badge
+                          className={`${
+                            data.status === 'UNVERIFY'
+                              ? 'bg-red-600'
+                              : data.status === 'PENDING'
+                              ? 'bg-yellow-600'
+                              : data.status === 'APPROVED'
+                              ? 'bg-green-600'
+                              : data.status === 'REJECTED'
+                              ? 'bg-red-600'
+                              : data.status === 'LOCKED'
+                              ? 'bg-red-600'
+                              : data.status === 'DELETED'
+                              ? 'bg-red-600'
+                              : 'bg-gray-600'
+                          } text-white`}
+                        >
+                          {t(data.status)}
+                        </Badge>
+                        <Badge variant="outline">Tier {data.tier}</Badge>
+                        {data.countPay > 0 && (
+                          <Badge
+                            variant="secondary"
+                            className="bg-blue-100 text-blue-800"
+                          >
+                            {currentTierData.rank ||
+                              renderRank(
+                                data.currentLayer[0] ? data.currentLayer[0] : 0,
+                              )}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                     <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 flex-shrink-0">
                       {userInfo?.permissions
@@ -396,7 +453,8 @@ const UserProfileCard = ({
                     {/* ID Code */}
                     <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
                       <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
-                        <label className="text-sm font-semibold text-gray-600">
+                        <label className="text-sm font-semibold text-gray-600 flex items-center">
+                          <UserIcon className="w-4 h-4 mr-2" />
                           {t('userProfile.fields.idCode')}
                         </label>
                       </div>
@@ -465,17 +523,151 @@ const UserProfileCard = ({
                         )}
                       </div>
                     </div>
-
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Financial Information Card */}
+              {/* HEWE Information Card */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <DollarSign className="w-5 h-5 mr-2" />
-                    {t('userProfile.sections.financialInfo')}
+                    HEWE Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Total HEWE */}
+                    <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
+                      <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
+                        <label className="text-sm font-semibold text-gray-600">
+                          {t('userProfile.fields.totalHewe')}
+                        </label>
+                      </div>
+                      <div className="w-full sm:w-2/3">
+                        {isEditting ? (
+                          <div>
+                            <Input
+                              {...register('totalHewe', {
+                                required: t(
+                                  'userProfile.validation.totalHeweRequired',
+                                ),
+                              })}
+                              defaultValue={data.totalHewe || 0}
+                              className="w-full"
+                            />
+                            {errors.totalHewe && (
+                              <p className="text-red-500 text-sm mt-1">
+                                {errors.totalHewe.message}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-900 font-medium">
+                            {data.totalHewe || 0}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Available HEWE */}
+                    <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
+                      <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
+                        <label className="text-sm font-semibold text-gray-600">
+                          {t('userProfile.fields.availableHewe')}
+                        </label>
+                      </div>
+                      <div className="w-full sm:w-2/3">
+                        {isEditting ? (
+                          <div>
+                            <Input
+                              {...register('availableHewe', {
+                                required: t(
+                                  'userProfile.validation.availableHeweRequired',
+                                ),
+                              })}
+                              defaultValue={
+                                currentTierData.availableHewe ||
+                                data.availableHewe
+                              }
+                              className="w-full"
+                            />
+                            {errors.availableHewe && (
+                              <p className="text-red-500 text-sm mt-1">
+                                {errors.availableHewe.message}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-900 font-medium">
+                            {currentTierData.availableHewe ||
+                              data.availableHewe}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Daily HEWE */}
+                    <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
+                      <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
+                        <label className="text-sm font-semibold text-gray-600">
+                          {t('userProfile.fields.hewePerDay')}
+                        </label>
+                      </div>
+                      <div className="w-full sm:w-2/3">
+                        {isEditting ? (
+                          <div>
+                            <Input
+                              {...register('hewePerDay', {
+                                required: t(
+                                  'userProfile.validation.hewePerDayRequired',
+                                ),
+                              })}
+                              defaultValue={
+                                currentTierData.hewePerDay || data.hewePerDay
+                              }
+                              className="w-full"
+                            />
+                            {errors.hewePerDay && (
+                              <p className="text-red-500 text-sm mt-1">
+                                {errors.hewePerDay.message}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-900 font-medium">
+                            {currentTierData.hewePerDay || data.hewePerDay}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Reward HEWE */}
+                    <div className="flex flex-col sm:flex-row sm:items-center py-3">
+                      <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
+                        <label className="text-sm font-semibold text-gray-600">
+                          {t('userProfile.fields.rewardHewe')}
+                        </label>
+                      </div>
+                      <div className="w-full sm:w-2/3">
+                        <p className="text-sm text-gray-900 font-medium">
+                          {Math.max(
+                            0,
+                            (data.totalHewe || 0) - (data.claimedHewe || 0),
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* USDT Information Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <DollarSign className="w-5 h-5 mr-2" />
+                    USDT Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -514,43 +706,6 @@ const UserProfileCard = ({
                             {currentTierData.availableUsdt ||
                               data.availableUsdt}{' '}
                             USDT
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Available HEWE */}
-                    <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
-                      <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
-                        <label className="text-sm font-semibold text-gray-600">
-                          {t('userProfile.fields.availableHewe')}
-                        </label>
-                      </div>
-                      <div className="w-full sm:w-2/3">
-                        {isEditting ? (
-                          <div>
-                            <Input
-                              {...register('availableHewe', {
-                                required: t(
-                                  'userProfile.validation.availableHeweRequired',
-                                ),
-                              })}
-                              defaultValue={
-                                currentTierData.availableHewe ||
-                                data.availableHewe
-                              }
-                              className="w-full"
-                            />
-                            {errors.availableHewe && (
-                              <p className="text-red-500 text-sm mt-1">
-                                {errors.availableHewe.message}
-                              </p>
-                            )}
-                          </div>
-                        ) : (
-                          <p className="text-sm text-gray-900 font-medium">
-                            {currentTierData.availableHewe ||
-                              data.availableHewe}
                           </p>
                         )}
                       </div>
@@ -634,19 +789,18 @@ const UserProfileCard = ({
                       </div>
                       <div className="w-full sm:w-2/3">
                         {isEditting ? (
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              checked={data.openLah || false}
-                              onChange={(e) => {
-                                // Handle openLah change
-                              }}
-                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span className="text-sm text-gray-700">
-                              {data.openLah ? t('yes') : t('no')}
-                            </span>
-                          </div>
+                          <Controller
+                            name="openLah"
+                            control={control}
+                            render={({ field }) => (
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </div>
+                            )}
+                          />
                         ) : (
                           <p className="text-sm text-gray-900 font-medium">
                             {data.openLah ? t('yes') : t('no')}
@@ -664,19 +818,18 @@ const UserProfileCard = ({
                       </div>
                       <div className="w-full sm:w-2/3">
                         {isEditting ? (
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              checked={data.closeLah || false}
-                              onChange={(e) => {
-                                // Handle closeLah change
-                              }}
-                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span className="text-sm text-gray-700">
-                              {data.closeLah ? t('yes') : t('no')}
-                            </span>
-                          </div>
+                          <Controller
+                            name="closeLah"
+                            control={control}
+                            render={({ field }) => (
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </div>
+                            )}
+                          />
                         ) : (
                           <p className="text-sm text-gray-900 font-medium">
                             {data.closeLah ? t('yes') : t('no')}
@@ -694,19 +847,18 @@ const UserProfileCard = ({
                       </div>
                       <div className="w-full sm:w-2/3">
                         {isEditting ? (
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              checked={data.lockKyc || false}
-                              onChange={(e) => {
-                                // Handle lockKyc change
-                              }}
-                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span className="text-sm text-gray-700">
-                              {data.lockKyc ? t('yes') : t('no')}
-                            </span>
-                          </div>
+                          <Controller
+                            name="lockKyc"
+                            control={control}
+                            render={({ field }) => (
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </div>
+                            )}
+                          />
                         ) : (
                           <p className="text-sm text-gray-900 font-medium">
                             {data.lockKyc ? t('yes') : t('no')}
@@ -724,21 +876,18 @@ const UserProfileCard = ({
                       </div>
                       <div className="w-full sm:w-2/3">
                         {isEditting ? (
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              checked={data.errLahCode === 'OVER45' || false}
-                              onChange={(e) => {
-                                // Handle termDie change
-                              }}
-                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span className="text-sm text-gray-700">
-                              {data.errLahCode === 'OVER45'
-                                ? t('yes')
-                                : t('no')}
-                            </span>
-                          </div>
+                          <Controller
+                            name="termDie"
+                            control={control}
+                            render={({ field }) => (
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </div>
+                            )}
+                          />
                         ) : (
                           <p className="text-sm text-gray-900 font-medium">
                             {data.errLahCode === 'OVER45' ? t('yes') : t('no')}
@@ -756,19 +905,18 @@ const UserProfileCard = ({
                       </div>
                       <div className="w-full sm:w-2/3">
                         {isEditting ? (
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              checked={data.bonusRef || false}
-                              onChange={(e) => {
-                                // Handle bonusRef change
-                              }}
-                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span className="text-sm text-gray-700">
-                              {data.bonusRef ? t('yes') : t('no')}
-                            </span>
-                          </div>
+                          <Controller
+                            name="bonusRef"
+                            control={control}
+                            render={({ field }) => (
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </div>
+                            )}
+                          />
                         ) : (
                           <p className="text-sm text-gray-900 font-medium">
                             {data.bonusRef ? t('yes') : t('no')}
@@ -786,19 +934,18 @@ const UserProfileCard = ({
                       </div>
                       <div className="w-full sm:w-2/3">
                         {isEditting ? (
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              checked={data.kycFee || false}
-                              onChange={(e) => {
-                                // Handle kycFee change
-                              }}
-                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span className="text-sm text-gray-700">
-                              {data.kycFee ? t('yes') : t('no')}
-                            </span>
-                          </div>
+                          <Controller
+                            name="kycFee"
+                            control={control}
+                            render={({ field }) => (
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </div>
+                            )}
+                          />
                         ) : (
                           <p className="text-sm text-gray-900 font-medium">
                             {data.kycFee ? t('yes') : t('no')}
@@ -817,19 +964,23 @@ const UserProfileCard = ({
                       <div className="w-full sm:w-2/3">
                         {isEditting ? (
                           <div>
-                            <select
+                            <Select
                               {...register('hold')}
                               defaultValue={data.hold}
                               disabled={loadingUpdate}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
-                              <option value="no">{t('no')}</option>
-                              <option value={1}>Tier 1</option>
-                              <option value={2}>Tier 2</option>
-                              <option value={3}>Tier 3</option>
-                              <option value={4}>Tier 4</option>
-                              <option value={5}>Tier 5</option>
-                            </select>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select hold tier" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="no">{t('no')}</SelectItem>
+                                <SelectItem value="1">Tier 1</SelectItem>
+                                <SelectItem value="2">Tier 2</SelectItem>
+                                <SelectItem value="3">Tier 3</SelectItem>
+                                <SelectItem value="4">Tier 4</SelectItem>
+                                <SelectItem value="5">Tier 5</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                         ) : (
                           <p className="text-sm text-gray-900 font-medium">
@@ -849,53 +1000,57 @@ const UserProfileCard = ({
                       <div className="w-full sm:w-2/3">
                         {isEditting ? (
                           <div>
-                            <select
+                            <Select
                               {...register('holdLevel')}
                               defaultValue={data.holdLevel}
                               disabled={loadingUpdate}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
-                              <option value="no">{t('no')}</option>
-                              <option value={0}>
-                                {t('userProfile.fields.level')} 0
-                              </option>
-                              <option value={1}>
-                                {t('userProfile.fields.level')} 1
-                              </option>
-                              <option value={2}>
-                                {t('userProfile.fields.level')} 2
-                              </option>
-                              <option value={3}>
-                                {t('userProfile.fields.level')} 3
-                              </option>
-                              <option value={4}>
-                                {t('userProfile.fields.level')} 4
-                              </option>
-                              <option value={5}>
-                                {t('userProfile.fields.level')} 5
-                              </option>
-                              <option value={6}>
-                                {t('userProfile.fields.level')} 6
-                              </option>
-                              <option value={7}>
-                                {t('userProfile.fields.level')} 7
-                              </option>
-                              <option value={8}>
-                                {t('userProfile.fields.level')} 8
-                              </option>
-                              <option value={9}>
-                                {t('userProfile.fields.level')} 9
-                              </option>
-                              <option value={10}>
-                                {t('userProfile.fields.level')} 10
-                              </option>
-                              <option value={11}>
-                                {t('userProfile.fields.level')} 11
-                              </option>
-                              <option value={12}>
-                                {t('userProfile.fields.level')} 12
-                              </option>
-                            </select>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select hold level" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="no">{t('no')}</SelectItem>
+                                <SelectItem value="0">
+                                  {t('userProfile.fields.level')} 0
+                                </SelectItem>
+                                <SelectItem value="1">
+                                  {t('userProfile.fields.level')} 1
+                                </SelectItem>
+                                <SelectItem value="2">
+                                  {t('userProfile.fields.level')} 2
+                                </SelectItem>
+                                <SelectItem value="3">
+                                  {t('userProfile.fields.level')} 3
+                                </SelectItem>
+                                <SelectItem value="4">
+                                  {t('userProfile.fields.level')} 4
+                                </SelectItem>
+                                <SelectItem value="5">
+                                  {t('userProfile.fields.level')} 5
+                                </SelectItem>
+                                <SelectItem value="6">
+                                  {t('userProfile.fields.level')} 6
+                                </SelectItem>
+                                <SelectItem value="7">
+                                  {t('userProfile.fields.level')} 7
+                                </SelectItem>
+                                <SelectItem value="8">
+                                  {t('userProfile.fields.level')} 8
+                                </SelectItem>
+                                <SelectItem value="9">
+                                  {t('userProfile.fields.level')} 9
+                                </SelectItem>
+                                <SelectItem value="10">
+                                  {t('userProfile.fields.level')} 10
+                                </SelectItem>
+                                <SelectItem value="11">
+                                  {t('userProfile.fields.level')} 11
+                                </SelectItem>
+                                <SelectItem value="12">
+                                  {t('userProfile.fields.level')} 12
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                         ) : (
                           <p className="text-sm text-gray-900 font-medium">
@@ -963,7 +1118,7 @@ const UserProfileCard = ({
                               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
                                 {data.listDirectUser.map((ele) => (
                                   <div
-                                    className="bg-white border hover:bg-gray-50 rounded p-2"
+                                    className="bg-white border hover:bg-gray-50 rounded"
                                     key={ele.userId}
                                   >
                                     <span
@@ -977,7 +1132,7 @@ const UserProfileCard = ({
                                           : ele.isPink
                                           ? 'bg-[#e600769c]'
                                           : 'bg-[#16a34a]'
-                                      } py-1 px-2 rounded text-white text-xs block text-center`}
+                                      } py-1 px-2 rounded text-white text-sm block text-center`}
                                     >
                                       {ele.userId}
                                     </span>
@@ -1224,35 +1379,6 @@ const UserProfileCard = ({
                       </div>
                     </div>
 
-                    {/* Buy Package */}
-                    <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
-                      <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
-                        <label className="text-sm font-semibold text-gray-600">
-                          {t('userProfile.fields.buyPackage')}
-                        </label>
-                      </div>
-                      <div className="w-full sm:w-2/3">
-                        {isEditting ? (
-                          <select
-                            {...register('buyPackage')}
-                            defaultValue={data.buyPackage}
-                            disabled={loadingUpdate}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            {packageOptions.map((item) => (
-                              <option key={item} value={item}>
-                                {item}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          <p className="text-sm text-gray-900 font-medium">
-                            {data.buyPackage}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
                     {/* Fine */}
                     <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
                       <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
@@ -1327,18 +1453,26 @@ const UserProfileCard = ({
                     <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
                       <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
                         <label className="text-sm font-semibold text-gray-600 flex items-center">
-                          <Calendar className="w-4 h-4 mr-2" />
+                          <CalendarIcon className="w-4 h-4 mr-2" />
                           {t('userProfile.fields.changeCreatedAt')}
                         </label>
                       </div>
                       <div className="w-full sm:w-2/3">
                         {isEditting ? (
                           <div>
-                            <Input
-                              {...register('changeCreatedAt')}
-                              type="date"
-                              className="w-full"
+                            <Controller
+                              name="changeCreatedAt"
+                              control={control}
+                              render={({ field }) => (
+                                <DatePickerCustom
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                  placeholder="Select date"
+                                  disabled={loadingUpdate}
+                                />
+                              )}
                             />
+
                             {errors.changeCreatedAt && (
                               <p className="text-red-500 text-sm mt-1">
                                 {errors.changeCreatedAt.message}
@@ -1361,17 +1495,24 @@ const UserProfileCard = ({
                     <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
                       <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
                         <label className="text-sm font-semibold text-gray-600 flex items-center">
-                          <Calendar className="w-4 h-4 mr-2" />
+                          <CalendarIcon className="w-4 h-4 mr-2" />
                           {t('userProfile.fields.dieTime')}
                         </label>
                       </div>
                       <div className="w-full sm:w-2/3">
                         {isEditting ? (
                           <div>
-                            <Input
-                              {...register('dieTime')}
-                              type="date"
-                              className="w-full"
+                            <Controller
+                              name="dieTime"
+                              control={control}
+                              render={({ field }) => (
+                                <DatePickerCustom
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                  placeholder="Select date"
+                                  disabled={loadingUpdate}
+                                />
+                              )}
                             />
                             {errors.dieTime && (
                               <p className="text-red-500 text-sm mt-1">
@@ -1424,17 +1565,24 @@ const UserProfileCard = ({
                     <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
                       <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
                         <label className="text-sm font-semibold text-gray-600 flex items-center">
-                          <Calendar className="w-4 h-4 mr-2" />
+                          <CalendarIcon className="w-4 h-4 mr-2" />
                           {t('userProfile.fields.memberSince')}
                         </label>
                       </div>
                       <div className="w-full sm:w-2/3">
                         {isEditting ? (
                           <div>
-                            <Input
-                              {...register('changeCreatedAt')}
-                              type="date"
-                              className="w-full"
+                            <Controller
+                              name="memberSince"
+                              control={control}
+                              render={({ field }) => (
+                                <DatePickerCustom
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                  placeholder="Select date"
+                                  disabled={loadingUpdate}
+                                />
+                              )}
                             />
                             {errors.changeCreatedAt && (
                               <p className="text-red-500 text-sm mt-1">
@@ -1459,7 +1607,7 @@ const UserProfileCard = ({
                       <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
                         <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
                           <label className="text-sm font-semibold text-gray-600 flex items-center">
-                            <Calendar className="w-4 h-4 mr-2" />
+                            <CalendarIcon className="w-4 h-4 mr-2" />
                             {t('userProfile.fields.lockedTime')}
                           </label>
                         </div>
@@ -1478,7 +1626,7 @@ const UserProfileCard = ({
                       <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
                         <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
                           <label className="text-sm font-semibold text-gray-600 flex items-center">
-                            <Calendar className="w-4 h-4 mr-2" />
+                            <CalendarIcon className="w-4 h-4 mr-2" />
                             {t('userProfile.fields.deletedTime')}
                           </label>
                         </div>
@@ -1496,7 +1644,7 @@ const UserProfileCard = ({
                     <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
                       <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
                         <label className="text-sm font-semibold text-gray-600 flex items-center">
-                          <Calendar className="w-4 h-4 mr-2" />
+                          <CalendarIcon className="w-4 h-4 mr-2" />
                           {t('userProfile.fields.tier1Time')}
                         </label>
                       </div>
@@ -1512,7 +1660,7 @@ const UserProfileCard = ({
                     <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
                       <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
                         <label className="text-sm font-semibold text-gray-600 flex items-center">
-                          <Calendar className="w-4 h-4 mr-2" />
+                          <CalendarIcon className="w-4 h-4 mr-2" />
                           {t('userProfile.fields.tier2Time')}
                         </label>
                       </div>
@@ -1528,7 +1676,7 @@ const UserProfileCard = ({
                     <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
                       <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
                         <label className="text-sm font-semibold text-gray-600 flex items-center">
-                          <Calendar className="w-4 h-4 mr-2" />
+                          <CalendarIcon className="w-4 h-4 mr-2" />
                           {t('userProfile.fields.tier3Time')}
                         </label>
                       </div>
@@ -1544,7 +1692,7 @@ const UserProfileCard = ({
                     <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
                       <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
                         <label className="text-sm font-semibold text-gray-600 flex items-center">
-                          <Calendar className="w-4 h-4 mr-2" />
+                          <CalendarIcon className="w-4 h-4 mr-2" />
                           {t('userProfile.fields.tier4Time')}
                         </label>
                       </div>
@@ -1560,7 +1708,7 @@ const UserProfileCard = ({
                     <div className="flex flex-col sm:flex-row sm:items-center py-3">
                       <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
                         <label className="text-sm font-semibold text-gray-600 flex items-center">
-                          <Calendar className="w-4 h-4 mr-2" />
+                          <CalendarIcon className="w-4 h-4 mr-2" />
                           {t('userProfile.fields.tier5Time')}
                         </label>
                       </div>

@@ -149,23 +149,23 @@ const Profile = () => {
   //     });
   // };
 
-  const claimUsdt = async (amount) => {
-    setLoadingClaimUsdt(true);
-    await KYC.claim({ coin: 'usdt', amount })
-      .then((response) => {
-        if (response.data.url) {
-          window.location.href = response.data.url;
-        }
-      })
-      .catch((error) => {
-        let message =
-          error.response && error.response.data.error
-            ? error.response.data.error
-            : error.message;
-        toast.error(t(message));
-        setLoadingClaimHewe(false);
-      });
-  };
+  // const claimUsdt = async (amount) => {
+  //   setLoadingClaimUsdt(true);
+  //   await KYC.claim({ coin: 'usdt', amount })
+  //     .then((response) => {
+  //       if (response.data.url) {
+  //         window.location.href = response.data.url;
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       let message =
+  //         error.response && error.response.data.error
+  //           ? error.response.data.error
+  //           : error.message;
+  //       toast.error(t(message));
+  //       setLoadingClaimHewe(false);
+  //     });
+  // };
 
   const claimHewe = async () => {
     setLoadingClaimHewe(true);
@@ -203,24 +203,24 @@ const Profile = () => {
       });
   };
 
-  // const claimUsdt = async () => {
-  //   setLoadingClaimUsdt(true);
-  //   await Claim.usdt()
-  //     .then((response) => {
-  //       toast.success(t(response.data.message));
-  //       setLoadingClaimUsdt(false);
-  //       setShowModal(false);
-  //       setRefresh(!refresh);
-  //     })
-  //     .catch((error) => {
-  //       let message =
-  //         error.response && error.response.data.error
-  //           ? error.response.data.error
-  //           : error.message;
-  //       toast.error(t(message));
-  //       setLoadingClaimUsdt(false);
-  //     });
-  // };
+  const claimUsdt = async (amount) => {
+    setLoadingClaimUsdt(true);
+    await Claim.usdt({ coin: 'usdt', amount })
+      .then((response) => {
+        toast.success(t(response.data.message));
+        setLoadingClaimUsdt(false);
+        setShowModal(false);
+        setRefresh(!refresh);
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.error
+            ? error.response.data.error
+            : error.message;
+        toast.error(t(message));
+        setLoadingClaimUsdt(false);
+      });
+  };
 
   useEffect(() => {
     (async () => {
@@ -820,13 +820,7 @@ const Profile = () => {
             <input
               className="bg-black rounded-xl text-NoExcuseChallenge p-2 flex-1"
               readOnly
-              value={
-                tier > 1
-                  ? 0
-                  : totalHewe > 0
-                  ? totalHewe - claimedHewe
-                  : 0
-              }
+              value={tier > 1 ? 0 : totalHewe > 0 ? totalHewe - claimedHewe : 0}
             />
           </div>
           <button
