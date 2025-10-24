@@ -57,7 +57,6 @@ const UserProfileCard = ({
   phone,
   setPhone,
   errorPhone,
-  packageOptions,
   renderRank,
   onEdit,
   onSave,

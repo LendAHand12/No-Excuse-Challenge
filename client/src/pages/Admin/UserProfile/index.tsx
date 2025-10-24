@@ -98,239 +98,241 @@ const UserProfile = () => {
     async (formData) => {
       setLoadingUpdate(true);
 
-      // Check for changes and only append fields that have changed
-      const form = new FormData();
-      let hasChanges = false;
+      console.log({ formData });
 
-      // Basic fields
-      if (
-        formData.userId !== data.userId &&
-        formData.userId !== undefined &&
-        formData.userId !== null
-      ) {
-        form.append('userId', formData.userId);
-        hasChanges = true;
-      }
+      // // Check for changes and only append fields that have changed
+      // const form = new FormData();
+      // let hasChanges = false;
 
-      if (
-        formData.email !== data.email &&
-        formData.email !== undefined &&
-        formData.email !== null
-      ) {
-        form.append('email', formData.email);
-        hasChanges = true;
-      }
+      // // Basic fields
+      // if (
+      //   formData.userId !== data.userId &&
+      //   formData.userId !== undefined &&
+      //   formData.userId !== null
+      // ) {
+      //   form.append('userId', formData.userId);
+      //   hasChanges = true;
+      // }
 
-      if (phone !== data.phone && phone !== undefined && phone !== null) {
-        form.append('phone', phone);
-        hasChanges = true;
-      }
+      // if (
+      //   formData.email !== data.email &&
+      //   formData.email !== undefined &&
+      //   formData.email !== null
+      // ) {
+      //   form.append('email', formData.email);
+      //   hasChanges = true;
+      // }
 
-      if (
-        formData.idCode !== data.idCode &&
-        formData.idCode !== undefined &&
-        formData.idCode !== null
-      ) {
-        form.append('idCode', formData.idCode);
-        hasChanges = true;
-      }
+      // if (phone !== data.phone && phone !== undefined && phone !== null) {
+      //   form.append('phone', phone);
+      //   hasChanges = true;
+      // }
 
-      if (
-        formData.tier !== data.tier &&
-        formData.tier !== undefined &&
-        formData.tier !== null
-      ) {
-        form.append('tier', formData.tier);
-        hasChanges = true;
-      }
+      // if (
+      //   formData.idCode !== data.idCode &&
+      //   formData.idCode !== undefined &&
+      //   formData.idCode !== null
+      // ) {
+      //   form.append('idCode', formData.idCode);
+      //   hasChanges = true;
+      // }
 
-      if (
-        formData.walletAddress !== data.walletAddress &&
-        formData.walletAddress !== undefined &&
-        formData.walletAddress !== null
-      ) {
-        form.append('walletAddress', formData.walletAddress);
-        hasChanges = true;
-      }
+      // if (
+      //   formData.tier !== data.tier &&
+      //   formData.tier !== undefined &&
+      //   formData.tier !== null
+      // ) {
+      //   form.append('tier', formData.tier);
+      //   hasChanges = true;
+      // }
 
-      // Financial fields
-      if (
-        formData.availableUsdt !== data.availableUsdt &&
-        formData.availableUsdt !== undefined &&
-        formData.availableUsdt !== null
-      ) {
-        form.append('availableUsdt', formData.availableUsdt);
-        hasChanges = true;
-      }
+      // if (
+      //   formData.walletAddress !== data.walletAddress &&
+      //   formData.walletAddress !== undefined &&
+      //   formData.walletAddress !== null
+      // ) {
+      //   form.append('walletAddress', formData.walletAddress);
+      //   hasChanges = true;
+      // }
 
-      if (
-        formData.availableHewe !== data.availableHewe &&
-        formData.availableHewe !== undefined &&
-        formData.availableHewe !== null
-      ) {
-        form.append('availableHewe', formData.availableHewe);
-        hasChanges = true;
-      }
+      // // Financial fields
+      // if (
+      //   formData.availableUsdt !== data.availableUsdt &&
+      //   formData.availableUsdt !== undefined &&
+      //   formData.availableUsdt !== null
+      // ) {
+      //   form.append('availableUsdt', formData.availableUsdt);
+      //   hasChanges = true;
+      // }
 
-      if (
-        formData.hewePerDay !== data.hewePerDay &&
-        formData.hewePerDay !== undefined &&
-        formData.hewePerDay !== null
-      ) {
-        form.append('hewePerDay', formData.hewePerDay);
-        hasChanges = true;
-      }
+      // if (
+      //   formData.availableHewe !== data.availableHewe &&
+      //   formData.availableHewe !== undefined &&
+      //   formData.availableHewe !== null
+      // ) {
+      //   form.append('availableHewe', formData.availableHewe);
+      //   hasChanges = true;
+      // }
 
-      if (
-        formData.newFine !== data.newFine &&
-        formData.newFine !== undefined &&
-        formData.newFine !== null
-      ) {
-        form.append('newFine', formData.newFine);
-        hasChanges = true;
-      }
+      // if (
+      //   formData.hewePerDay !== data.hewePerDay &&
+      //   formData.hewePerDay !== undefined &&
+      //   formData.hewePerDay !== null
+      // ) {
+      //   form.append('hewePerDay', formData.hewePerDay);
+      //   hasChanges = true;
+      // }
 
-      if (
-        formData.level !== data.level &&
-        formData.level !== undefined &&
-        formData.level !== null
-      ) {
-        form.append('level', formData.level);
-        hasChanges = true;
-      }
+      // if (
+      //   formData.newFine !== data.newFine &&
+      //   formData.newFine !== undefined &&
+      //   formData.newFine !== null
+      // ) {
+      //   form.append('newFine', formData.newFine);
+      //   hasChanges = true;
+      // }
 
-      if (
-        formData.note !== data.note &&
-        formData.note !== undefined &&
-        formData.note !== null
-      ) {
-        form.append('note', formData.note);
-        hasChanges = true;
-      }
+      // if (
+      //   formData.level !== data.level &&
+      //   formData.level !== undefined &&
+      //   formData.level !== null
+      // ) {
+      //   form.append('level', formData.level);
+      //   hasChanges = true;
+      // }
 
-      // Date fields
-      if (
-        formData.changeCreatedAt !== data.changeCreatedAt &&
-        formData.changeCreatedAt !== undefined &&
-        formData.changeCreatedAt !== null
-      ) {
-        form.append('changeCreatedAt', formData.changeCreatedAt);
-        hasChanges = true;
-      }
+      // if (
+      //   formData.note !== data.note &&
+      //   formData.note !== undefined &&
+      //   formData.note !== null
+      // ) {
+      //   form.append('note', formData.note);
+      //   hasChanges = true;
+      // }
 
-      if (
-        formData.dieTime !== data.dieTime &&
-        formData.dieTime !== undefined &&
-        formData.dieTime !== null
-      ) {
-        form.append('dieTime', formData.dieTime);
-        hasChanges = true;
-      }
+      // // Date fields
+      // if (
+      //   formData.changeCreatedAt !== data.changeCreatedAt &&
+      //   formData.changeCreatedAt !== undefined &&
+      //   formData.changeCreatedAt !== null
+      // ) {
+      //   form.append('changeCreatedAt', formData.changeCreatedAt);
+      //   hasChanges = true;
+      // }
 
-      if (
-        formData.memberSince !== data.memberSince &&
-        formData.memberSince !== undefined &&
-        formData.memberSince !== null
-      ) {
-        form.append('memberSince', formData.memberSince);
-        hasChanges = true;
-      }
+      // if (
+      //   formData.dieTime !== data.dieTime &&
+      //   formData.dieTime !== undefined &&
+      //   formData.dieTime !== null
+      // ) {
+      //   form.append('dieTime', formData.dieTime);
+      //   hasChanges = true;
+      // }
 
-      // Checkbox fields
-      if (
-        currentOpenLah !== data.openLah &&
-        currentOpenLah !== undefined &&
-        currentOpenLah !== null
-      ) {
-        form.append('openLah', currentOpenLah);
-        hasChanges = true;
-      }
+      // if (
+      //   formData.memberSince !== data.memberSince &&
+      //   formData.memberSince !== undefined &&
+      //   formData.memberSince !== null
+      // ) {
+      //   form.append('memberSince', formData.memberSince);
+      //   hasChanges = true;
+      // }
 
-      if (
-        currentCloseLah !== data.closeLah &&
-        currentCloseLah !== undefined &&
-        currentCloseLah !== null
-      ) {
-        form.append('closeLah', currentCloseLah);
-        hasChanges = true;
-      }
+      // // Checkbox fields
+      // if (
+      //   currentOpenLah !== data.openLah &&
+      //   currentOpenLah !== undefined &&
+      //   currentOpenLah !== null
+      // ) {
+      //   form.append('openLah', currentOpenLah);
+      //   hasChanges = true;
+      // }
 
-      if (
-        currentLockKyc !== data.lockKyc &&
-        currentLockKyc !== undefined &&
-        currentLockKyc !== null
-      ) {
-        form.append('lockKyc', currentLockKyc);
-        hasChanges = true;
-      }
+      // if (
+      //   currentCloseLah !== data.closeLah &&
+      //   currentCloseLah !== undefined &&
+      //   currentCloseLah !== null
+      // ) {
+      //   form.append('closeLah', currentCloseLah);
+      //   hasChanges = true;
+      // }
 
-      if (
-        currentTermDie !== data.termDie &&
-        currentTermDie !== undefined &&
-        currentTermDie !== null
-      ) {
-        form.append('termDie', currentTermDie);
-        hasChanges = true;
-      }
+      // if (
+      //   currentLockKyc !== data.lockKyc &&
+      //   currentLockKyc !== undefined &&
+      //   currentLockKyc !== null
+      // ) {
+      //   form.append('lockKyc', currentLockKyc);
+      //   hasChanges = true;
+      // }
 
-      if (
-        isBonusRef !== data.bonusRef &&
-        isBonusRef !== undefined &&
-        isBonusRef !== null
-      ) {
-        form.append('bonusRef', isBonusRef);
-        hasChanges = true;
-      }
+      // if (
+      //   currentTermDie !== data.termDie &&
+      //   currentTermDie !== undefined &&
+      //   currentTermDie !== null
+      // ) {
+      //   form.append('termDie', currentTermDie);
+      //   hasChanges = true;
+      // }
 
-      if (kycFee !== data.kycFee && kycFee !== undefined && kycFee !== null) {
-        form.append('kycFee', kycFee);
-        hasChanges = true;
-      }
+      // if (
+      //   isBonusRef !== data.bonusRef &&
+      //   isBonusRef !== undefined &&
+      //   isBonusRef !== null
+      // ) {
+      //   form.append('bonusRef', isBonusRef);
+      //   hasChanges = true;
+      // }
 
-      // Hold fields
-      if (
-        formData.hold !== data.hold &&
-        formData.hold !== undefined &&
-        formData.hold !== null
-      ) {
-        form.append('hold', formData.hold);
-        hasChanges = true;
-      }
+      // if (kycFee !== data.kycFee && kycFee !== undefined && kycFee !== null) {
+      //   form.append('kycFee', kycFee);
+      //   hasChanges = true;
+      // }
 
-      if (
-        formData.holdLevel !== data.holdLevel &&
-        formData.holdLevel !== undefined &&
-        formData.holdLevel !== null
-      ) {
-        form.append('holdLevel', formData.holdLevel);
-        hasChanges = true;
-      }
+      // // Hold fields
+      // if (
+      //   formData.hold !== data.hold &&
+      //   formData.hold !== undefined &&
+      //   formData.hold !== null
+      // ) {
+      //   form.append('hold', formData.hold);
+      //   hasChanges = true;
+      // }
 
-      // If no changes, show message and return
-      if (!hasChanges) {
-        setLoadingUpdate(false);
-        toast.info(t('No changes detected'));
-        setEditting(false);
-        return;
-      }
+      // if (
+      //   formData.holdLevel !== data.holdLevel &&
+      //   formData.holdLevel !== undefined &&
+      //   formData.holdLevel !== null
+      // ) {
+      //   form.append('holdLevel', formData.holdLevel);
+      //   hasChanges = true;
+      // }
 
-      await User.adminUpdateUser(id, form)
-        .then((response) => {
-          const { message } = response.data;
-          setLoadingUpdate(false);
-          toast.success(t(message));
-          setEditting(false);
-          setRefresh(!refresh);
-        })
-        .catch((error) => {
-          let message =
-            error.response && error.response.data.message
-              ? error.response.data.message
-              : error.message;
-          toast.error(t(message));
-          setLoadingUpdate(false);
-          setEditting(false);
-        });
+      // // If no changes, show message and return
+      // if (!hasChanges) {
+      //   setLoadingUpdate(false);
+      //   toast.info(t('No changes detected'));
+      //   setEditting(false);
+      //   return;
+      // }
+
+      // await User.adminUpdateUser(id, form)
+      //   .then((response) => {
+      //     const { message } = response.data;
+      //     setLoadingUpdate(false);
+      //     toast.success(t(message));
+      //     setEditting(false);
+      //     setRefresh(!refresh);
+      //   })
+      //   .catch((error) => {
+      //     let message =
+      //       error.response && error.response.data.message
+      //         ? error.response.data.message
+      //         : error.message;
+      //     toast.error(t(message));
+      //     setLoadingUpdate(false);
+      //     setEditting(false);
+      //   });
     },
     [
       data,
