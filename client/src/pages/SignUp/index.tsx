@@ -143,7 +143,7 @@ const SignUpPage = () => {
                           <input
                             className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
                             type="email"
-                            placeholder="Email"
+                            placeholder={t('email')}
                             {...register('email', {
                               required: t('Email is required'),
                             })}
@@ -240,7 +240,7 @@ const SignUpPage = () => {
                             <input
                               type={showPassword ? 'text' : 'password'}
                               className="bg-black px-4 text-sm shadow-xl py-3 rounded-lg w-full text-white"
-                              placeholder="Password"
+                              placeholder={t('password')}
                               {...register('password', {
                                 required: t('Password is required'),
                                 pattern: {
@@ -291,7 +291,7 @@ const SignUpPage = () => {
                             <input
                               type={showPassword ? 'text' : 'password'}
                               className="bg-black px-4 text-sm shadow-xl py-3 rounded-lg w-full text-white"
-                              placeholder="Confirm Password"
+                              placeholder={t('confirmPassword')}
                               {...register('confirmPassword', {
                                 required: t('Confirm password is required'),
                                 validate: (val) => {
@@ -350,12 +350,12 @@ const SignUpPage = () => {
                             {t('confirm')}
                           </button>
                           <p className="mt-12 text-gray-600 font-medium">
-                            Already have an account?{' '}
+                            {t('alreadyHaveAccount')}{' '}
                             <Link
                               to="/signin"
                               className="text-dreamchain hover:underline"
                             >
-                              Signin
+                              {t('signin')}
                             </Link>
                           </p>
                         </form>

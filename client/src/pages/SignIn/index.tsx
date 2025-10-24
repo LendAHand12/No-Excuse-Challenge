@@ -52,15 +52,15 @@ const SignInPage: React.FC = () => {
             className="-mt-28 py-10 rounded-t-3xl bg-white flex w-full lg:max-w-150 flex-col justify-center gap-6 px-4"
           >
             <h1 className="text-4xl font-bold text-black text-center mb-10">
-              {t('signin.title')}
+              {t('login')}
             </h1>
             <div className="">
               <input
                 type="text"
                 className="bg-black px-4 py-3 shadow-xl rounded-lg w-full text-white"
-                placeholder={t('signin.emailPlaceholder')}
+                placeholder={t('emailOrUsername')}
                 {...register('code', {
-                  required: t('signin.emailRequired'),
+                  required: t('emailOrUsernameRequired'),
                 })}
               />
               <p className="text-red-500 mt-1 text-sm">
@@ -71,7 +71,7 @@ const SignInPage: React.FC = () => {
               <input
                 type={showPassword ? 'text' : 'password'}
                 className="bg-black px-4 shadow-xl py-3 rounded-lg w-full text-white"
-                placeholder={t('signin.passwordPlaceholder')}
+                placeholder={t('password')}
                 {...register('password', {
                   required: t('signin.passwordRequired'),
                   pattern: {
@@ -119,21 +119,21 @@ const SignInPage: React.FC = () => {
               <div className="flex gap-2">
                 <input type="checkbox" id="remember" />
                 <label htmlFor="remember" className="text-black font-medium">
-                  {t('signin.rememberMe')}
+                  {t('rememberMe')}
                 </label>
               </div>
               <Link
                 to="/forgot-password"
                 className="text-NoExcuseChallenge font-medium hover:underline"
               >
-                {t('signin.forgotPassword')}
+                {t('forgotPassword')}
               </Link>
             </div>
             <button
               type="submit"
               className="font-semibold rounded-3xl border py-4 border-black text-black hover:bg-black hover:text-white duration-100 ease-linear"
             >
-              {t('signin.confirm')}
+              {t('confirm')}
             </button>
             <Link
               to="/"

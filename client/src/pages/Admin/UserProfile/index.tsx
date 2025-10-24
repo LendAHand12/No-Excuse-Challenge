@@ -6,13 +6,15 @@ import Loading from '@/components/Loading';
 import USER_RANKINGS from '@/constants/userRankings';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import DefaultLayout from '../../../layout/DefaultLayout';
-import UserProfileCard from '@/components/UserProfileCard';
 import { useSelector } from 'react-redux';
+import DatePicker from 'react-datepicker';
+import Switch from 'react-switch';
+import PhoneInput from 'react-phone-number-input';
 
 const UserProfile = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -45,6 +47,7 @@ const UserProfile = () => {
     handleSubmit,
     formState: { errors },
     setValue,
+    control
   } = useForm();
 
   useEffect(() => {
@@ -95,244 +98,109 @@ const UserProfile = () => {
   }, [id, refresh]);
 
   const onSubmit = useCallback(
-    async (formData) => {
+    async (values) => {
+      if (phone === '') {
+        setErrPhone(true);
+        return;
+      }
+      var formData = new FormData();
+
+      if (values.totalHewe !== data.totalHewe) {
+        formData.append('totalHewe', values.totalHewe);
+      }
+      if (values.hewePerDay !== data.hewePerDay) {
+        formData.append('hewePerDay', values.hewePerDay);
+      }
+      if (values.availableHewe !== data.availableHewe) {
+        formData.append('availableHewe', values.availableHewe);
+      }
+      if (values.userId !== data.userId) {
+        formData.append('userId', values.userId);
+      }
+      if (values.note !== data.note) {
+        formData.append('note', values.note);
+      }
+      if (values.email !== data.email) {
+        formData.append('email', values.email);
+      }
+      if (data.phone !== phone) {
+        formData.append('phone', phone);
+      }
+      if (values.idCode !== data.idCode) {
+        formData.append('idCode', values.idCode);
+      }
+      if (values.tier !== data.tier) {
+        formData.append('tier', values.tier);
+      }
+      if (values.walletAddress !== data.walletAddress) {
+        formData.append('walletAddress', values.walletAddress);
+      }
+      if (currentOpenLah !== data.openLah) {
+        formData.append('openLah', currentOpenLah);
+      }
+      if (currentLockKyc !== data.lockKyc) {
+        formData.append('lockKyc', currentLockKyc);
+      }
+      if (currentTermDie) {
+        formData.append('termDie', currentTermDie);
+      }
+      if (currentCloseLah !== data.closeLah) {
+        formData.append('closeLah', currentCloseLah);
+      }
+      if (values.newStatus !== data.status) {
+        formData.append('newStatus', values.newStatus);
+      }
+      if (values.newFine !== data.fine) {
+        formData.append('newFine', values.newFine);
+      }
+
+      if (values.hold !== data.hold) {
+        formData.append('hold', values.hold);
+      }
+
+      if (values.dieTime && values.dieTime !== data.dieTime) {
+        formData.append('dieTime', values.dieTime);
+      }
+
+      if (values.changeCreatedAt !== data.changeCreatedAt) {
+        formData.append('changeCreatedAt', values.changeCreatedAt);
+      }
+
+      if (values.availableUsdt !== data.availableUsdt) {
+        formData.append('availableUsdt', values.availableUsdt);
+      }
+
+      if (values.holdLevel !== data.holdLevel) {
+        formData.append('holdLevel', values.holdLevel);
+      }
+
+      if (values.level !== data.level) {
+        formData.append('level', values.level);
+      }
+
+      formData.append('isRegistered', values.isRegistered);
+
+      formData.append('removeErrLahCode', values.removeErrLahCode);
+
       setLoadingUpdate(true);
 
-      console.log({ formData });
-
-      // // Check for changes and only append fields that have changed
-      // const form = new FormData();
-      // let hasChanges = false;
-
-      // // Basic fields
-      // if (
-      //   formData.userId !== data.userId &&
-      //   formData.userId !== undefined &&
-      //   formData.userId !== null
-      // ) {
-      //   form.append('userId', formData.userId);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   formData.email !== data.email &&
-      //   formData.email !== undefined &&
-      //   formData.email !== null
-      // ) {
-      //   form.append('email', formData.email);
-      //   hasChanges = true;
-      // }
-
-      // if (phone !== data.phone && phone !== undefined && phone !== null) {
-      //   form.append('phone', phone);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   formData.idCode !== data.idCode &&
-      //   formData.idCode !== undefined &&
-      //   formData.idCode !== null
-      // ) {
-      //   form.append('idCode', formData.idCode);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   formData.tier !== data.tier &&
-      //   formData.tier !== undefined &&
-      //   formData.tier !== null
-      // ) {
-      //   form.append('tier', formData.tier);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   formData.walletAddress !== data.walletAddress &&
-      //   formData.walletAddress !== undefined &&
-      //   formData.walletAddress !== null
-      // ) {
-      //   form.append('walletAddress', formData.walletAddress);
-      //   hasChanges = true;
-      // }
-
-      // // Financial fields
-      // if (
-      //   formData.availableUsdt !== data.availableUsdt &&
-      //   formData.availableUsdt !== undefined &&
-      //   formData.availableUsdt !== null
-      // ) {
-      //   form.append('availableUsdt', formData.availableUsdt);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   formData.availableHewe !== data.availableHewe &&
-      //   formData.availableHewe !== undefined &&
-      //   formData.availableHewe !== null
-      // ) {
-      //   form.append('availableHewe', formData.availableHewe);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   formData.hewePerDay !== data.hewePerDay &&
-      //   formData.hewePerDay !== undefined &&
-      //   formData.hewePerDay !== null
-      // ) {
-      //   form.append('hewePerDay', formData.hewePerDay);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   formData.newFine !== data.newFine &&
-      //   formData.newFine !== undefined &&
-      //   formData.newFine !== null
-      // ) {
-      //   form.append('newFine', formData.newFine);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   formData.level !== data.level &&
-      //   formData.level !== undefined &&
-      //   formData.level !== null
-      // ) {
-      //   form.append('level', formData.level);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   formData.note !== data.note &&
-      //   formData.note !== undefined &&
-      //   formData.note !== null
-      // ) {
-      //   form.append('note', formData.note);
-      //   hasChanges = true;
-      // }
-
-      // // Date fields
-      // if (
-      //   formData.changeCreatedAt !== data.changeCreatedAt &&
-      //   formData.changeCreatedAt !== undefined &&
-      //   formData.changeCreatedAt !== null
-      // ) {
-      //   form.append('changeCreatedAt', formData.changeCreatedAt);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   formData.dieTime !== data.dieTime &&
-      //   formData.dieTime !== undefined &&
-      //   formData.dieTime !== null
-      // ) {
-      //   form.append('dieTime', formData.dieTime);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   formData.memberSince !== data.memberSince &&
-      //   formData.memberSince !== undefined &&
-      //   formData.memberSince !== null
-      // ) {
-      //   form.append('memberSince', formData.memberSince);
-      //   hasChanges = true;
-      // }
-
-      // // Checkbox fields
-      // if (
-      //   currentOpenLah !== data.openLah &&
-      //   currentOpenLah !== undefined &&
-      //   currentOpenLah !== null
-      // ) {
-      //   form.append('openLah', currentOpenLah);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   currentCloseLah !== data.closeLah &&
-      //   currentCloseLah !== undefined &&
-      //   currentCloseLah !== null
-      // ) {
-      //   form.append('closeLah', currentCloseLah);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   currentLockKyc !== data.lockKyc &&
-      //   currentLockKyc !== undefined &&
-      //   currentLockKyc !== null
-      // ) {
-      //   form.append('lockKyc', currentLockKyc);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   currentTermDie !== data.termDie &&
-      //   currentTermDie !== undefined &&
-      //   currentTermDie !== null
-      // ) {
-      //   form.append('termDie', currentTermDie);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   isBonusRef !== data.bonusRef &&
-      //   isBonusRef !== undefined &&
-      //   isBonusRef !== null
-      // ) {
-      //   form.append('bonusRef', isBonusRef);
-      //   hasChanges = true;
-      // }
-
-      // if (kycFee !== data.kycFee && kycFee !== undefined && kycFee !== null) {
-      //   form.append('kycFee', kycFee);
-      //   hasChanges = true;
-      // }
-
-      // // Hold fields
-      // if (
-      //   formData.hold !== data.hold &&
-      //   formData.hold !== undefined &&
-      //   formData.hold !== null
-      // ) {
-      //   form.append('hold', formData.hold);
-      //   hasChanges = true;
-      // }
-
-      // if (
-      //   formData.holdLevel !== data.holdLevel &&
-      //   formData.holdLevel !== undefined &&
-      //   formData.holdLevel !== null
-      // ) {
-      //   form.append('holdLevel', formData.holdLevel);
-      //   hasChanges = true;
-      // }
-
-      // // If no changes, show message and return
-      // if (!hasChanges) {
-      //   setLoadingUpdate(false);
-      //   toast.info(t('No changes detected'));
-      //   setEditting(false);
-      //   return;
-      // }
-
-      // await User.adminUpdateUser(id, form)
-      //   .then((response) => {
-      //     const { message } = response.data;
-      //     setLoadingUpdate(false);
-      //     toast.success(t(message));
-      //     setEditting(false);
-      //     setRefresh(!refresh);
-      //   })
-      //   .catch((error) => {
-      //     let message =
-      //       error.response && error.response.data.message
-      //         ? error.response.data.message
-      //         : error.message;
-      //     toast.error(t(message));
-      //     setLoadingUpdate(false);
-      //     setEditting(false);
-      //   });
+      await User.adminUpdateUser(id, formData)
+        .then((response) => {
+          const { message } = response.data;
+          setLoadingUpdate(false);
+          toast.success(t(message));
+          setEditting(false);
+          setRefresh(!refresh);
+        })
+        .catch((error) => {
+          let message =
+            error.response && error.response.data.message
+              ? error.response.data.message
+              : error.message;
+          toast.error(t(message));
+          setLoadingUpdate(false);
+          setEditting(false);
+        });
     },
     [
       data,
@@ -572,44 +440,1333 @@ const UserProfile = () => {
     return USER_RANKINGS.find((ele) => level <= ele.value)?.label;
   };
 
+  const handleChangeOpenLah = useCallback(
+    () => setCurrentOpenLah(!currentOpenLah),
+    [currentOpenLah],
+  );
+
+  const handleChangeCloseLah = useCallback(
+    () => setCurrentCloseLah(!currentCloseLah),
+    [currentCloseLah],
+  );
+
+  const handleChangeLockKyc = useCallback(
+    () => setCurrentLockKyc(!currentLockKyc),
+    [currentLockKyc],
+  );
+
+  const handleChangeTermDie = useCallback(
+    () => setCurrentTermDie(!currentTermDie),
+    [currentTermDie],
+  );
+
   return (
     <DefaultLayout>
       <ToastContainer />
       {!loading && (
-        <div className="container px-10 mt-24 pb-10">
-          <div className="w-full">
-            <UserProfileCard
-              data={data}
-              isEditting={isEditting}
-              loading={loading}
-              loadingUpdate={loadingUpdate}
-              register={register}
-              errors={errors}
-              phone={phone}
-              setPhone={setPhone}
-              errorPhone={errorPhone}
-              packageOptions={packageOptions}
-              renderRank={renderRank}
-              onEdit={() => setEditting(true)}
-              onSave={handleSubmit(onSubmit)}
-              onCancel={() => setEditting(false)}
-              onDelete={handleDelete}
-              onApproveChangeWallet={handleApproveChangeWallet}
-              onCheckKyc={handleCheckKyc}
-              onPushToPreTier2={handlePushToPreTier2}
-              loadingCheckKyc={loadingCheckKyc}
-              loadingPushToPreTier2={loadingPushToPreTier2}
-              walletChange={walletChange}
-              userInfo={userInfo}
-              // Checkbox setters
-              setCurrentOpenLah={setCurrentOpenLah}
-              setCurrentCloseLah={setCurrentCloseLah}
-              setCurrentLockKyc={setCurrentLockKyc}
-              setCurrentTermDie={setCurrentTermDie}
-              setIsBonusRef={setIsBonusRef}
-              setKycFee={setKycFee}
-            />
-          </div>
+        <div className="container mx-10 my-24">
+          {isBonusRef && (
+            <div
+              className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-5"
+              role="alert"
+            >
+              <span className="block sm:inline">
+                {t('You have received 10 USDT from DreamPool fund')}
+              </span>
+            </div>
+          )}
+
+          {walletChange && (
+            <div
+              className="w-full bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded mb-5"
+              role="alert"
+            >
+              <span className="block sm:inline">
+                {t('Wallet information update is pending admin approval')}
+              </span>
+            </div>
+          )}
+
+          {/* {kycFee && (
+            <div
+              className="w-full bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded mb-5"
+              role="alert"
+            >
+              <span className="block sm:inline">
+                {t(
+                  'To enhance security, facial recognition verification and a 2 USDT/year fee will be applied. The fee will be auto-deducted annually. Thank you for your support!',
+                )}
+              </span>
+            </div>
+          )} */}
+
+          {data.tier === 2 && data.dieTime && data.countdown > 0 && (
+            <div
+              className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
+              role="alert"
+            >
+              <span className="block sm:inline">
+                You have only <b>{data.countdown}</b> days left to complete the
+                62 required IDs to be eligible for Tier 2 benefits.
+              </span>
+            </div>
+          )}
+
+          {data.tier === 1 && data.dieTime && data.countdown > 0 && (
+            <div
+              className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
+              role="alert"
+            >
+              <span className="block sm:inline">
+                You have only <b>{data.countdown}</b> days left to complete
+                referring at least 2 people in 2 different branches.
+              </span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="md:flex no-wrap">
+            <div className="w-full lg:w-3/12 lg:mx-2 mb-4 lg:mb-0">
+              <div className="bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                <ul className=" text-gray-600 py-2 px-3 mt-3 divide-y rounded">
+                  <li className="flex items-center py-3">
+                    <span>{t('adminUsers.table.status')}</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <select
+                          className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
+                          {...register('newStatus')}
+                          defaultValue={data.status}
+                          disabled={loadingUpdate}
+                        >
+                          <option value="UNVERIFY">Unverify</option>
+                          <option value="APPROVED">Approved</option>
+                          <option value="LOCKED">Locked</option>
+                        </select>
+                      ) : (
+                        <span
+                          className={`${
+                            data.status === 'UNVERIFY'
+                              ? 'bg-red-600'
+                              : data.status === 'PENDING'
+                              ? 'bg-yellow-600'
+                              : data.status === 'APPROVED'
+                              ? 'bg-green-600'
+                              : data.status === 'REJECTED'
+                              ? 'bg-red-600'
+                              : data.status === 'LOCKED'
+                              ? 'bg-red-600'
+                              : data.status === 'DELETED'
+                              ? 'bg-red-600'
+                              : ''
+                          }  py-1 px-2 rounded text-white text-sm`}
+                        >
+                          {t(data.status)}
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>Hold Tier</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <select
+                          className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
+                          {...register('hold')}
+                          defaultValue={data.hold}
+                          disabled={loadingUpdate}
+                        >
+                          <option value="no">{t('no')}</option>
+                          <option value={1}>Tier 1</option>
+                          <option value={2}>Tier 2</option>
+                          <option value={3}>Tier 3</option>
+                          <option value={4}>Tier 4</option>
+                          <option value={5}>Tier 5</option>
+                        </select>
+                      ) : (
+                        <span className={`py-1 px-2 text-sm`}>
+                          {data.hold === 'no' ? t('no') : data.hold}
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>{t('holdLevel')}</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <select
+                          className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
+                          {...register('holdLevel')}
+                          defaultValue={data.holdLevel}
+                          disabled={loadingUpdate}
+                        >
+                          <option value="no">{t('no')}</option>
+                          <option value={0}>{t('level')} 0</option>
+                          <option value={1}>{t('level')} 1</option>
+                          <option value={2}>{t('level')} 2</option>
+                          <option value={3}>{t('level')} 3</option>
+                          <option value={4}>{t('level')} 4</option>
+                          <option value={5}>{t('level')} 5</option>
+                          <option value={6}>{t('level')} 6</option>
+                          <option value={7}>{t('level')} 7</option>
+                          <option value={8}>{t('level')} 8</option>
+                          <option value={9}>{t('level')} 9</option>
+                          <option value={10}>{t('level')} 10</option>
+                          <option value={11}>{t('level')} 11</option>
+                          <option value={12}>{t('level')} 12</option>
+                        </select>
+                      ) : (
+                        <span className={`py-1 px-2 text-sm`}>
+                          {data.holdLevel === 'no' ? t('no') : data.holdLevel}
+                        </span>
+                      )}
+                    </span>
+                  </li>
+
+                  <li className="flex items-center py-3">
+                    <span>{t('openLah')}</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Switch
+                          checked={currentOpenLah}
+                          onChange={handleChangeOpenLah}
+                        />
+                      ) : currentOpenLah ? (
+                        'True'
+                      ) : (
+                        'False'
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>{t('closeLah')}</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Switch
+                          checked={currentCloseLah}
+                          onChange={handleChangeCloseLah}
+                        />
+                      ) : currentCloseLah ? (
+                        'True'
+                      ) : (
+                        'False'
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>{t('Lock KYC')}</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Switch
+                          checked={currentLockKyc}
+                          onChange={handleChangeLockKyc}
+                        />
+                      ) : currentLockKyc ? (
+                        'True'
+                      ) : (
+                        'False'
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>Temporary Die</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Switch
+                          checked={currentTermDie}
+                          onChange={handleChangeTermDie}
+                        />
+                      ) : currentTermDie ? (
+                        'True'
+                      ) : (
+                        'False'
+                      )}
+                    </span>
+                  </li>
+                  {data.status === 'LOCKED' && (
+                    <li className="flex items-center py-3">
+                      <span>{t('lockedTime')}</span>
+                      <span className="ml-auto">
+                        {new Date(data.lockedTime).toLocaleDateString('vi')}
+                      </span>
+                    </li>
+                  )}
+                  {data.status === 'DELETED' && (
+                    <li className="flex items-center py-3">
+                      <span>{t('deletedTime')}</span>
+                      <span className="ml-auto">
+                        {new Date(data.deletedTime).toLocaleDateString('vi')}
+                      </span>
+                    </li>
+                  )}
+                  <li className="flex items-center py-3">
+                    <span>{t('memberSince')}</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Controller
+                          control={control}
+                          name="changeCreatedAt"
+                          render={({ field }) => (
+                            <DatePicker
+                              placeholderText={t('fromDate')}
+                              onChange={(date) => field.onChange(date)}
+                              selected={field.value}
+                              dateFormat="dd/MM/yyyy"
+                              className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            />
+                          )}
+                        />
+                      ) : (
+                        new Date(data.changeCreatedAt).toLocaleDateString('vi')
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex flex-col justify-between py-3">
+                    <div className="flex items-center justify-between">
+                      <div>Tier 1 :</div>
+                      <div
+                        className={`w-10 h-5 rounded-md ${
+                          data.isRed
+                            ? 'bg-[#ee0000]'
+                            : data.isBlue
+                            ? 'bg-[#0033ff]'
+                            : data.isBrown
+                            ? 'bg-[#663300]'
+                            : data.isYellow
+                            ? 'bg-[#ffcc00]'
+                            : data.isPink
+                            ? 'bg-[#ff3399]'
+                            : 'bg-[#009933]'
+                        }`}
+                      ></div>
+                    </div>
+                    {data.tier === 2 && (
+                      <div className="flex items-center justify-between">
+                        <div>Tier 2 :</div>
+                        {data.isDisableTier2 ? (
+                          <div
+                            className={`w-10 h-5 rounded-md bg-[#663300]`}
+                          ></div>
+                        ) : (
+                          <div
+                            className={`w-10 h-5 rounded-md bg-[#009933]`}
+                          ></div>
+                        )}
+                      </div>
+                    )}
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>Die Time</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Controller
+                          control={control}
+                          name="dieTime"
+                          render={({ field }) => (
+                            <DatePicker
+                              placeholderText={t('fromDate')}
+                              onChange={(date) => field.onChange(date)}
+                              selected={field.value}
+                              dateFormat="dd/MM/yyyy"
+                              className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            />
+                          )}
+                        />
+                      ) : data.dieTime ? (
+                        new Date(data.dieTime).toLocaleDateString('vi')
+                      ) : (
+                        ''
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>{t('tier1Time')}</span>
+                    <span className="ml-auto">
+                      {data.tier1Time
+                        ? new Date(data.tier1Time).toLocaleDateString('vi')
+                        : ''}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>{t('tier2Time')}</span>
+                    <span className="ml-auto">
+                      {data.tier2Time
+                        ? new Date(data.tier2Time).toLocaleDateString('vi')
+                        : ''}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>{t('tier3Time')}</span>
+                    <span className="ml-auto">
+                      {data.tier3Time
+                        ? new Date(data.tier3Time).toLocaleDateString('vi')
+                        : ''}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>{t('tier4Time')}</span>
+                    <span className="ml-auto">
+                      {data.tier4Time
+                        ? new Date(data.tier4Time).toLocaleDateString('vi')
+                        : ''}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>{t('tier5Time')}</span>
+                    <span className="ml-auto">
+                      {data.tier5Time
+                        ? new Date(data.tier5Time).toLocaleDateString('vi')
+                        : ''}
+                    </span>
+                  </li>
+                  {data.changeUser && (
+                    <>
+                      <li className="flex items-center py-3">
+                        <span>{t('old user name')}</span>
+                        <span className="ml-auto">
+                          {data.changeUser.oldUserName}
+                        </span>
+                      </li>
+                      <li className="flex items-center py-3">
+                        <span>{t('old email')}</span>
+                        <span className="ml-auto">
+                          {data.changeUser.oldEmail}
+                        </span>
+                      </li>
+                      <li className="flex items-center py-3">
+                        <span>{t('changeDate')}</span>
+                        <span className="ml-auto">
+                          {new Date(
+                            data.changeUser.updatedAt,
+                          ).toLocaleDateString('vi')}
+                        </span>
+                      </li>
+                    </>
+                  )}
+                </ul>
+              </div>
+              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                <p className="uppercase mt-2 font-bold">{t('children')}</p>
+                <div className="py-2">
+                  <ul>
+                    {data.listDirectUser
+                      .filter((ele) => !ele.isSubId)
+                      .map((ele) => (
+                        <li
+                          className="bg-white border-b hover:bg-gray-50"
+                          key={ele.userId}
+                        >
+                          <div className="py-2">
+                            <div className="text-base">
+                              <span
+                                className={`${
+                                  ele.isRed
+                                    ? 'bg-[#b91c1c]'
+                                    : ele.isBlue
+                                    ? 'bg-[#0000ff]'
+                                    : ele.isYellow
+                                    ? 'bg-[#F4B400]'
+                                    : ele.isPink
+                                    ? 'bg-[#e600769c]'
+                                    : 'bg-[#16a34a]'
+                                } py-1 px-2 rounded text-white text-sm`}
+                              >
+                                {ele.userId}
+                              </span>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              </div>
+              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                <p className="uppercase mt-2 font-bold">
+                  direct referral sub member{' '}
+                </p>
+                <div className="py-2">
+                  <ul>
+                    {data.listDirectUser
+                      .filter((ele) => ele.isSubId)
+                      .map((ele) => (
+                        <li
+                          className="bg-white border-b hover:bg-gray-50"
+                          key={ele.userId}
+                        >
+                          <div className="py-2">
+                            <div className="text-base">
+                              <span
+                                className={`${
+                                  ele.isRed
+                                    ? 'bg-[#b91c1c]'
+                                    : ele.isBlue
+                                    ? 'bg-[#0000ff]'
+                                    : ele.isYellow
+                                    ? 'bg-[#F4B400]'
+                                    : ele.isPink
+                                    ? 'bg-[#e600769c]'
+                                    : 'bg-[#16a34a]'
+                                } py-1 px-2 rounded text-white text-sm`}
+                              >
+                                {ele.userId}
+                              </span>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              </div>
+              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                <p className="uppercase mt-2 font-bold">Tier 2 Users</p>
+                <div className="py-2">
+                  <p className="font-medium">Branch 1 :</p>
+                  <ul className="flex flex-wrap gap-2">
+                    {data?.tier2ChildUsers?.branch1?.map((ele) => (
+                      <li
+                        className="bg-white border-b hover:bg-gray-50"
+                        key={ele}
+                      >
+                        <div className="py-2">
+                          <div className="text-base">
+                            <span
+                              className={`${
+                                ele.isRed
+                                  ? 'bg-[#b91c1c]'
+                                  : ele.isBlue
+                                  ? 'bg-[#0000ff]'
+                                  : ele.isYellow
+                                  ? 'bg-[#F4B400]'
+                                  : ele.isPink
+                                  ? 'bg-[#e600769c]'
+                                  : 'bg-[#16a34a]'
+                              } py-1 px-2 rounded text-white text-sm`}
+                            >
+                              {ele}
+                            </span>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="py-2">
+                  <p className="font-medium">Branch 2 :</p>
+                  <ul className="flex flex-wrap gap-2">
+                    {data?.tier2ChildUsers?.branch2?.map((ele) => (
+                      <li
+                        className="bg-white border-b hover:bg-gray-50"
+                        key={ele}
+                      >
+                        <div className="py-2">
+                          <div className="text-base">
+                            <span
+                              className={`${
+                                ele.isRed
+                                  ? 'bg-[#b91c1c]'
+                                  : ele.isBlue
+                                  ? 'bg-[#0000ff]'
+                                  : ele.isYellow
+                                  ? 'bg-[#F4B400]'
+                                  : ele.isPink
+                                  ? 'bg-[#e600769c]'
+                                  : 'bg-[#16a34a]'
+                              } py-1 px-2 rounded text-white text-sm`}
+                            >
+                              {ele}
+                            </span>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              {data.tier === 2 && (
+                <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                  <p className="uppercase mt-2 font-bold">{t('ACTIVE ID')}</p>
+                  <div className="lg:py-2">
+                    <ul className="flex flex-col list-disc">
+                      <li className="ml-4">
+                        Branch 1 : {data.notEnoughtChild?.countChild1} IDs
+                      </li>
+                      <li className="ml-4">
+                        Branch 2 : {data.notEnoughtChild?.countChild2} IDs
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="py-2">
+                    <p className="uppercase mt-2 font-bold">
+                      {t('NUMBERS OF ID REQUIRE')}
+                    </p>
+                    <div className="lg:py-2">
+                      <ul className="flex flex-col list-disc">
+                        {(() => {
+                          const c1 = data?.notEnoughtChild?.countChild1 ?? 0;
+                          const c2 = data?.notEnoughtChild?.countChild2 ?? 0;
+
+                          let b1 = 0;
+                          let b2 = 0;
+
+                          if (c1 >= 20 && c2 >= 20 && c1 + c2 >= 62) {
+                            // ✅ Đủ điều kiện, không cần bù
+                            b1 = 0;
+                            b2 = 0;
+                          } else {
+                            // ✅ Xác định nhánh mạnh và nhánh yếu
+                            if (c1 >= c2) {
+                              // Nhánh 1 mạnh (quota 42), nhánh 2 yếu (quota 20)
+                              b1 = Math.max(42 - c1, 0);
+                              b2 = Math.max(20 - c2, 0);
+                            } else {
+                              // Nhánh 2 mạnh (quota 42), nhánh 1 yếu (quota 20)
+                              b1 = Math.max(20 - c1, 0);
+                              b2 = Math.max(42 - c2, 0);
+                            }
+                          }
+
+                          return (
+                            <>
+                              <li className="ml-4">Branch 1 : {b1} IDs</li>
+                              <li className="ml-4">Branch 2 : {b2} IDs</li>
+                            </>
+                          );
+                        })()}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                <p className="uppercase mt-2 font-bold">{t('refUserName')}</p>
+                <div className="py-2">
+                  <ul>
+                    <li className="bg-white hover:bg-gray-50">
+                      <div className="py-2">
+                        <div className="text-base">
+                          <span className="">
+                            {data.refUserName}
+                            <br></br>
+                            <i className="text-xs">{data.refUserEmail}</i>
+                          </span>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              {data.tier > 1 && (
+                <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                  <p className="uppercase mt-2 font-bold">
+                    {data.subInfo?.subName}
+                  </p>
+                  <div className="py-2">
+                    <ul className="flex flex-col list-disc">
+                      <li className="ml-4">
+                        Total Earned USDT : {data.subInfo?.totalAmountUsdt}
+                      </li>
+                      <li className="ml-4">
+                        Total Earned HEWE : {data.subInfo?.totalAmountHewe}
+                      </li>
+                    </ul>
+                  </div>
+                  <p className="uppercase mt-2 font-bold">
+                    {t('refUserName')} OF {data.subInfo?.subName}
+                  </p>
+                  <div className="py-2">
+                    <ul>
+                      {data.subInfo?.listDirectUser?.map((ele) => (
+                        <li
+                          className="bg-white border-b hover:bg-gray-50"
+                          key={ele.userId}
+                        >
+                          <div className="py-2">
+                            <div className="text-base">
+                              <span
+                                className={`${
+                                  ele.isRed
+                                    ? 'bg-[#b91c1c]'
+                                    : ele.isBlue
+                                    ? 'bg-[#0000ff]'
+                                    : ele.isYellow
+                                    ? 'bg-[#F4B400]'
+                                    : ele.isPink
+                                    ? 'bg-[#e600769c]'
+                                    : 'bg-[#16a34a]'
+                                } py-1 px-2 rounded text-white text-sm`}
+                              >
+                                {ele.userId}
+                              </span>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                <p className="uppercase mt-2 font-bold">{t('oldParent')}</p>
+                {data.listOldParent.length > 0 && (
+                  <div className="py-2">
+                    <ul>
+                      {data.listOldParent.map((ele) => (
+                        <li className="bg-white hover:bg-gray-50" key={ele._id}>
+                          <div className="py-2">
+                            <div className="text-base">
+                              <span className="">{ele.userId}</span>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+              {/* <div className="py-10">
+                <div className="max-w-sm">
+                  <Doughnut
+                    data={{
+                      labels: [
+                        'Group 1',
+                        'Group 2',
+                        'Group 3',
+                        'Remaining target',
+                      ],
+                      datasets: [
+                        {
+                          label: 'Members',
+                          data: [
+                            ...adjustSales(chartData, targetSales),
+                            targetSales - totalChild,
+                          ],
+                          backgroundColor: [
+                            '#FFCF65',
+                            '#02071B',
+                            '#C1C9D3',
+                            'red',
+                          ],
+                        },
+                      ],
+                    }}
+                    plugins={[ChartDataLabels]}
+                    options={{
+                      responsive: true,
+                      plugins: {
+                        legend: {
+                          position: 'bottom' as const,
+                        },
+                        tooltip: {
+                          enabled: false,
+                        },
+                        datalabels: {
+                          color: '#ffffff',
+                          anchor: 'center',
+                          font: { size: 16, weight: 'bold' },
+                          formatter: (value) => {
+                            return value <= 0
+                              ? ''
+                              : Math.round((value / targetSales) * 100) + '%';
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </div>
+                <div className="w-full mt-6">
+                  <ul className="flex flex-col items-center gap-3">
+                    <li>
+                      <span className="bg-[#FFCF65] px-2 py-1 text-sm">
+                        Group 1 :
+                      </span>{' '}
+                      {chartData[0]} members
+                    </li>
+                    <li>
+                      <span className="bg-[#02071B] text-white px-2 py-1 text-sm">
+                        Group 2 :
+                      </span>{' '}
+                      {chartData[1]} members
+                    </li>
+                    <li>
+                      <span className="bg-[#C1C9D3] px-2 py-1 text-sm">
+                        Group 3 :
+                      </span>{' '}
+                      {chartData[2]} members
+                    </li>
+                  </ul>
+                </div>
+              </div> */}
+            </div>
+            <div className="w-full lg:w-2/3 lg:mx-2">
+              <div className="bg-white p-6 shadow-md rounded-sm border-t-4 border-NoExcuseChallenge">
+                <div className="text-gray-700">
+                  <div className="grid grid-cols-1 text-sm">
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        {t('user name')}
+                      </div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('userId', {
+                              required: t('User ID is required'),
+                            })}
+                            autoComplete="off"
+                          />
+                          <p className="text-red-500 text-sm">
+                            {errors.userId?.message}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">{data.userId}</div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">Email</div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('email', {
+                              required: t('Email is required'),
+                            })}
+                            autoComplete="off"
+                          />
+                          <p className="text-red-500 text-sm">
+                            {errors.email?.message}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">{data.email}</div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        {t('phone')}
+                      </div>
+                      <div className="py-2">
+                        {isEditting ? (
+                          <>
+                            <PhoneInput
+                              defaultCountry="VN"
+                              placeholder={t('phone')}
+                              value={phone}
+                              onChange={setPhone}
+                              className="-my-1 ml-4 w-full"
+                            />
+                            <p className="text-red-500 text-sm">
+                              {errorPhone && t('Phone is required')}
+                            </p>
+                          </>
+                        ) : (
+                          <div className="px-4 py-2">{data.phone}</div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        {t('id code')}
+                      </div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('idCode', {
+                              required: t('id code is required'),
+                            })}
+                            autoComplete="off"
+                          />
+                          <p className="text-red-500 text-sm">
+                            {errors.idCode?.message}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">{data.idCode}</div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        {t('walletAddress')}
+                      </div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('walletAddress', {
+                              required: t('Wallet address is required'),
+                              pattern: {
+                                value: /^0x[a-fA-F0-9]{40}$/g,
+                                message: t(
+                                  'Please enter the correct wallet format',
+                                ),
+                              },
+                            })}
+                            autoComplete="off"
+                          />
+                          <p className="text-red-500 text-sm">
+                            {errors.walletAddress?.message}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2 break-words">
+                          {data.walletAddress}
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        {t('isRegistered')}
+                      </div>
+                      <div className="px-4 py-2">
+                        {isEditting && data.countPay === 0 && (
+                          <div className="flex gap-4">
+                            <input
+                              type="radio"
+                              {...register('isRegistered')}
+                            ></input>
+                            <p>Finished</p>
+                          </div>
+                        )}
+                        {!isEditting || data.countPay >= 1
+                          ? data.countPay >= 1
+                            ? t('finished')
+                            : t('unfinished')
+                          : ''}
+                      </div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        {t('count pay')}
+                      </div>
+                      <div className="px-4 py-2">
+                        {data.countPay === 0 ? 0 : data.countPay - 3}{' '}
+                        {t('times')}
+                      </div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">Tier</div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('tier', {
+                              required: t('tier is required'),
+                            })}
+                            autoComplete="off"
+                          />
+                          <p className="text-red-500 text-sm">
+                            {errors.tier?.message}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">{data.tier}</div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        {t('buyPackage')}
+                      </div>
+                      <div className="px-4 py-2">
+                        {!isEditting ? (
+                          data.buyPackage
+                        ) : (
+                          <select
+                            {...register('buyPackage')}
+                            defaultValue={data.buyPackage}
+                            disabled={loadingUpdate}
+                            className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
+                          >
+                            {packageOptions.map((item) => (
+                              <option key={item} value={item}>
+                                {item}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">Rank</div>
+                      <div className="px-4 py-2">
+                        {data.countPay !== 0 && (
+                          <div
+                            className={`p-2 max-w-fit text-sm bg-green-600 text-white rounded-[50px]`}
+                          >
+                            {renderRank(
+                              data.currentLayer[0] ? data.currentLayer[0] : 0,
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        Available HEWE
+                      </div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('availableHewe', {
+                              required: 'Available Hewe is required',
+                            })}
+                            defaultValue={data.availableHewe}
+                          />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">{data.availableHewe}</div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">Total HEWE</div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('totalHewe')}
+                            defaultValue={data.totalHewe
+                            }
+                          />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">
+                          {data.totalHewe}
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">Reward HEWE</div>
+                        <div className="px-4 py-2">
+                          {data.tier > 1
+                            ? 0
+                            : data.totalHewe > 0
+                            ? parseInt(data.totalHewe) -
+                              parseInt(data.claimedHewe)
+                            : 0}
+                        </div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        HEWE Per Day
+                      </div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('hewePerDay')}
+                            defaultValue={data.hewePerDay}
+                          />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">{data.hewePerDay}</div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        Available USDT
+                      </div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('availableUsdt', {
+                              required: 'Available Usdt is required',
+                            })}
+                            defaultValue={data.availableUsdt}
+                          />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">
+                          {data.availableUsdt} USDT
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        Processing USDT
+                      </div>
+                      <div className="px-4 py-2">
+                        {data.withdrawPending} USDT
+                      </div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        Total Earned
+                      </div>
+                      <div className="px-4 py-2">{data.totalEarning} USDT</div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">Total Hold</div>
+                      <div className="px-4 py-2">{data.totalHold} USDT</div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        Outstanding Pre-Tier2 Pool Amount
+                      </div>
+                      <div className="px-4 py-2">
+                        {data.shortfallAmount} USDT
+                      </div>
+                    </div>
+                    {data.city === 'US' && (
+                      <>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            Payout Gateway
+                          </div>
+                          <div className="px-4 py-2">{data.paymentMethod}</div>
+                        </div>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            Payout Display Name
+                          </div>
+                          <div className="px-4 py-2">{data.accountName}</div>
+                        </div>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            Payout Email or Phone Number
+                          </div>
+                          <div className="px-4 py-2">{data.accountNumber}</div>
+                        </div>
+                      </>
+                    )}
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        Overdue referral
+                      </div>
+                      <div className="px-4 py-2">
+                        {isEditting && data.errLahCode !== '' && (
+                          <div className="flex gap-4">
+                            <input
+                              type="radio"
+                              {...register('removeErrLahCode')}
+                            ></input>
+                            <p>Reset</p>
+                          </div>
+                        )}
+                        {!isEditting && data.errLahCode}
+                      </div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">{t('fine')}</div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('newFine', {
+                              required: 'Fine is required',
+                            })}
+                            defaultValue={data.fine}
+                          />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">{data.fine}</div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">Level</div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('level', {
+                              required: 'Level is required',
+                            })}
+                            defaultValue={
+                              data.currentLayer[parseInt(data.tier) - 1]
+                            }
+                          />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">
+                          {data.currentLayer[parseInt(data.tier) - 1]}
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">{t('note')}</div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <textarea
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('note')}
+                            autoComplete="off"
+                            rows="3"
+                          />
+                          <p className="text-red-500 text-sm">
+                            {errors.note?.message}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">{data.note}</div>
+                      )}
+                    </div>
+                    {/* <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        ID Image Front
+                      </div>
+                      <div className="px-4 py-2">
+                        {data.imgFront !== '' ? (
+                          <img
+                            src={`${
+                              import.meta.env.VITE_API_URL
+                            }/uploads/CCCD/${data.imgFront}`}
+                          />
+                        ) : (
+                          'No data'
+                        )}
+                      </div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        ID Image Back
+                      </div>
+                      <div className="px-4 py-2">
+                        {data.imgBack !== '' ? (
+                          <img
+                            src={`${
+                              import.meta.env.VITE_API_URL
+                            }/uploads/CCCD/${data.imgBack}`}
+                          />
+                        ) : (
+                          'No data'
+                        )}
+                      </div>
+                    </div> */}
+                    <div className="w-full flex justify-center">
+                      <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+                        <p className="font-semibold"> FaceTec Image :</p>
+                        <div className="flex flex-col items-center justify-center w-full">
+                          {data.facetecTid !== '' && (
+                            <img
+                              src={`${
+                                import.meta.env.VITE_FACETEC_URL
+                              }/api/liveness/image?tid=${data.facetecTid}`}
+                              className="w-full h-full rounded-md object-cover"
+                              alt="FaceTec image"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-full flex justify-center">
+                      <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+                        <p className="font-semibold"> FaceTec Url :</p>
+                        <div className="flex flex-col w-full">
+                          {data.facetecTid !== '' && (
+                            <a
+                              target="_blank"
+                              className="text-blue-500"
+                              href={`${
+                                import.meta.env.VITE_FACETEC_DASHBOARD_URL
+                              }/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${
+                                data.id
+                              }`}
+                            >
+                              {`${
+                                import.meta.env.VITE_FACETEC_DASHBOARD_URL
+                              }/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${
+                                data.id
+                              }`}
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* {data.status === 'PENDING' && (
+                  <>
+                    <div
+                      onClick={() => handleApprove(id)}
+                      className="w-full cursor-pointer flex justify-center items-center hover:underline bg-green-600 text-white font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                    >
+                      {t('accept')}
+                    </div>
+                  </>
+                )} */}
+                {isEditting && (
+                  <>
+                    <button
+                      onClick={() => setEditting(true)}
+                      disabled={loading}
+                      className="w-full flex justify-center items-center hover:underline bg-black text-NoExcuseChallenge font-semibold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                    >
+                      {loading && <Loading />}
+                      {t('update')}
+                    </button>
+                    <button
+                      onClick={() => setEditting(false)}
+                      className="w-full flex justify-center items-center hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                    >
+                      {t('cancel')}
+                    </button>
+                  </>
+                )}
+                {userInfo?.permissions
+                  .find((p) => p.page.pageName === 'admin-users-details')
+                  ?.actions.includes('update') &&
+                  !isEditting &&
+                  data.status !== 'DELETED' && (
+                    <button
+                      onClick={() => setEditting(true)}
+                      className="w-full flex justify-center items-center hover:underline text-NoExcuseChallenge bg-black font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                    >
+                      {t('edit')}
+                    </button>
+                  )}
+                {userInfo?.permissions
+                  .find((p) => p.page.pageName === 'admin-users-details')
+                  ?.actions.includes('delete') &&
+                  !isEditting &&
+                  data.status !== 'DELETED' && (
+                    <div
+                      onClick={handleDelete}
+                      className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-red-500 text-white"
+                    >
+                      {t('delete')}
+                    </div>
+                  )}
+                {userInfo?.permissions
+                  .find((p) => p.page.pageName === 'admin-users-details')
+                  ?.actions.includes('update') &&
+                  walletChange && (
+                    <div
+                      onClick={handleApproveChangeWallet}
+                      className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-orange-500 text-white"
+                    >
+                      {t('Approve change wallet address')}
+                    </div>
+                  )}
+                {userInfo?.permissions
+                  .find((p) => p.page.pageName === 'admin-users-details')
+                  ?.actions.includes('update') &&
+                  data.facetecTid === '' &&
+                  data.status === 'UNVERIFY' && (
+                    <div
+                      onClick={handleCheckKyc}
+                      className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-orange-500 text-white"
+                    >
+                      {loadingCheckKyc && <Loading />}
+                      Check KYC
+                    </div>
+                  )}
+
+                {userInfo?.permissions
+                  .find((p) => p.page.pageName === 'admin-users-details')
+                  ?.actions.includes('update') &&
+                  data.preTier2Status === '' &&
+                  data.status === 'APPROVED' && (
+                    <div
+                      onClick={handlePushToPreTier2}
+                      className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-purple-500 text-white"
+                    >
+                      {loadingPushToPreTier2 && <Loading />}
+                      Push to Pre Tier 2
+                    </div>
+                  )}
+              </div>
+            </div>
+          </form>
         </div>
       )}
     </DefaultLayout>

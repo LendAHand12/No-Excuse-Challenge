@@ -825,7 +825,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     holdLevel,
     availableHewe,
     availableUsdt,
-    rewardHewe,
+    totalHewe,
     hewePerDay,
     level,
     removeErrLahCode,
@@ -837,6 +837,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     termDie,
     preTier2Status,
   } = req.body;
+  console.log({totalHewe, availableHewe, hewePerDay})
   if (userId) {
     const userExistsUserId = await User.findOne({
       userId,
@@ -913,7 +914,8 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     user.availableUsdt = availableUsdt || user.availableUsdt;
     user.walletAddress = walletAddress || user.walletAddress;
     user.hewePerDay = hewePerDay || user.hewePerDay;
-    user.totalHewe = rewardHewe || user.totalHewe;
+    user.totalHewe = totalHewe || user.totalHewe;
+    user.availableHewe = availableHewe || user.availableHewe;
     user.accountName = accountName || user.accountName;
     user.accountNumber = accountNumber || user.accountNumber;
     if (preTier2Status) {
