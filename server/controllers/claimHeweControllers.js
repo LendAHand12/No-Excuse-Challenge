@@ -62,118 +62,43 @@ const claimHewe = asyncHandler(async (req, res) => {
   }
 });
 
-// const claimUsdt = asyncHandler(async (req, res) => {
-//   const { token, amount } = req.body;
-//   const decode = decodeCallbackToken(token);
-//   console.log({ decode });
-
-//   if (!decode) {
-//     throw new Error("Internal Error");
-//   }
-
-//   const { userId } = decode;
-
-//   // Bước 1: Set isClaiming = true chỉ khi hiện tại nó = false
-//   const user = await User.findOneAndUpdate(
-//     { _id: userId, isClaiming: false },
-//     { $set: { isClaiming: true } },
-//     { new: true }
-//   );
-
-//   if (!user) {
-//     return res.status(400).json({
-//       error: "Your withdraw request is already being processed. Please wait!",
-//     });
-//   }
-
-//   try {
-//     // Bước 2: Validate user
-//     if (user.status !== "APPROVED" || user.facetecTid === "") {
-//       throw new Error("Please verify your account");
-//     }
-//     if (user.errLahCode === "OVER45") {
-//       throw new Error("Request denied");
-//     }
-
-//     // Bước 3: Check balance
-//     if (user.availableUsdt > 0 && user.availableUsdt >= parseInt(amount)) {
-//       if (parseInt(amount) < 200 && user.paymentMethod === "") {
-//         // Gửi trực tiếp USDT
-//         const receipt = await sendUsdt({
-//           amount: amount - 1,
-//           receiverAddress: user.walletAddress,
-//         });
-
-//         await Claim.create({
-//           userId: user.id,
-//           amount: parseInt(amount),
-//           hash: receipt.hash,
-//           coin: "USDT",
-//         });
-
-//         user.claimedUsdt += parseInt(amount);
-//         user.availableUsdt -= parseInt(amount);
-//         await user.save();
-
-//         res.status(200).json({ message: "claim USDT successful" });
-//       } else {
-//         // Tạo yêu cầu withdraw chờ admin xử lý
-//         await Withdraw.create({
-//           userId: user.id,
-//           amount: parseInt(amount),
-//           method: user.paymentMethod,
-//           accountName: user.accountName,
-//           accountNumber: user.accountNumber,
-//         });
-
-//         user.availableUsdt -= parseInt(amount);
-//         await user.save();
-
-//         res.status(200).json({
-//           message: "Withdrawal request has been sent to Admin. Please wait!",
-//         });
-//       }
-//     } else {
-//       throw new Error("Insufficient balance in account");
-//     }
-//   } catch (err) {
-//     res.status(400).json({
-//       error: err.message ? err.message.split(",")[0] : "Internal Error",
-//     });
-//   } finally {
-//     // Reset trạng thái sau khi xử lý xong (dù success hay error)
-//     await User.findByIdAndUpdate(userId, { isClaiming: false });
-//   }
-// });
-
 const claimUsdt = asyncHandler(async (req, res) => {
-  const { user } = req;
-  const { amount } = req.body;
+  const { token, amount } = req.body;
+  const decode = decodeCallbackToken(token);
+  console.log({ decode });
 
-  // Dùng findOneAndUpdate để set isClaimingHewe = true
-  const lockedUser = await User.findOneAndUpdate(
-    { _id: user._id, isClaiming: false },
+  if (!decode) {
+    throw new Error("Internal Error");
+  }
+
+  const { userId } = decode;
+
+  // Bước 1: Set isClaiming = true chỉ khi hiện tại nó = false
+  const user = await User.findOneAndUpdate(
+    { _id: userId, isClaiming: false },
     { $set: { isClaiming: true } },
     { new: true }
   );
 
-  if (!lockedUser) {
+  if (!user) {
     return res.status(400).json({
-      error: "Your HEWE claim is already being processed. Please wait!",
+      error: "Your withdraw request is already being processed. Please wait!",
     });
   }
 
   try {
-    if (lockedUser.availableUsdt > 0) {
-      if (user.status !== "APPROVED" || user.facetecTid === "") {
-        throw new Error("Please verify your account");
-      }
-      if (user.errLahCode === "OVER45") {
-        throw new Error("Request denied");
-      }
+    // Bước 2: Validate user
+    if (user.status !== "APPROVED" || user.facetecTid === "") {
+      throw new Error("Please verify your account");
+    }
+    if (user.errLahCode === "OVER45") {
+      throw new Error("Request denied");
+    }
 
+    // Bước 3: Check balance
+    if (user.availableUsdt > 0 && user.availableUsdt >= parseInt(amount)) {
       if (parseInt(amount) < 200 && user.paymentMethod === "") {
-        //         // Gửi trực tiếp USDT
+        // Gửi trực tiếp USDT
         const receipt = await sendUsdt({
           amount: amount - 1,
           receiverAddress: user.walletAddress,
@@ -213,13 +138,88 @@ const claimUsdt = asyncHandler(async (req, res) => {
     }
   } catch (err) {
     res.status(400).json({
-      error: err.message || "Internal error",
+      error: err.message ? err.message.split(",")[0] : "Internal Error",
     });
   } finally {
-    // Reset lại trạng thái để lần sau vẫn claim được
-    await User.findByIdAndUpdate(lockedUser._id, { isClaiming: false });
+    // Reset trạng thái sau khi xử lý xong (dù success hay error)
+    await User.findByIdAndUpdate(userId, { isClaiming: false });
   }
 });
+
+// const claimUsdt = asyncHandler(async (req, res) => {
+//   const { user } = req;
+//   const { amount } = req.body;
+
+//   // Dùng findOneAndUpdate để set isClaimingHewe = true
+//   const lockedUser = await User.findOneAndUpdate(
+//     { _id: user._id, isClaiming: false },
+//     { $set: { isClaiming: true } },
+//     { new: true }
+//   );
+
+//   if (!lockedUser) {
+//     return res.status(400).json({
+//       error: "Your HEWE claim is already being processed. Please wait!",
+//     });
+//   }
+
+//   try {
+//     if (lockedUser.availableUsdt > 0) {
+//       if (user.status !== "APPROVED" || user.facetecTid === "") {
+//         throw new Error("Please verify your account");
+//       }
+//       if (user.errLahCode === "OVER45") {
+//         throw new Error("Request denied");
+//       }
+
+//       if (parseInt(amount) < 200 && user.paymentMethod === "") {
+//         //         // Gửi trực tiếp USDT
+//         const receipt = await sendUsdt({
+//           amount: amount - 1,
+//           receiverAddress: user.walletAddress,
+//         });
+
+//         await Claim.create({
+//           userId: user.id,
+//           amount: parseInt(amount),
+//           hash: receipt.hash,
+//           coin: "USDT",
+//         });
+
+//         user.claimedUsdt += parseInt(amount);
+//         user.availableUsdt -= parseInt(amount);
+//         await user.save();
+
+//         res.status(200).json({ message: "claim USDT successful" });
+//       } else {
+//         // Tạo yêu cầu withdraw chờ admin xử lý
+//         await Withdraw.create({
+//           userId: user.id,
+//           amount: parseInt(amount),
+//           method: user.paymentMethod,
+//           accountName: user.accountName,
+//           accountNumber: user.accountNumber,
+//         });
+
+//         user.availableUsdt -= parseInt(amount);
+//         await user.save();
+
+//         res.status(200).json({
+//           message: "Withdrawal request has been sent to Admin. Please wait!",
+//         });
+//       }
+//     } else {
+//       throw new Error("Insufficient balance in account");
+//     }
+//   } catch (err) {
+//     res.status(400).json({
+//       error: err.message || "Internal error",
+//     });
+//   } finally {
+//     // Reset lại trạng thái để lần sau vẫn claim được
+//     await User.findByIdAndUpdate(lockedUser._id, { isClaiming: false });
+//   }
+// });
 
 var processingAmcUserIds = [];
 
