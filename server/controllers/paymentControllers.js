@@ -318,10 +318,13 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           indexFor++;
         }
       }
+
+      const exchangeRate = await Config.findOne({ label: "USD_TO_VND" });
       res.json({
         status: "PAY",
         payments,
         paymentIds,
+        exchangeRate: exchangeRate.value,
       });
     }
   } else {

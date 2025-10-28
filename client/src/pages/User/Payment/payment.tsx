@@ -10,6 +10,8 @@ import DefaultLayout from '../../../layout/DefaultLayout';
 import { transfer } from '../../../utils/smartContract';
 import { shortenWalletAddress } from '../../../utils';
 import { useSelector } from 'react-redux';
+import PaymentModal from '@/components/PaymentModal';
+import '@/components/PaymentModal/index.css';
 
 Modal.setAppElement('#root');
 
@@ -23,6 +25,9 @@ const PaymentPage = () => {
   const [loadingPayment, setLoadingPayment] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [exchangeRate, setExchangeRate] = useState(0);
+  const [orderId, setOrderId] = useState('');
 
   const {
     formState: { errors },
@@ -32,7 +37,7 @@ const PaymentPage = () => {
     setLoadingPaymentInfo(true);
     await Payment.getPaymentInfo()
       .then((response) => {
-        const { payments, paymentIds, message } = response.data;
+        const { payments, paymentIds, message, exchangeRate } = response.data;
         if (message) {
           toast.success(message);
           setShowPayment(false);
@@ -45,6 +50,10 @@ const PaymentPage = () => {
           setTotal(totalPayment + fee);
           setPaymentIdsList(paymentIds);
           setPaymentsList(payments);
+          setExchangeRate(exchangeRate || 0);
+          // Generate unique orderId
+          const uniqueOrderId = `ORDER-${userInfo.id}-${Date.now()}`;
+          setOrderId(uniqueOrderId);
           setShowPayment(true);
         }
 
@@ -133,7 +142,8 @@ const PaymentPage = () => {
                     </div>
                     <div className="mb-3">
                       <p className="text-lg mb-2 ml-1">
-                        <span className="font-bold">Total</span> : {total} USDT
+                        <span className="font-bold">{t('Total')}</span> :{' '}
+                        {total} USDT
                       </p>
                     </div>
                   </div>
@@ -179,11 +189,11 @@ const PaymentPage = () => {
                                 : payment.type === 'FINE'
                                 ? t('fine')
                                 : payment.type === 'PIG'
-                                ? 'Dream Pool'
+                                ? t('Dream Pool')
                                 : payment.type === 'COMPANY'
                                 ? 'HEWE'
                                 : payment.type === 'KYC'
-                                ? 'KYC Fee'
+                                ? t('KYC Fee')
                                 : t('Foundation Contribution')}
                               <span> : </span>
                             </span>
@@ -191,7 +201,9 @@ const PaymentPage = () => {
                           </div>
                           <div className="">
                             <span className="mx-2 text-black">
-                              <span className="font-medium mr-2">To : </span>
+                              <span className="font-medium mr-2">
+                                {t('To')} :{' '}
+                              </span>
                               <span className="">{payment.to}</span>
                             </span>
                           </div>
@@ -200,12 +212,12 @@ const PaymentPage = () => {
                     ))}
                   <button
                     type="submit"
-                    onClick={paymentMetamask}
+                    onClick={() => setShowPaymentModal(true)}
                     disabled={loadingPayment}
                     className="w-2xl mx-auto flex justify-center border border-black items-center hover:underline  font-medium rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
                   >
                     {loadingPayment && <Loading />}
-                    {t('payment')}
+                    {t('signin.confirm')}
                   </button>
                 </div>
               </>
@@ -234,15 +246,29 @@ const PaymentPage = () => {
                   </svg>
 
                   <p className="text-md lg:text-2xl font-bold">
-                    Contribution Completed
+                    {t('Contribution Completed')}
                   </p>
-                  <p className="text-md lg:text-2xl font-bold">Thank You </p>
+                  <p className="text-md lg:text-2xl font-bold">
+                    {t('Thank You')}{' '}
+                  </p>
                 </div>
               </div>
             )}
           </>
         )}
       </div>
+
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        totalAmount={total}
+        changeRate={exchangeRate}
+        orderId={orderId}
+        onWalletPayment={() => {
+          setShowPaymentModal(false);
+          paymentMetamask();
+        }}
+      />
     </DefaultLayout>
   );
 };

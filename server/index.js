@@ -35,6 +35,7 @@ import userHistoryRoutes from "./routes/userHistoryRoutes.js";
 import moveSystemRoutes from "./routes/moveSystemRoutes.js";
 import swapRoutes from "./routes/swapRoutes.js";
 import preTier2Routes from "./routes/preTier2Routes.js";
+import bankWebhookRoutes from "./routes/bankWebhookRoutes.js";
 
 import {
   countChildToData,
@@ -53,6 +54,9 @@ import Tree from "./models/treeModel.js";
 import { getTotalLevel1ToLevel10OfUser, getTotalLevel6ToLevel10OfUser } from "./utils/methods.js";
 
 const app = express();
+
+// Trust proxy để IP whitelist hoạt động đúng (khi đứng sau Nginx/Cloudflare)
+app.set("trust proxy", true);
 
 // use morgan in development mode
 if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
@@ -99,6 +103,7 @@ app.use("/api/user-history", userHistoryRoutes);
 app.use("/api/move-system", moveSystemRoutes);
 app.use("/api/swap", swapRoutes);
 app.use("/api/pre-tier-2", preTier2Routes);
+app.use("/api/bank-webhook", bankWebhookRoutes);
 
 app.get("/api/test-tele", async (req, res) => {
   await sendTelegramMessage({ userName: "kiet" });
