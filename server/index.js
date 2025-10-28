@@ -115,15 +115,23 @@ app.use(errorHandler);
 
 // await resetPass();
 
-const cron0 = new CronJob("00 00 * * *", async () => {
-  // 0h
-  console.log("Dis hewe to user start");
-  await distributionHewe();
-  console.log("Dis hewe user done");
-});
+// Cấu hình timezone Việt Nam (GMT+7)
+const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";
+
+const cron0 = new CronJob(
+  "00 00 * * *", // 0h giờ Việt Nam
+  async () => {
+    console.log("Dis hewe to user start");
+    await distributionHewe();
+    console.log("Dis hewe user done");
+  },
+  null,
+  true,
+  VIETNAM_TIMEZONE
+);
 
 const cron1 = new CronJob(
-  "05 * * * *", // chạy 4:00 sáng
+  "00 05 * * *", // 5h sáng giờ Việt Nam
   async () => {
     console.log("Delete user start");
     await deleteUser24hUnPay();
@@ -131,48 +139,80 @@ const cron1 = new CronJob(
   },
   null,
   true,
-  "Asia/Bangkok" // múi giờ GMT+7
+  VIETNAM_TIMEZONE
 );
 
-const cron12 = new CronJob("30 01 * * *", async () => {
-  // 1h30
-  console.log("Block user not KYC start");
-  await blockUserNotKYC();
-  console.log("Block user not KYC done");
-});
+const cron12 = new CronJob(
+  "30 01 * * *", // 1h30 giờ Việt Nam
+  async () => {
+    console.log("Block user not KYC start");
+    await blockUserNotKYC();
+    console.log("Block user not KYC done");
+  },
+  null,
+  true,
+  VIETNAM_TIMEZONE
+);
 
-const cron2 = new CronJob("00 02 * * *", async () => {
-  // 2h
-  console.log("Count child start");
-  await countChildToData();
-  console.log("Count child done");
-});
+const cron2 = new CronJob(
+  "00 02 * * *", // 2h giờ Việt Nam
+  async () => {
+    console.log("Count child start");
+    await countChildToData();
+    console.log("Count child done");
+  },
+  null,
+  true,
+  VIETNAM_TIMEZONE
+);
 
-const cron3 = new CronJob("00 03 * * *", async () => {
-  // 3h
-  console.log("Refresh layer start");
-  await countLayerToData();
-  console.log("Refresh layer done");
-});
+const cron3 = new CronJob(
+  "00 03 * * *", // 3h giờ Việt Nam
+  async () => {
+    console.log("Refresh layer start");
+    await countLayerToData();
+    console.log("Refresh layer done");
+  },
+  null,
+  true,
+  VIETNAM_TIMEZONE
+);
 
-const cron4 = new CronJob("00 04 * * *", async () => {
-  // 4h
-  console.log("Ranking calc start");
-  await rankingCalc();
-  console.log("Ranking calc done");
-});
+const cron4 = new CronJob(
+  "00 04 * * *", // 4h giờ Việt Nam
+  async () => {
+    console.log("Ranking calc start");
+    await rankingCalc();
+    console.log("Ranking calc done");
+  },
+  null,
+  true,
+  VIETNAM_TIMEZONE
+);
 
-const cron6 = new CronJob("0 * * * *", async () => {
-  // evry hour
-  await updateHewePrice();
-});
+const cron6 = new CronJob(
+  "0 * * * *", // Mỗi giờ theo giờ Việt Nam
+  async () => {
+    console.log("Update HEWE price start");
+    await updateHewePrice();
+    console.log("Update HEWE price done");
+  },
+  null,
+  true,
+  VIETNAM_TIMEZONE
+);
 
-const cron7 = new CronJob("00 06 * * *", async () => {
-  // every 6 hour
-  console.log("Check user pre tier 2 start");
-  await checkUserPreTier2();
-  console.log("Check user pre tier 2 end");
-});
+const cron7 = new CronJob(
+  "00 06 * * *", // 6h giờ Việt Nam
+  async () => {
+    console.log("Check user pre tier 2 start");
+    await checkUserPreTier2();
+    console.log("Check user pre tier 2 end");
+  },
+  null,
+  true,
+  VIETNAM_TIMEZONE
+);
 
 // await resetErrLahCode();
 

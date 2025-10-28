@@ -57,6 +57,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
           { userId: { $regex: keyword, $options: "i" } },
           { email: { $regex: keyword, $options: "i" } },
           { walletAddress: { $regex: keyword, $options: "i" } },
+          { idCode: { $regex: keyword, $options: "i" } },
         ],
       },
       { role: "user" },
@@ -837,7 +838,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     termDie,
     preTier2Status,
   } = req.body;
-  console.log({totalHewe, availableHewe, hewePerDay})
+  console.log({ totalHewe, availableHewe, hewePerDay });
   if (userId) {
     const userExistsUserId = await User.findOne({
       userId,
