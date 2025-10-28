@@ -17,6 +17,7 @@ import PhoneInput from 'react-phone-number-input';
 import './index.css';
 import ClaimModal from '../../../components/ClaimModal';
 import { Link, useNavigate } from 'react-router-dom';
+import vietnamBanks from '@/lib/vietnam-banks.json';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -61,6 +62,9 @@ const Profile = () => {
     lockKyc,
     accountName,
     accountNumber,
+    bankName,
+    bankCode,
+    dateOfBirth,
     city,
     subUser,
     checkCanNextTier,
@@ -93,6 +97,7 @@ const Profile = () => {
       ? true
       : false,
   );
+  const [showBankInfoModal, setShowBankInfoModal] = useState(false);
 
   const {
     register,
@@ -108,19 +113,51 @@ const Profile = () => {
       imgFrontData: '',
       accountName,
       accountNumber,
+      bankName: bankName || '',
+      dateOfBirth: dateOfBirth
+        ? new Date(dateOfBirth).toISOString().split('T')[0]
+        : '',
     },
   });
 
   const onSubmit = useCallback(
-    async (data) => {
-      const { walletAddress, email } = data;
+    async (data: any) => {
+      const {
+        walletAddress,
+        email,
+        bankName,
+        accountName,
+        accountNumber,
+        dateOfBirth,
+      } = data;
       if (!phoneNumber || phoneNumber === '') {
         setErrPhone(true);
       } else {
         setErrPhone(false);
+
+        // Find bank info
+        const selectedBank = vietnamBanks.find(
+          (bank: any) => bank.vn_name === bankName,
+        );
+
+        const bankCode = selectedBank ? selectedBank.shortName : '';
+        const finalBankName = selectedBank ? selectedBank.vn_name : bankName;
+
+        // Build query params
+        const params = new URLSearchParams({
+          walletAddress: walletAddress || '',
+          phone: phoneNumber,
+          email: email || '',
+          bankName: finalBankName || '',
+          bankCode: bankCode || '',
+          accountName: accountName?.trim() || '',
+          accountNumber: accountNumber?.trim() || '',
+          dateOfBirth: dateOfBirth || '',
+        });
+
         const callbackUrl = `${
           import.meta.env.VITE_URL
-        }/user/update-info?walletAddress=${walletAddress}&phone=${phoneNumber}&email=${email}`;
+        }/user/update-info?${params.toString()}`;
         window.location.href = `${
           import.meta.env.VITE_FACETEC_URL
         }/verify.html?callback=${encodeURIComponent(
@@ -232,6 +269,15 @@ const Profile = () => {
           }
           if (response.data.preTier2Status === 'PASSED') {
             setShowPreTier2Commit(false);
+          }
+          // Check if bank information is missing after getting user data
+          if (
+            !response.data.bankName ||
+            !response.data.accountName ||
+            !response.data.accountNumber ||
+            !response.data.dateOfBirth
+          ) {
+            setShowBankInfoModal(true);
           }
         })
         .catch((error) => {
@@ -1309,6 +1355,38 @@ const Profile = () => {
                 </div>
               </>
             )}
+            {city !== 'US' && (
+              <>
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
+                  <p>{t('bank name')} :</p>
+                  <p>{bankName}</p>
+                </div>
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                  <p>{t('bankCode')} :</p>
+                  <p>{bankCode || '-'}</p>
+                </div>
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
+                  <p>{t('accountName')} :</p>
+                  <p>{accountName || '-'}</p>
+                </div>
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                  <p>{t('accountNumber')} :</p>
+                  <p>{accountNumber || '-'}</p>
+                </div>
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
+                  <p>{t('date of birth')} :</p>
+                  <p>
+                    {dateOfBirth
+                      ? new Date(dateOfBirth).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                        })
+                      : '-'}
+                  </p>
+                </div>
+              </>
+            )}
           </div>
           {isEdit && (
             <button
@@ -1322,6 +1400,110 @@ const Profile = () => {
           )}
         </form>
       </div>
+
+      {/* Bank Info Modal */}
+      <Modal
+        isOpen={showBankInfoModal}
+        onRequestClose={() => setShowBankInfoModal(false)}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+        overlayClassName="fixed inset-0 z-40"
+        contentLabel="Bank Information Modal"
+      >
+        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+          <h2 className="text-xl font-bold mb-4">{t('Bank Information')}</h2>
+          <p className="text-gray-600 mb-4">
+            {t('Please provide your bank account information')}
+          </p>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">
+                {t('bank name')} <span className="text-red-500">*</span>
+              </label>
+              <select
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
+                {...register('bankName', {
+                  required: t('bank name is required'),
+                })}
+              >
+                <option value="">{t('Select bank name')}</option>
+                {vietnamBanks.map((bank: any, index: number) => (
+                  <option key={index} value={bank.vn_name}>
+                    {bank.vn_name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.bankName?.message}
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">
+                {t('accountName')} <span className="text-red-500">*</span>
+              </label>
+              <input
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
+                {...register('accountName', {
+                  required: t('bank account name is required'),
+                })}
+                autoComplete="off"
+              />
+              <p className="text-red-500 text-sm mt-1">
+                {errors.accountName?.message}
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">
+                {t('accountNumber')} <span className="text-red-500">*</span>
+              </label>
+              <input
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
+                {...register('accountNumber', {
+                  required: t('bank account number is required'),
+                })}
+                autoComplete="off"
+              />
+              <p className="text-red-500 text-sm mt-1">
+                {errors.accountNumber?.message}
+              </p>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-2">
+                {t('date of birth')} <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
+                {...register('dateOfBirth', {
+                  required: t('date of birth is required'),
+                })}
+              />
+              <p className="text-red-500 text-sm mt-1">
+                {errors.dateOfBirth?.message}
+              </p>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowBankInfoModal(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+              >
+                {t('Skip')}
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading ? <Loading /> : t('Submit')}
+              </button>
+            </div>
+          </form>
+        </div>
+      </Modal>
     </DefaultLayout>
   );
 };

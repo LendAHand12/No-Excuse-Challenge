@@ -207,6 +207,18 @@
 
   "id code": "ID/DL/Passport number",
   "id code is required": "ID/DL/Passport number is required",
+  "bank name": "Bank name",
+  "bank name is required": "Bank name is required",
+  "bankCode": "Bank code",
+  "accountName": "Account name",
+  "accountNumber": "Account number",
+  "Select bank name": "Select bank name",
+  "bank account name": "Bank account name",
+  "bank account name is required": "Bank account name is required",
+  "bank account number": "Bank account number",
+  "bank account number is required": "Bank account number is required",
+  "date of birth": "Date of birth",
+  "date of birth is required": "Date of birth is required",
   "edit": "Edit",
   "delete": "Delete",
   "show password": "Show password",
@@ -231,6 +243,7 @@
   "duplicateInfoUserId": "Duplicate user name",
   "duplicateInfoIdCode": "Duplicate ID/DL/Passport number",
   "duplicateWalletAddress": "Duplicate Wallet Address",
+  "duplicateBankAccount": "Duplicate bank account",
 
   "termTitle": "Lend A Hand Program - Terms and Conditions",
   "termDate": "Effective Date: July 01, 2023",
@@ -444,12 +457,19 @@
     "signIn": "Sign in",
     "copyright": "©2024 NoExcuseChallenge. All Rights Reserved.",
     "menu": {
+      "Home": "Home",
+      "Services": "Services",
+      "Mechanism": "Mechanism",
+      "Terms & Conditions": "Terms & Conditions",
+      "Members Guidelines": "Members Guidelines",
+      "Rules & Regulation": "Rules & Regulation",
+      "Contact": "Contact",
+      "News": "News",
       "Users": "Users",
       "Transactions": "Transactions",
       "Get link active": "Get link active",
       "Withdraw request": "Withdraw request",
       "Claims": "Claims",
-      "News": "News",
       "Permissions": "Permissions",
       "Cronjob": "Cronjob",
       "Admins": "Admins",
@@ -621,5 +641,11 @@
       "fineRequired": "Fine is required",
       "levelRequired": "Level is required"
     }
-  }
+  },
+
+  "Bank Information": "Bank Information",
+  "Please provide your bank account information": "Please provide your bank account information",
+  "Bank information updated successfully": "Bank information updated successfully",
+  "Skip": "Skip",
+  "Submit": "Submit"
 }

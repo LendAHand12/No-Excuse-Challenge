@@ -34,14 +34,7 @@ const userSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: [
-        "UNVERIFY",
-        "PENDING",
-        "APPROVED",
-        "LOCKED",
-        "DELETED",
-        "REJECTED",
-      ],
+      enum: ["UNVERIFY", "PENDING", "APPROVED", "LOCKED", "DELETED", "REJECTED"],
       default: "UNVERIFY",
     },
     imgFront: {
@@ -279,6 +272,15 @@ const userSchema = mongoose.Schema(
     adminChangeToDie: {
       type: Boolean,
       default: false,
+    },
+    dateOfBirth: {
+      type: Date,
+    },
+    bankName: {
+      type: String,
+    },
+    bankCode: {
+      type: String,
     },
   },
   {

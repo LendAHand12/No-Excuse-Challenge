@@ -10,14 +10,68 @@ import DefaultLayout from '../../../layout/DefaultLayout';
 import { useSelector } from 'react-redux';
 
 const UpdateInfoKYCPage = () => {
-  const {userInfo} = useSelector(auth => auth.auth);
+  const { userInfo } = useSelector((auth) => auth.auth);
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
-  const parsed = queryString.parse(location.search);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  let { user_id, status, walletAddress, email, phone } = parsed;
+
+  // Parse URL params (queryString.parse automatically decodes)
+  const parsed = queryString.parse(location.search);
+
+  // Helper function to safely decode and handle URLs
+  const safeDecode = (value) => {
+    if (!value) return '';
+    if (typeof value !== 'string') return value;
+    try {
+      // Replace + with space first, then decode URI component
+      // URLSearchParams encodes spaces as + instead of %20
+      const withSpaces = value.replace(/\+/g, ' ');
+      return decodeURIComponent(withSpaces);
+    } catch (e) {
+      return value;
+    }
+  };
+
+  // Helper to safely get string value from parsed params (handle array case)
+  const getStringValue = (value) => {
+    if (!value) return '';
+    if (Array.isArray(value)) return value[0];
+    if (typeof value === 'string') return value;
+    return String(value);
+  };
+
+  let {
+    user_id,
+    status,
+    walletAddress,
+    email,
+    phone,
+    bankName,
+    bankCode,
+    accountName,
+    accountNumber,
+    dateOfBirth,
+  } = parsed;
+
+  // Decode values that might contain special characters (Vietnamese, spaces, etc.)
+  walletAddress = walletAddress
+    ? safeDecode(getStringValue(walletAddress))
+    : walletAddress;
+  email = email ? safeDecode(getStringValue(email)) : email;
+  phone = phone ? safeDecode(getStringValue(phone)) : phone;
+  bankName = bankName ? safeDecode(getStringValue(bankName)) : bankName;
+  bankCode = bankCode ? safeDecode(getStringValue(bankCode)) : bankCode;
+  accountName = accountName
+    ? safeDecode(getStringValue(accountName))
+    : accountName;
+  accountNumber = accountNumber
+    ? safeDecode(getStringValue(accountNumber))
+    : accountNumber;
+  dateOfBirth = dateOfBirth
+    ? safeDecode(getStringValue(dateOfBirth))
+    : dateOfBirth;
   if (status !== 'success') {
     toast.error(t('invalidUrl'));
   }
@@ -29,6 +83,11 @@ const UpdateInfoKYCPage = () => {
         formData.append('phone', phone.trim());
         formData.append('walletAddress', walletAddress.trim());
         formData.append('email', email.trim());
+        formData.append('bankName', bankName.trim());
+        formData.append('bankCode', bankCode.trim());
+        formData.append('accountName', accountName.trim());
+        formData.append('accountNumber', accountNumber.trim());
+        formData.append('dateOfBirth', dateOfBirth.trim());
 
         await User.update(user_id, formData)
           .then((response) => {

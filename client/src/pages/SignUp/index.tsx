@@ -5,10 +5,11 @@ import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import queryString from 'query-string';
-import PhoneInput from 'react-phone-number-input';
 
 import Loading from '@/components/Loading';
 import Auth from '@/api/Auth';
+import vietnamBanks from '@/lib/vietnam-banks.json';
+import PhoneInput from 'react-phone-number-input';
 
 import 'react-phone-number-input/style.css';
 import './index.css';
@@ -31,6 +32,17 @@ const SignUpPage = () => {
     defaultValues: {
       ref,
       receiveId,
+      userId: '',
+      email: '',
+      phone: '',
+      idCode: '',
+      walletAddress: '',
+      dateOfBirth: '',
+      password: '',
+      confirmPassword: '',
+      accountName: '',
+      accountNumber: '',
+      bankCode: '',
     },
   });
   const [loading, setLoading] = useState(false);
@@ -43,6 +55,7 @@ const SignUpPage = () => {
 
   const onSubmit = useCallback(
     async (data) => {
+      console.log({ data });
       if (phone === '') {
         setErrPhone(true);
         return;
@@ -58,18 +71,29 @@ const SignUpPage = () => {
         walletAddress,
         accountName,
         accountNumber,
+        bankCode,
+        dateOfBirth,
       } = data;
+
+      // Find bank info from selected bankCode
+      const selectedBank = vietnamBanks.find(
+        (bank: any) => bank.shortName === bankCode,
+      );
+
       await Auth.register({
         userId: userId.trim(),
         email: email.trim(),
-        walletAddress: walletAddress.trim(),
+        walletAddress: walletAddress ? walletAddress.trim() : '',
         password,
         ref,
         receiveId,
         phone: phone.trim(),
         idCode: idCode.trim(),
+        bankCode: bankCode ? bankCode.trim() : '',
+        bankName: selectedBank ? selectedBank.vn_name : '',
         accountName: accountName ? accountName.trim() : '',
         accountNumber: accountNumber ? accountNumber.trim() : '',
+        dateOfBirth: dateOfBirth,
       })
         .then((response) => {
           setLoading(false);
@@ -152,12 +176,14 @@ const SignUpPage = () => {
                           <p className="text-red-500 mt-1 text-sm">
                             {errors.email?.message}
                           </p>
-                          <div>
+                          {/* Phone */}
+                          <div className="mt-5">
                             <PhoneInput
-                              defaultCountry="US"
+                              defaultCountry="VN"
                               placeholder={t('Phone')}
                               value={phone}
-                              onChange={setPhone}
+                              onChange={(value) => setPhone(value || '')}
+                              className="PhoneInput"
                             />
                             <p className="text-red-500 mt-1 text-sm">
                               {errorPhone && t('Phone is required')}
@@ -178,14 +204,15 @@ const SignUpPage = () => {
                               {errors.idCode?.message}
                             </p>
                           </div>
-                          {/* Wallet address */}
+                          {/* Wallet address - Optional */}
                           <div>
                             <input
                               className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
                               type="text"
-                              placeholder={`${t('Wallet address')} : Oxbx7...`}
+                              placeholder={`${t(
+                                'Wallet address',
+                              )} (Optional) : Oxbx7...`}
                               {...register('walletAddress', {
-                                required: t('Wallet address is required'),
                                 pattern: {
                                   value: /^0x[a-fA-F0-9]{40}$/g,
                                   message: t(
@@ -197,6 +224,75 @@ const SignUpPage = () => {
                             />
                             <p className="text-red-500 mt-1 text-sm">
                               {errors.walletAddress?.message}
+                            </p>
+                          </div>
+
+                          {/* Bank Name */}
+                          <div>
+                            <select
+                              className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
+                              {...register('bankCode', {
+                                required: t('bank name is required'),
+                              })}
+                              disabled={loading}
+                            >
+                              <option value="">{t('Select bank name')}</option>
+                              {vietnamBanks.map((bank: any, index: number) => (
+                                <option key={index} value={bank.shortName}>
+                                  {bank.vn_name}
+                                </option>
+                              ))}
+                            </select>
+                            <p className="text-red-500 mt-1 text-sm">
+                              {errors.bankCode?.message}
+                            </p>
+                          </div>
+
+                          {/* Bank Account Name */}
+                          <div>
+                            <input
+                              className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
+                              type="text"
+                              placeholder={`${t('bank account name')}`}
+                              {...register('accountName', {
+                                required: t('bank account name is required'),
+                              })}
+                              disabled={loading}
+                            />
+                            <p className="text-red-500 mt-1 text-sm">
+                              {errors.accountName?.message}
+                            </p>
+                          </div>
+
+                          {/* Bank Account Number */}
+                          <div>
+                            <input
+                              className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
+                              type="text"
+                              placeholder={`${t('bank account number')}`}
+                              {...register('accountNumber', {
+                                required: t('bank account number is required'),
+                              })}
+                              disabled={loading}
+                            />
+                            <p className="text-red-500 mt-1 text-sm">
+                              {errors.accountNumber?.message}
+                            </p>
+                          </div>
+
+                          {/* Date of Birth */}
+                          <div>
+                            <input
+                              className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
+                              type="date"
+                              placeholder={`${t('date of birth')}`}
+                              {...register('dateOfBirth', {
+                                required: t('date of birth is required'),
+                              })}
+                              disabled={loading}
+                            />
+                            <p className="text-red-500 mt-1 text-sm">
+                              {errors.dateOfBirth?.message}
                             </p>
                           </div>
 

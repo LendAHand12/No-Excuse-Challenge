@@ -4,7 +4,7 @@ import { Schema, model, Types } from "mongoose";
 const userHistorySchema = new Schema({
   userId: { type: Types.ObjectId, ref: "User", required: true },
   field: { type: String, required: true },
-  oldValue: { type: Schema.Types.Mixed, required: true },
+  oldValue: { type: Schema.Types.Mixed },
   newValue: { type: Schema.Types.Mixed, required: true },
   status: {
     type: String,

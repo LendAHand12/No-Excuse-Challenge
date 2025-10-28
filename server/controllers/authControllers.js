@@ -71,6 +71,9 @@ const registerUser = asyncHandler(async (req, res) => {
     walletAddress,
     accountName,
     accountNumber,
+    bankName,
+    bankCode,
+    dateOfBirth,
   } = req.body;
 
   const userExistsUserId = await User.findOne({
@@ -98,6 +101,15 @@ const registerUser = asyncHandler(async (req, res) => {
     status: { $ne: "DELETED" },
   });
 
+  // Check duplicate bank account (bankCode + accountNumber)
+  const userExistsBankAccount = await User.findOne({
+    $and: [
+      { bankCode: bankCode },
+      { accountNumber: accountNumber },
+      { status: { $ne: "DELETED" } },
+    ],
+  });
+
   if (userExistsUserId) {
     let message = "duplicateInfoUserId";
     res.status(400);
@@ -122,8 +134,14 @@ const registerUser = asyncHandler(async (req, res) => {
     let message = "Duplicate account number";
     res.status(400);
     throw new Error(message);
+  } else if (bankCode && accountNumber && userExistsBankAccount) {
+    let message = "duplicateBankAccount";
+    res.status(400);
+    throw new Error(message);
   } else {
     const treeReceiveUser = await Tree.findById(receiveId);
+
+    console.log({ treeReceiveUser });
 
     if (treeReceiveUser.userName === "NoExcuse 9" || treeReceiveUser.children.length < 2) {
       const parent = await User.findById(treeReceiveUser.userId);
@@ -142,6 +160,9 @@ const registerUser = asyncHandler(async (req, res) => {
         city: parent.city,
         accountName,
         accountNumber,
+        bankName,
+        bankCode,
+        dateOfBirth,
       });
 
       const tree = await Tree.create({

@@ -208,6 +208,18 @@
 
   "id code": "Số CCCD",
   "id code is required": "CCCD là bắt buộc",
+  "bank name": "Tên ngân hàng",
+  "bank name is required": "Tên ngân hàng là bắt buộc",
+  "bankCode": "Mã ngân hàng",
+  "accountName": "Tên tài khoản",
+  "accountNumber": "Số tài khoản",
+  "Select bank name": "Chọn ngân hàng",
+  "bank account name": "Tên chủ tài khoản",
+  "bank account name is required": "Tên chủ tài khoản là bắt buộc",
+  "bank account number": "Số tài khoản ngân hàng",
+  "bank account number is required": "Số tài khoản ngân hàng là bắt buộc",
+  "date of birth": "Ngày tháng năm sinh",
+  "date of birth is required": "Ngày tháng năm sinh là bắt buộc",
   "edit": "Chỉnh sửa",
   "delete": "Xoá",
   "show password": "Hiển thị mật khẩu",
@@ -231,6 +243,7 @@
   "duplicateInfoEmail": "Thông tin Email bị trùng",
   "duplicateInfoUserId": "User name bị trùng",
   "duplicateInfoIdCode": "Thông tin CCCD bị trùng",
+  "duplicateBankAccount": "Tài khoản ngân hàng bị trùng",
 
   "termTitle": "Chương trình Lend A Hand - Điều khoản và Điều kiện",
   "termDate": "Ngày có hiệu lực: 01 tháng 7 năm 2023",
@@ -532,12 +545,19 @@
     "signIn": "Đăng nhập",
     "copyright": "©2024 NoExcuseChallenge. Tất cả quyền được bảo lưu.",
     "menu": {
+      "Home": "Trang chủ",
+      "Services": "Dịch vụ",
+      "Mechanism": "Cơ chế",
+      "Terms & Conditions": "Điều khoản & Điều kiện",
+      "Members Guidelines": "Hướng dẫn Thành viên",
+      "Rules & Regulation": "Quy tắc & Quy định",
+      "Contact": "Liên hệ",
+      "News": "Tin tức",
       "Users": "Người dùng",
       "Transactions": "Giao dịch",
       "Get link active": "Lấy liên kết kích hoạt",
       "Withdraw request": "Yêu cầu rút tiền",
       "Claims": "Yêu cầu",
-      "News": "Tin tức",
       "Permissions": "Quyền hạn",
       "Cronjob": "Tác vụ tự động",
       "Admins": "Quản trị viên",
@@ -711,5 +731,11 @@
       "fineRequired": "Phạt là bắt buộc",
       "levelRequired": "Cấp là bắt buộc"
     }
-  }
+  },
+
+  "Bank Information": "Thông tin ngân hàng",
+  "Please provide your bank account information": "Vui lòng cung cấp thông tin tài khoản ngân hàng",
+  "Bank information updated successfully": "Cập nhật thông tin ngân hàng thành công",
+  "Skip": "Bỏ qua",
+  "Submit": "Gửi"
 }

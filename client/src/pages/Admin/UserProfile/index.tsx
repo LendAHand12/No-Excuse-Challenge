@@ -15,6 +15,7 @@ import { useSelector } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import Switch from 'react-switch';
 import PhoneInput from 'react-phone-number-input';
+import vietnamBanks from '@/lib/vietnam-banks.json';
 
 const UserProfile = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -47,7 +48,7 @@ const UserProfile = () => {
     handleSubmit,
     formState: { errors },
     setValue,
-    control
+    control,
   } = useForm();
 
   useEffect(() => {
@@ -71,6 +72,11 @@ const UserProfile = () => {
             lockKyc,
             dieTime,
             errLahCode,
+            bankName,
+            bankCode,
+            accountName,
+            accountNumber,
+            dateOfBirth,
           } = response.data;
           setValue('userId', userId);
           setValue('email', email);
@@ -80,6 +86,11 @@ const UserProfile = () => {
           setValue('walletAddress', walletAddress);
           setValue('changeCreatedAt', changeCreatedAt);
           setValue('dieTime', dieTime);
+          setValue('bankName', bankName);
+          setValue('bankCode', bankCode);
+          setValue('accountName', accountName);
+          setValue('accountNumber', accountNumber);
+          setValue('dateOfBirth', dateOfBirth);
           setCurrentOpenLah(openLah);
           setCurrentCloseLah(closeLah);
           setCurrentLockKyc(lockKyc);
@@ -176,6 +187,25 @@ const UserProfile = () => {
 
       if (values.level !== data.level) {
         formData.append('level', values.level);
+      }
+
+      if (values.bankName !== data.bankName) {
+        const selectedBank = vietnamBanks.find(
+          (bank: any) => bank.vn_name === values.bankName,
+        );
+        if (selectedBank) {
+          formData.append('bankName', selectedBank.vn_name);
+          formData.append('bankCode', selectedBank.shortName);
+        }
+      }
+      if (values.accountName !== data.accountName) {
+        formData.append('accountName', values.accountName);
+      }
+      if (values.accountNumber !== data.accountNumber) {
+        formData.append('accountNumber', values.accountNumber);
+      }
+      if (values.dateOfBirth !== data.dateOfBirth) {
+        formData.append('dateOfBirth', values.dateOfBirth);
       }
 
       formData.append('isRegistered', values.isRegistered);
@@ -1293,12 +1323,16 @@ const UserProfile = () => {
                           <input
                             className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                             {...register('walletAddress', {
-                              required: t('Wallet address is required'),
-                              pattern: {
-                                value: /^0x[a-fA-F0-9]{40}$/g,
-                                message: t(
-                                  'Please enter the correct wallet format',
-                                ),
+                              validate: (value) => {
+                                if (!value || value.trim() === '') {
+                                  return true; // Optional field, empty is allowed
+                                }
+                                if (!/^0x[a-fA-F0-9]{40}$/g.test(value)) {
+                                  return t(
+                                    'Please enter the correct wallet format',
+                                  );
+                                }
+                                return true;
                               },
                             })}
                             autoComplete="off"
@@ -1309,7 +1343,91 @@ const UserProfile = () => {
                         </div>
                       ) : (
                         <div className="px-4 py-2 break-words">
-                          {data.walletAddress}
+                          {data.walletAddress || '-'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        {t('bank name')}
+                      </div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <select
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 text-sm focus:outline-none focus:border-gray-400"
+                            {...register('bankName')}
+                          >
+                            <option value="">{t('Select bank name')}</option>
+                            {vietnamBanks.map((bank: any, index: number) => (
+                              <option key={index} value={bank.vn_name}>
+                                {bank.vn_name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">{data.bankName || '-'}</div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        {t('bankCode')}
+                      </div>
+                      <div className="px-4 py-2">{data.bankCode || '-'}</div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        {t('date of birth')}
+                      </div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            type="date"
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('dateOfBirth')}
+                          />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">
+                          {data.dateOfBirth
+                            ? new Date(data.dateOfBirth).toLocaleDateString()
+                            : '-'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        {t('accountName')}
+                      </div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('accountName')}
+                            autoComplete="off"
+                          />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">
+                          {data.accountName || '-'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        {t('accountNumber')}
+                      </div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('accountNumber')}
+                            autoComplete="off"
+                          />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">
+                          {data.accountNumber || '-'}
                         </div>
                       )}
                     </div>
@@ -1424,26 +1542,23 @@ const UserProfile = () => {
                           <input
                             className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                             {...register('totalHewe')}
-                            defaultValue={data.totalHewe
-                            }
+                            defaultValue={data.totalHewe}
                           />
                         </div>
                       ) : (
-                        <div className="px-4 py-2">
-                          {data.totalHewe}
-                        </div>
+                        <div className="px-4 py-2">{data.totalHewe}</div>
                       )}
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">Reward HEWE</div>
-                        <div className="px-4 py-2">
-                          {data.tier > 1
-                            ? 0
-                            : data.totalHewe > 0
-                            ? parseInt(data.totalHewe) -
-                              parseInt(data.claimedHewe)
-                            : 0}
-                        </div>
+                      <div className="px-4 py-2">
+                        {data.tier > 1
+                          ? 0
+                          : data.totalHewe > 0
+                          ? parseInt(data.totalHewe) -
+                            parseInt(data.claimedHewe)
+                          : 0}
+                      </div>
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">

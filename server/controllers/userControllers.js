@@ -433,6 +433,9 @@ const getUserById = asyncHandler(async (req, res) => {
       isPink: user.countPay === 13 && listDirectUser.length < 2,
       isDisableTier2: treeTier2OfUser ? treeTier2OfUser.disable : false,
       timeToTry: user.timeToTry,
+      bankName: user.bankName,
+      bankCode: user.bankCode,
+      dateOfBirth: user.dateOfBirth,
     });
   } else {
     res.status(404);
@@ -640,6 +643,9 @@ const getUserInfo = asyncHandler(async (req, res) => {
       tier2ChildUsers: tier2Users,
       dieTime: user.dieTime,
       timeToTry: user.timeToTry,
+      bankName: user.bankName,
+      bankCode: user.bankCode,
+      dateOfBirth: user.dateOfBirth,
     });
   } else {
     res.status(404);
@@ -648,9 +654,26 @@ const getUserInfo = asyncHandler(async (req, res) => {
 });
 
 const updateUser = asyncHandler(async (req, res) => {
-  const { phone, walletAddress, email } = req.body;
+  const {
+    phone,
+    walletAddress,
+    email,
+    bankName,
+    bankCode,
+    accountName,
+    accountNumber,
+    dateOfBirth,
+  } = req.body;
+
+  console.log({ bankName, bankCode, accountName, accountNumber, dateOfBirth });
 
   const user = await User.findOne({ _id: req.params.id }).select("-password");
+
+  if (!user) {
+    res.status(400).json({ error: "User not found" });
+    return;
+  }
+
   const userHavePhone = await User.find({
     $and: [{ phone: `+${phone}` }, { userId: { $ne: user.userId } }, { isAdmin: false }],
   });
@@ -661,14 +684,44 @@ const updateUser = asyncHandler(async (req, res) => {
     $and: [{ email }, { userId: { $ne: user.userId } }, { isAdmin: false }],
   });
 
+  console.log({ userHavePhone, userHaveWalletAddress, userHaveEmail });
+
   if (userHavePhone.length >= 1 || userHaveWalletAddress.length >= 1 || userHaveEmail.length >= 1) {
     res.status(400).json({ error: "duplicateInfo" });
+    return;
   }
+
+  // Check duplicate bank account
+  if (bankCode && accountNumber) {
+    const userHaveBankAccount = await User.find({
+      $and: [
+        { bankCode: bankCode },
+        { accountNumber: accountNumber },
+        { _id: { $ne: user._id } },
+        { status: { $ne: "DELETED" } },
+      ],
+    });
+
+    if (userHaveBankAccount.length >= 1) {
+      res.status(400).json({ error: "duplicateBankAccount" });
+      return;
+    }
+  }
+
   if (user) {
     const kycConfig = await Config.findOne({ label: "AUTO_KYC_USER_INFO" });
 
     const changes = [];
-    for (const field of ["email", "phone", "walletAddress"]) {
+    for (const field of [
+      "email",
+      "phone",
+      "walletAddress",
+      "bankName",
+      "bankCode",
+      "accountName",
+      "accountNumber",
+      "dateOfBirth",
+    ]) {
       if (
         req.body[field] &&
         user[field] !== (field === "phone" ? `+${req.body[field]}` : req.body[field])
@@ -705,6 +758,23 @@ const updateUser = asyncHandler(async (req, res) => {
         phone: user.phone,
         email: user.email,
       });
+    }
+
+    // Update bank info
+    if (bankName) {
+      user.bankName = bankName;
+    }
+    if (bankCode) {
+      user.bankCode = bankCode;
+    }
+    if (accountName) {
+      user.accountName = accountName;
+    }
+    if (accountNumber) {
+      user.accountNumber = accountNumber;
+    }
+    if (dateOfBirth) {
+      user.dateOfBirth = new Date(dateOfBirth);
     }
 
     const updatedUser = await user.save();
@@ -833,11 +903,14 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     lockKyc,
     accountName,
     accountNumber,
+    bankName,
+    bankCode,
+    dateOfBirth,
     dieTime,
     termDie,
     preTier2Status,
   } = req.body;
-  console.log({totalHewe, availableHewe, hewePerDay})
+  console.log({ totalHewe, availableHewe, hewePerDay });
   if (userId) {
     const userExistsUserId = await User.findOne({
       userId,
@@ -918,6 +991,11 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     user.availableHewe = availableHewe || user.availableHewe;
     user.accountName = accountName || user.accountName;
     user.accountNumber = accountNumber || user.accountNumber;
+    user.bankName = bankName || user.bankName;
+    user.bankCode = bankCode || user.bankCode;
+    if (dateOfBirth) {
+      user.dateOfBirth = new Date(dateOfBirth);
+    }
     if (preTier2Status) {
       user.preTier2Status = preTier2Status;
     }
