@@ -57,6 +57,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
           { userId: { $regex: keyword, $options: "i" } },
           { email: { $regex: keyword, $options: "i" } },
           { walletAddress: { $regex: keyword, $options: "i" } },
+          { idCode: { $regex: keyword, $options: "i" } },
         ],
       },
       { role: "user" },
