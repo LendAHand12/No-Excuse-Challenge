@@ -349,10 +349,11 @@ const createBankOrder = asyncHandler(async (req, res) => {
   }
 
   // Generate unique orderId: AMERITEC + 5 last chars of user._id + unique timestamp
+  // Note: Convert to uppercase để tránh vấn đề case-sensitive khi webhook nhận content
   const userIdStr = user.id.toString();
   const last5Chars = userIdStr.slice(-5); // Lấy 5 ký tự cuối của user._id
   const timestamp = Date.now().toString().slice(-8); // Lấy 8 số cuối của timestamp
-  const orderId = `AMERITEC${last5Chars}${timestamp}`;
+  const orderId = `AMERITEC${last5Chars}${timestamp}`.toUpperCase();
 
   // Create order
   const order = await Order.create({

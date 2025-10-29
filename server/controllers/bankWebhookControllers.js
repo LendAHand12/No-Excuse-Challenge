@@ -67,32 +67,68 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
       });
     }
 
-    // Clean content: loại bỏ khoảng trắng đầu cuối và chuyển thành uppercase
-    // Trong QR code, content thường chỉ chứa orderId (ví dụ: "AMERITECabc12345678901")
-    const contentClean = content.trim().toUpperCase();
-    let orderId = contentClean;
+    // Clean content: chỉ trim, KHÔNG uppercase ngay để giữ nguyên case của orderId
+    const contentTrimmed = content.trim();
 
-    // Tìm order trực tiếp bằng content đã clean
-    // Thường thì content chỉ chứa orderId, không có text thêm
-    let order = await Order.findOne({
-      $or: [{ orderId: contentClean }, { userId: contentClean }],
-      status: { $ne: "SUCCESS" }, // Chưa xử lý thành công
-    });
+    // Helper function để escape regex special characters
+    const escapeRegex = (str) => {
+      return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    };
 
-    // Nếu không tìm thấy, có thể content có text thêm (ví dụ: "AMERITECabc12345678901 thanh toan")
-    // Trong trường hợp này, cần extract orderId từ content
-    if (!order) {
-      // Tìm pattern AMERITEC theo sau bởi đúng 13 ký tự alphanumeric
-      // Format: AMERITEC{5 ký tự user._id}{8 số timestamp} = 21 ký tự tổng cộng
-      const amritecMatch = contentClean.match(/AMERITEC[\w\d]{13}/);
-      if (amritecMatch) {
-        orderId = amritecMatch[0];
-        order = await Order.findOne({
-          $or: [{ orderId: orderId }, { userId: orderId }],
-          status: { $ne: "SUCCESS" },
-        });
+    // Helper function để tìm order với case-insensitive search
+    const findOrderCaseInsensitive = async (searchId) => {
+      // Escape special characters cho regex
+      const escapedId = escapeRegex(searchId);
+
+      // Dùng case-insensitive regex để tìm (luôn dùng regex để đảm bảo match dù case nào)
+      const found = await Order.findOne({
+        $or: [
+          {
+            orderId: {
+              $regex: `^${escapedId}$`,
+              $options: "i",
+            },
+          },
+          {
+            userId: {
+              $regex: `^${escapedId}$`,
+              $options: "i",
+            },
+          },
+        ],
+        status: { $ne: "SUCCESS" },
+      });
+
+      return found;
+    };
+
+    // Extract orderId từ content GỐC (chưa uppercase) để giữ nguyên case
+    // Pattern: AMERITEC theo sau bởi 13 ký tự alphanumeric
+    // Format: AMERITEC{5 ký tự user._id}{8 số timestamp} = 21 ký tự tổng cộng
+    let orderId = null;
+    const amritecMatch = contentTrimmed.match(/AMERITEC[\w\d]{13}/i); // Case-insensitive match
+    if (amritecMatch) {
+      orderId = amritecMatch[0]; // Giữ nguyên case gốc từ content
+    } else {
+      // Nếu không match pattern, thử dùng toàn bộ content nếu nó chỉ là orderId (không có text thêm)
+      // Kiểm tra xem content có chứa khoảng trắng không
+      if (!contentTrimmed.includes(" ")) {
+        orderId = contentTrimmed;
       }
     }
+
+    if (!orderId) {
+      console.log("Could not extract orderId from content:", content);
+      return res.status(400).json({
+        error: "Invalid content format",
+        message: "Could not extract orderId from content",
+      });
+    }
+
+    console.log("Extracted orderId from content:", orderId);
+
+    // Tìm order với case-insensitive search
+    let order = await findOrderCaseInsensitive(orderId);
 
     // Nếu vẫn không tìm thấy, thử tìm bằng userId từ code (fallback)
     if (!order && code) {
