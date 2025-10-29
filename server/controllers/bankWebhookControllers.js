@@ -52,16 +52,23 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
 
     // Validate required fields
     if (!content || !transferAmount || transferType === undefined) {
-      return res.status(400).json({
-        error: "Missing required fields",
-        message: "content, transferAmount, and transferType are required",
+      // Trả về success: true ngay cả khi thiếu field (SePay yêu cầu)
+      // Nhưng log để debug
+      console.warn("Missing required fields in webhook:", {
+        content: !!content,
+        transferAmount: !!transferAmount,
+        transferType: transferType !== undefined,
+      });
+      return res.status(201).json({
+        success: true,
+        message: "Webhook received (missing fields ignored)",
       });
     }
 
     // Chỉ xử lý giao dịch tiền vào (in)
     if (transferType !== "in") {
       console.log("Ignoring outgoing transaction (transferType: out)");
-      return res.status(200).json({
+      return res.status(201).json({
         success: true,
         message: "Outgoing transaction ignored",
       });
@@ -103,25 +110,37 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
     };
 
     // Extract orderId từ content GỐC (chưa uppercase) để giữ nguyên case
-    // Pattern: AMERITEC theo sau bởi 13 ký tự alphanumeric
-    // Format: AMERITEC{5 ký tự user._id}{8 số timestamp} = 21 ký tự tổng cộng
+    // Pattern mới: AMR theo sau bởi timestamp (số)
+    // Format: AMR{timestamp} (ví dụ: AMR1703123456789)
+    // Cũng hỗ trợ format cũ AMERITEC cho tương thích ngược
     let orderId = null;
-    const amritecMatch = contentTrimmed.match(/AMERITEC[\w\d]{13}/i); // Case-insensitive match
-    if (amritecMatch) {
-      orderId = amritecMatch[0]; // Giữ nguyên case gốc từ content
+
+    // Tìm pattern mới: AMR + số (timestamp)
+    const amrMatch = contentTrimmed.match(/AMR\d+/i); // Case-insensitive match: AMR theo sau bởi 1+ chữ số
+    if (amrMatch) {
+      orderId = amrMatch[0]; // Giữ nguyên case gốc từ content
     } else {
-      // Nếu không match pattern, thử dùng toàn bộ content nếu nó chỉ là orderId (không có text thêm)
-      // Kiểm tra xem content có chứa khoảng trắng không
-      if (!contentTrimmed.includes(" ")) {
-        orderId = contentTrimmed;
+      // Fallback: Tìm pattern cũ AMERITEC (tương thích ngược với order cũ)
+      const amritecMatch = contentTrimmed.match(/AMERITEC[\w\d]{13}/i);
+      if (amritecMatch) {
+        orderId = amritecMatch[0];
+      } else {
+        // Nếu không match pattern nào, thử dùng toàn bộ content nếu nó chỉ là orderId (không có text thêm)
+        // Kiểm tra xem content có chứa khoảng trắng không
+        if (!contentTrimmed.includes(" ")) {
+          orderId = contentTrimmed;
+        }
       }
     }
 
     if (!orderId) {
       console.log("Could not extract orderId from content:", content);
-      return res.status(400).json({
-        error: "Invalid content format",
-        message: "Could not extract orderId from content",
+      // Trả về success: true để SePay không retry
+      // Nhưng log để theo dõi
+      return res.status(201).json({
+        success: true,
+        message: "Webhook received (could not extract orderId)",
+        content: content,
       });
     }
 
@@ -146,16 +165,18 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
     // Nếu vẫn không tìm thấy, tìm order PENDING gần nhất của accountNumber (nếu match)
     if (!order) {
       console.log("Order not found with orderId/userId:", orderId);
-      return res.status(404).json({
-        error: "Order not found",
-        message: `Could not find order with identifier: ${orderId}`,
+      // Trả về success: true để SePay không retry
+      return res.status(201).json({
+        success: true,
+        message: "Webhook received (order not found)",
+        orderId: orderId,
       });
     }
 
     // Kiểm tra replay - order đã được xử lý
     if (order.status === "SUCCESS") {
       console.log("Order already processed:", order.orderId);
-      return res.status(200).json({
+      return res.status(201).json({
         success: true,
         message: "Order already processed",
         orderId: order.orderId,
@@ -173,9 +194,12 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
         difference: amountDiff,
         orderId: order.orderId,
       });
-      return res.status(400).json({
-        error: "Amount mismatch",
-        message: `Expected amount: ${order.amount}, received: ${transferAmount}`,
+      // Trả về success: true nhưng log lỗi để theo dõi
+      // SePay sẽ không retry, nhưng admin có thể xử lý thủ công
+      return res.status(201).json({
+        success: true,
+        message: "Webhook received (amount mismatch logged)",
+        orderId: order.orderId,
         expected: order.amount,
         received: transferAmount,
       });
@@ -217,7 +241,7 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
 
     if (!user) {
       console.warn("User not found for order:", order.orderId, "userId:", userId);
-      return res.status(200).json({
+      return res.status(201).json({
         success: true,
         message: "Order processed but user not found",
         orderId: order.orderId,
@@ -225,29 +249,25 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
     }
 
     // Update user's countPay based on order type
-    if (order.type === "PAYMENT") {
-      const previousCountPay = user.countPay || 0;
-      user.countPay = previousCountPay + 1;
+    // if (order.type === "PAYMENT") {
+    //   // Gửi email thông báo cho admin
+    //   try {
+    //     await sendMailPaymentForAdmin({
+    //       userId: user._id,
+    //       userName: user.userId,
+    //       amount: transferAmount,
+    //       transactionId: id?.toString(),
+    //       accountNumber: accountNumber,
+    //       bankCode: gateway,
+    //       orderId: order.orderId,
+    //     });
+    //   } catch (emailError) {
+    //     console.error("Failed to send email notification:", emailError);
+    //     // Không throw error, chỉ log
+    //   }
 
-      // Gửi email thông báo cho admin
-      try {
-        await sendMailPaymentForAdmin({
-          userId: user._id,
-          userName: user.userId,
-          amount: transferAmount,
-          transactionId: id?.toString(),
-          accountNumber: accountNumber,
-          bankCode: gateway,
-          orderId: order.orderId,
-        });
-      } catch (emailError) {
-        console.error("Failed to send email notification:", emailError);
-        // Không throw error, chỉ log
-      }
-
-      await user.save();
-      console.log(`User ${user.userId} countPay updated: ${previousCountPay} -> ${user.countPay}`);
-    }
+    //   await user.save();
+    // }
 
     console.log("✅ Order processed successfully:", {
       orderId: order.orderId,
@@ -256,7 +276,8 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
       sepayId: id,
     });
 
-    return res.status(200).json({
+    // Trả về status 201 theo yêu cầu SePay cho response thành công
+    return res.status(201).json({
       success: true,
       message: "Order processed successfully",
       orderId: order.orderId,
@@ -265,9 +286,12 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("❌ SePay webhook error:", error);
-    return res.status(500).json({
-      error: "Internal server error",
-      message: error.message,
+    // Trả về success: true ngay cả khi có lỗi để SePay không retry nhiều lần
+    // Admin có thể xem log để xử lý
+    return res.status(201).json({
+      success: true,
+      message: "Webhook received (error logged)",
+      error: error.message,
     });
   }
 });
