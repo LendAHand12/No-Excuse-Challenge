@@ -219,6 +219,15 @@
   background-color: #f9fafb;
 }
 
+.payment-button.success {
+  background-color: #10b981;
+  color: white;
+}
+
+.payment-button.success:hover {
+  background-color: #059669;
+}
+
 .payment-button.connect-wallet-btn {
   background-color: #1f2937;
   color: white;

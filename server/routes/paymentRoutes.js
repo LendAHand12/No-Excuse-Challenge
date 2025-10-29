@@ -1,6 +1,8 @@
 import express from "express";
 import {
   getPaymentInfo,
+  createBankOrder,
+  checkOrderStatus,
   addPayment,
   getAllPayments,
   getPaymentsOfUser,
@@ -23,6 +25,8 @@ const router = express.Router();
 router.route("/getParentWithCount").post(getParentWithCount);
 
 router.route("/info").get(protectRoute, getPaymentInfo);
+router.route("/createBankOrder").post(protectRoute, createBankOrder);
+router.route("/checkOrder/:orderId").get(protectRoute, checkOrderStatus);
 router.route("/infoNextTier").get(protectRoute, getPaymentNextTierInfo);
 router.route("/user").get(protectRoute, isAdmin, getAllPayments);
 router.route("/getAllTransForExport").post(protectRoute, isAdmin, getAllTransForExport);

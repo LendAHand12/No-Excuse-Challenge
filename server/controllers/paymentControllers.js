@@ -27,6 +27,7 @@ import Tree from "../models/treeModel.js";
 import { getPriceHewe } from "../utils/getPriceHewe.js";
 import PreTier2Pool from "../models/preTier2PoolModel.js";
 import { getListChildNotEnoughBranchOfUser } from "./userControllers.js";
+import Order from "../models/orderModel.js";
 
 const getPaymentInfo = asyncHandler(async (req, res) => {
   const { user } = req;
@@ -331,6 +332,91 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("User does not exist");
   }
+});
+
+/**
+ * Tạo Order cho thanh toán chuyển khoản ngân hàng
+ * @route POST /api/payment/createBankOrder
+ * @access Private
+ */
+const createBankOrder = asyncHandler(async (req, res) => {
+  const { user } = req;
+  const { totalAmount } = req.body; // Total amount in VND
+
+  if (!totalAmount || totalAmount <= 0) {
+    res.status(400);
+    throw new Error("Total amount is required and must be greater than 0");
+  }
+
+  // Generate unique orderId: AMERITEC + 5 last chars of user._id + unique timestamp
+  const userIdStr = user.id.toString();
+  const last5Chars = userIdStr.slice(-5); // Lấy 5 ký tự cuối của user._id
+  const timestamp = Date.now().toString().slice(-8); // Lấy 8 số cuối của timestamp
+  const orderId = `AMERITEC${last5Chars}${timestamp}`;
+
+  // Create order
+  const order = await Order.create({
+    orderId: orderId,
+    userId: user.id,
+    userCountPay: user.countPay || 0,
+    tier: user.tier || 1,
+    amount: parseFloat(totalAmount),
+    type: "PAYMENT",
+    status: "PENDING",
+    metadata: {
+      createdAt: new Date(),
+      paymentMethod: "BANK_TRANSFER",
+    },
+  });
+
+  console.log("Bank order created:", {
+    orderId: order.orderId,
+    userId: user.userId,
+    amount: order.amount,
+  });
+
+  res.status(201).json({
+    success: true,
+    orderId: order.orderId,
+    amount: order.amount,
+    message: "Order created successfully",
+  });
+});
+
+/**
+ * Kiểm tra trạng thái order
+ * @route GET /api/payment/checkOrder/:orderId
+ * @access Private
+ */
+const checkOrderStatus = asyncHandler(async (req, res) => {
+  const { user } = req;
+  const { orderId } = req.params;
+
+  if (!orderId) {
+    res.status(400);
+    throw new Error("OrderId is required");
+  }
+
+  const order = await Order.findOne({
+    orderId: orderId,
+    userId: user.id,
+  });
+
+  if (!order) {
+    res.status(404);
+    throw new Error("Order not found");
+  }
+
+  res.status(200).json({
+    success: true,
+    order: {
+      orderId: order.orderId,
+      status: order.status,
+      amount: order.amount,
+      processedAt: order.processedAt,
+      transferContent: order.transferContent,
+    },
+  });
 });
 
 const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
@@ -1503,6 +1589,8 @@ const onDonePaymentWithCash = asyncHandler(async (req, res) => {
 
 export {
   getPaymentInfo,
+  createBankOrder,
+  checkOrderStatus,
   addPayment,
   getAllPayments,
   getPaymentsOfUser,

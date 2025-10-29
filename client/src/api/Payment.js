@@ -5,6 +5,12 @@ const Payment = {
   getPaymentInfo: () => {
     return API.get(`${URL_API_PAYMENT}/info`);
   },
+  createBankOrder: (totalAmount) => {
+    return API.post(`${URL_API_PAYMENT}/createBankOrder`, { totalAmount });
+  },
+  checkOrderStatus: (orderId) => {
+    return API.get(`${URL_API_PAYMENT}/checkOrder/${orderId}`);
+  },
   getPaymentNextTierInfo: (childId) => {
     return API.get(`${URL_API_PAYMENT}/infoNextTier?childId=${childId}`);
   },

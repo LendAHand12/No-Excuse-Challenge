@@ -17,7 +17,7 @@ import PhoneInput from 'react-phone-number-input';
 import './index.css';
 import ClaimModal from '../../../components/ClaimModal';
 import { Link, useNavigate } from 'react-router-dom';
-import vietnamBanks from '@/lib/vietnam-banks.json';
+import banks from '@/lib/banks.json';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -136,12 +136,10 @@ const Profile = () => {
         setErrPhone(false);
 
         // Find bank info
-        const selectedBank = vietnamBanks.find(
-          (bank: any) => bank.vn_name === bankName,
-        );
+        const selectedBank = banks.find((bank: any) => bank.name === bankName);
 
-        const bankCode = selectedBank ? selectedBank.shortName : '';
-        const finalBankName = selectedBank ? selectedBank.vn_name : bankName;
+        const bankCode = selectedBank ? selectedBank.code : '';
+        const finalBankName = selectedBank ? selectedBank.name : bankName;
 
         // Build query params
         const params = new URLSearchParams({
@@ -1426,9 +1424,9 @@ const Profile = () => {
                 })}
               >
                 <option value="">{t('Select bank name')}</option>
-                {vietnamBanks.map((bank: any, index: number) => (
-                  <option key={index} value={bank.vn_name}>
-                    {bank.vn_name}
+                {banks.map((bank: any, index: number) => (
+                  <option key={index} value={bank.name}>
+                    {bank.name}
                   </option>
                 ))}
               </select>

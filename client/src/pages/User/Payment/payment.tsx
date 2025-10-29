@@ -27,7 +27,6 @@ const PaymentPage = () => {
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [exchangeRate, setExchangeRate] = useState(0);
-  const [orderId, setOrderId] = useState('');
 
   const {
     formState: { errors },
@@ -51,9 +50,6 @@ const PaymentPage = () => {
           setPaymentIdsList(paymentIds);
           setPaymentsList(payments);
           setExchangeRate(exchangeRate || 0);
-          // Generate unique orderId
-          const uniqueOrderId = `ORDER-${userInfo.id}-${Date.now()}`;
-          setOrderId(uniqueOrderId);
           setShowPayment(true);
         }
 
@@ -263,7 +259,8 @@ const PaymentPage = () => {
         onClose={() => setShowPaymentModal(false)}
         totalAmount={total}
         changeRate={exchangeRate}
-        orderId={orderId}
+        paymentIdsList={paymentIdsList}
+        onDonePayment={donePayment}
         onWalletPayment={() => {
           setShowPaymentModal(false);
           paymentMetamask();

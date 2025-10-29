@@ -97,6 +97,8 @@ export const transfer = async (address, amount) => {
   const account = await getAccount();
   const web3 = await loadWeb3();
 
+  console.log({ account });
+
   const validAddress = await isValidAddress(address);
 
   if (!validAddress) {

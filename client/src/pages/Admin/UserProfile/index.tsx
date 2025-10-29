@@ -15,7 +15,7 @@ import { useSelector } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import Switch from 'react-switch';
 import PhoneInput from 'react-phone-number-input';
-import vietnamBanks from '@/lib/vietnam-banks.json';
+import banks from '@/lib/banks.json';
 
 const UserProfile = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -190,12 +190,12 @@ const UserProfile = () => {
       }
 
       if (values.bankName !== data.bankName) {
-        const selectedBank = vietnamBanks.find(
-          (bank: any) => bank.vn_name === values.bankName,
+        const selectedBank = banks.find(
+          (bank: any) => bank.name === values.bankName,
         );
         if (selectedBank) {
-          formData.append('bankName', selectedBank.vn_name);
-          formData.append('bankCode', selectedBank.shortName);
+          formData.append('bankName', selectedBank.name);
+          formData.append('bankCode', selectedBank.code);
         }
       }
       if (values.accountName !== data.accountName) {
@@ -1358,9 +1358,9 @@ const UserProfile = () => {
                             {...register('bankName')}
                           >
                             <option value="">{t('Select bank name')}</option>
-                            {vietnamBanks.map((bank: any, index: number) => (
-                              <option key={index} value={bank.vn_name}>
-                                {bank.vn_name}
+                            {banks.map((bank: any, index: number) => (
+                              <option key={index} value={bank.name}>
+                                {bank.name}
                               </option>
                             ))}
                           </select>

@@ -685,8 +685,6 @@ const updateUser = asyncHandler(async (req, res) => {
     $and: [{ email }, { userId: { $ne: user.userId } }, { isAdmin: false }],
   });
 
-  console.log({ userHavePhone, userHaveWalletAddress, userHaveEmail });
-
   if (userHavePhone.length >= 1 || userHaveWalletAddress.length >= 1 || userHaveEmail.length >= 1) {
     res.status(400).json({ error: "duplicateInfo" });
     return;
@@ -710,9 +708,27 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 
   if (user) {
-    const kycConfig = await Config.findOne({ label: "AUTO_KYC_USER_INFO" });
+    // const kycConfig = await Config.findOne({ label: "AUTO_KYC_USER_INFO" });
+    const kycConfig = { value: true };
 
     const changes = [];
+
+    // Helper function to normalize phone for comparison
+    const normalizePhone = (phone) => {
+      if (!phone) return "";
+      const cleaned = phone.toString().trim();
+      return cleaned.startsWith("+") ? cleaned : `+${cleaned}`;
+    };
+
+    // Helper function to normalize date for comparison
+    const normalizeDate = (date) => {
+      if (!date) return null;
+      if (date instanceof Date) {
+        return date.toISOString().split("T")[0];
+      }
+      return new Date(date).toISOString().split("T")[0];
+    };
+
     for (const field of [
       "email",
       "phone",
@@ -723,23 +739,53 @@ const updateUser = asyncHandler(async (req, res) => {
       "accountNumber",
       "dateOfBirth",
     ]) {
-      if (
-        req.body[field] &&
-        user[field] !== (field === "phone" ? `+${req.body[field]}` : req.body[field])
-      ) {
-        changes.push({
+      if (!req.body[field]) continue;
+
+      const currentValue = user[field];
+      const newValue = req.body[field];
+
+      // Normalize values for comparison
+      let normalizedCurrent = currentValue;
+      let normalizedNew = newValue;
+
+      if (field === "phone") {
+        normalizedCurrent = normalizePhone(currentValue);
+        normalizedNew = normalizePhone(newValue);
+      } else if (field === "dateOfBirth") {
+        normalizedCurrent = normalizeDate(currentValue);
+        normalizedNew = normalizeDate(newValue);
+      }
+
+      // Check if value actually changed
+      if (normalizedCurrent !== normalizedNew) {
+        const historyEntry = {
           userId: user._id,
           field,
-          oldValue: user[field],
-          newValue: field === "phone" ? `+${req.body[field]}` : req.body[field],
+          oldValue: currentValue || "",
+          newValue:
+            field === "phone"
+              ? normalizedNew
+              : field === "dateOfBirth"
+              ? new Date(newValue).toISOString()
+              : newValue,
           status: kycConfig.value === true ? "approved" : "pending",
           reviewedBy: kycConfig.value === true ? "AUTO" : "",
-        });
+        };
 
+        changes.push(historyEntry);
+
+        // Update user object immediately if auto-approved
         if (kycConfig.value) {
-          user[field] = req.body[field];
+          if (field === "phone") {
+            user[field] = normalizedNew; // Store with + prefix
+          } else if (field === "dateOfBirth") {
+            user[field] = new Date(newValue);
+          } else {
+            user[field] = newValue;
+          }
         }
 
+        // Delete pending history for this field
         await UserHistory.deleteMany({
           userId: user._id,
           field,
@@ -748,6 +794,7 @@ const updateUser = asyncHandler(async (req, res) => {
       }
     }
 
+    // Save all changes to history
     if (changes.length > 0) {
       await UserHistory.insertMany(changes);
     }
@@ -759,23 +806,6 @@ const updateUser = asyncHandler(async (req, res) => {
         phone: user.phone,
         email: user.email,
       });
-    }
-
-    // Update bank info
-    if (bankName) {
-      user.bankName = bankName;
-    }
-    if (bankCode) {
-      user.bankCode = bankCode;
-    }
-    if (accountName) {
-      user.accountName = accountName;
-    }
-    if (accountNumber) {
-      user.accountNumber = accountNumber;
-    }
-    if (dateOfBirth) {
-      user.dateOfBirth = new Date(dateOfBirth);
     }
 
     const updatedUser = await user.save();
@@ -869,6 +899,11 @@ const updateUser = asyncHandler(async (req, res) => {
           errLahCode: updatedUser.errLahCode,
           availableAmc: updatedUser.availableAmc,
           claimedAmc: updatedUser.claimedAmc,
+          bankName: updatedUser.bankName,
+          bankCode: updatedUser.bankCode,
+          accountName: updatedUser.accountName,
+          accountNumber: updatedUser.accountNumber,
+          dateOfBirth: updatedUser.dateOfBirth,
         },
       });
     }

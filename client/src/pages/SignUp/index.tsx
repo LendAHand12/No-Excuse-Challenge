@@ -8,7 +8,7 @@ import queryString from 'query-string';
 
 import Loading from '@/components/Loading';
 import Auth from '@/api/Auth';
-import vietnamBanks from '@/lib/vietnam-banks.json';
+import banks from '@/lib/banks.json';
 import PhoneInput from 'react-phone-number-input';
 
 import 'react-phone-number-input/style.css';
@@ -76,9 +76,7 @@ const SignUpPage = () => {
       } = data;
 
       // Find bank info from selected bankCode
-      const selectedBank = vietnamBanks.find(
-        (bank: any) => bank.shortName === bankCode,
-      );
+      const selectedBank = banks.find((bank: any) => bank.code === bankCode);
 
       await Auth.register({
         userId: userId.trim(),
@@ -89,8 +87,12 @@ const SignUpPage = () => {
         receiveId,
         phone: phone.trim(),
         idCode: idCode.trim(),
-        bankCode: bankCode ? bankCode.trim() : '',
-        bankName: selectedBank ? selectedBank.vn_name : '',
+        bankCode: selectedBank
+          ? selectedBank.code
+          : bankCode
+          ? bankCode.trim()
+          : '',
+        bankName: selectedBank ? selectedBank.name : '',
         accountName: accountName ? accountName.trim() : '',
         accountNumber: accountNumber ? accountNumber.trim() : '',
         dateOfBirth: dateOfBirth,
@@ -237,9 +239,9 @@ const SignUpPage = () => {
                               disabled={loading}
                             >
                               <option value="">{t('Select bank name')}</option>
-                              {vietnamBanks.map((bank: any, index: number) => (
-                                <option key={index} value={bank.shortName}>
-                                  {bank.vn_name}
+                              {banks.map((bank: any, index: number) => (
+                                <option key={index} value={bank.code}>
+                                  {bank.name}
                                 </option>
                               ))}
                             </select>
