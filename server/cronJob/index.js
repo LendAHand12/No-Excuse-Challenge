@@ -26,6 +26,58 @@ import Income from "../models/incomeModel.js";
 import PreTier2 from "../models/preTier2Model.js";
 import mongoose from "mongoose";
 
+// Fetch VN rates from phobitcoin.com
+export const fetchVnUsdRates = asyncHandler(async () => {
+  const url = "https://phobitcoin.com/api/update";
+  const response = await fetch(url, { method: "GET" });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch rates: ${response.status} ${response.statusText}`);
+  }
+  const json = await response.json();
+  const vn = json && json.vn ? json.vn : {};
+
+  const rates = {
+    usdtAsk: vn.usdt_ask ? Number(vn.usdt_ask) : null,
+    usdtBid: vn.usdt_bid ? Number(vn.usdt_bid) : null,
+    pmVoucherAsk: vn.pm_voucher_ask ? Number(vn.pm_voucher_ask) : null,
+    pmVoucherBid: vn.pm_voucher_bid ? Number(vn.pm_voucher_bid) : null,
+    pmAsk: vn.pm_ask ? Number(vn.pm_ask) : null,
+    pmBid: vn.pm_bid ? Number(vn.pm_bid) : null,
+    fetchedAt: new Date(),
+  };
+
+  // Update ConfigModel values if available; keep old values on missing fields
+  try {
+    // BUY = usdt_ask
+    if (rates.usdtAsk !== null) {
+      let buyCfg = await Config.findOne({ label: "USD_TO_VND_SELL" });
+      if (!buyCfg) {
+        buyCfg = new Config({ label: "USD_TO_VND_SELL", value: rates.usdtAsk });
+      } else {
+        buyCfg.value = rates.usdtAsk;
+      }
+      await buyCfg.save();
+    }
+
+    // SELL = usdt_bid
+    if (rates.usdtBid !== null) {
+      let sellCfg = await Config.findOne({ label: "USD_TO_VND_BUY" });
+      if (!sellCfg) {
+        sellCfg = new Config({ label: "USD_TO_VND_BUY", value: rates.usdtBid });
+      } else {
+        sellCfg.value = rates.usdtBid;
+      }
+      await sellCfg.save();
+    }
+  } catch (e) {
+    // Keep old values: swallow update errors but log
+    console.error("Failed to update USD_TO_VND configs:", e?.message || e);
+  }
+
+  console.log("Fetched VN USD rates from phobitcoin:", rates);
+  return rates;
+});
+
 export const deleteUser24hUnPay = asyncHandler(async () => {
   const listUser = await User.find({
     $and: [{ tier: 1 }, { countPay: 0 }, { isAdmin: false }, { status: { $ne: "DELETED" } }],

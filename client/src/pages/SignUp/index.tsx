@@ -14,6 +14,7 @@ import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import './index.css';
 import SignInLayout from '../../layout/SignInLayout';
+import DateInput from '@/components/DateInput';
 
 const SignUpPage = () => {
   const { t } = useTranslation();
@@ -284,13 +285,12 @@ const SignUpPage = () => {
 
                           {/* Date of Birth */}
                           <div>
-                            <input
+                            <DateInput
+                              register={register}
+                              name="dateOfBirth"
+                              rules={{ required: t('date of birth is required') as any }}
                               className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
-                              type="date"
-                              placeholder={`${t('date of birth')}`}
-                              {...register('dateOfBirth', {
-                                required: t('date of birth is required'),
-                              })}
+                              placeholder={`${t('date of birth')} (DD/MM/YYYY)`}
                               disabled={loading}
                             />
                             <p className="text-red-500 mt-1 text-sm">

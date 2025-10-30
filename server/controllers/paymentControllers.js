@@ -320,7 +320,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         }
       }
 
-      const exchangeRate = await Config.findOne({ label: "USD_TO_VND" });
+      const exchangeRate = await Config.findOne({ label: "USD_TO_VND_SELL" });
       res.json({
         status: "PAY",
         payments,
@@ -348,10 +348,10 @@ const createBankOrder = asyncHandler(async (req, res) => {
     throw new Error("Total amount is required and must be greater than 0");
   }
 
-  // Generate unique orderId: AMR + timestamp hiện tại
-  // Format: AMR{timestamp} (ví dụ: AMR1703123456789)
+  // Generate unique orderId: NEC + timestamp hiện tại
+  // Format: NEC{timestamp} (ví dụ: NEC1703123456789)
   const timestamp = Date.now(); // Timestamp hiện tại (milliseconds)
-  const orderId = `AMR${timestamp}`.toUpperCase();
+  const orderId = `NEC${timestamp}`.toUpperCase();
 
   // Create order
   const order = await Order.create({

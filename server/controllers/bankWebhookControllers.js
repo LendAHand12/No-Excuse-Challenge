@@ -110,15 +110,15 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
     };
 
     // Extract orderId từ content GỐC (chưa uppercase) để giữ nguyên case
-    // Pattern mới: AMR theo sau bởi timestamp (số)
-    // Format: AMR{timestamp} (ví dụ: AMR1703123456789)
+    // Pattern mới: NEC theo sau bởi timestamp (số)
+    // Format: NEC{timestamp} (ví dụ: NEC1703123456789)
     // Cũng hỗ trợ format cũ AMERITEC cho tương thích ngược
     let orderId = null;
 
-    // Tìm pattern mới: AMR + số (timestamp)
-    const amrMatch = contentTrimmed.match(/AMR\d+/i); // Case-insensitive match: AMR theo sau bởi 1+ chữ số
-    if (amrMatch) {
-      orderId = amrMatch[0]; // Giữ nguyên case gốc từ content
+    // Tìm pattern mới: NEC + số (timestamp)
+    const necMatch = contentTrimmed.match(/NEC\d+/i); // Case-insensitive match: NEC theo sau bởi 1+ chữ số
+    if (necMatch) {
+      orderId = necMatch[0]; // Giữ nguyên case gốc từ content
     } else {
       // Fallback: Tìm pattern cũ AMERITEC (tương thích ngược với order cũ)
       const amritecMatch = contentTrimmed.match(/AMERITEC[\w\d]{13}/i);

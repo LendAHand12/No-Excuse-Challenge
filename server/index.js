@@ -47,6 +47,7 @@ import {
   updateHewePrice,
   checkUserPreTier2,
   checkRefAndTotalChildOfUser,
+  fetchVnUsdRates,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 import { fixParentChildLinks } from "./common.js";
@@ -207,6 +208,23 @@ const cron6 = new CronJob(
   VIETNAM_TIMEZONE
 );
 
+// Chạy mỗi giờ vào phút thứ 10: lấy tỷ giá VN từ phobitcoin
+const cronFetchVnUsdRates = new CronJob(
+  "10 * * * *", // phút 10 mỗi giờ
+  async () => {
+    try {
+      console.log("Fetch VN USD rates start");
+      await fetchVnUsdRates();
+      console.log("Fetch VN USD rates done");
+    } catch (e) {
+      console.error("Fetch VN USD rates error:", e?.message || e);
+    }
+  },
+  null,
+  true,
+  VIETNAM_TIMEZONE
+);
+
 const cron7 = new CronJob(
   "00 06 * * *", // 6h giờ Việt Nam
   async () => {
@@ -237,6 +255,7 @@ cron3.start();
 cron4.start();
 cron6.start();
 cron7.start();
+cronFetchVnUsdRates.start();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>

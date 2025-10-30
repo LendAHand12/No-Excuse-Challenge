@@ -291,6 +291,12 @@ const PaymentModal = ({
               <p className="payment-amount">
                 {t('Total Amount')}: {totalAmount} USDT
               </p>
+              <p
+                className="payment-rate"
+                style={{ fontSize: '12px', color: '#6b7280' }}
+              >
+                1 USDT ≈ {changeRate.toLocaleString('vi-VN')} VND
+              </p>
               <p className="payment-amount vnd">
                 ≈ {vndAmount.toLocaleString('vi-VN')} VND
               </p>

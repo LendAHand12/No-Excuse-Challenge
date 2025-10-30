@@ -3,6 +3,7 @@ import DefaultLayout from '../../../layout/DefaultLayout';
 import { shortenWalletAddress } from '../../../utils';
 import { useTranslation } from 'react-i18next';
 import Loading from '@/components/Loading';
+import DateInput from '@/components/DateInput';
 import { UPDATE_USER_INFO } from '@/slices/auth';
 import { useForm } from 'react-hook-form';
 import User from '@/api/User';
@@ -1471,12 +1472,11 @@ const Profile = () => {
               <label className="block text-sm font-medium mb-2">
                 {t('date of birth')} <span className="text-red-500">*</span>
               </label>
-              <input
-                type="date"
+              <DateInput
+                register={register}
+                name="dateOfBirth"
+                rules={{ required: t('date of birth is required') as any }}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
-                {...register('dateOfBirth', {
-                  required: t('date of birth is required'),
-                })}
               />
               <p className="text-red-500 text-sm mt-1">
                 {errors.dateOfBirth?.message}
