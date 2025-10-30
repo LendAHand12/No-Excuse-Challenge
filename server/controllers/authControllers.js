@@ -92,10 +92,12 @@ const registerUser = asyncHandler(async (req, res) => {
     $and: [{ idCode: { $ne: "" } }, { idCode }],
     status: { $ne: "DELETED" },
   });
-  const userExistsWalletAddress = await User.findOne({
-    walletAddress,
-    status: { $ne: "DELETED" },
-  });
+  const userExistsWalletAddress = walletAddress
+    ? await User.findOne({
+        $and: [{ walletAddress: { $ne: "" } }, { walletAddress }],
+        status: { $ne: "DELETED" },
+      })
+    : null;
   const userExistsAccountNumber = await User.findOne({
     accountNumber,
     status: { $ne: "DELETED" },
@@ -126,7 +128,7 @@ const registerUser = asyncHandler(async (req, res) => {
     let message = "duplicateInfoIdCode";
     res.status(400);
     throw new Error(message);
-  } else if (userExistsWalletAddress) {
+  } else if (walletAddress && userExistsWalletAddress) {
     let message = "duplicateWalletAddress";
     res.status(400);
     throw new Error(message);
