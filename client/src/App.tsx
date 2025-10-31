@@ -87,6 +87,7 @@ import AdminPreTier2PoolPage from './pages/Admin/PreTier2Pool';
 import PreTier2Pool from './pages/User/PreTier2Pool';
 import UsersPassedTier2Page from './pages/User/UsersPassedTier2';
 import AdminWalletConnectHistoryPages from './pages/Admin/WalletConnectHistory';
+import UserAssetsPage from './pages/User/Assets';
 function App() {
   const { pathname } = useLocation();
   const { userInfo } = useSelector((state) => state.auth);
@@ -841,6 +842,15 @@ function App() {
                 <>
                   <PageTitle title="Income | NoExcuseChallenge" />
                   <IncomePage />
+                </>
+              }
+            />
+            <Route
+              path="/user/assets"
+              element={
+                <>
+                  <PageTitle title="Assets | NoExcuseChallenge" />
+                  <UserAssetsPage />
                 </>
               }
             />

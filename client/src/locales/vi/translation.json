@@ -607,7 +607,8 @@
       "System": "Hệ thống",
       "Income": "Thu nhập",
       "Withdraws": "Rút tiền",
-      "Referral": "Giới thiệu"
+      "Referral": "Giới thiệu",
+      "Assets": "Tài sản"
     }
   },
 
@@ -769,5 +770,27 @@
   "Please provide your bank account information": "Vui lòng cung cấp thông tin tài khoản ngân hàng",
   "Bank information updated successfully": "Cập nhật thông tin ngân hàng thành công",
   "Skip": "Bỏ qua",
-  "Submit": "Gửi"
+  "Submit": "Gửi",
+  "My Assets": "Tài sản của tôi",
+  "Withdraw": "Rút tiền",
+  "Coin": "Loại tiền",
+  "Amount": "Số lượng",
+  "Available": "Khả dụng",
+  "Max": "Tối đa",
+  "Withdraw request created successfully": "Tạo yêu cầu rút thành công",
+  "Withdraw failed": "Rút tiền thất bại",
+  "Request Withdraw": "Yêu cầu rút",
+  "Submitting...": "Đang gửi...",
+  "Withdraw History": "Lịch sử rút tiền",
+  "Time": "Thời gian",
+  "Status": "Trạng thái",
+  "Tx Hash": "Mã giao dịch",
+  "No withdraw records": "Chưa có lịch sử rút",
+  "Withdraw method": "Phương thức rút",
+  "Wallet": "Ví",
+  "Bank transfer": "Chuyển khoản ngân hàng",
+  "Please add your wallet address": "Vui lòng bổ sung địa chỉ ví",
+  "Go to Profile": "Đi tới Hồ sơ",
+  "Exchange rate": "Tỷ giá",
+  "VND Equivalent": "Quy đổi VND"
 }

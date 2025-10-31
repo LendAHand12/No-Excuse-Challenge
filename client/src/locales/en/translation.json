@@ -523,7 +523,8 @@
       "System": "System",
       "Income": "Income",
       "Withdraws": "Withdraws",
-      "Referral": "Referral"
+      "Referral": "Referral",
+      "Assets": "Assets"
     }
   },
 
@@ -683,5 +684,27 @@
   "Please provide your bank account information": "Please provide your bank account information",
   "Bank information updated successfully": "Bank information updated successfully",
   "Skip": "Skip",
-  "Submit": "Submit"
+  "Submit": "Submit",
+  "My Assets": "My Assets",
+  "Withdraw": "Withdraw",
+  "Coin": "Coin",
+  "Amount": "Amount",
+  "Available": "Available",
+  "Max": "Max",
+  "Withdraw request created successfully": "Withdraw request created successfully",
+  "Withdraw failed": "Withdraw failed",
+  "Request Withdraw": "Request Withdraw",
+  "Submitting...": "Submitting...",
+  "Withdraw History": "Withdraw History",
+  "Time": "Time",
+  "Status": "Status",
+  "Tx Hash": "Tx Hash",
+  "No withdraw records": "No withdraw records",
+  "Withdraw method": "Withdraw method",
+  "Wallet": "Wallet",
+  "Bank transfer": "Bank transfer",
+  "Please add your wallet address": "Please add your wallet address",
+  "Go to Profile": "Go to Profile",
+  "Exchange rate": "Exchange rate",
+  "VND Equivalent": "VND Equivalent"
 }
