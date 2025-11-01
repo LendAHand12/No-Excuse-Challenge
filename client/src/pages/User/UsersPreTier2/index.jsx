@@ -131,7 +131,7 @@ const AdminPreTier2UsersPages = () => {
                 Branch 2
               </th>
               <th scope="col" className="px-6 py-3">
-                {t('status')}
+                {t('userProfile.fields.status')}
               </th>
             </tr>
           </thead>

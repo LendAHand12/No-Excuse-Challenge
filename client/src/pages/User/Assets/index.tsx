@@ -286,7 +286,7 @@ export default function UserAssetsPage() {
                       <th className="py-2 pr-4">{t('Amount')}</th>
                       <th className="py-2 pr-4">{t('Available USDT After')}</th>
                       <th className="py-2 pr-4">{t('Withdrawal Method')}</th>
-                      <th className="py-2 pr-4">{t('Status')}</th>
+                      <th className="py-2 pr-4">{t('userProfile.fields.status')}</th>
                       <th className="py-2 pr-4">{t('Tx Hash')}</th>
                     </tr>
                   </thead>

@@ -312,7 +312,7 @@ const UserHistoryPage = () => {
                 {t('time')}
               </th>
               <th scope="col" className="px-6 py-3">
-                {t('status')}
+                {t('userProfile.fields.status')}
               </th>
               <th scope="col" className="px-6 py-3">
                 Action

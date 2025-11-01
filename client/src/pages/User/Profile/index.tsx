@@ -74,6 +74,9 @@ const Profile = () => {
   );
   const [showLockKyc, setShowLockKyc] = useState(lockKyc);
   const [showMoveSystem, setShowMoveSystem] = useState(false);
+  const [bankSearch, setBankSearch] = useState('');
+  const [showBankDropdown, setShowBankDropdown] = useState(false);
+  const [selectedBank, setSelectedBank] = useState<any>(null);
   const [errAgrre, setErrAgrre] = useState(false);
   const [valueCheckAgrree, setValueCheckAgrree] = useState('');
   const [showPreTier2Commit, setShowPreTier2Commit] = useState(
@@ -87,6 +90,7 @@ const Profile = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -185,6 +189,21 @@ const Profile = () => {
     })();
   }, [refresh]);
 
+  // Initialize selectedBank when modal opens or bankName changes
+  useEffect(() => {
+    if (showBankInfoModal && bankName) {
+      const foundBank = banks.find((bank: any) => bank.name === bankName);
+      if (foundBank) {
+        setSelectedBank(foundBank);
+        setBankSearch(`${foundBank.code} ${foundBank.name}`);
+      }
+    } else if (!showBankInfoModal) {
+      // Reset when modal closes
+      setSelectedBank(null);
+      setBankSearch('');
+      setShowBankDropdown(false);
+    }
+  }, [showBankInfoModal, bankName]);
 
   const findNextRank = (level) => {
     const currentRankIndex = USER_RANKINGS.findIndex(
@@ -762,7 +781,7 @@ const Profile = () => {
                     clipRule="evenodd"
                   />
                 </svg>
-              </div>
+          </div>
               <div className="ml-3">
                 <p className="text-sm text-yellow-700">
                   <span className="font-semibold">
@@ -772,15 +791,15 @@ const Profile = () => {
                   {t('Please update your bank information (Bank Name, Account Name, Account Number) to enable bank transfer withdrawal.')}
                 </p>
                 <div className="mt-2">
-                  <button
+          <button
                     onClick={() => setShowBankInfoModal(true)}
                     className="text-sm font-medium text-yellow-800 underline hover:text-yellow-900"
-                  >
+          >
                     {t('Update Bank Information')}
-                  </button>
-                </div>
-              </div>
-            </div>
+          </button>
+          </div>
+          </div>
+        </div>
           </div>
         )}
 
@@ -1262,23 +1281,129 @@ const Profile = () => {
             {t('Please provide your bank account information')}
           </p>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-4">
+            <div className="mb-4 relative">
               <label className="block text-sm font-medium mb-2">
                 {t('bank name')} <span className="text-red-500">*</span>
               </label>
-              <select
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
+              {/* Hidden input for form validation */}
+              <input
+                type="hidden"
                 {...register('bankName', {
                   required: t('bank name is required'),
                 })}
-              >
-                <option value="">{t('Select bank name')}</option>
-                {banks.map((bank: any, index: number) => (
-                  <option key={index} value={bank.name}>
-                    {bank.name}
-                  </option>
-                ))}
-              </select>
+                value={selectedBank?.name || ''}
+              />
+              
+              {/* Search Input */}
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder={
+                    selectedBank
+                      ? `(${selectedBank.code}) ${selectedBank.name}`
+                      : t('Search bank name') || 'Search bank name...'
+                  }
+                  value={showBankDropdown ? bankSearch : selectedBank ? `(${selectedBank.code}) ${selectedBank.name}` : ''}
+                  onChange={(e) => {
+                    setBankSearch(e.target.value);
+                    setShowBankDropdown(true);
+                  }}
+                  onFocus={() => {
+                    setShowBankDropdown(true);
+                    if (selectedBank) {
+                      setBankSearch(`${selectedBank.code} ${selectedBank.name}`);
+                    }
+                  }}
+                  className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
+                  autoComplete="off"
+                />
+                {selectedBank && (
+                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedBank(null);
+                        setBankSearch('');
+                        setShowBankDropdown(false);
+                        setValue('bankName', '', { shouldValidate: true });
+                        setValue('bankCode', '', { shouldValidate: true });
+                      }}
+                      className="text-gray-400 hover:text-gray-600 text-xl leading-none w-6 h-6 flex items-center justify-center"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Dropdown List */}
+              {showBankDropdown && (
+                <>
+                  <div
+                    className="fixed inset-0 z-[60]"
+                    onClick={() => setShowBankDropdown(false)}
+                  />
+                  <div className="absolute z-[70] w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {banks
+                      .filter((bank: any) =>
+                        bank.name
+                          .toLowerCase()
+                          .includes(bankSearch.toLowerCase()) ||
+                        bank.code
+                          .toLowerCase()
+                          .includes(bankSearch.toLowerCase()) ||
+                        bank.short_name
+                          ?.toLowerCase()
+                          .includes(bankSearch.toLowerCase())
+                      )
+                      .map((bank: any, index: number) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => {
+                            setSelectedBank(bank);
+                            setBankSearch(`${bank.code} ${bank.name}`);
+                            setShowBankDropdown(false);
+                            // Update form value
+                            setValue('bankName', bank.name, {
+                              shouldValidate: true,
+                            });
+                            setValue('bankCode', bank.code, {
+                              shouldValidate: true,
+                            });
+                          }}
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none ${
+                            selectedBank?.code === bank.code
+                              ? 'bg-gray-100 font-medium'
+                              : ''
+                          }`}
+                        >
+                          <span className="font-semibold">
+                            ({bank.code})
+                          </span>{' '}
+                          {bank.name}
+                        </button>
+                      ))}
+                    {banks.filter((bank: any) =>
+                      bank.name
+                        .toLowerCase()
+                        .includes(bankSearch.toLowerCase()) ||
+                      bank.code
+                        .toLowerCase()
+                        .includes(bankSearch.toLowerCase()) ||
+                      bank.short_name
+                        ?.toLowerCase()
+                        .includes(bankSearch.toLowerCase())
+                    ).length === 0 && (
+                      <div className="px-4 py-2 text-sm text-gray-500 text-center">
+                        {t('No banks found') || 'No banks found'}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
               <p className="text-red-500 text-sm mt-1">
                 {errors.bankName?.message}
               </p>

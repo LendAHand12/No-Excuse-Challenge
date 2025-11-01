@@ -406,8 +406,8 @@ const AdminWithdrawPages = () => {
                 )}
 
                 {/* Amount */}
-                <div>
-                  <label className="block mb-1 font-medium text-gray-700">
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">
                     {t('adminWithdraw.amount')}: <br></br>
                     <span className="font-semibold">{currentApproveRequest?.amount} USDT</span>
                     {currentApproveRequest?.exchangeRate && (
@@ -430,8 +430,8 @@ const AdminWithdrawPages = () => {
                         )}
                       </>
                     )}
-                  </label>
-                </div>
+              </label>
+            </div>
 
                 {/* Bank Information - Lấy từ userInfo */}
                 <div>
@@ -446,12 +446,12 @@ const AdminWithdrawPages = () => {
                     <span className="font-semibold">{currentApproveRequest?.userInfo?.accountName || 'N/A'}</span>
                   </label>
                 </div>
-                <div>
-                  <label className="block mb-1 font-medium text-gray-700">
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">
                     {t('adminWithdraw.accountNumber')}: <br></br>
                     <span className="font-semibold">{currentApproveRequest?.userInfo?.accountNumber || 'N/A'}</span>
-                  </label>
-                </div>
+              </label>
+            </div>
 
                 {/* Transfer Content */}
                 <div>
@@ -521,12 +521,12 @@ const AdminWithdrawPages = () => {
 
               {/* Crypto Wallet Information - Lấy từ userInfo */}
               {/* Payment Method */}
-              <div>
-                <label className="block mb-1 font-medium text-gray-700">
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">
                   {t('adminWithdraw.paymentMethod')}: <br></br>
                   <span className="font-semibold">{currentApproveRequest?.userInfo?.paymentMethod || 'N/A'}</span>
-                </label>
-              </div>
+              </label>
+            </div>
 
               {/* Wallet Address */}
               {currentApproveRequest?.userInfo?.walletAddress && (
@@ -552,31 +552,31 @@ const AdminWithdrawPages = () => {
 
               {/* Email or Phone Number */}
               {currentApproveRequest?.userInfo?.accountNumber && (
-                <div>
-                  <label className="block mb-1 font-medium text-gray-700">
+            <div>
+              <label className="block mb-1 font-medium text-gray-700">
                     {t('adminWithdraw.payoutEmailOrPhone')}: <br></br>
                     <span className="font-semibold">{currentApproveRequest.userInfo.accountNumber}</span>
-                  </label>
-                  <p className="text-xs text-gray-500 mt-1">
+              </label>
+              <p className="text-xs text-gray-500 mt-1">
                     {t('adminWithdraw.payoutDestination')}
-                  </p>
+              </p>
                 </div>
               )}
             </div>
           )}
 
-          {/* Nút xác nhận */}
+            {/* Nút xác nhận */}
           <div className="pt-6 mt-6 border-t border-gray-200">
-            <button
+              <button
               onClick={handleBankApprove}
               disabled={loadingPayment}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-            >
+              >
               {loadingPayment && (
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
               )}
-              Confirm and Submit
-            </button>
+                Confirm and Submit
+              </button>
           </div>
         </div>
       </Modal>
