@@ -263,7 +263,7 @@ const AdminPreTier2Pool = () => {
                 {t('time')}
               </th>
               <th scope="col" className="px-6 py-3">
-                {t('status')}
+                {t('userProfile.fields.status')}
               </th>
             </tr>
           </thead>

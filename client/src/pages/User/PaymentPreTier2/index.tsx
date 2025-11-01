@@ -8,14 +8,13 @@ import { useForm } from 'react-hook-form';
 import Modal from 'react-modal';
 import DefaultLayout from '../../../layout/DefaultLayout';
 import { transfer } from '../../../utils/smartContract';
-import { shortenWalletAddress } from '../../../utils';
-import { useSelector } from 'react-redux';
+import PaymentModal from '@/components/PaymentModal';
+import '@/components/PaymentModal/index.css';
 
 Modal.setAppElement('#root');
 
 const PaymentPage = () => {
   const { t } = useTranslation();
-  const { userInfo } = useSelector((state) => state.auth);
   const [total, setTotal] = useState(0);
   const [loadingPaymentInfo, setLoadingPaymentInfo] = useState(true);
   const [paymentsList, setPaymentsList] = useState([]);
@@ -23,6 +22,8 @@ const PaymentPage = () => {
   const [loadingPayment, setLoadingPayment] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [exchangeRate, setExchangeRate] = useState(0);
 
   const {
     formState: { errors },
@@ -32,7 +33,7 @@ const PaymentPage = () => {
     setLoadingPaymentInfo(true);
     await PreTier2.payment()
       .then((response) => {
-        const { payments, paymentIds, message } = response.data;
+        const { payments, paymentIds, message, exchangeRate } = response.data;
         if (message) {
           toast.success(message);
           setShowPayment(false);
@@ -45,6 +46,7 @@ const PaymentPage = () => {
           setTotal(totalPayment + fee);
           setPaymentIdsList(paymentIds);
           setPaymentsList(payments);
+          setExchangeRate(exchangeRate || 0);
           setShowPayment(true);
         }
 
@@ -93,6 +95,7 @@ const PaymentPage = () => {
       })
         .then((response) => {
           toast.success(t(response.data.message));
+          setPaymentCompleted(true);
         })
         .catch((error) => {
           let message =
@@ -204,12 +207,12 @@ const PaymentPage = () => {
                     ))}
                   <button
                     type="submit"
-                    onClick={paymentMetamask}
+                    onClick={() => setShowPaymentModal(true)}
                     disabled={loadingPayment}
                     className="w-2xl mx-auto flex justify-center border border-black items-center hover:underline  font-medium rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
                   >
                     {loadingPayment && <Loading />}
-                    {t('payment')}
+                    {t('signin.confirm')}
                   </button>
                 </div>
               </>
@@ -247,6 +250,21 @@ const PaymentPage = () => {
           </>
         )}
       </div>
+
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        totalAmount={total}
+        changeRate={exchangeRate}
+        paymentIdsList={paymentIdsList}
+        onDonePayment={donePayment}
+        onWalletPayment={() => {
+          setShowPaymentModal(false);
+          paymentMetamask();
+        }}
+        createBankOrder={PreTier2.createBankOrder}
+        checkOrderStatus={PreTier2.checkOrderStatus}
+      />
     </DefaultLayout>
   );
 };

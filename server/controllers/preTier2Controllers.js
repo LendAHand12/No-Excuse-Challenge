@@ -22,6 +22,7 @@ import Tree from "../models/treeModel.js";
 import ChangeOrderHistory from "../models/changeOrderHistoryModel.js";
 import { findAncestors } from "./paymentControllers.js";
 import moment from "moment";
+import Order from "../models/orderModel.js";
 
 const getAllPreTier2Users = asyncHandler(async (req, res) => {
   let { pageNumber, keyword, status } = req.query;
@@ -362,10 +363,15 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           to: "Purchased HEWE",
         });
       }
+
+      // Get exchange rate for bank transfer
+      const exchangeRate = await Config.findOne({ label: "USD_TO_VND_SELL" });
+      
       res.json({
         status: "PAY",
         payments,
         paymentIds,
+        exchangeRate: exchangeRate?.value || 0,
       });
     } else {
       res.status(200).json({
@@ -382,6 +388,8 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
 const onDonePayment = asyncHandler(async (req, res) => {
   const { user } = req;
   const { transIds, transactionHash } = req.body;
+  // transactionHash có thể là transactionHash (crypto) hoặc transferContent (bank transfer)
+  const hashValue = transactionHash;
   const transIdsList = Object.values(transIds);
 
   if (transIdsList.length > 0) {
@@ -391,7 +399,7 @@ const onDonePayment = asyncHandler(async (req, res) => {
       for (let transId of transIdsList) {
         const trans = await Transaction.findOneAndUpdate(
           { _id: transId.id },
-          { status: "SUCCESS", hash: transactionHash }
+          { status: "SUCCESS", hash: hashValue }
         );
       }
 
@@ -452,6 +460,91 @@ const onDonePayment = asyncHandler(async (req, res) => {
   } else {
     throw new Error("No transaction found");
   }
+});
+
+/**
+ * Tạo Order cho thanh toán chuyển khoản ngân hàng (PreTier2)
+ * @route POST /api/pre-tier-2/createBankOrder
+ * @access Private
+ */
+const createBankOrder = asyncHandler(async (req, res) => {
+  const { user } = req;
+  const { totalAmount } = req.body; // Total amount in VND
+
+  if (!totalAmount || totalAmount <= 0) {
+    res.status(400);
+    throw new Error("Total amount is required and must be greater than 0");
+  }
+
+  // Generate unique orderId: NEC + timestamp hiện tại
+  // Format: NEC{timestamp} (ví dụ: NEC1703123456789)
+  const timestamp = Date.now(); // Timestamp hiện tại (milliseconds)
+  const orderId = `NEC${timestamp}`.toUpperCase();
+
+  // Create order
+  const order = await Order.create({
+    orderId: orderId,
+    userId: user.id,
+    userCountPay: user.countPay || 0,
+    tier: user.tier || 1,
+    amount: parseFloat(totalAmount),
+    type: "PRETIER2_PAYMENT",
+    status: "PENDING",
+    metadata: {
+      createdAt: new Date(),
+      paymentMethod: "BANK_TRANSFER",
+    },
+  });
+
+  console.log("PreTier2 bank order created:", {
+    orderId: order.orderId,
+    userId: user.userId,
+    amount: order.amount,
+  });
+
+  res.status(201).json({
+    success: true,
+    orderId: order.orderId,
+    amount: order.amount,
+    message: "Order created successfully",
+  });
+});
+
+/**
+ * Kiểm tra trạng thái order (PreTier2)
+ * @route GET /api/pre-tier-2/checkOrder/:orderId
+ * @access Private
+ */
+const checkOrderStatus = asyncHandler(async (req, res) => {
+  const { user } = req;
+  const { orderId } = req.params;
+
+  if (!orderId) {
+    res.status(400);
+    throw new Error("OrderId is required");
+  }
+
+  const order = await Order.findOne({
+    orderId: orderId,
+    userId: user.id,
+    type: "PRETIER2_PAYMENT",
+  });
+
+  if (!order) {
+    res.status(404);
+    throw new Error("Order not found");
+  }
+
+  res.status(200).json({
+    success: true,
+    order: {
+      orderId: order.orderId,
+      status: order.status,
+      amount: order.amount,
+      processedAt: order.processedAt,
+      transferContent: order.transferContent,
+    },
+  });
 });
 
 const onUserPassTier2 = async () => {
@@ -1095,7 +1188,7 @@ const onDoneTier2Payment = asyncHandler(async (req, res) => {
 
         user.tier = user.tier + 1;
         user.paymentStep = 0;
-        user.shortfallAmount = 402;
+        user.shortfallAmount = 302;
         message = "Payment successful";
 
         const preTier2User = await PreTier2.findOne({
@@ -1328,4 +1421,6 @@ export {
   achievedUserTier2,
   getPassedUsers,
   adminAddToPool,
+  createBankOrder,
+  checkOrderStatus,
 };

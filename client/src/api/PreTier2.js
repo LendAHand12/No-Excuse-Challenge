@@ -51,6 +51,12 @@ const PreTier2 = {
   adminAddToPool: (body) => {
     return API.post(`${URL_API_PRE_TIER_2}/add-pool`, body);
   },
+  createBankOrder: (totalAmount) => {
+    return API.post(`${URL_API_PRE_TIER_2}/createBankOrder`, { totalAmount });
+  },
+  checkOrderStatus: (orderId) => {
+    return API.get(`${URL_API_PRE_TIER_2}/checkOrder/${orderId}`);
+  },
 };
 
 export default PreTier2;

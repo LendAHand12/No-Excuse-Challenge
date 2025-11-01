@@ -13,6 +13,9 @@ interface PaymentModalProps {
   paymentIdsList: any[];
   onDonePayment: (transactionHash: string) => Promise<void>;
   onWalletPayment: () => void;
+  // Optional API functions for bank transfer (if not provided, uses Payment API)
+  createBankOrder?: (totalAmount: number) => Promise<any>;
+  checkOrderStatus?: (orderId: string) => Promise<any>;
 }
 
 const PaymentModal = ({
@@ -23,6 +26,8 @@ const PaymentModal = ({
   paymentIdsList,
   onDonePayment,
   onWalletPayment,
+  createBankOrder: customCreateBankOrder,
+  checkOrderStatus: customCheckOrderStatus,
 }: PaymentModalProps) => {
   const { t } = useTranslation();
   const [paymentMethod, setPaymentMethod] = useState<'wallet' | 'bank'>(
@@ -83,7 +88,9 @@ const PaymentModal = ({
       if (!isMounted) return;
 
       try {
-        const response = await Payment.checkOrderStatus(orderId!);
+        const response = customCheckOrderStatus
+          ? await customCheckOrderStatus(orderId!)
+          : await Payment.checkOrderStatus(orderId!);
         if (response.data.success && isMounted) {
           const status = response.data.order.status;
           if (status === 'SUCCESS') {
@@ -164,7 +171,9 @@ const PaymentModal = ({
     try {
       // Calculate VND amount to send to server
       const vndAmountToSend = Math.round(totalAmount * changeRate);
-      const response = await Payment.createBankOrder(vndAmountToSend);
+      const response = customCreateBankOrder
+        ? await customCreateBankOrder(vndAmountToSend)
+        : await Payment.createBankOrder(vndAmountToSend);
       if (response.data.success && response.data.orderId) {
         setOrderId(response.data.orderId);
         toast.success(t('Order created successfully'));

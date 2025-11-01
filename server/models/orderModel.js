@@ -25,7 +25,7 @@ const orderSchema = mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["PAYMENT", "REFUND", "OTHER"],
+      enum: ["PAYMENT", "REFUND", "OTHER", "PRETIER2_PAYMENT"],
       default: "PAYMENT",
     },
     status: {
