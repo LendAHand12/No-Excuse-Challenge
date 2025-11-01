@@ -20,6 +20,14 @@ const claimSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    withdrawalType: {
+      type: String,
+      enum: ["CRYPTO", "BANK"],
+    },
+    availableUsdtAfter: {
+      type: Number,
+      // Số dư USDT còn lại sau khi rút (chỉ cho USDT)
+    },
   },
   { timestamps: true }
 );

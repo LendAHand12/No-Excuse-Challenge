@@ -8,8 +8,11 @@ const Claim = {
   amc: () => {
     return API.post(`${URL_API_CLAIM}/amc`);
   },
-  usdt: ({ user_id, token, amount }) => {
-    return API.post(`${URL_API_CLAIM}/usdt`, { user_id, token, amount });
+  usdt: ({ user_id, token, amount, withdrawalType, exchangeRate }) => {
+    const body = { user_id, token, amount };
+    if (withdrawalType) body.withdrawalType = withdrawalType;
+    if (exchangeRate) body.exchangeRate = exchangeRate;
+    return API.post(`${URL_API_CLAIM}/usdt`, body);
   },
   list: (pageNumber, coin, keyword) => {
     return API.get(

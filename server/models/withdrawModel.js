@@ -11,6 +11,11 @@ const withdrawSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
+    withdrawalType: {
+      type: String,
+      enum: ["CRYPTO", "BANK"],
+      default: "CRYPTO",
+    },
     hash: {
       type: String,
     },
@@ -22,6 +27,36 @@ const withdrawSchema = mongoose.Schema(
     },
     accountNumber: {
       type: String,
+    },
+    bankCode: {
+      type: String,
+    },
+    bankName: {
+      type: String,
+    },
+    // For bank withdrawal
+    exchangeRate: {
+      type: Number,
+    },
+    receivedAmount: {
+      type: Number, // Amount in VND after tax
+    },
+    tax: {
+      type: Number, // Tax amount (10% of USDT amount * exchangeRate)
+    },
+    // Admin processing info
+    qrCode: {
+      type: String, // QR code image URL or data
+    },
+    transferContent: {
+      type: String, // Transfer content created by admin
+    },
+    processedBy: {
+      type: String,
+      ref: "User",
+    },
+    processedAt: {
+      type: Date,
     },
     status: {
       type: String,

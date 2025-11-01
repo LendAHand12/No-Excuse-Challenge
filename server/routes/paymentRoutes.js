@@ -17,6 +17,8 @@ import {
   onDoneNextTierPayment,
   payWithCash,
   onDonePaymentWithCash,
+  searchPendingOrder,
+  approveBankPayment,
 } from "../controllers/paymentControllers.js";
 import { protectRoute, isAdmin } from "../middleware/authMiddleware.js";
 
@@ -42,5 +44,9 @@ router.route("/changeToRefunded").post(protectRoute, isAdmin, changeToRefunded);
 router.route("/onAdminDoneRefund").post(protectRoute, isAdmin, onAdminDoneRefund);
 router.route("/payWithCash").post(protectRoute, payWithCash);
 router.route("/donePayWithCash").post(protectRoute, isAdmin, onDonePaymentWithCash);
+
+// Admin routes for payment verification
+router.route("/admin/search-pending").get(protectRoute, isAdmin, searchPendingOrder);
+router.route("/admin/approve-bank-payment").post(protectRoute, isAdmin, approveBankPayment);
 
 export default router;

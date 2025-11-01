@@ -1586,6 +1586,204 @@ const onDonePaymentWithCash = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Search pending order by orderId or userId (Admin)
+// @route   GET /api/payment/admin/search-pending
+// @access  Private/Admin
+const searchPendingOrder = asyncHandler(async (req, res) => {
+  const { orderId, userId } = req.query;
+
+  if (!orderId && !userId) {
+    res.status(400);
+    throw new Error("Please provide orderId or userId");
+  }
+
+  let orders = [];
+  let transactions = [];
+
+  // Search by orderId
+  if (orderId) {
+    const order = await Order.findOne({ orderId, status: "PENDING" })
+      .populate("userId", "userId email phone")
+      .sort({ createdAt: -1 });
+
+    console.log({order});
+    if (order) {
+      orders.push(order);
+
+      // Get related transactions
+      const relatedTransactions = await Transaction.find({
+        userId: order.userId.id || order.userId,
+        status: "PENDING",
+      }).populate("userId_to", "userId email");
+
+      transactions = relatedTransactions;
+    }
+  }
+
+  // Search by userId
+  if (userId && !orderId) {
+    const user = await User.findOne({ userId: { $regex: userId, $options: "i" } });
+
+    if (user) {
+      // Get pending orders
+      const userOrders = await Order.find({
+        userId: user.id,
+        status: "PENDING",
+      })
+        .populate("userId", "userId email phone")
+        .sort({ createdAt: -1 });
+
+      orders = userOrders;
+
+      // Get pending transactions
+      const userTransactions = await Transaction.find({
+        userId: user.id,
+        status: "PENDING",
+      })
+        .populate("userId_to", "userId email")
+        .sort({ createdAt: -1 });
+
+      transactions = userTransactions;
+    }
+  }
+
+  res.status(200).json({
+    orders,
+    transactions,
+  });
+});
+
+// @desc    Approve bank payment by admin
+// @route   POST /api/payment/admin/approve-bank-payment
+// @access  Private/Admin
+const approveBankPayment = asyncHandler(async (req, res) => {
+  const { user: admin } = req;
+  const {
+    orderId,
+    transactionIds,
+    bankTransactionId,
+    transferContent,
+    amount,
+    adminNote,
+  } = req.body;
+
+  if (!orderId && !transactionIds) {
+    res.status(400);
+    throw new Error("Please provide orderId or transactionIds");
+  }
+
+  if (!bankTransactionId) {
+    res.status(400);
+    throw new Error("Bank transaction ID is required");
+  }
+
+  // Update order if provided
+  if (orderId) {
+    const order = await Order.findOne({ orderId });
+
+    if (!order) {
+      res.status(404);
+      throw new Error("Order not found");
+    }
+
+    if (order.status !== "PENDING") {
+      res.status(400);
+      throw new Error("Order is not pending");
+    }
+
+    order.status = "SUCCESS";
+    order.bankTransactionId = bankTransactionId;
+    order.transferContent = transferContent || "";
+    order.processedBy = admin.id;
+    order.processedAt = new Date();
+    if (amount) order.amount = amount;
+
+    await order.save();
+  }
+
+  // Update transactions if provided
+  if (transactionIds && transactionIds.length > 0) {
+    const transIdsList = Array.isArray(transactionIds)
+      ? transactionIds
+      : [transactionIds];
+
+    for (let transId of transIdsList) {
+      const transaction = await Transaction.findById(transId);
+
+      if (!transaction) {
+        continue;
+      }
+
+      if (transaction.status !== "PENDING") {
+        continue;
+      }
+
+      transaction.status = "SUCCESS";
+      transaction.hash = bankTransactionId;
+
+      await transaction.save();
+
+      // Process payment completion
+      const userObj = await User.findById(transaction.userId);
+      if (userObj) {
+        // Handle FINE type
+        if (transaction.type === "FINE") {
+          userObj.fine = 0;
+        } else {
+          // Handle POOLREPAYMENT type
+          if (transaction.type.includes("POOLREPAYMENT")) {
+            const newPreTier2Pool = await PreTier2Pool.create({
+              userId: transaction.userId_to,
+              amount: transaction.amount,
+              status: "IN",
+            });
+          } else if (!transaction.type.includes("HOLD")) {
+            // Update recipient user's available USDT
+            const userReceive = await User.findById(transaction.userId_to);
+            if (userReceive) {
+              userReceive.availableUsdt =
+                (userReceive.availableUsdt || 0) + transaction.amount;
+              await userReceive.save();
+            }
+          }
+        }
+
+        // Process first payment for tier 1
+        if (userObj.countPay === 0 && userObj.tier === 1) {
+          await sendActiveLink(userObj.userId, userObj.email);
+        }
+
+        // Calculate and update HEWE
+        let responseHewe = await getPriceHewe();
+        if (responseHewe.data.result === "false") {
+          // Handle error if needed
+        }
+        const hewePriceConfig = await Config.findOne({ label: "HEWE_PRICE" });
+        const hewePrice =
+          responseHewe?.data?.ticker?.latest || hewePriceConfig?.value || 0;
+        const totalPriceHewe = userObj.city === "IN" ? 200 : 100;
+        const totalDayReturnHewe = userObj.city === "IN" ? 730 : 540;
+        const totalHewe = Math.round(totalPriceHewe / hewePrice);
+        const hewePerDay = Math.round(totalHewe / totalDayReturnHewe);
+
+        userObj.totalHewe = totalHewe;
+        userObj.hewePerDay = hewePerDay;
+        userObj.countPay = 13;
+        await userObj.save();
+      }
+    }
+  }
+
+  res.status(200).json({
+    message: "Payment approved successfully",
+    data: {
+      orderId: orderId || null,
+      transactionIds: transactionIds || null,
+      bankTransactionId,
+    },
+  });
+});
+
 export {
   getPaymentInfo,
   createBankOrder,
@@ -1605,4 +1803,6 @@ export {
   onDoneNextTierPayment,
   payWithCash,
   onDonePaymentWithCash,
+  searchPendingOrder,
+  approveBankPayment,
 };

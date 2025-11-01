@@ -63,7 +63,7 @@ const claimHewe = asyncHandler(async (req, res) => {
 });
 
 const claimUsdt = asyncHandler(async (req, res) => {
-  const { token, amount } = req.body;
+  const { token, amount, withdrawalType, exchangeRate } = req.body;
   const decode = decodeCallbackToken(token);
   console.log({ decode });
 
@@ -97,33 +97,36 @@ const claimUsdt = asyncHandler(async (req, res) => {
 
     // Bước 3: Check balance
     if (user.availableUsdt > 0 && user.availableUsdt >= parseInt(amount)) {
-      if (parseInt(amount) < 200 && user.paymentMethod === "") {
-        // Gửi trực tiếp USDT
-        const receipt = await sendUsdt({
-          amount: amount - 1,
-          receiverAddress: user.walletAddress,
-        });
+      const withdrawType = withdrawalType || "CRYPTO";
 
-        await Claim.create({
-          userId: user.id,
-          amount: parseInt(amount),
-          hash: receipt.hash,
-          coin: "USDT",
-        });
+      // BANK withdrawal: Always create withdraw request
+      if (withdrawType === "BANK") {
+        // Validate bank information
+        if (!user.accountName || !user.accountNumber || !user.bankName || !user.bankCode) {
+          throw new Error("Please update your bank information in Profile");
+        }
 
-        user.claimedUsdt += parseInt(amount);
-        user.availableUsdt -= parseInt(amount);
-        await user.save();
+        // Calculate amounts
+        const rate = parseFloat(exchangeRate) || 0;
+        if (!rate || rate <= 0) {
+          throw new Error("Invalid exchange rate");
+        }
 
-        res.status(200).json({ message: "claim USDT successful" });
-      } else {
-        // Tạo yêu cầu withdraw chờ admin xử lý
+        const totalVND = parseFloat(amount) * rate;
+        const tax = totalVND * 0.1; // 10% tax
+        const receivedAmount = totalVND - tax;
+
+        // Create withdraw request
+        // Làm tròn xuống đến hàng đơn vị (bỏ phần thập phân) để đảm bảo số tiền chuyển khoản được
+        // Chỉ lưu userId và các giá trị tính toán (exchangeRate, receivedAmount, tax)
+        // Thông tin ngân hàng sẽ lấy từ user khi hiển thị QR code
         await Withdraw.create({
           userId: user.id,
           amount: parseInt(amount),
-          method: user.paymentMethod,
-          accountName: user.accountName,
-          accountNumber: user.accountNumber,
+          withdrawalType: "BANK",
+          exchangeRate: rate,
+          receivedAmount: Math.floor(receivedAmount),
+          tax: Math.floor(tax),
         });
 
         user.availableUsdt -= parseInt(amount);
@@ -132,6 +135,46 @@ const claimUsdt = asyncHandler(async (req, res) => {
         res.status(200).json({
           message: "Withdrawal request has been sent to Admin. Please wait!",
         });
+      } else {
+        // CRYPTO withdrawal: Logic như cũ
+        if (parseInt(amount) < 200 && user.paymentMethod === "") {
+          // Gửi trực tiếp USDT
+          const receipt = await sendUsdt({
+            amount: amount - 1,
+            receiverAddress: user.walletAddress,
+          });
+
+          user.claimedUsdt += parseInt(amount);
+          user.availableUsdt -= parseInt(amount);
+          await user.save();
+
+          // Create claim record after updating balance
+          await Claim.create({
+            userId: user.id,
+            amount: parseInt(amount),
+            hash: receipt.hash,
+            coin: "USDT",
+            withdrawalType: "CRYPTO",
+            availableUsdtAfter: user.availableUsdt, // Lưu số dư còn lại
+          });
+
+          res.status(200).json({ message: "claim USDT successful" });
+        } else {
+          // Tạo yêu cầu withdraw chờ admin xử lý
+          // Chỉ lưu userId, thông tin khác lấy từ user khi hiển thị
+          await Withdraw.create({
+            userId: user.id,
+            amount: parseInt(amount),
+            withdrawalType: "CRYPTO",
+          });
+
+          user.availableUsdt -= parseInt(amount);
+          await user.save();
+
+          res.status(200).json({
+            message: "Withdrawal request has been sent to Admin. Please wait!",
+          });
+        }
       }
     } else {
       throw new Error("Insufficient balance in account");
@@ -324,12 +367,14 @@ const getAllClaims = asyncHandler(async (req, res) => {
     { $sort: { createdAt: -1 } },
     { $skip: pageSize * (page - 1) },
     { $limit: pageSize },
-    {
+      {
       $project: {
         _id: 1,
         coin: 1,
         amount: 1,
         hash: 1,
+        withdrawalType: 1,
+        availableUsdtAfter: 1,
         createdAt: 1,
         userInfo: {
           _id: 1,
@@ -442,12 +487,14 @@ const getAllClaimsOfUser = asyncHandler(async (req, res) => {
     { $sort: { createdAt: -1 } },
     { $skip: pageSize * (page - 1) },
     { $limit: pageSize },
-    {
+      {
       $project: {
         _id: 1,
         coin: 1,
         amount: 1,
         hash: 1,
+        withdrawalType: 1,
+        availableUsdtAfter: 1,
         createdAt: 1,
         userInfo: {
           _id: 1,

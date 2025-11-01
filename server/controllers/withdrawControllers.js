@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Withdraw from "../models/withdrawModel.js";
 import User from "../models/userModel.js";
+import Claim from "../models/claimModel.js";
 import { removeAccents } from "../utils/methods.js";
 import mongoose from "mongoose";
 
@@ -54,14 +55,24 @@ const getAllWithdraws = asyncHandler(async (req, res) => {
         amount: 1,
         hash: 1,
         method: 1,
-        accountName: 1,
-        accountNumber: 1,
+        withdrawalType: 1,
+        exchangeRate: 1,
+        receivedAmount: 1,
+        tax: 1,
+        transferContent: 1,
+        processedBy: 1,
+        processedAt: 1,
         createdAt: 1,
         userInfo: {
           _id: 1,
           userId: 1,
           email: 1,
           walletAddress: 1,
+          accountName: 1,
+          accountNumber: 1,
+          bankCode: 1,
+          bankName: 1,
+          paymentMethod: 1,
         },
       },
     }
@@ -130,24 +141,65 @@ const getAllWithdrawsForExport = asyncHandler(async (req, res) => {
 
 const updateWithdraw = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { hash, status } = req.body;
+  const { hash, status, transferContent } = req.body;
+  const { user: admin } = req;
 
   try {
     const withdraw = await Withdraw.findById(id);
     const user = await User.findById(withdraw.userId);
+    
     if (status === "APPROVED") {
-      withdraw.hash = hash;
-      user.claimedUsdt = user.claimedUsdt + user.availableUsdt;
+      withdraw.hash = hash || '';
+      
+      if (withdraw.withdrawalType === "BANK") {
+        // Bank withdrawal: Save transfer content and admin processing info
+        if (transferContent) {
+          withdraw.transferContent = transferContent;
+        }
+        withdraw.processedBy = admin.id;
+        withdraw.processedAt = new Date();
+        
+        // Create claim record for bank withdrawal
+        // Use transferContent as hash for bank transfers
+        const claimHash = transferContent || `BANK_${withdraw._id}_${Date.now()}`;
+        await Claim.create({
+          userId: withdraw.userId,
+          amount: withdraw.amount,
+          coin: "USDT",
+          hash: claimHash,
+          withdrawalType: "BANK",
+          availableUsdtAfter: user.availableUsdt, // Lưu số dư còn lại
+        });
+      } else {
+        // Crypto withdrawal: Update claimed USDT
+        user.claimedUsdt = user.claimedUsdt + withdraw.amount;
+        
+        // Create claim record for crypto withdrawal
+        // Use transaction hash from blockchain
+        const claimHash = hash || `CRYPTO_${withdraw._id}_${Date.now()}`;
+        await Claim.create({
+          userId: withdraw.userId,
+          amount: withdraw.amount,
+          coin: "USDT",
+          hash: claimHash,
+          withdrawalType: "CRYPTO",
+          availableUsdtAfter: user.availableUsdt, // Lưu số dư còn lại
+        });
+      }
     }
+    
     if (status === "CANCEL") {
+      // Refund USDT to user's available balance
       user.availableUsdt = user.availableUsdt + withdraw.amount;
     }
+    
     withdraw.status = status;
     await user.save();
     await withdraw.save();
 
     res.status(200).json({ message: status === "APPROVED" ? "Withdraw successful" : "Cancel!" });
   } catch (err) {
+    console.error("Error updating withdraw:", err);
     res.status(400).json({ error: "Internal Error" });
   }
 });

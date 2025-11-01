@@ -33,10 +33,10 @@ const Admin = {
   exportWithdraw: (body) => {
     return API.post(`${URL_API_WITHDRAW}/export`, body);
   },
-  updateWithdraw: ({ id, hash, status }) => {
-    return API.put(`${URL_API_WITHDRAW}/${id}`, {
-      hash, status
-    });
+  updateWithdraw: ({ id, hash, status, transferContent }) => {
+    const body = { hash, status };
+    if (transferContent) body.transferContent = transferContent;
+    return API.put(`${URL_API_WITHDRAW}/${id}`, body);
   },
 };
 

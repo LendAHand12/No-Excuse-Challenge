@@ -55,6 +55,16 @@ const Payment = {
   donePayWithCash: (body) => {
     return API.post(`${URL_API_PAYMENT}/donePayWithCash`, body);
   },
+  // Admin payment verification
+  searchPendingOrder: (orderId, userId) => {
+    const params = new URLSearchParams();
+    if (orderId) params.append('orderId', orderId);
+    if (userId) params.append('userId', userId);
+    return API.get(`${URL_API_PAYMENT}/admin/search-pending?${params.toString()}`);
+  },
+  approveBankPayment: (body) => {
+    return API.post(`${URL_API_PAYMENT}/admin/approve-bank-payment`, body);
+  },
 };
 
 export default Payment;

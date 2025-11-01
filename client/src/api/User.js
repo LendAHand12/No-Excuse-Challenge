@@ -31,6 +31,9 @@ const User = {
   getUserInfo: () => {
     return API.get(`${URL_API_USER}/info`);
   },
+  getUserAssets: () => {
+    return API.get(`${URL_API_USER}/assets`);
+  },
   deleteUserById: (id) => {
     return API.delete(`${URL_API_USER}/${id}`);
   },

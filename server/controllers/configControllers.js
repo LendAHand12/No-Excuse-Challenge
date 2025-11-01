@@ -26,4 +26,21 @@ const update = asyncHandler(async (req, res) => {
   });
 });
 
-export { getAllConfigs, update };
+// Get USDT exchange rate for bank withdrawal
+const getExchangeRate = asyncHandler(async (req, res) => {
+  const exchangeRateConfig = await Config.findOne({ label: "USD_TO_VND_BUY" });
+
+  if (!exchangeRateConfig) {
+    res.status(404).json({
+      error: "Exchange rate not found",
+    });
+    return;
+  }
+
+  res.json({
+    exchangeRate: exchangeRateConfig.value,
+    label: exchangeRateConfig.label,
+  });
+});
+
+export { getAllConfigs, update, getExchangeRate };

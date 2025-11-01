@@ -8,7 +8,6 @@ import { UPDATE_USER_INFO } from '@/slices/auth';
 import { useForm } from 'react-hook-form';
 import User from '@/api/User';
 import KYC from '@/api/KYC';
-import Claim from '@/api/Claim';
 import { useCallback, useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import USER_RANKINGS from '@/constants/userRankings';
@@ -16,7 +15,6 @@ import Modal from 'react-modal';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import PhoneInput from 'react-phone-number-input';
 import './index.css';
-import ClaimModal from '../../../components/ClaimModal';
 import { Link, useNavigate } from 'react-router-dom';
 import banks from '@/lib/banks.json';
 
@@ -41,25 +39,17 @@ const Profile = () => {
     phone,
     idCode,
     buyPackage,
-    totalHewe,
-    availableHewe,
-    availableUsdt,
-    availableAmc,
     walletAddress,
-    claimedHewe,
     ranking,
     totalEarning,
     totalHold,
-    withdrawPending,
     bonusRef,
     currentLayer,
     facetecTid,
     errLahCode,
     pendingUpdateInfo,
     notEnoughtChild,
-    tryToTier2,
     countdown,
-    isMoveSystem,
     lockKyc,
     accountName,
     accountNumber,
@@ -68,7 +58,6 @@ const Profile = () => {
     dateOfBirth,
     city,
     subUser,
-    checkCanNextTier,
     preTier2Status,
     preTier2User,
     shortfallAmount,
@@ -80,10 +69,6 @@ const Profile = () => {
   const [errorPhone, setErrPhone] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [refresh, setRefresh] = useState(false);
-  const [loadingClaimHewe, setLoadingClaimHewe] = useState(false);
-  const [loadingClaimUsdt, setLoadingClaimUsdt] = useState(false);
-  const [loadingClaimAmc, setLoadingClaimAmc] = useState(false);
-  const [showModal, setShowModal] = useState(false);
   const [showFaceId, setShowFaceId] = useState(
     lockKyc === false && facetecTid === '' ? true : false,
   );
@@ -91,7 +76,6 @@ const Profile = () => {
   const [showMoveSystem, setShowMoveSystem] = useState(false);
   const [errAgrre, setErrAgrre] = useState(false);
   const [valueCheckAgrree, setValueCheckAgrree] = useState('');
-  const [showNextTier, setShowNextTier] = useState(false);
   const [showPreTier2Commit, setShowPreTier2Commit] = useState(
     tier === 1 &&
       (preTier2Status === 'APPROVED' || preTier2Status === 'ACHIEVED')
@@ -167,96 +151,6 @@ const Profile = () => {
     [phoneNumber],
   );
 
-  // const claimHewe = async () => {
-  //   setLoadingClaimHewe(true);
-  //   await KYC.claim({ coin: 'hewe' })
-  //     .then((response) => {
-  //       if (response.data.url) {
-  //         window.location.href = response.data.url;
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       let message =
-  //         error.response && error.response.data.error
-  //           ? error.response.data.error
-  //           : error.message;
-  //       toast.error(t(message));
-  //       setLoadingClaimHewe(false);
-  //     });
-  // };
-
-  const claimUsdt = async (amount) => {
-    setLoadingClaimUsdt(true);
-    await KYC.claim({ coin: 'usdt', amount })
-      .then((response) => {
-        if (response.data.url) {
-          window.location.href = response.data.url;
-        }
-      })
-      .catch((error) => {
-        let message =
-          error.response && error.response.data.error
-            ? error.response.data.error
-            : error.message;
-        toast.error(t(message));
-        setLoadingClaimHewe(false);
-      });
-  };
-
-  const claimHewe = async () => {
-    setLoadingClaimHewe(true);
-    await Claim.hewe()
-      .then((response) => {
-        toast.success(t(response.data.message));
-        setLoadingClaimHewe(false);
-        setRefresh(!refresh);
-      })
-      .catch((error) => {
-        let message =
-          error.response && error.response.data.error
-            ? error.response.data.error
-            : error.message;
-        toast.error(t(message));
-        setLoadingClaimHewe(false);
-      });
-  };
-
-  const claimAmc = async () => {
-    setLoadingClaimAmc(true);
-    await KYC.claim({ coin: 'amc' })
-      .then((response) => {
-        if (response.data.url) {
-          window.location.href = response.data.url;
-        }
-      })
-      .catch((error) => {
-        let message =
-          error.response && error.response.data.error
-            ? error.response.data.error
-            : error.message;
-        toast.error(t(message));
-        setLoadingClaimAmc(false);
-      });
-  };
-
-  // const claimUsdt = async (amount) => {
-  //   setLoadingClaimUsdt(true);
-  //   await Claim.usdt({ coin: 'usdt', amount })
-  //     .then((response) => {
-  //       toast.success(t(response.data.message));
-  //       setLoadingClaimUsdt(false);
-  //       setShowModal(false);
-  //       setRefresh(!refresh);
-  //     })
-  //     .catch((error) => {
-  //       let message =
-  //         error.response && error.response.data.error
-  //           ? error.response.data.error
-  //           : error.message;
-  //       toast.error(t(message));
-  //       setLoadingClaimUsdt(false);
-  //     });
-  // };
 
   useEffect(() => {
     (async () => {
@@ -270,8 +164,10 @@ const Profile = () => {
             setShowPreTier2Commit(false);
           }
           // Check if bank information is missing after getting user data
+          // Required for bank withdrawal: bankName, bankCode, accountName, accountNumber
           if (
             !response.data.bankName ||
+            !response.data.bankCode ||
             !response.data.accountName ||
             !response.data.accountNumber ||
             !response.data.dateOfBirth
@@ -289,9 +185,6 @@ const Profile = () => {
     })();
   }, [refresh]);
 
-  const closeModal = () => {
-    setShowModal(false);
-  };
 
   const findNextRank = (level) => {
     const currentRankIndex = USER_RANKINGS.findIndex(
@@ -302,6 +195,15 @@ const Profile = () => {
 
   const renderRank = (level) => {
     return USER_RANKINGS.find((ele) => level <= ele.value).label;
+  };
+
+  const hasCompleteBankInfo = () => {
+    return (
+      userInfo?.accountName &&
+      userInfo?.accountNumber &&
+      userInfo?.bankName &&
+      userInfo?.bankCode
+    );
   };
 
   const handleStartKYC = async () => {
@@ -347,13 +249,6 @@ const Profile = () => {
   return (
     <DefaultLayout>
       <ToastContainer />
-      <ClaimModal
-        showModal={showModal}
-        closeModal={closeModal}
-        availableUsdt={availableUsdt}
-        claimUsdt={claimUsdt}
-        loadingClaimUsdt={loadingClaimUsdt}
-      />
 
       <Modal
         isOpen={showFaceId}
@@ -851,91 +746,44 @@ const Profile = () => {
           </div>
         )}
 
-        <div className="bg-[#FAFBFC] p-4 rounded-2xl flex 2xl:flex-row flex-col items-start 2xl:items-center xl:justify-between gap-8">
-          <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
-            <p className="font-medium">Available HEWE</p>
-            <input
-              className="bg-black rounded-xl text-NoExcuseChallenge p-2 flex-1"
-              readOnly
-              value={availableHewe}
-            />
+        {/* Bank Information Warning */}
+        {!hasCompleteBankInfo() && (
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-yellow-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-yellow-700">
+                  <span className="font-semibold">
+                    {t('Bank information required for bank withdrawal')}
+                  </span>
+                  <br />
+                  {t('Please update your bank information (Bank Name, Account Name, Account Number) to enable bank transfer withdrawal.')}
+                </p>
+                <div className="mt-2">
+                  <button
+                    onClick={() => setShowBankInfoModal(true)}
+                    className="text-sm font-medium text-yellow-800 underline hover:text-yellow-900"
+                  >
+                    {t('Update Bank Information')}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
-            <p className="font-medium">Reward HEWE</p>
-            <input
-              className="bg-black rounded-xl text-NoExcuseChallenge p-2 flex-1"
-              readOnly
-              value={tier > 1 ? 0 : totalHewe > 0 ? totalHewe - claimedHewe : 0}
-            />
-          </div>
-          <button
-            className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
-              availableHewe === 0 ? 'opacity-30' : ''
-            }`}
-            disabled={availableHewe === 0}
-            onClick={claimHewe}
-          >
-            {loadingClaimHewe && <Loading />}
-            WITHDRAW HEWE
-          </button>
-        </div>
-        {/* <div className="bg-[#FAFBFC] p-4 rounded-2xl flex 2xl:flex-row flex-col items-start 2xl:items-center xl:justify-between gap-8">
-          <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
-            <p className="font-medium">Available AMC</p>
-            <input
-              className="bg-black rounded-xl text-NoExcuseChallenge p-2 flex-1"
-              readOnly
-              value={availableAmc}
-            />
-          </div>
-          <button
-            className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
-              availableAmc === 0 ? 'opacity-30' : ''
-            }`}
-            disabled={availableAmc === 0}
-            onClick={claimAmc}
-          >
-            {loadingClaimAmc && <Loading />}
-            WITHDRAW AMC
-          </button>
-        </div> */}
-        <div className="bg-[#FAFBFC] p-4 rounded-2xl flex 2xl:flex-row flex-col items-start xl:items-center gap-8">
-          <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
-            <p className="font-medium">Available USDT</p>
-            <input
-              className="bg-black rounded-xl text-NoExcuseChallenge p-2 flex-1"
-              readOnly
-              value={availableUsdt}
-            />
-          </div>
-          <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
-            <p className="font-medium">Processing USDT</p>
-            <input
-              className="bg-black rounded-xl text-NoExcuseChallenge p-2 flex-1"
-              readOnly
-              value={withdrawPending}
-            />
-          </div>
-          <button
-            className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
-              errLahCode === 'OVER45' ||
-              availableUsdt === 0 ||
-              status !== 'APPROVED' ||
-              facetecTid === ''
-                ? 'opacity-30'
-                : ''
-            }`}
-            disabled={
-              errLahCode === 'OVER45' ||
-              availableUsdt === 0 ||
-              status !== 'APPROVED' ||
-              facetecTid === ''
-            }
-            onClick={() => setShowModal(true)}
-          >
-            WITHDRAW USDT
-          </button>
-        </div>
+        )}
+
         <div className={`grid gap-10 font-semibold`}>
           <div className={`grid lg:grid-cols-2 gap-2`}>
             <div className="bg-[#FAFBFC] p-4 rounded-2xl">

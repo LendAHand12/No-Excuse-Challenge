@@ -444,6 +444,44 @@ const getUserById = asyncHandler(async (req, res) => {
   }
 });
 
+const getUserAssets = asyncHandler(async (req, res) => {
+  const user = req.user;
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  // Get pending withdraws to calculate withdrawPending
+  const withdraws = await Withdraw.find({
+    userId: user._id,
+  });
+  const withdrawPending = withdraws
+    .filter((ele) => ele.status === "PENDING")
+    .reduce((sum, withdraw) => sum + withdraw.amount, 0);
+
+  // Calculate claimedHewe (same logic as getUserInfo)
+  const diffDaySinceCreate = moment().diff(moment(user.createdAt), "days");
+  const claimedHewe = user.hewePerDay > 0 ? diffDaySinceCreate * user.hewePerDay : 0;
+
+  res.json({
+    availableHewe: user.availableHewe || 0,
+    availableUsdt: user.availableUsdt || 0,
+    totalHewe: user.totalHewe || 0,
+    claimedHewe: claimedHewe,
+    withdrawPending: withdrawPending,
+    tier: user.tier || 1,
+    status: user.status || '',
+    facetecTid: user.facetecTid || '',
+    errLahCode: user.errLahCode || '',
+    // Bank information for withdrawal check
+    accountName: user.accountName || '',
+    accountNumber: user.accountNumber || '',
+    bankCode: user.bankCode || '',
+    bankName: user.bankName || '',
+  });
+});
+
 const getUserInfo = asyncHandler(async (req, res) => {
   const user = req.user;
 
@@ -2906,6 +2944,7 @@ export {
   deleteAdmin,
   getAdminById,
   getUserInfo,
+  getUserAssets,
   adminChangeWalletUser,
   getListChildNotEnoughBranchOfUser,
   getListUserForCreateAdmin,

@@ -64,7 +64,6 @@ import ExportDreampoolPage from './pages/Admin/Export/ExportDreampool';
 import AdminCronjobPage from './pages/Admin/Cronjob';
 import RulesPage from './pages/Rules';
 import { useSelector } from 'react-redux';
-import ClaimsPage from './pages/User/Claims';
 import RegisterKYCPage from './pages/User/RegisterKYC';
 import ClaimKYCPage from './pages/User/ClaimKYC';
 import MoveSystemPage from './pages/User/MoveSystemKYC';
@@ -88,6 +87,8 @@ import PreTier2Pool from './pages/User/PreTier2Pool';
 import UsersPassedTier2Page from './pages/User/UsersPassedTier2';
 import AdminWalletConnectHistoryPages from './pages/Admin/WalletConnectHistory';
 import UserAssetsPage from './pages/User/Assets';
+import ApprovePaymentPage from './pages/Admin/ApprovePayment';
+
 function App() {
   const { pathname } = useLocation();
   const { userInfo } = useSelector((state) => state.auth);
@@ -215,6 +216,19 @@ function App() {
               <>
                 <PageTitle title="Transactions | NoExcuseChallenge" />
                 <AdminTransactionsPage />
+              </>
+            }
+          />
+        )}
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/approve-payment')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/approve-payment"
+            element={
+              <>
+                <PageTitle title="Approve Payment | NoExcuseChallenge" />
+                <ApprovePaymentPage />
               </>
             }
           />
@@ -860,15 +874,6 @@ function App() {
                 <>
                   <PageTitle title="Withdraws | NoExcuseChallenge" />
                   <WithdrawsPage />
-                </>
-              }
-            />
-            <Route
-              path="/user/claims"
-              element={
-                <>
-                  <PageTitle title="Claims | NoExcuseChallenge" />
-                  <ClaimsPage />
                 </>
               }
             />

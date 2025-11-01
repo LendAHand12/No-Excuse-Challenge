@@ -15,7 +15,7 @@ const ClaimKYCPage = () => {
   const [loadingClaim, setLoadingClaim] = useState(true);
   const [claimSuccess, setClaimSuccess] = useState(false);
 
-  let { token, user_id, coin, status, amount } = parsed;
+  let { token, user_id, coin, status, amount, withdrawalType, exchangeRate } = parsed;
 
   useEffect(() => {
     (async () => {
@@ -30,7 +30,10 @@ const ClaimKYCPage = () => {
         if (coin === 'hewe') {
           response = await Claim.hewe({ user_id, token });
         } else if (coin === 'usdt') {
-          response = await Claim.usdt({ user_id, token, amount });
+          const claimData: any = { user_id, token, amount };
+          if (withdrawalType) claimData.withdrawalType = withdrawalType;
+          if (exchangeRate) claimData.exchangeRate = exchangeRate;
+          response = await Claim.usdt(claimData);
         } else if (coin === 'amc') {
           response = await Claim.amc({ user_id, token });
         }

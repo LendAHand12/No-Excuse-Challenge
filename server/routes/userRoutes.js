@@ -31,6 +31,7 @@ import {
   deleteAdmin,
   getAdminById,
   getUserInfo,
+  getUserAssets,
   adminChangeWalletUser,
   getListChildNotEnoughBranchOfUser,
   getListUserForCreateAdmin,
@@ -48,6 +49,7 @@ const router = express.Router();
 router.route("/").get(protectRoute, isAdmin, getAllUsers);
 router.route("/over45").get(protectRoute, isAdmin, getAllUsersOver45);
 router.route("/info").get(protectRoute, getUserInfo);
+router.route("/assets").get(protectRoute, getUserAssets);
 router.route("/getAllDeletedUsers").get(protectRoute, isAdmin, getAllDeletedUsers);
 router.route("/getAllUsersPreTier2").get(protectRoute, isAdmin, getAllUsersPreTier2);
 router.route("/profile").get(protectRoute, getUserProfile);

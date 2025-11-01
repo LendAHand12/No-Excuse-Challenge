@@ -21,11 +21,19 @@ const startKYC = expressAsyncHandler(async (req, res) => {
 });
 
 const claimKYC = expressAsyncHandler(async (req, res) => {
-  const { coin, amount } = req.body;
+  const { coin, amount, withdrawalType, exchangeRate } = req.body;
   const { user } = req;
 
   const token = createCallbackToken(user._id);
-  const callbackUrl = `${process.env.FRONTEND_BASE_URL}/user/claim?coin=${coin}&token=${token}&amount=${amount}`;
+  let callbackUrl = `${process.env.FRONTEND_BASE_URL}/user/claim?coin=${coin}&token=${token}&amount=${amount}`;
+  
+  // Add withdrawalType and exchangeRate to callback if provided
+  if (withdrawalType) {
+    callbackUrl += `&withdrawalType=${withdrawalType}`;
+  }
+  if (exchangeRate) {
+    callbackUrl += `&exchangeRate=${exchangeRate}`;
+  }
 
   const redirectToKYC = `${process.env.KYC_URL}/verify.html?callback=${encodeURIComponent(
     callbackUrl
