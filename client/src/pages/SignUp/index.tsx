@@ -100,7 +100,7 @@ const SignUpPage = () => {
         bankName: selectedBank ? selectedBank.name : '',
         accountName: accountName ? accountName.trim() : '',
         accountNumber: accountNumber ? accountNumber.trim() : '',
-        dateOfBirth: dateOfBirth,
+        dateOfBirth: new Date(dateOfBirth),
       })
         .then((response) => {
           setLoading(false);
