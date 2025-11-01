@@ -164,7 +164,7 @@ const registerUser = asyncHandler(async (req, res) => {
         accountNumber,
         bankName,
         bankCode,
-        dateOfBirth,
+        dateOfBirth: new Date(dateOfBirth),
       });
 
       const tree = await Tree.create({
