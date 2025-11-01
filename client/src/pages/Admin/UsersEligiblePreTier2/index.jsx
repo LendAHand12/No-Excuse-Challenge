@@ -260,7 +260,7 @@ const AdminEligiblePreTier2UsersPages = () => {
                 Wallet Address
               </th>
               <th scope="col" className="px-6 py-3">
-                {t('status')}
+                {t('userProfile.fields.status')}
               </th>
               <th scope="col" className="px-6 py-3">
                 Eligible Time
