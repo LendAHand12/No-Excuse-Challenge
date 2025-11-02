@@ -476,25 +476,57 @@ const createBankOrder = asyncHandler(async (req, res) => {
     throw new Error("Total amount is required and must be greater than 0");
   }
 
-  // Generate unique orderId: NEC + timestamp hiện tại
-  // Format: NEC{timestamp} (ví dụ: NEC1703123456789)
-  const timestamp = Date.now(); // Timestamp hiện tại (milliseconds)
-  const orderId = `NEC${timestamp}`.toUpperCase();
+  // Generate unique orderId: NEC + timestamp + random suffix để đảm bảo unique
+  // Format: NEC{timestamp}{random} - timestamp 13 chữ số + 3 chữ số random = 19 ký tự
+  // Ví dụ: NEC1703123456789123 (19 ký tự: 3 "NEC" + 13 số timestamp + 3 số random)
+  let orderId;
+  let order;
+  let maxRetries = 5;
+  let retryCount = 0;
 
-  // Create order
-  const order = await Order.create({
-    orderId: orderId,
-    userId: user.id,
-    userCountPay: user.countPay || 0,
-    tier: user.tier || 1,
-    amount: parseFloat(totalAmount),
-    type: "PRETIER2_PAYMENT",
-    status: "PENDING",
-    metadata: {
-      createdAt: new Date(),
-      paymentMethod: "BANK_TRANSFER",
-    },
-  });
+  // Retry logic để đảm bảo orderId unique
+  while (retryCount < maxRetries) {
+    try {
+      const timestamp = Date.now();
+      const randomSuffix = Math.floor(Math.random() * 1000)
+        .toString()
+        .padStart(3, '0'); // 3 chữ số random (000-999)
+      orderId = `NEC${String(timestamp).padStart(13, '0')}${randomSuffix}`.toUpperCase();
+
+      // Try to create order
+      order = await Order.create({
+        orderId: orderId,
+        userId: user.id,
+        userCountPay: user.countPay || 0,
+        tier: user.tier || 1,
+        amount: parseFloat(totalAmount),
+        type: "PRETIER2_PAYMENT",
+        status: "PENDING",
+        metadata: {
+          createdAt: new Date(),
+          paymentMethod: "BANK_TRANSFER",
+        },
+      });
+
+      // Success - break out of loop
+      break;
+    } catch (error) {
+      // Check if it's a duplicate key error (E11000)
+      if (error.code === 11000 && error.keyPattern?.orderId) {
+        retryCount++;
+        if (retryCount >= maxRetries) {
+          console.error(`Failed to create unique orderId after ${maxRetries} retries`);
+          res.status(500);
+          throw new Error("Failed to create order. Please try again.");
+        }
+        // Wait a tiny bit before retry to get new timestamp
+        await new Promise((resolve) => setTimeout(resolve, 1));
+      } else {
+        // Different error - rethrow
+        throw error;
+      }
+    }
+  }
 
   console.log("PreTier2 bank order created:", {
     orderId: order.orderId,

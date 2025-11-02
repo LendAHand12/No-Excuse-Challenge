@@ -115,8 +115,12 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
     // Cũng hỗ trợ format cũ AMERITEC cho tương thích ngược
     let orderId = null;
 
-    // Tìm pattern mới: NEC + số (timestamp)
-    const necMatch = contentTrimmed.match(/NEC\d+/i); // Case-insensitive match: NEC theo sau bởi 1+ chữ số
+    // Tìm pattern mới: NEC + số (timestamp) + số random - format: NEC{13 chữ số timestamp}{3 chữ số random}
+    // Format mới: NEC{13 số}{3 số} = 19 ký tự tổng cộng
+    // Cũng hỗ trợ format cũ (16 ký tự) cho tương thích: NEC{13 số}
+    const necMatchNew = contentTrimmed.match(/NEC\d{16}/i); // Format mới: 19 ký tự (NEC + 16 số)
+    const necMatchOld = contentTrimmed.match(/NEC\d{13}/i); // Format cũ: 16 ký tự (NEC + 13 số) - tương thích ngược
+    const necMatch = necMatchNew || necMatchOld;
     if (necMatch) {
       orderId = necMatch[0]; // Giữ nguyên case gốc từ content
     } else {

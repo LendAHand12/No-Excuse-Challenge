@@ -348,25 +348,57 @@ const createBankOrder = asyncHandler(async (req, res) => {
     throw new Error("Total amount is required and must be greater than 0");
   }
 
-  // Generate unique orderId: NEC + timestamp hiện tại
-  // Format: NEC{timestamp} (ví dụ: NEC1703123456789)
-  const timestamp = Date.now(); // Timestamp hiện tại (milliseconds)
-  const orderId = `NEC${timestamp}`.toUpperCase();
+  // Generate unique orderId: NEC + timestamp + random suffix để đảm bảo unique
+  // Format: NEC{timestamp}{random} - timestamp 13 chữ số + 3 chữ số random = 19 ký tự
+  // Ví dụ: NEC1703123456789123 (19 ký tự: 3 "NEC" + 13 số timestamp + 3 số random)
+  let orderId;
+  let order;
+  let maxRetries = 5;
+  let retryCount = 0;
 
-  // Create order
-  const order = await Order.create({
-    orderId: orderId,
-    userId: user.id,
-    userCountPay: user.countPay || 0,
-    tier: user.tier || 1,
-    amount: parseFloat(totalAmount),
-    type: "PAYMENT",
-    status: "PENDING",
-    metadata: {
-      createdAt: new Date(),
-      paymentMethod: "BANK_TRANSFER",
-    },
-  });
+  // Retry logic để đảm bảo orderId unique
+  while (retryCount < maxRetries) {
+    try {
+      const timestamp = Date.now();
+      const randomSuffix = Math.floor(Math.random() * 1000)
+        .toString()
+        .padStart(3, '0'); // 3 chữ số random (000-999)
+      orderId = `NEC${String(timestamp).padStart(13, '0')}${randomSuffix}`.toUpperCase();
+
+      // Try to create order
+      order = await Order.create({
+        orderId: orderId,
+        userId: user.id,
+        userCountPay: user.countPay || 0,
+        tier: user.tier || 1,
+        amount: parseFloat(totalAmount),
+        type: "PAYMENT",
+        status: "PENDING",
+        metadata: {
+          createdAt: new Date(),
+          paymentMethod: "BANK_TRANSFER",
+        },
+      });
+
+      // Success - break out of loop
+      break;
+    } catch (error) {
+      // Check if it's a duplicate key error (E11000)
+      if (error.code === 11000 && error.keyPattern?.orderId) {
+        retryCount++;
+        if (retryCount >= maxRetries) {
+          console.error(`Failed to create unique orderId after ${maxRetries} retries`);
+          res.status(500);
+          throw new Error("Failed to create order. Please try again.");
+        }
+        // Wait a tiny bit before retry to get new timestamp
+        await new Promise((resolve) => setTimeout(resolve, 1));
+      } else {
+        // Different error - rethrow
+        throw error;
+      }
+    }
+  }
 
   console.log("Bank order created:", {
     orderId: order.orderId,
@@ -1586,65 +1618,37 @@ const onDonePaymentWithCash = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Search pending order by orderId or userId (Admin)
+// @desc    Search order by orderId (Admin) - cho phép search order đã SUCCESS để load transactions PENDING
 // @route   GET /api/payment/admin/search-pending
 // @access  Private/Admin
 const searchPendingOrder = asyncHandler(async (req, res) => {
-  const { orderId, userId } = req.query;
+  const { orderId } = req.query;
 
-  if (!orderId && !userId) {
+  if (!orderId) {
     res.status(400);
-    throw new Error("Please provide orderId or userId");
+    throw new Error("Please provide orderId");
   }
 
   let orders = [];
   let transactions = [];
 
-  // Search by orderId
-  if (orderId) {
-    const order = await Order.findOne({ orderId, status: "PENDING" })
-      .populate("userId", "userId email phone")
-      .sort({ createdAt: -1 });
+  // Search by orderId - cho phép tìm cả order SUCCESS (vì có thể transactions còn PENDING)
+  const order = await Order.findOne({ orderId })
+    .populate("userId", "userId email phone")
+    .sort({ createdAt: -1 });
 
-    console.log({order});
-    if (order) {
-      orders.push(order);
+  if (order) {
+    orders.push(order);
 
-      // Get related transactions
-      const relatedTransactions = await Transaction.find({
-        userId: order.userId.id || order.userId,
-        status: "PENDING",
-      }).populate("userId_to", "userId email");
+    // Get related transactions with PENDING status and matching tier
+    // Ngay cả khi order đã SUCCESS, vẫn có thể có transactions còn PENDING chưa được xử lý
+    const relatedTransactions = await Transaction.find({
+      userId: order.userId.id || order.userId,
+      status: "PENDING",
+      tier: order.tier, // Tìm transactions theo tier của order
+    }).populate("userId_to", "userId email");
 
-      transactions = relatedTransactions;
-    }
-  }
-
-  // Search by userId
-  if (userId && !orderId) {
-    const user = await User.findOne({ userId: { $regex: userId, $options: "i" } });
-
-    if (user) {
-      // Get pending orders
-      const userOrders = await Order.find({
-        userId: user.id,
-        status: "PENDING",
-      })
-        .populate("userId", "userId email phone")
-        .sort({ createdAt: -1 });
-
-      orders = userOrders;
-
-      // Get pending transactions
-      const userTransactions = await Transaction.find({
-        userId: user.id,
-        status: "PENDING",
-      })
-        .populate("userId_to", "userId email")
-        .sort({ createdAt: -1 });
-
-      transactions = userTransactions;
-    }
+    transactions = relatedTransactions;
   }
 
   res.status(200).json({
@@ -1678,6 +1682,7 @@ const approveBankPayment = asyncHandler(async (req, res) => {
   }
 
   // Update order if provided
+  // Cho phép update order ngay cả khi đã SUCCESS (trường hợp order SUCCESS nhưng transactions còn PENDING)
   if (orderId) {
     const order = await Order.findOne({ orderId });
 
@@ -1686,16 +1691,16 @@ const approveBankPayment = asyncHandler(async (req, res) => {
       throw new Error("Order not found");
     }
 
-    if (order.status !== "PENDING") {
-      res.status(400);
-      throw new Error("Order is not pending");
+    // Nếu order chưa SUCCESS thì update status
+    if (order.status === "PENDING") {
+      order.status = "SUCCESS";
+      order.processedBy = admin.id;
+      order.processedAt = new Date();
     }
 
-    order.status = "SUCCESS";
-    order.bankTransactionId = bankTransactionId;
-    order.transferContent = transferContent || "";
-    order.processedBy = admin.id;
-    order.processedAt = new Date();
+    // Update các field khác nếu có
+    if (bankTransactionId) order.bankTransactionId = bankTransactionId;
+    if (transferContent) order.transferContent = transferContent;
     if (amount) order.amount = amount;
 
     await order.save();

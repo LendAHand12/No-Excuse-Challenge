@@ -845,5 +845,59 @@
     "payoutDisplayName": "Tên hiển thị thanh toán",
     "payoutEmailOrPhone": "Email hoặc số điện thoại thanh toán",
     "payoutDestination": "Đây là nơi khoản thanh toán của bạn sẽ được gửi đến."
+  },
+
+  "approvePayment": {
+    "title": "Phê duyệt thanh toán ngân hàng",
+    "search": {
+      "title": "Tìm kiếm thanh toán đang chờ",
+      "orderId": "Mã đơn hàng",
+      "orderIdPlaceholder": "Nhập mã đơn hàng (ví dụ: NEC1762048809409)",
+      "button": "Tìm kiếm"
+    },
+    "orders": {
+      "title": "Đơn hàng ({{count}})",
+      "pending": "Đang chờ",
+      "successButPending": "Đơn hàng đã SUCCESS nhưng giao dịch có thể còn PENDING",
+      "orderId": "Mã đơn hàng",
+      "user": "Người dùng",
+      "email": "Email",
+      "phone": "Số điện thoại",
+      "amount": "Số tiền",
+      "transferContent": "Nội dung chuyển khoản",
+      "created": "Ngày tạo"
+    },
+    "transactions": {
+      "title": "Giao dịch đang chờ ({{count}})",
+      "amount": "Số tiền",
+      "to": "Đến",
+      "created": "Ngày tạo"
+    },
+    "approve": {
+      "title": "Phê duyệt thanh toán",
+      "bankTransactionId": "Mã giao dịch ngân hàng",
+      "bankTransactionIdPlaceholder": "Nhập mã giao dịch ngân hàng",
+      "transferContent": "Nội dung chuyển khoản (Tùy chọn)",
+      "transferContentPlaceholder": "Nhập nội dung chuyển khoản",
+      "approving": "Đang phê duyệt...",
+      "button": "Phê duyệt tất cả thanh toán ({{count}} mục)"
+    },
+    "errors": {
+      "orderIdRequired": "Vui lòng nhập mã đơn hàng",
+      "bankTransactionIdRequired": "Mã giao dịch ngân hàng là bắt buộc",
+      "noPendingItems": "Không có đơn hàng hoặc giao dịch nào đang chờ để phê duyệt",
+      "searchFailed": "Tìm kiếm đơn hàng thất bại",
+      "approveFailed": "Phê duyệt thanh toán thất bại"
+    },
+    "success": {
+      "approved": "Tất cả thanh toán đã được phê duyệt thành công"
+    },
+    "info": {
+      "noOrdersFound": "Không tìm thấy đơn hàng hoặc giao dịch đang chờ nào cho mã đơn hàng này"
+    },
+    "common": {
+      "notAvailable": "Không có"
+    },
+    "noContent": "Không tìm thấy đơn hàng hoặc giao dịch nào đang chờ"
   }
 }

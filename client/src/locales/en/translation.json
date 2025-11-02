@@ -759,5 +759,59 @@
     "payoutDisplayName": "Payout Display Name",
     "payoutEmailOrPhone": "Payout Email or Phone Number",
     "payoutDestination": "This is where your payout will be sent."
+  },
+
+  "approvePayment": {
+    "title": "Approve Bank Payment",
+    "search": {
+      "title": "Search Pending Payment",
+      "orderId": "Order ID",
+      "orderIdPlaceholder": "Enter Order ID (e.g., NEC1762048809409)",
+      "button": "Search"
+    },
+    "orders": {
+      "title": "Orders ({{count}})",
+      "pending": "Pending",
+      "successButPending": "Order already SUCCESS, but transactions may be PENDING",
+      "orderId": "Order ID",
+      "user": "User",
+      "email": "Email",
+      "phone": "Phone",
+      "amount": "Amount",
+      "transferContent": "Transfer Content",
+      "created": "Created"
+    },
+    "transactions": {
+      "title": "Pending Transactions ({{count}})",
+      "amount": "Amount",
+      "to": "To",
+      "created": "Created"
+    },
+    "approve": {
+      "title": "Approve Payment",
+      "bankTransactionId": "Bank Transaction ID",
+      "bankTransactionIdPlaceholder": "Enter bank transaction ID",
+      "transferContent": "Transfer Content (Optional)",
+      "transferContentPlaceholder": "Enter transfer content",
+      "approving": "Approving...",
+      "button": "Approve All Payments ({{count}} items)"
+    },
+    "errors": {
+      "orderIdRequired": "Please enter Order ID",
+      "bankTransactionIdRequired": "Bank Transaction ID is required",
+      "noPendingItems": "No pending orders or transactions to approve",
+      "searchFailed": "Failed to search orders",
+      "approveFailed": "Failed to approve payment"
+    },
+    "success": {
+      "approved": "All payments approved successfully"
+    },
+    "info": {
+      "noOrdersFound": "No orders or pending transactions found for this Order ID"
+    },
+    "common": {
+      "notAvailable": "N/A"
+    },
+    "noContent": "No pending orders or transactions found"
   }
 }

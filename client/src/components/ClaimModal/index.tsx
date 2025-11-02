@@ -141,7 +141,7 @@ export default function WithdrawModal({
               >
                 {t('withdrawModal.cryptoWallet')}
               </button>
-              {/* <button
+              <button
                 type="button"
                 onClick={() => setWithdrawalType('BANK')}
                 className={`flex-1 px-4 py-2 rounded-lg border transition ${
@@ -151,7 +151,7 @@ export default function WithdrawModal({
                 }`}
               >
                 {t('withdrawModal.bankTransfer')}
-              </button> */}
+              </button>
             </div>
           </div>
 
