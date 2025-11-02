@@ -86,6 +86,7 @@ const Profile = () => {
       : false,
   );
   const [showBankInfoModal, setShowBankInfoModal] = useState(false);
+  const [showNextTier, setShowNextTier] = useState(false);
 
   const {
     register,
@@ -1243,10 +1244,10 @@ const Profile = () => {
                   <p>{t('date of birth')} :</p>
                   <p>
                     {dateOfBirth
-                      ? new Date(dateOfBirth).toLocaleDateString('en-US', {
+                      ? new Date(dateOfBirth).toLocaleDateString('vi-Vn', {
+                        day: '2-digit',
+                        month: '2-digit',
                           year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
                         })
                       : '-'}
                   </p>

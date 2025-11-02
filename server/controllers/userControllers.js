@@ -758,13 +758,43 @@ const updateUser = asyncHandler(async (req, res) => {
       return cleaned.startsWith("+") ? cleaned : `+${cleaned}`;
     };
 
-    // Helper function to normalize date for comparison
-    const normalizeDate = (date) => {
-      if (!date) return null;
-      if (date instanceof Date) {
-        return date.toISOString().split("T")[0];
+    // Helper function to parse date from DD/MM/YYYY format
+    const parseDateOfBirth = (dateString) => {
+      if (!dateString) return null;
+      
+      // If it's already a Date object, return it
+      if (dateString instanceof Date) {
+        return isNaN(dateString.getTime()) ? null : dateString;
       }
-      return new Date(date).toISOString().split("T")[0];
+      
+      const str = dateString.toString().trim();
+      
+      // Try to parse DD/MM/YYYY format
+      const ddMmYyyyMatch = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (ddMmYyyyMatch) {
+        const [, day, month, year] = ddMmYyyyMatch;
+        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        // Validate date
+        if (date.getFullYear() === parseInt(year) && 
+            date.getMonth() === parseInt(month) - 1 && 
+            date.getDate() === parseInt(day)) {
+          return date;
+        }
+      }
+      
+      // Try ISO format (YYYY-MM-DD)
+      const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (isoMatch) {
+        const [, year, month, day] = isoMatch;
+        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        if (!isNaN(date.getTime())) {
+          return date;
+        }
+      }
+      
+      // Fallback to default Date parsing
+      const date = new Date(str);
+      return isNaN(date.getTime()) ? null : date;
     };
 
     for (const field of [
@@ -790,8 +820,8 @@ const updateUser = asyncHandler(async (req, res) => {
         normalizedCurrent = normalizePhone(currentValue);
         normalizedNew = normalizePhone(newValue);
       } else if (field === "dateOfBirth") {
-        normalizedCurrent = normalizeDate(currentValue);
-        normalizedNew = normalizeDate(newValue);
+        normalizedCurrent = new Date(currentValue);
+        normalizedNew = new Date(newValue);
       }
 
       // Check if value actually changed
@@ -804,7 +834,7 @@ const updateUser = asyncHandler(async (req, res) => {
             field === "phone"
               ? normalizedNew
               : field === "dateOfBirth"
-              ? new Date(newValue).toISOString()
+              ? new Date(newValue)
               : newValue,
           status: kycConfig.value === true ? "approved" : "pending",
           reviewedBy: kycConfig.value === true ? "AUTO" : "",
@@ -817,7 +847,8 @@ const updateUser = asyncHandler(async (req, res) => {
           if (field === "phone") {
             user[field] = normalizedNew; // Store with + prefix
           } else if (field === "dateOfBirth") {
-            user[field] = new Date(newValue);
+            console.log({newValue: moment(newValue, "DD/MM/YYYY").toISOString()});
+            user[field] = moment(newValue, "DD/MM/YYYY").toISOString();
           } else {
             user[field] = newValue;
           }
