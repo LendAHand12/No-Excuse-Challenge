@@ -156,7 +156,6 @@ const Profile = () => {
     [phoneNumber],
   );
 
-
   useEffect(() => {
     (async () => {
       await User.getUserInfo()
@@ -782,25 +781,27 @@ const Profile = () => {
                     clipRule="evenodd"
                   />
                 </svg>
-          </div>
+              </div>
               <div className="ml-3">
                 <p className="text-sm text-yellow-700">
                   <span className="font-semibold">
                     {t('Bank information required for bank withdrawal')}
                   </span>
                   <br />
-                  {t('Please update your bank information (Bank Name, Account Name, Account Number) to enable bank transfer withdrawal.')}
+                  {t(
+                    'Please update your bank information (Bank Name, Account Name, Account Number) to enable bank transfer withdrawal.',
+                  )}
                 </p>
                 <div className="mt-2">
-          <button
+                  <button
                     onClick={() => setShowBankInfoModal(true)}
                     className="text-sm font-medium text-yellow-800 underline hover:text-yellow-900"
-          >
+                  >
                     {t('Update Bank Information')}
-          </button>
-          </div>
-          </div>
-        </div>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -1245,8 +1246,8 @@ const Profile = () => {
                   <p>
                     {dateOfBirth
                       ? new Date(dateOfBirth).toLocaleDateString('vi-Vn', {
-                        day: '2-digit',
-                        month: '2-digit',
+                          day: '2-digit',
+                          month: '2-digit',
                           year: 'numeric',
                         })
                       : '-'}
@@ -1294,7 +1295,7 @@ const Profile = () => {
                 })}
                 value={selectedBank?.name || ''}
               />
-              
+
               {/* Search Input */}
               <div className="relative">
                 <input
@@ -1304,7 +1305,13 @@ const Profile = () => {
                       ? `(${selectedBank.code}) ${selectedBank.name}`
                       : t('Search bank name') || 'Search bank name...'
                   }
-                  value={showBankDropdown ? bankSearch : selectedBank ? `(${selectedBank.code}) ${selectedBank.name}` : ''}
+                  value={
+                    showBankDropdown
+                      ? bankSearch
+                      : selectedBank
+                      ? `(${selectedBank.short_name}) ${selectedBank.name}`
+                      : ''
+                  }
                   onChange={(e) => {
                     setBankSearch(e.target.value);
                     setShowBankDropdown(true);
@@ -1312,7 +1319,9 @@ const Profile = () => {
                   onFocus={() => {
                     setShowBankDropdown(true);
                     if (selectedBank) {
-                      setBankSearch(`${selectedBank.code} ${selectedBank.name}`);
+                      setBankSearch(
+                        `${selectedBank.code} ${selectedBank.name}`,
+                      );
                     }
                   }}
                   className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
@@ -1347,16 +1356,17 @@ const Profile = () => {
                   />
                   <div className="absolute z-[70] w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                     {banks
-                      .filter((bank: any) =>
-                        bank.name
-                          .toLowerCase()
-                          .includes(bankSearch.toLowerCase()) ||
-                        bank.code
-                          .toLowerCase()
-                          .includes(bankSearch.toLowerCase()) ||
-                        bank.short_name
-                          ?.toLowerCase()
-                          .includes(bankSearch.toLowerCase())
+                      .filter(
+                        (bank: any) =>
+                          bank.name
+                            .toLowerCase()
+                            .includes(bankSearch.toLowerCase()) ||
+                          bank.code
+                            .toLowerCase()
+                            .includes(bankSearch.toLowerCase()) ||
+                          bank.short_name
+                            ?.toLowerCase()
+                            .includes(bankSearch.toLowerCase()),
                       )
                       .map((bank: any, index: number) => (
                         <button
@@ -1381,21 +1391,22 @@ const Profile = () => {
                           }`}
                         >
                           <span className="font-semibold">
-                            ({bank.code})
+                            ({bank.short_name})
                           </span>{' '}
                           {bank.name}
                         </button>
                       ))}
-                    {banks.filter((bank: any) =>
-                      bank.name
-                        .toLowerCase()
-                        .includes(bankSearch.toLowerCase()) ||
-                      bank.code
-                        .toLowerCase()
-                        .includes(bankSearch.toLowerCase()) ||
-                      bank.short_name
-                        ?.toLowerCase()
-                        .includes(bankSearch.toLowerCase())
+                    {banks.filter(
+                      (bank: any) =>
+                        bank.name
+                          .toLowerCase()
+                          .includes(bankSearch.toLowerCase()) ||
+                        bank.code
+                          .toLowerCase()
+                          .includes(bankSearch.toLowerCase()) ||
+                        bank.short_name
+                          ?.toLowerCase()
+                          .includes(bankSearch.toLowerCase()),
                     ).length === 0 && (
                       <div className="px-4 py-2 text-sm text-gray-500 text-center">
                         {t('No banks found') || 'No banks found'}

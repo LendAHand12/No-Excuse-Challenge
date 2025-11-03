@@ -731,16 +731,25 @@ function App() {
       </Route>
       <Route element={<PrivateRoute />}>
         <Route
-          path="/user/profile"
+          path="/user/assets"
           element={
             <>
-              <PageTitle title="Profile | NoExcuseChallenge" />
-              <Profile />
+              <PageTitle title="Assets | NoExcuseChallenge" />
+              <UserAssetsPage />
             </>
           }
         />
         {userInfo?.errLahCode !== 'OVER45' && (
           <>
+            <Route
+              path="/user/profile"
+              element={
+                <>
+                  <PageTitle title="Profile | NoExcuseChallenge" />
+                  <Profile />
+                </>
+              }
+            />
             <Route
               path="/user/payment"
               element={
@@ -856,15 +865,6 @@ function App() {
                 <>
                   <PageTitle title="Income | NoExcuseChallenge" />
                   <IncomePage />
-                </>
-              }
-            />
-            <Route
-              path="/user/assets"
-              element={
-                <>
-                  <PageTitle title="Assets | NoExcuseChallenge" />
-                  <UserAssetsPage />
                 </>
               }
             />

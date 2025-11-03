@@ -25,7 +25,13 @@ export const PublicRoute = () => {
     if (userInfo && userInfo.role !== 'user') {
       return <Navigate to="/admin/dashboard" />;
     } else if (userInfo && userInfo.role === 'user') {
-      return <Navigate to="/user/profile" />;
+      return (
+        <Navigate
+          to={
+            userInfo?.errLahCode === 'OVER45' ? '/user/assets' : '/user/profile'
+          }
+        />
+      );
     }
   }
 

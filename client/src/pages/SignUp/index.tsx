@@ -244,7 +244,7 @@ const SignUpPage = () => {
                               })}
                               value={selectedBank?.code || ''}
                             />
-                            
+
                             {/* Search Input */}
                             <div className="relative">
                               <input
@@ -252,9 +252,16 @@ const SignUpPage = () => {
                                 placeholder={
                                   selectedBank
                                     ? `(${selectedBank.code}) ${selectedBank.name}`
-                                    : t('Search bank name') || 'Search bank name...'
+                                    : t('Search bank name') ||
+                                      'Search bank name...'
                                 }
-                                value={showBankDropdown ? bankSearch : selectedBank ? `(${selectedBank.code}) ${selectedBank.name}` : ''}
+                                value={
+                                  showBankDropdown
+                                    ? bankSearch
+                                    : selectedBank
+                                    ? `(${selectedBank.short_name}) ${selectedBank.name}`
+                                    : ''
+                                }
                                 onChange={(e) => {
                                   setBankSearch(e.target.value);
                                   setShowBankDropdown(true);
@@ -262,7 +269,9 @@ const SignUpPage = () => {
                                 onFocus={() => {
                                   setShowBankDropdown(true);
                                   if (selectedBank) {
-                                    setBankSearch(`${selectedBank.code} ${selectedBank.name}`);
+                                    setBankSearch(
+                                      `${selectedBank.short_name} ${selectedBank.name}`,
+                                    );
                                   }
                                 }}
                                 className="text-white w-full px-4 py-3 pr-10 rounded-lg bg-black border text-sm focus:outline-none"
@@ -278,7 +287,9 @@ const SignUpPage = () => {
                                       setSelectedBank(null);
                                       setBankSearch('');
                                       setShowBankDropdown(false);
-                                      setValue('bankCode', '', { shouldValidate: true });
+                                      setValue('bankCode', '', {
+                                        shouldValidate: true,
+                                      });
                                     }}
                                     className="text-gray-400 hover:text-gray-300 text-xl leading-none w-6 h-6 flex items-center justify-center"
                                     disabled={loading}
@@ -298,16 +309,17 @@ const SignUpPage = () => {
                                 />
                                 <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                   {banks
-                                    .filter((bank: any) =>
-                                      bank.name
-                                        .toLowerCase()
-                                        .includes(bankSearch.toLowerCase()) ||
-                                      bank.code
-                                        .toLowerCase()
-                                        .includes(bankSearch.toLowerCase()) ||
-                                      bank.short_name
-                                        ?.toLowerCase()
-                                        .includes(bankSearch.toLowerCase())
+                                    .filter(
+                                      (bank: any) =>
+                                        bank.name
+                                          .toLowerCase()
+                                          .includes(bankSearch.toLowerCase()) ||
+                                        bank.code
+                                          .toLowerCase()
+                                          .includes(bankSearch.toLowerCase()) ||
+                                        bank.short_name
+                                          ?.toLowerCase()
+                                          .includes(bankSearch.toLowerCase()),
                                     )
                                     .map((bank: any, index: number) => (
                                       <button
@@ -315,7 +327,9 @@ const SignUpPage = () => {
                                         type="button"
                                         onClick={() => {
                                           setSelectedBank(bank);
-                                          setBankSearch(`${bank.code} ${bank.name}`);
+                                          setBankSearch(
+                                            `${bank.code} ${bank.name}`,
+                                          );
                                           setShowBankDropdown(false);
                                           // Update form value
                                           setValue('bankCode', bank.code, {
@@ -329,21 +343,22 @@ const SignUpPage = () => {
                                         }`}
                                       >
                                         <span className="font-semibold">
-                                          ({bank.code})
+                                          ({bank.short_name})
                                         </span>{' '}
                                         {bank.name}
                                       </button>
                                     ))}
-                                  {banks.filter((bank: any) =>
-                                    bank.name
-                                      .toLowerCase()
-                                      .includes(bankSearch.toLowerCase()) ||
-                                    bank.code
-                                      .toLowerCase()
-                                      .includes(bankSearch.toLowerCase()) ||
-                                    bank.short_name
-                                      ?.toLowerCase()
-                                      .includes(bankSearch.toLowerCase())
+                                  {banks.filter(
+                                    (bank: any) =>
+                                      bank.name
+                                        .toLowerCase()
+                                        .includes(bankSearch.toLowerCase()) ||
+                                      bank.code
+                                        .toLowerCase()
+                                        .includes(bankSearch.toLowerCase()) ||
+                                      bank.short_name
+                                        ?.toLowerCase()
+                                        .includes(bankSearch.toLowerCase()),
                                   ).length === 0 && (
                                     <div className="px-4 py-2 text-sm text-gray-500 text-center">
                                       {t('No banks found') || 'No banks found'}
@@ -395,7 +410,9 @@ const SignUpPage = () => {
                             <DateInput
                               register={register}
                               name="dateOfBirth"
-                              rules={{ required: t('date of birth is required') as any }}
+                              rules={{
+                                required: t('date of birth is required') as any,
+                              }}
                               className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
                               placeholder={`${t('date of birth')} (DD/MM/YYYY)`}
                               disabled={loading}
@@ -560,7 +577,7 @@ const SignUpPage = () => {
                               to="/signin"
                               className="text-dreamchain hover:underline"
                             >
-                              {t('signin')}
+                              {t('signin.title')}
                             </Link>
                           </p>
                         </form>
@@ -617,7 +634,7 @@ const SignUpPage = () => {
                     d="M21,11H5.41l5.3-5.29A1,1,0,1,0,9.29,4.29l-7,7a1,1,0,0,0,0,1.42l7,7a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42L5.41,13H21a1,1,0,0,0,0-2Z"
                   ></path>
                 </svg>
-                Back to Homepage
+                {t('Back to Homepage')}
               </Link>
             </div>
           </div>

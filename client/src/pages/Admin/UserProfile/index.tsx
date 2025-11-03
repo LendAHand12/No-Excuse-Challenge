@@ -1390,7 +1390,14 @@ const UserProfile = () => {
                       ) : (
                         <div className="px-4 py-2">
                           {data.dateOfBirth
-                            ? new Date(data.dateOfBirth).toLocaleDateString()
+                            ? new Date(data.dateOfBirth).toLocaleDateString(
+                                'vi-Vn',
+                                {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                },
+                              )
                             : '-'}
                         </div>
                       )}
