@@ -721,13 +721,28 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 
   const userHavePhone = await User.find({
-    $and: [{ phone: `+${phone}` }, { userId: { $ne: user.userId } }, { isAdmin: false }],
+    $and: [
+      { phone: `+${phone}` },
+      { userId: { $ne: user.userId } },
+      { isAdmin: false },
+      { status: { $ne: "DELETED" } },
+    ],
   });
   const userHaveWalletAddress = await User.find({
-    $and: [{ walletAddress }, { userId: { $ne: user.userId } }, { isAdmin: false }],
+    $and: [
+      { walletAddress },
+      { userId: { $ne: user.userId } },
+      { isAdmin: false },
+      { status: { $ne: "DELETED" } },
+    ],
   });
   const userHaveEmail = await User.find({
-    $and: [{ email }, { userId: { $ne: user.userId } }, { isAdmin: false }],
+    $and: [
+      { email },
+      { userId: { $ne: user.userId } },
+      { isAdmin: false },
+      { status: { $ne: "DELETED" } },
+    ],
   });
 
   console.log({
