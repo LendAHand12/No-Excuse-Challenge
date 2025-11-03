@@ -28,6 +28,22 @@ const claimSchema = mongoose.Schema(
       type: Number,
       // Số dư USDT còn lại sau khi rút (chỉ cho USDT)
     },
+    tax: {
+      type: Number,
+      // Thuế (10% của số tiền rút)
+    },
+    fee: {
+      type: Number,
+      // Phí giao dịch (1 USDT)
+    },
+    exchangeRate: {
+      type: Number,
+      // Tỷ giá quy đổi USDT sang VND (chỉ cho BANK withdrawal)
+    },
+    receivedAmount: {
+      type: Number,
+      // Số tiền thực tế nhận được (VND cho BANK, USDT cho CRYPTO)
+    },
   },
   { timestamps: true }
 );

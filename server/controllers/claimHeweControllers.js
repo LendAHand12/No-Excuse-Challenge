@@ -106,27 +106,32 @@ const claimUsdt = asyncHandler(async (req, res) => {
           throw new Error("Please update your bank information in Profile");
         }
 
-        // Calculate amounts
+        // Calculate amounts - Tất cả tính bằng USDT
         const rate = parseFloat(exchangeRate) || 0;
         if (!rate || rate <= 0) {
           throw new Error("Invalid exchange rate");
         }
 
-        const totalVND = parseFloat(amount) * rate;
-        const tax = totalVND * 0.1; // 10% tax
-        const receivedAmount = totalVND - tax;
+        const amountUsdt = parseFloat(amount);
+        const tax = amountUsdt * 0.1; // 10% tax (USDT)
+        const fee = 1; // Transaction fee 1 USDT
+        const receivedAmount = amountUsdt - tax - fee; // Số tiền thực tế nhận được (USDT)
+
+        if (receivedAmount <= 0) {
+          throw new Error("Amount is too small after fees");
+        }
 
         // Create withdraw request
-        // Làm tròn xuống đến hàng đơn vị (bỏ phần thập phân) để đảm bảo số tiền chuyển khoản được
-        // Chỉ lưu userId và các giá trị tính toán (exchangeRate, receivedAmount, tax)
-        // Thông tin ngân hàng sẽ lấy từ user khi hiển thị QR code
+        // Lưu tất cả giá trị bằng USDT, chỉ lưu thêm exchangeRate
+        // Khi hiển thị sẽ tính VND từ USDT * exchangeRate
         await Withdraw.create({
           userId: user.id,
-          amount: parseInt(amount),
+          amount: amountUsdt, // Số tiền user yêu cầu (USDT)
           withdrawalType: "BANK",
           exchangeRate: rate,
-          receivedAmount: Math.floor(receivedAmount),
-          tax: Math.floor(tax),
+          tax: tax, // Thuế (USDT)
+          fee: fee, // Phí giao dịch (USDT)
+          receivedAmount: receivedAmount, // Số tiền thực tế nhận được (USDT)
         });
 
         user.availableUsdt -= parseInt(amount);
@@ -136,39 +141,53 @@ const claimUsdt = asyncHandler(async (req, res) => {
           message: "Withdrawal request has been sent to Admin. Please wait!",
         });
       } else {
-        // CRYPTO withdrawal: Logic như cũ
+        // CRYPTO withdrawal: Trừ thuế 10% và phí 1 USDT
+        const amountUsdt = parseFloat(amount);
+        const tax = amountUsdt * 0.1; // 10% tax
+        const fee = 1; // Transaction fee 1 USDT
+        const actualAmount = amountUsdt - tax - fee; // Số tiền thực tế gửi cho user
+
+        if (actualAmount <= 0) {
+          throw new Error("Amount is too small after fees");
+        }
+
         if (parseInt(amount) < 200 && user.paymentMethod === "") {
-          // Gửi trực tiếp USDT
+          // Gửi trực tiếp USDT (số tiền thực tế sau khi trừ thuế và phí)
           const receipt = await sendUsdt({
-            amount: amount - 1,
+            amount: actualAmount,
             receiverAddress: user.walletAddress,
           });
 
-          user.claimedUsdt += parseInt(amount);
-          user.availableUsdt -= parseInt(amount);
+          user.claimedUsdt += parseInt(amount); // Số tiền claim là số tiền user yêu cầu
+          user.availableUsdt -= parseInt(amount); // Trừ số tiền user yêu cầu
           await user.save();
 
           // Create claim record after updating balance
           await Claim.create({
             userId: user.id,
-            amount: parseInt(amount),
+            amount: parseInt(amount), // Lưu số tiền user yêu cầu
             hash: receipt.hash,
             coin: "USDT",
             withdrawalType: "CRYPTO",
             availableUsdtAfter: user.availableUsdt, // Lưu số dư còn lại
+            tax: tax, // Lưu thuế
+            fee: fee, // Lưu phí
+            receivedAmount: actualAmount, // Số tiền thực tế nhận được (USDT)
           });
 
           res.status(200).json({ message: "claim USDT successful" });
         } else {
           // Tạo yêu cầu withdraw chờ admin xử lý
-          // Chỉ lưu userId, thông tin khác lấy từ user khi hiển thị
           await Withdraw.create({
             userId: user.id,
-            amount: parseInt(amount),
+            amount: parseInt(amount), // Số tiền user yêu cầu
             withdrawalType: "CRYPTO",
+            tax: tax, // Lưu thuế để admin xử lý
+            fee: fee, // Lưu phí để admin xử lý
+            actualAmount: actualAmount, // Số tiền thực tế cần gửi
           });
 
-          user.availableUsdt -= parseInt(amount);
+          user.availableUsdt -= parseInt(amount); // Trừ số tiền user yêu cầu
           await user.save();
 
           res.status(200).json({
@@ -367,7 +386,7 @@ const getAllClaims = asyncHandler(async (req, res) => {
     { $sort: { createdAt: -1 } },
     { $skip: pageSize * (page - 1) },
     { $limit: pageSize },
-      {
+    {
       $project: {
         _id: 1,
         coin: 1,
@@ -487,7 +506,7 @@ const getAllClaimsOfUser = asyncHandler(async (req, res) => {
     { $sort: { createdAt: -1 } },
     { $skip: pageSize * (page - 1) },
     { $limit: pageSize },
-      {
+    {
       $project: {
         _id: 1,
         coin: 1,
@@ -495,6 +514,10 @@ const getAllClaimsOfUser = asyncHandler(async (req, res) => {
         hash: 1,
         withdrawalType: 1,
         availableUsdtAfter: 1,
+        tax: 1,
+        fee: 1,
+        exchangeRate: 1,
+        receivedAmount: 1,
         createdAt: 1,
         userInfo: {
           _id: 1,

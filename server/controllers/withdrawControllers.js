@@ -59,6 +59,7 @@ const getAllWithdraws = asyncHandler(async (req, res) => {
         exchangeRate: 1,
         receivedAmount: 1,
         tax: 1,
+        fee: 1,
         transferContent: 1,
         processedBy: 1,
         processedAt: 1,
@@ -169,10 +170,20 @@ const updateWithdraw = asyncHandler(async (req, res) => {
           hash: claimHash,
           withdrawalType: "BANK",
           availableUsdtAfter: user.availableUsdt, // Lưu số dư còn lại
+          tax: withdraw.tax || 0, // Thuế (USDT)
+          fee: withdraw.fee || 0, // Phí giao dịch (USDT)
+          exchangeRate: withdraw.exchangeRate || 0, // Tỷ giá quy đổi
+          receivedAmount: withdraw.receivedAmount || 0, // Số tiền thực tế nhận được (USDT)
         });
       } else {
         // Crypto withdrawal: Update claimed USDT
         user.claimedUsdt = user.claimedUsdt + withdraw.amount;
+        
+        // Calculate receivedAmount for CRYPTO withdrawal
+        const amountUsdt = withdraw.amount || 0;
+        const tax = withdraw.tax || 0;
+        const fee = withdraw.fee || 0;
+        const receivedAmount = amountUsdt - tax - fee; // Số tiền thực tế nhận được (USDT)
         
         // Create claim record for crypto withdrawal
         // Use transaction hash from blockchain
@@ -184,6 +195,9 @@ const updateWithdraw = asyncHandler(async (req, res) => {
           hash: claimHash,
           withdrawalType: "CRYPTO",
           availableUsdtAfter: user.availableUsdt, // Lưu số dư còn lại
+          tax: tax, // Thuế (USDT)
+          fee: fee, // Phí giao dịch (USDT)
+          receivedAmount: receivedAmount, // Số tiền thực tế nhận được (USDT)
         });
       }
     }

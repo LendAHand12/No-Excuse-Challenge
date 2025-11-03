@@ -15,7 +15,7 @@ export default function WithdrawModal({
 }) {
   const { t } = useTranslation();
   const [amount, setAmount] = useState('');
-  const [withdrawalType, setWithdrawalType] = useState('CRYPTO'); // CRYPTO or BANK
+  const [withdrawalType, setWithdrawalType] = useState('BANK'); // CRYPTO or BANK
   const [exchangeRate, setExchangeRate] = useState(0);
   const [loadingRate, setLoadingRate] = useState(false);
 
@@ -50,19 +50,64 @@ export default function WithdrawModal({
     }
   };
 
+  const calculateCryptoAmount = () => {
+    if (!amount) return { amount: 0, tax: 0, fee: 0, received: 0 };
+    const amountUsdt = Number(amount);
+    const tax = amountUsdt * 0.1; // 10% tax
+    const fee = 1; // Transaction fee 1 USDT
+    const received = amountUsdt - tax - fee;
+    return {
+      amount: amountUsdt.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+      tax: tax.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+      fee: fee.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+      received:
+        received > 0
+          ? received.toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })
+          : '0.00',
+      amountValue: amountUsdt,
+      taxValue: tax,
+      feeValue: fee,
+      receivedValue: Math.max(0, received),
+    };
+  };
+
   const calculateBankAmount = () => {
-    if (!amount || !exchangeRate) return { total: 0, tax: 0, received: 0 };
-    const totalVND = Number(amount) * exchangeRate;
-    const tax = totalVND * 0.1; // 10% tax
-    const received = totalVND - tax;
+    if (!amount || !exchangeRate)
+      return { total: 0, tax: 0, fee: 0, received: 0 };
+    // Calculate all values in USDT first
+    const amountUsdt = Number(amount);
+    const taxUsdt = amountUsdt * 0.1; // 10% tax (USDT)
+    const feeUsdt = 1; // Transaction fee 1 USDT
+    const receivedUsdt = amountUsdt - taxUsdt - feeUsdt; // Received amount (USDT)
+
+    // Convert to VND for display
+    const totalVND = amountUsdt * exchangeRate;
+    const taxVND = taxUsdt * exchangeRate;
+    const feeVND = feeUsdt * exchangeRate;
+    const receivedVND = receivedUsdt * exchangeRate;
+
     // Làm tròn xuống đến hàng đơn vị (bỏ phần thập phân)
     return {
       total: Math.floor(totalVND).toLocaleString('vi-VN'),
-      tax: Math.floor(tax).toLocaleString('vi-VN'),
-      received: Math.floor(received).toLocaleString('vi-VN'),
+      tax: Math.floor(taxVND).toLocaleString('vi-VN'),
+      fee: Math.floor(feeVND).toLocaleString('vi-VN'),
+      received: Math.floor(receivedVND).toLocaleString('vi-VN'),
       totalValue: Math.floor(totalVND),
-      taxValue: Math.floor(tax),
-      receivedValue: Math.floor(received),
+      taxValue: Math.floor(taxVND),
+      feeValue: Math.floor(feeVND),
+      receivedValue: Math.floor(receivedVND),
     };
   };
 
@@ -75,6 +120,7 @@ export default function WithdrawModal({
     );
   };
 
+  const cryptoAmount = calculateCryptoAmount();
   const bankAmount = calculateBankAmount();
 
   return (
@@ -101,7 +147,9 @@ export default function WithdrawModal({
       <div className="w-full bg-gray-900 rounded-xl shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center p-5 border-b border-gray-700">
-          <h3 className="text-lg font-semibold text-white">{t('withdrawModal.title')}</h3>
+          <h3 className="text-lg font-semibold text-white">
+            {t('withdrawModal.title')}
+          </h3>
           <button
             onClick={closeModal}
             className="text-gray-400 hover:text-gray-200 transition"
@@ -130,7 +178,7 @@ export default function WithdrawModal({
               {t('withdrawModal.withdrawalMethod')}
             </label>
             <div className="flex gap-2">
-              <button
+              {/* <button
                 type="button"
                 onClick={() => setWithdrawalType('CRYPTO')}
                 className={`flex-1 px-4 py-2 rounded-lg border transition ${
@@ -140,7 +188,7 @@ export default function WithdrawModal({
                 }`}
               >
                 {t('withdrawModal.cryptoWallet')}
-              </button>
+              </button> */}
               <button
                 type="button"
                 onClick={() => setWithdrawalType('BANK')}
@@ -158,7 +206,9 @@ export default function WithdrawModal({
           {/* Bank Withdrawal Notice */}
           {withdrawalType === 'BANK' && (
             <div className="w-full bg-blue-900 border border-blue-700 rounded-lg p-3 text-blue-200 text-sm">
-              <p className="font-semibold mb-1">{t('withdrawModal.bankProcessingNotice')}</p>
+              <p className="font-semibold mb-1">
+                {t('withdrawModal.bankProcessingNotice')}
+              </p>
               <p>{t('withdrawModal.bankProcessingNoticeDesc')}</p>
             </div>
           )}
@@ -166,7 +216,9 @@ export default function WithdrawModal({
           {/* Bank Info Validation */}
           {withdrawalType === 'BANK' && !hasBankInfo() && (
             <div className="w-full bg-yellow-900 border border-yellow-700 rounded-lg p-3 text-yellow-200 text-sm">
-              <p className="font-semibold mb-1">{t('withdrawModal.bankInfoRequired')}</p>
+              <p className="font-semibold mb-1">
+                {t('withdrawModal.bankInfoRequired')}
+              </p>
               <p>{t('withdrawModal.bankInfoRequiredDesc')}</p>
             </div>
           )}
@@ -188,26 +240,79 @@ export default function WithdrawModal({
             />
           </div>
 
+          {/* Crypto Amount Display */}
+          {withdrawalType === 'CRYPTO' && amount && (
+            <div className="w-full bg-gray-800 border border-gray-700 rounded-lg p-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">
+                  {t('withdrawModal.withdrawalAmount')}:
+                </span>
+                <span className="text-white font-semibold">
+                  {cryptoAmount.amount} USDT
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">{t('withdrawModal.tax')}:</span>
+                <span className="text-red-400">-{cryptoAmount.tax} USDT</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">
+                  {t('withdrawModal.transactionFee')}:
+                </span>
+                <span className="text-red-400">-{cryptoAmount.fee} USDT</span>
+              </div>
+              <div className="border-t border-gray-700 pt-2 mt-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-300 font-semibold">
+                    {t('withdrawModal.youWillReceive')}:
+                  </span>
+                  <span className="text-green-400 font-bold text-lg">
+                    {cryptoAmount.received} USDT
+                  </span>
+                </div>
+              </div>
+              {(cryptoAmount.receivedValue ?? 0) <= 0 && (
+                <div className="mt-2 text-yellow-400 text-xs">
+                  {t('withdrawModal.amountTooSmall')}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Bank Amount Display */}
           {withdrawalType === 'BANK' && amount && hasBankInfo() && (
             <div className="w-full bg-gray-800 border border-gray-700 rounded-lg p-4 space-y-2">
               {loadingRate ? (
-                <p className="text-gray-400 text-sm">{t('withdrawModal.loadingExchangeRate')}</p>
+                <p className="text-gray-400 text-sm">
+                  {t('withdrawModal.loadingExchangeRate')}
+                </p>
               ) : (
                 <>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">{t('withdrawModal.exchangeRate')}:</span>
+                    <span className="text-gray-400">
+                      {t('withdrawModal.exchangeRate')}:
+                    </span>
                     <span className="text-white font-semibold">
                       1 USDT = {exchangeRate.toLocaleString('vi-VN')} VND
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">{t('withdrawModal.totalAmount')}:</span>
+                    <span className="text-gray-400">
+                      {t('withdrawModal.totalAmount')}:
+                    </span>
                     <span className="text-white">{bankAmount.total} VND</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">{t('withdrawModal.tax')}:</span>
+                    <span className="text-gray-400">
+                      {t('withdrawModal.tax')}:
+                    </span>
                     <span className="text-red-400">-{bankAmount.tax} VND</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-400">
+                      {t('withdrawModal.transactionFee')} (1 USDT):
+                    </span>
+                    <span className="text-red-400">-{bankAmount.fee} VND</span>
                   </div>
                   <div className="border-t border-gray-700 pt-2 mt-2">
                     <div className="flex justify-between">
@@ -219,6 +324,11 @@ export default function WithdrawModal({
                       </span>
                     </div>
                   </div>
+                  {(bankAmount.receivedValue ?? 0) <= 0 && (
+                    <div className="mt-2 text-yellow-400 text-xs">
+                      {t('withdrawModal.amountTooSmall')}
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -236,13 +346,21 @@ export default function WithdrawModal({
           </button>
           <button
             onClick={() =>
-              claimUsdt(amount, withdrawalType, withdrawalType === 'BANK' ? exchangeRate : null)
+              claimUsdt(
+                amount,
+                withdrawalType,
+                withdrawalType === 'BANK' ? exchangeRate : null,
+              )
             }
             disabled={
               loadingClaimUsdt ||
               !amount ||
               (withdrawalType === 'BANK' && !hasBankInfo()) ||
-              (withdrawalType === 'BANK' && loadingRate)
+              (withdrawalType === 'BANK' && loadingRate) ||
+              (withdrawalType === 'CRYPTO' &&
+                (cryptoAmount.receivedValue ?? 0) <= 0) ||
+              (withdrawalType === 'BANK' &&
+                (bankAmount.receivedValue ?? 0) <= 0)
             }
             className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
           >

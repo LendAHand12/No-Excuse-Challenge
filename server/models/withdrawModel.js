@@ -42,7 +42,13 @@ const withdrawSchema = mongoose.Schema(
       type: Number, // Amount in VND after tax
     },
     tax: {
-      type: Number, // Tax amount (10% of USDT amount * exchangeRate)
+      type: Number, // Tax amount (10% of USDT amount * exchangeRate for BANK, or 10% of amount for CRYPTO)
+    },
+    fee: {
+      type: Number, // Transaction fee (1 USDT converted to VND for BANK, or 1 USDT for CRYPTO)
+    },
+    actualAmount: {
+      type: Number, // Actual amount to send after tax and fee (for CRYPTO only)
     },
     // Admin processing info
     qrCode: {
