@@ -471,14 +471,14 @@ const getUserAssets = asyncHandler(async (req, res) => {
     claimedHewe: claimedHewe,
     withdrawPending: withdrawPending,
     tier: user.tier || 1,
-    status: user.status || '',
-    facetecTid: user.facetecTid || '',
-    errLahCode: user.errLahCode || '',
+    status: user.status || "",
+    facetecTid: user.facetecTid || "",
+    errLahCode: user.errLahCode || "",
     // Bank information for withdrawal check
-    accountName: user.accountName || '',
-    accountNumber: user.accountNumber || '',
-    bankCode: user.bankCode || '',
-    bankName: user.bankName || '',
+    accountName: user.accountName || "",
+    accountNumber: user.accountNumber || "",
+    bankCode: user.bankCode || "",
+    bankName: user.bankName || "",
   });
 });
 
@@ -704,9 +704,16 @@ const updateUser = asyncHandler(async (req, res) => {
     dateOfBirth,
   } = req.body;
 
-  console.log({ bankName, bankCode, accountName, accountNumber, dateOfBirth });
-
   const user = await User.findOne({ _id: req.params.id }).select("-password");
+
+  console.log({
+    userId: user?.userId || "",
+    bankName,
+    bankCode,
+    accountName,
+    accountNumber,
+    dateOfBirth,
+  });
 
   if (!user) {
     res.status(400).json({ error: "User not found" });
@@ -721,6 +728,12 @@ const updateUser = asyncHandler(async (req, res) => {
   });
   const userHaveEmail = await User.find({
     $and: [{ email }, { userId: { $ne: user.userId } }, { isAdmin: false }],
+  });
+
+  console.log({
+    userHavePhone,
+    userHaveWalletAddress,
+    userHaveEmail,
   });
 
   if (userHavePhone.length >= 1 || userHaveWalletAddress.length >= 1 || userHaveEmail.length >= 1) {
@@ -761,27 +774,29 @@ const updateUser = asyncHandler(async (req, res) => {
     // Helper function to parse date from DD/MM/YYYY format
     const parseDateOfBirth = (dateString) => {
       if (!dateString) return null;
-      
+
       // If it's already a Date object, return it
       if (dateString instanceof Date) {
         return isNaN(dateString.getTime()) ? null : dateString;
       }
-      
+
       const str = dateString.toString().trim();
-      
+
       // Try to parse DD/MM/YYYY format
       const ddMmYyyyMatch = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
       if (ddMmYyyyMatch) {
         const [, day, month, year] = ddMmYyyyMatch;
         const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
         // Validate date
-        if (date.getFullYear() === parseInt(year) && 
-            date.getMonth() === parseInt(month) - 1 && 
-            date.getDate() === parseInt(day)) {
+        if (
+          date.getFullYear() === parseInt(year) &&
+          date.getMonth() === parseInt(month) - 1 &&
+          date.getDate() === parseInt(day)
+        ) {
           return date;
         }
       }
-      
+
       // Try ISO format (YYYY-MM-DD)
       const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
       if (isoMatch) {
@@ -791,7 +806,7 @@ const updateUser = asyncHandler(async (req, res) => {
           return date;
         }
       }
-      
+
       // Fallback to default Date parsing
       const date = new Date(str);
       return isNaN(date.getTime()) ? null : date;
@@ -847,7 +862,7 @@ const updateUser = asyncHandler(async (req, res) => {
           if (field === "phone") {
             user[field] = normalizedNew; // Store with + prefix
           } else if (field === "dateOfBirth") {
-            console.log({newValue: moment(newValue, "DD/MM/YYYY").toISOString()});
+            console.log({ newValue: moment(newValue, "DD/MM/YYYY").toISOString() });
             user[field] = moment(newValue, "DD/MM/YYYY").toISOString();
           } else {
             user[field] = newValue;
