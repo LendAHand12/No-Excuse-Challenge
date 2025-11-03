@@ -189,8 +189,11 @@ const AdminWithdrawPages = () => {
     // Lấy thông tin ngân hàng từ userInfo
     const acc = currentApproveRequest?.userInfo?.accountNumber;
     const bank = currentApproveRequest?.userInfo?.bankCode;
-    // Sử dụng receivedAmount đã lưu lúc tạo yêu cầu (không tính toán lại)
-    const amount = currentApproveRequest?.receivedAmount || 0;
+    
+    // Tính số tiền VND cần chuyển: receivedAmount (USDT) * exchangeRate
+    const receivedAmountUsdt = currentApproveRequest?.receivedAmount || 0;
+    const exchangeRate = currentApproveRequest?.exchangeRate || 0;
+    const amount = Math.floor(receivedAmountUsdt * exchangeRate); // VND (làm tròn xuống)
 
     // Use transferContent if available, otherwise generate new orderId
     const des =
