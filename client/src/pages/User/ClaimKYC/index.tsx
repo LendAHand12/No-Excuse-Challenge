@@ -31,7 +31,14 @@ const ClaimKYCPage = () => {
           response = await Claim.hewe({ user_id, token });
         } else if (coin === 'usdt') {
           const claimData: any = { user_id, token, amount };
-          if (withdrawalType) claimData.withdrawalType = withdrawalType;
+          // Chặn CRYPTO withdrawal - chỉ cho phép BANK
+          if (withdrawalType === 'CRYPTO') {
+            toast.error(t('Crypto withdrawal is currently disabled. Please use bank transfer.'));
+            setLoadingClaim(false);
+            return;
+          }
+          // Mặc định là BANK nếu không có withdrawalType
+          claimData.withdrawalType = withdrawalType || 'BANK';
           if (exchangeRate) claimData.exchangeRate = exchangeRate;
           response = await Claim.usdt(claimData);
         } else if (coin === 'amc') {

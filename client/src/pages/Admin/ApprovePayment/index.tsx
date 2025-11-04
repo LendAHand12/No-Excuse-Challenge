@@ -32,12 +32,17 @@ const ApprovePayment = () => {
       const response = await Payment.searchPendingOrder(searchOrderId);
       setOrders(response.data.orders || []);
       setTransactions(response.data.transactions || []);
-      
-      if (response.data.orders.length === 0 && response.data.transactions.length === 0) {
+
+      if (
+        response.data.orders.length === 0 &&
+        response.data.transactions.length === 0
+      ) {
         toast.info(t('approvePayment.info.noOrdersFound'));
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.error || t('approvePayment.errors.searchFailed'));
+      toast.error(
+        error.response?.data?.error || t('approvePayment.errors.searchFailed'),
+      );
     } finally {
       setLoading(false);
     }
@@ -50,7 +55,9 @@ const ApprovePayment = () => {
     }
 
     // Only allow approve if there are pending transactions or pending orders
-    const pendingOrders = orders.filter((order: any) => order.status === 'PENDING');
+    const pendingOrders = orders.filter(
+      (order: any) => order.status === 'PENDING',
+    );
     const hasPendingItems = transactions.length > 0 || pendingOrders.length > 0;
 
     if (!hasPendingItems) {
@@ -83,15 +90,17 @@ const ApprovePayment = () => {
       }
 
       toast.success(t('approvePayment.success.approved'));
-      
+
       // Reset form
       setBankTransactionId('');
       setTransferContent('');
-      
+
       // Refresh search
       await handleSearch();
     } catch (error: any) {
-      toast.error(error.response?.data?.error || t('approvePayment.errors.approveFailed'));
+      toast.error(
+        error.response?.data?.error || t('approvePayment.errors.approveFailed'),
+      );
     } finally {
       setApproving(false);
     }
@@ -111,16 +120,26 @@ const ApprovePayment = () => {
           <CardContent>
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium mb-2">{t('approvePayment.search.orderId')}</label>
-                  <Input
-                    placeholder={t('approvePayment.search.orderIdPlaceholder')}
-                    value={searchOrderId}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchOrderId(e.target.value)}
-                    onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSearch()}
-                  />
+                <label className="block text-sm font-medium mb-2">
+                  {t('approvePayment.search.orderId')}
+                </label>
+                <Input
+                  placeholder={t('approvePayment.search.orderIdPlaceholder')}
+                  value={searchOrderId}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSearchOrderId(e.target.value)
+                  }
+                  onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                    e.key === 'Enter' && handleSearch()
+                  }
+                />
               </div>
               <div className="flex items-end">
-                <Button onClick={handleSearch} disabled={loading} className="text-white">
+                <Button
+                  onClick={handleSearch}
+                  disabled={loading}
+                  className="text-white"
+                >
                   <Search className="w-4 h-4 mr-2" />
                   {t('approvePayment.search.button')}
                 </Button>
@@ -153,7 +172,9 @@ const ApprovePayment = () => {
                     className="p-4 border border-gray-200 rounded-lg"
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="font-semibold">{t('approvePayment.orders.orderId')}: {order.orderId}</span>
+                      <span className="font-semibold">
+                        {t('approvePayment.orders.orderId')}: {order.orderId}
+                      </span>
                       <Badge
                         variant="outline"
                         className={
@@ -173,25 +194,38 @@ const ApprovePayment = () => {
                     </div>
                     <div className="text-sm text-gray-600 space-y-1">
                       <p>
-                        <strong>{t('approvePayment.orders.user')}:</strong> {order.userId?.userId || order.userId}
+                        <strong>{t('approvePayment.orders.user')}:</strong>{' '}
+                        {order.userId?.userId || order.userId}
                       </p>
                       <p>
-                        <strong>{t('approvePayment.orders.email')}:</strong> {order.userId?.email || t('approvePayment.common.notAvailable')}
+                        <strong>{t('approvePayment.orders.email')}:</strong>{' '}
+                        {order.userId?.email ||
+                          t('approvePayment.common.notAvailable')}
                       </p>
                       <p>
-                        <strong>{t('approvePayment.orders.phone')}:</strong> {order.userId?.phone || t('approvePayment.common.notAvailable')}
+                        <strong>{t('approvePayment.orders.phone')}:</strong>{' '}
+                        {order.userId?.phone ||
+                          t('approvePayment.common.notAvailable')}
                       </p>
                       <p>
-                        <strong>{t('approvePayment.orders.amount')}:</strong> {order.amount} VND
+                        <strong>{t('approvePayment.orders.amount')}:</strong>{' '}
+                        {order.amount} VND
                       </p>
                       {order.transferContent && (
                         <p>
-                          <strong>{t('approvePayment.orders.transferContent')}:</strong> {order.transferContent}
+                          <strong>
+                            {t('approvePayment.orders.transferContent')}:
+                          </strong>{' '}
+                          {order.transferContent}
                         </p>
                       )}
                       <p>
                         <strong>{t('approvePayment.orders.created')}:</strong>{' '}
-                        {new Date(order.createdAt).toLocaleString()}
+                        {new Date(order.createdAt).toLocaleDateString('vi-Vn', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                        })}
                       </p>
                     </div>
                   </div>
@@ -205,7 +239,11 @@ const ApprovePayment = () => {
         {!loading && transactions.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>{t('approvePayment.transactions.title', { count: transactions.length })}</CardTitle>
+              <CardTitle>
+                {t('approvePayment.transactions.title', {
+                  count: transactions.length,
+                })}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
@@ -235,13 +273,21 @@ const ApprovePayment = () => {
                     </div>
                     <div className="text-sm text-gray-600 space-y-1">
                       <p>
-                        <strong>{t('approvePayment.transactions.amount')}:</strong> {trans.amount} USDT
+                        <strong>
+                          {t('approvePayment.transactions.amount')}:
+                        </strong>{' '}
+                        {trans.amount} USDT
                       </p>
                       <p>
-                        <strong>{t('approvePayment.transactions.to')}:</strong> {trans.userId_to?.userId || trans.username_to || t('approvePayment.common.notAvailable')}
+                        <strong>{t('approvePayment.transactions.to')}:</strong>{' '}
+                        {trans.userId_to?.userId ||
+                          trans.username_to ||
+                          t('approvePayment.common.notAvailable')}
                       </p>
                       <p>
-                        <strong>{t('approvePayment.transactions.created')}:</strong>{' '}
+                        <strong>
+                          {t('approvePayment.transactions.created')}:
+                        </strong>{' '}
                         {new Date(trans.createdAt).toLocaleString()}
                       </p>
                     </div>
@@ -253,59 +299,73 @@ const ApprovePayment = () => {
         )}
 
         {/* Approve Section - Only show if there are pending transactions or pending orders */}
-        {!loading && (transactions.length > 0 || orders.some((order: any) => order.status === 'PENDING')) && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('approvePayment.approve.title')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    {t('approvePayment.approve.bankTransactionId')} <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    placeholder={t('approvePayment.approve.bankTransactionIdPlaceholder')}
-                    value={bankTransactionId}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBankTransactionId(e.target.value)}
-                    required
-                  />
-                </div>
+        {!loading &&
+          (transactions.length > 0 ||
+            orders.some((order: any) => order.status === 'PENDING')) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('approvePayment.approve.title')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      {t('approvePayment.approve.bankTransactionId')}{' '}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      placeholder={t(
+                        'approvePayment.approve.bankTransactionIdPlaceholder',
+                      )}
+                      value={bankTransactionId}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setBankTransactionId(e.target.value)
+                      }
+                      required
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    {t('approvePayment.approve.transferContent')}
-                  </label>
-                  <Input
-                    placeholder={t('approvePayment.approve.transferContentPlaceholder')}
-                    value={transferContent}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTransferContent(e.target.value)}
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      {t('approvePayment.approve.transferContent')}
+                    </label>
+                    <Input
+                      placeholder={t(
+                        'approvePayment.approve.transferContentPlaceholder',
+                      )}
+                      value={transferContent}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setTransferContent(e.target.value)
+                      }
+                    />
+                  </div>
 
-                <Button
-                  onClick={handleApprove}
-                  disabled={approving || !bankTransactionId}
-                  className="w-full bg-green-600 hover:bg-green-700"
-                >
-                  {approving ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                      {t('approvePayment.approve.approving')}
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      {t('approvePayment.approve.button', { 
-                        count: orders.filter((order: any) => order.status === 'PENDING').length + transactions.length 
-                      })}
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                  <Button
+                    onClick={handleApprove}
+                    disabled={approving || !bankTransactionId}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                  >
+                    {approving ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        {t('approvePayment.approve.approving')}
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        {t('approvePayment.approve.button', {
+                          count:
+                            orders.filter(
+                              (order: any) => order.status === 'PENDING',
+                            ).length + transactions.length,
+                        })}
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
         {!loading && orders.length === 0 && transactions.length === 0 && (
           <NoContent message={t('approvePayment.noContent')} />
@@ -316,5 +376,3 @@ const ApprovePayment = () => {
 };
 
 export default ApprovePayment;
-
-

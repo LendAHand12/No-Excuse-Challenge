@@ -1619,7 +1619,6 @@ const getListChildOfUser = asyncHandler(async (req, res) => {
   } else {
     result = await getAllDescendants(parent._id, 1);
   }
-  console.log({ result });
 
   res.json({ userTreeId: parent._id, result });
 });

@@ -61,8 +61,6 @@ export const getUnknowChild = async () => {
       }
     }
   }
-
-  console.log({ result });
 };
 
 export const addBuyPackage = async () => {
@@ -345,7 +343,7 @@ export const resetErrLahCode = async () => {
   for (let u of listUser) {
     console.log({ u: u.userId });
     const oldUser = await UserOld.findById(u._id);
-    if(oldUser) {
+    if (oldUser) {
       u.errLahCode = oldUser.errLahCode;
       u.dieTime = oldUser.dieTime;
       u.timeRetryOver45 = oldUser.timeRetryOver45;
@@ -369,10 +367,7 @@ export const fixParentChildLinks = async () => {
 
       // Nếu parentId của con khác với id của cha → sửa lại
       if (child.parentId !== parent._id.toString()) {
-        await Tree.updateOne(
-          { _id: child._id },
-          { $set: { parentId: parent._id.toString() } }
-        );
+        await Tree.updateOne({ _id: child._id }, { $set: { parentId: parent._id.toString() } });
         fixedCount++;
       }
     }

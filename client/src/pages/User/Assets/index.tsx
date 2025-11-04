@@ -155,7 +155,7 @@ export default function UserAssetsPage() {
 
   const claimUsdt = async (
     amount: string,
-    withdrawalType: string = 'CRYPTO',
+    withdrawalType: string = 'BANK', // Mặc định là BANK, không cho phép CRYPTO
     exchangeRate: number | null = null,
   ) => {
     setLoadingClaimUsdt(true);

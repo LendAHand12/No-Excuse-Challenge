@@ -76,8 +76,6 @@ const registerUser = asyncHandler(async (req, res) => {
     dateOfBirth,
   } = req.body;
 
-  console.log({ dateOfBirth });
-
   const userExistsUserId = await User.findOne({
     userId: userId,
     status: { $ne: "DELETED" },

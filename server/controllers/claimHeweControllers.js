@@ -97,7 +97,12 @@ const claimUsdt = asyncHandler(async (req, res) => {
 
     // Bước 3: Check balance
     if (user.availableUsdt > 0 && user.availableUsdt >= parseInt(amount)) {
-      const withdrawType = withdrawalType || "CRYPTO";
+      const withdrawType = withdrawalType || "BANK"; // Mặc định là BANK, không cho phép CRYPTO
+
+      // Chặn CRYPTO withdrawal - chỉ cho phép BANK withdrawal
+      if (withdrawType === "CRYPTO") {
+        throw new Error("Crypto withdrawal is currently disabled. Please use bank transfer.");
+      }
 
       // BANK withdrawal: Always create withdraw request
       if (withdrawType === "BANK") {
@@ -141,59 +146,9 @@ const claimUsdt = asyncHandler(async (req, res) => {
           message: "Withdrawal request has been sent to Admin. Please wait!",
         });
       } else {
-        // CRYPTO withdrawal: Trừ thuế 10% và phí 1 USDT
-        const amountUsdt = parseFloat(amount);
-        const tax = amountUsdt * 0.1; // 10% tax
-        const fee = 1; // Transaction fee 1 USDT
-        const actualAmount = amountUsdt - tax - fee; // Số tiền thực tế gửi cho user
-
-        if (actualAmount <= 0) {
-          throw new Error("Amount is too small after fees");
-        }
-
-        if (parseInt(amount) < 200 && user.paymentMethod === "") {
-          // Gửi trực tiếp USDT (số tiền thực tế sau khi trừ thuế và phí)
-          const receipt = await sendUsdt({
-            amount: actualAmount,
-            receiverAddress: user.walletAddress,
-          });
-
-          user.claimedUsdt += parseInt(amount); // Số tiền claim là số tiền user yêu cầu
-          user.availableUsdt -= parseInt(amount); // Trừ số tiền user yêu cầu
-          await user.save();
-
-          // Create claim record after updating balance
-          await Claim.create({
-            userId: user.id,
-            amount: parseInt(amount), // Lưu số tiền user yêu cầu
-            hash: receipt.hash,
-            coin: "USDT",
-            withdrawalType: "CRYPTO",
-            availableUsdtAfter: user.availableUsdt, // Lưu số dư còn lại
-            tax: tax, // Lưu thuế
-            fee: fee, // Lưu phí
-            receivedAmount: actualAmount, // Số tiền thực tế nhận được (USDT)
-          });
-
-          res.status(200).json({ message: "claim USDT successful" });
-        } else {
-          // Tạo yêu cầu withdraw chờ admin xử lý
-          await Withdraw.create({
-            userId: user.id,
-            amount: parseInt(amount), // Số tiền user yêu cầu
-            withdrawalType: "CRYPTO",
-            tax: tax, // Lưu thuế để admin xử lý
-            fee: fee, // Lưu phí để admin xử lý
-            actualAmount: actualAmount, // Số tiền thực tế cần gửi
-          });
-
-          user.availableUsdt -= parseInt(amount); // Trừ số tiền user yêu cầu
-          await user.save();
-
-          res.status(200).json({
-            message: "Withdrawal request has been sent to Admin. Please wait!",
-          });
-        }
+        // CRYPTO withdrawal đã bị chặn ở trên - không bao giờ đến đây
+        // Giữ lại code này để đảm bảo không có lỗi logic, nhưng sẽ không bao giờ chạy
+        throw new Error("Crypto withdrawal is currently disabled. Please use bank transfer.");
       }
     } else {
       throw new Error("Insufficient balance in account");
@@ -394,6 +349,10 @@ const getAllClaims = asyncHandler(async (req, res) => {
         hash: 1,
         withdrawalType: 1,
         availableUsdtAfter: 1,
+        tax: 1,
+        fee: 1,
+        exchangeRate: 1,
+        receivedAmount: 1,
         createdAt: 1,
         userInfo: {
           _id: 1,

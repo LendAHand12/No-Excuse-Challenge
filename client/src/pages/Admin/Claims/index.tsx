@@ -12,6 +12,13 @@ import DefaultLayout from '../../../layout/DefaultLayout';
 import { shortenWalletAddress } from '../../../utils';
 import { useSelector } from 'react-redux';
 import CustomPagination from '../../../components/CustomPagination';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const AdminClaimsPage = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -23,12 +30,13 @@ const AdminClaimsPage = () => {
   const page = searchParams.get('page') || 1;
   const [keyword, setKeyword] = useState(key);
   const coin = searchParams.get('coin') || '';
+  const [selectedCoin, setSelectedCoin] = useState(coin || 'ALL');
   const [totalPage, setTotalPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   const [objectFilter, setObjectFilter] = useState({
     pageNumber: page,
-    coin,
+    coin: coin === 'ALL' ? '' : coin,
     keyword: key,
   });
 
@@ -73,12 +81,15 @@ const AdminClaimsPage = () => {
   };
 
   const onChangeCoin = useCallback(
-    (e) =>
+    (value) => {
+      const coinValue = value === 'ALL' ? '' : value;
+      setSelectedCoin(value);
       setObjectFilter({
         ...objectFilter,
         pageNumber: 1,
-        coin: e.target.value,
-      }),
+        coin: coinValue,
+      });
+    },
     [objectFilter],
   );
 
@@ -103,26 +114,19 @@ const AdminClaimsPage = () => {
     <DefaultLayout>
       <ToastContainer />
       <div className="py-24 px-10">
-        <div className="relative overflow-x-auto p-10">
-          <div className="flex items-center justify-between pb-4 bg-white">
+        <div className="bg-[#FAFBFC] p-4 rounded-2xl">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
-              <div>
-                <select
-                  className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
-                  onChange={onChangeCoin}
-                  defaultValue={objectFilter.coin}
-                >
-                  <option value="ALL" key="ALL">
-                    All
-                  </option>
-                  <option value="HEWE" key="HEWE">
-                    HEWE
-                  </option>
-                  <option value="USDT" key="USDT">
-                    USDT
-                  </option>
-                </select>
-              </div>
+              <Select value={selectedCoin} onValueChange={onChangeCoin}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filter by coin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All Coins</SelectItem>
+                  <SelectItem value="HEWE">HEWE</SelectItem>
+                  <SelectItem value="USDT">USDT</SelectItem>
+                </SelectContent>
+              </Select>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <svg
@@ -180,80 +184,192 @@ const AdminClaimsPage = () => {
               </div>
             )}
           </div>
-          <table className="w-full text-sm text-left text-gray-500">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3">
-                  Claimer
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Amount
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Coin
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  HasH
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Time
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.length > 0 &&
-                !loading &&
-                data.map((ele) => (
-                  <tr
-                    className="bg-white border-b hover:bg-gray-50"
-                    key={ele._id}
-                  >
-                    <th
-                      scope="row"
-                      className="px-6 py-4 text-gray-900 whitespace-nowrap "
-                    >
-                      <div className="">
-                        <div className="text-base font-semibold">
-                          {ele.userInfo.userId}
-                        </div>
-                        <div className="font-normal text-gray-500">
-                          {ele.userInfo.email}
-                        </div>
-                      </div>
-                    </th>
-                    <td className="px-6 py-4">
-                      {ele.amount} {ele.coin}
-                    </td>
-                    <td className="px-6 py-4">{ele.coin}</td>
-                    <td className="px-6 py-4 text-blue-600 hover:underline">
-                      <a
-                        target="_blank"
-                        href={
-                          ele.coin === 'HEWE'
-                            ? `https://explorer.amchain.net/transactions_detail/${ele.hash}`
-                            : `https://bscscan.com/tx/${ele.hash}`
-                        }
-                      >
-                        {shortenWalletAddress(ele.hash, 20)}
-                      </a>
-                    </td>
-                    <td className="px-6 py-4">{ele.createdAt}</td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-          {loading && (
-            <div className="w-full flex justify-center my-4">
+          {loading ? (
+            <div className="flex justify-center py-8">
               <Loading />
             </div>
-          )}
-          {!loading && data.length === 0 && <NoContent />}
-          {!loading && data.length > 0 && (
-            <CustomPagination
-              currentPage={parseInt(objectFilter.pageNumber)}
-              totalPages={totalPage}
-              onPageChange={handleChangePage}
-            />
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-gray-600 border-b">
+                      <th className="py-2 pr-4">{t('Time')}</th>
+                      <th className="py-2 pr-4">{t('Claimer')}</th>
+                      <th className="py-2 pr-4">{t('Withdraw Amount')}</th>
+                      <th className="py-2 pr-4">{t('Tax')}</th>
+                      <th className="py-2 pr-4">{t('Transaction Fee')}</th>
+                      <th className="py-2 pr-4">{t('Received Amount')}</th>
+                      <th className="py-2 pr-4">{t('Withdrawal Method')}</th>
+                      <th className="py-2 pr-4">{t('Status')}</th>
+                      <th className="py-2 pr-4">{t('Tx Hash')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.length === 0 && (
+                      <tr>
+                        <td className="py-3 pr-4 text-gray-500" colSpan={10}>
+                          {t('No withdraw records')}
+                        </td>
+                      </tr>
+                    )}
+                    {data.map((item) => {
+                      // Determine if hash is a crypto transaction (starts with 0x)
+                      const isCryptoHash =
+                        item.hash && item.hash.startsWith('0x');
+                      const withdrawalMethod =
+                        item.withdrawalType ||
+                        (isCryptoHash
+                          ? 'CRYPTO'
+                          : item.coin === 'USDT'
+                          ? 'BANK'
+                          : null);
+
+                      // For BANK withdrawal: calculate amounts in VND
+                      const isBank =
+                        withdrawalMethod === 'BANK' && item.coin === 'USDT';
+                      const exchangeRate = item.exchangeRate || 0;
+
+                      // Calculate amounts - All values stored in USDT, calculate VND when displaying
+                      const tax = item.tax || 0;
+                      const fee = item.fee || 0;
+                      const receivedAmount =
+                        item.receivedAmount !== undefined
+                          ? item.receivedAmount // Use value from backend (USDT)
+                          : item.amount - tax - fee; // For both CRYPTO and BANK (USDT)
+
+                      // Calculate VND values for BANK withdrawal display
+                      const totalVND =
+                        isBank && exchangeRate > 0
+                          ? item.amount * exchangeRate
+                          : 0;
+                      const taxVND =
+                        isBank && exchangeRate > 0 ? tax * exchangeRate : 0;
+                      const feeVND =
+                        isBank && exchangeRate > 0 ? fee * exchangeRate : 0;
+                      const receivedAmountVND =
+                        isBank && exchangeRate > 0
+                          ? receivedAmount * exchangeRate
+                          : 0;
+
+                      return (
+                        <tr key={item._id} className="border-b">
+                          <td className="py-3 pr-4">
+                            {new Date(item.createdAt).toLocaleString()}
+                          </td>
+                          <td className="py-3 pr-4">
+                            <div className="flex flex-col gap-1">
+                              <span className="font-semibold">
+                                {item.userInfo?.userId || '-'}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {item.userInfo?.email || '-'}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-3 pr-4">
+                            {isBank && exchangeRate > 0 ? (
+                              <div className="flex flex-col gap-1">
+                                <span className="font-medium">
+                                  {Number(item.amount).toLocaleString()} USDT
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  ≈ {Number(totalVND).toLocaleString()} VND
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="font-medium">
+                                {Number(item.amount).toLocaleString()}{' '}
+                                {item.coin}
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3 pr-4">
+                            {tax > 0 ? (
+                              <span className="text-red-600">
+                                -
+                                {isBank && exchangeRate > 0
+                                  ? Math.floor(taxVND).toLocaleString()
+                                  : Number(tax).toLocaleString()}{' '}
+                                {isBank ? 'VND' : item.coin}
+                              </span>
+                            ) : (
+                              '-'
+                            )}
+                          </td>
+                          <td className="py-3 pr-4">
+                            {fee > 0 ? (
+                              <span className="text-red-600">
+                                -
+                                {isBank && exchangeRate > 0
+                                  ? Math.floor(feeVND).toLocaleString()
+                                  : Number(fee).toLocaleString()}{' '}
+                                {isBank ? 'VND' : item.coin}
+                              </span>
+                            ) : (
+                              '-'
+                            )}
+                          </td>
+                          <td className="py-3 pr-4">
+                            <span className="font-semibold text-green-600">
+                              {isBank && exchangeRate > 0
+                                ? Math.floor(receivedAmountVND).toLocaleString()
+                                : Number(receivedAmount).toLocaleString()}{' '}
+                              {isBank ? 'VND' : item.coin}
+                            </span>
+                          </td>
+                          <td className="py-3 pr-4">
+                            {withdrawalMethod ? (
+                              <span className="px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
+                                {withdrawalMethod === 'CRYPTO'
+                                  ? t('Crypto Wallet')
+                                  : t('Bank Transfer')}
+                              </span>
+                            ) : (
+                              '-'
+                            )}
+                          </td>
+                          <td className="py-3 pr-4">
+                            <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
+                              SUCCESS
+                            </span>
+                          </td>
+                          <td className="py-3 pr-4">
+                            {item.hash ? (
+                              isCryptoHash ? (
+                                <a
+                                  href={`https://bscscan.com/tx/${item.hash}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-blue-600 hover:text-blue-800 underline truncate inline-block max-w-[220px] align-bottom"
+                                >
+                                  {shortenWalletAddress(item.hash, 12)}
+                                </a>
+                              ) : (
+                                <span className="truncate inline-block max-w-[220px] align-bottom">
+                                  {item.hash}
+                                </span>
+                              )
+                            ) : (
+                              '-'
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {!loading && data.length > 0 && (
+                <CustomPagination
+                  currentPage={parseInt(objectFilter.pageNumber)}
+                  totalPages={totalPage}
+                  onPageChange={handleChangePage}
+                />
+              )}
+            </>
           )}
         </div>
       </div>
