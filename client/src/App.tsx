@@ -739,17 +739,26 @@ function App() {
             </>
           }
         />
+        <Route
+          path="/user/profile"
+          element={
+            <>
+              <PageTitle title="Profile | NoExcuseChallenge" />
+              <Profile />
+            </>
+          }
+        />
+        <Route
+          path="/user/update-info"
+          element={
+            <>
+              <PageTitle title="Update Info | NoExcuseChallenge" />
+              <UserUpdateInfoKYCPage />
+            </>
+          }
+        />
         {userInfo?.errLahCode !== 'OVER45' && (
           <>
-            <Route
-              path="/user/profile"
-              element={
-                <>
-                  <PageTitle title="Profile | NoExcuseChallenge" />
-                  <Profile />
-                </>
-              }
-            />
             <Route
               path="/user/payment"
               element={
@@ -883,15 +892,6 @@ function App() {
                 <>
                   <PageTitle title="Register KYC | NoExcuseChallenge" />
                   <RegisterKYCPage />
-                </>
-              }
-            />
-            <Route
-              path="/user/update-info"
-              element={
-                <>
-                  <PageTitle title="Update Info | NoExcuseChallenge" />
-                  <UserUpdateInfoKYCPage />
                 </>
               }
             />

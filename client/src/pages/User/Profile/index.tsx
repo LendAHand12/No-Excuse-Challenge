@@ -169,12 +169,14 @@ const Profile = () => {
           }
           // Check if bank information is missing after getting user data
           // Required for bank withdrawal: bankName, bankCode, accountName, accountNumber
+          // Only show if errLahCode !== "OVER45"
           if (
-            !response.data.bankName ||
+            response.data.errLahCode !== 'OVER45' &&
+            (!response.data.bankName ||
             !response.data.bankCode ||
             !response.data.accountName ||
             !response.data.accountNumber ||
-            !response.data.dateOfBirth
+            !response.data.dateOfBirth)
           ) {
             setShowBankInfoModal(true);
           }
@@ -766,7 +768,7 @@ const Profile = () => {
         )}
 
         {/* Bank Information Warning */}
-        {!hasCompleteBankInfo() && (
+        {errLahCode !== 'OVER45' && !hasCompleteBankInfo() && (
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded">
             <div className="flex">
               <div className="flex-shrink-0">
