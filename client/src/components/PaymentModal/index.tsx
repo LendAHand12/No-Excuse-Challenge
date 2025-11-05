@@ -105,10 +105,6 @@ const PaymentModal = ({
             if (paymentIdsList.length > 0) {
               try {
                 setPaymentStatus('processing');
-                console.log(
-                  'Calling onDonePayment with transferContent:',
-                  transferContent,
-                );
                 // Chờ donePayment hoàn thành trước khi hiển thị thành công
                 await onDonePayment(transferContent);
 

@@ -792,7 +792,7 @@
     "cryptoWallet": "Crypto Wallet",
     "bankTransfer": "Bank Transfer",
     "bankProcessingNotice": "Processing Notice",
-    "bankProcessingNoticeDesc": "Bank transfer requests will be processed during business hours (9 AM - 5 PM, Monday to Saturday).",
+    "bankProcessingNoticeDesc": "Bank transfer requests will be processed during hours (9 AM - 9 PM, Monday to Saturday and 11 AM - 5 PM Sunday).",
     "bankInfoRequired": "Bank information required",
     "bankInfoRequiredDesc": "Please update your bank information in Profile before withdrawing via bank transfer.",
     "amount": "Amount (USDT)",

@@ -878,7 +878,7 @@
     "cryptoWallet": "Ví tiền điện tử",
     "bankTransfer": "Chuyển khoản ngân hàng",
     "bankProcessingNotice": "Lưu ý xử lý",
-    "bankProcessingNoticeDesc": "Giao dịch sẽ được xử lý trong giờ hành chính, tức là từ 9 - 17 giờ từ thứ 2 đến thứ 7.",
+    "bankProcessingNoticeDesc": "Giao dịch sẽ được xử lý từ 09 - 21 giờ từ thứ 2 đến thứ 7 và 11 - 17 giờ Chủ Nhật",
     "bankInfoRequired": "Cần thông tin ngân hàng",
     "bankInfoRequiredDesc": "Vui lòng cập nhật thông tin ngân hàng trong Hồ sơ trước khi rút tiền qua chuyển khoản ngân hàng.",
     "amount": "Số lượng (USDT)",

@@ -40,6 +40,7 @@ const AdminWithdrawPages = () => {
   const [keyword, setKeyword] = useState(key);
   const [showPaymentInfo, setShowPaymentInfo] = useState(false);
   const [transferContent, setTransferContent] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const onSearch = (e) => {
     setKeyword(e.target.value);
@@ -189,7 +190,7 @@ const AdminWithdrawPages = () => {
     // Lấy thông tin ngân hàng từ userInfo
     const acc = currentApproveRequest?.userInfo?.accountNumber;
     const bank = currentApproveRequest?.userInfo?.bankCode;
-    
+
     // Tính số tiền VND cần chuyển: receivedAmount (USDT) * exchangeRate
     const receivedAmountUsdt = currentApproveRequest?.receivedAmount || 0;
     const exchangeRate = currentApproveRequest?.exchangeRate || 0;
@@ -226,6 +227,16 @@ const AdminWithdrawPages = () => {
       setTransferContent(orderId);
     }
   }, [currentApproveRequest?.withdrawalType, showPaymentInfo]);
+
+  // Track window size for mobile margin
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial check
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleBankApprove = () => {
     if (currentApproveRequest?.withdrawalType === 'BANK') {
@@ -373,12 +384,12 @@ const AdminWithdrawPages = () => {
         }}
         style={{
           content: {
-            top: '50%',
+            top: isMobile ? '80px' : '50%',
             left: '50%',
             right: 'auto',
             bottom: 'auto',
             marginRight: '-50%',
-            transform: 'translate(-50%, -50%)',
+            transform: isMobile ? 'translateX(-50%)' : 'translate(-50%, -50%)',
             padding: 0,
             border: 'none',
             background: 'transparent',
@@ -387,287 +398,310 @@ const AdminWithdrawPages = () => {
                 ? '900px'
                 : '600px',
             width: '90%',
+            maxHeight: isMobile ? 'calc(100vh - 100px)' : '90vh',
+            overflow: 'hidden',
           },
           overlay: {
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1000,
           },
         }}
       >
         <div
-          className={`bg-white rounded-xl p-6 w-full ${
+          className={`bg-white rounded-xl p-6 w-full relative ${
             currentApproveRequest?.withdrawalType === 'BANK'
               ? 'max-w-4xl'
               : 'max-w-md'
-          } shadow-xl`}
+          } shadow-xl max-h-[90vh] flex flex-col`}
         >
-          {/* Close button */}
+          {/* Close button - sticky để luôn hiển thị */}
           <button
             onClick={() => {
               setShowPaymentInfo(false);
               setTransferContent('');
             }}
-            className="absolute top-3 right-3 text-gray-400 hover:text-gray-700"
+            className="absolute top-3 right-3 z-10 text-gray-400 hover:text-gray-700 bg-white rounded-full p-1 shadow-md"
+            aria-label="Close"
           >
-            ✕
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
           </button>
 
-          <h2 className="text-xl font-semibold text-gray-800 text-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-800 text-center mb-4 pr-8">
             {t('adminWithdraw.payoutInformation')}
           </h2>
 
-          {/* Form */}
-          {currentApproveRequest?.withdrawalType === 'BANK' ? (
-            /* Two-column layout for BANK withdrawal */
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Left column: Information */}
-              <div className="space-y-4">
+          {/* Scrollable content */}
+          <div
+            className="overflow-y-auto flex-1 pr-2 -mr-2 min-h-0"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            {/* Form */}
+            {currentApproveRequest?.withdrawalType === 'BANK' ? (
+              /* Two-column layout for BANK withdrawal */
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left column: Information */}
+                <div className="space-y-4">
+                  {/* Withdrawal Type */}
+                  {currentApproveRequest?.withdrawalType && (
+                    <div>
+                      <label className="block mb-1 font-medium text-gray-700">
+                        {t('adminWithdraw.withdrawalType')}: <br></br>
+                        <span className="text-blue-600 font-bold">
+                          {t('adminWithdraw.bankTransfer')}
+                        </span>
+                      </label>
+                    </div>
+                  )}
+
+                  {/* Amount - Hiển thị đầy đủ thông tin */}
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <label className="block mb-3 font-semibold text-gray-800">
+                      {t('adminWithdraw.amount')}:{' '}
+                      <span className="text-blue-600">
+                        {currentApproveRequest?.amount} USDT
+                      </span>
+                    </label>
+                    {currentApproveRequest?.exchangeRate && (
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">
+                            {t('adminWithdraw.exchangeRate')}:
+                          </span>
+                          <span className="font-medium">
+                            1 USDT ={' '}
+                            {currentApproveRequest.exchangeRate.toLocaleString(
+                              'vi-VN',
+                            )}{' '}
+                            VND
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">
+                            {t('adminWithdraw.totalAmountVND')}:
+                          </span>
+                          <span className="font-semibold text-gray-800">
+                            {Math.floor(
+                              currentApproveRequest.amount *
+                                currentApproveRequest.exchangeRate,
+                            ).toLocaleString('vi-VN')}{' '}
+                            VND
+                          </span>
+                        </div>
+                        {currentApproveRequest?.tax && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-600">
+                              {t('adminWithdraw.tax')} (10%):
+                            </span>
+                            <span className="text-red-600 font-medium">
+                              -
+                              {Math.floor(
+                                currentApproveRequest.tax *
+                                  currentApproveRequest.exchangeRate,
+                              ).toLocaleString('vi-VN')}{' '}
+                              VND
+                            </span>
+                          </div>
+                        )}
+                        {currentApproveRequest?.fee && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-600">
+                              {t('adminWithdraw.transactionFee')} (1 USDT):
+                            </span>
+                            <span className="text-red-600 font-medium">
+                              -
+                              {Math.floor(
+                                currentApproveRequest.fee *
+                                  currentApproveRequest.exchangeRate,
+                              ).toLocaleString('vi-VN')}{' '}
+                              VND
+                            </span>
+                          </div>
+                        )}
+                        <div className="border-t border-gray-300 pt-2 mt-2">
+                          <div className="flex justify-between items-center">
+                            <span className="font-semibold text-gray-800">
+                              {t('adminWithdraw.totalReceived')}:
+                            </span>
+                            <span className="text-green-600 font-bold text-lg">
+                              {currentApproveRequest?.receivedAmount &&
+                              currentApproveRequest?.exchangeRate
+                                ? Math.floor(
+                                    currentApproveRequest.receivedAmount *
+                                      currentApproveRequest.exchangeRate,
+                                  ).toLocaleString('vi-VN')
+                                : '-'}{' '}
+                              VND
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bank Information - Lấy từ userInfo */}
+                  <div>
+                    <label className="block mb-1 font-medium text-gray-700">
+                      {t('adminWithdraw.bankName')}: <br></br>
+                      <span className="font-semibold">
+                        {currentApproveRequest?.userInfo?.bankName || 'N/A'}
+                      </span>
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block mb-1 font-medium text-gray-700">
+                      {t('adminWithdraw.accountName')}: <br></br>
+                      <span className="font-semibold">
+                        {currentApproveRequest?.userInfo?.accountName || 'N/A'}
+                      </span>
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block mb-1 font-medium text-gray-700">
+                      {t('adminWithdraw.accountNumber')}: <br></br>
+                      <span className="font-semibold">
+                        {currentApproveRequest?.userInfo?.accountNumber ||
+                          'N/A'}
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Transfer Content */}
+                  <div>
+                    <label className="block mb-2 font-medium text-gray-700">
+                      {t('adminWithdraw.transferContent')}
+                    </label>
+                    <input
+                      type="text"
+                      value={transferContent}
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-sm font-mono cursor-not-allowed"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      {t('adminWithdraw.transferContentDescription')}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right column: QR Code */}
+                <div className="flex flex-col items-center justify-start">
+                  <label className="block mb-3 font-medium text-gray-700 w-full">
+                    {t('adminWithdraw.qrCodeForTransfer')}
+                  </label>
+
+                  {/* Auto-generated QR Code */}
+                  {generateQRUrl() && (
+                    <div className="w-full flex flex-col items-center">
+                      <p className="text-xs text-gray-600 mb-3 text-center">
+                        {t('adminWithdraw.autoGeneratedQRCode')}
+                      </p>
+                      <div className="bg-white p-4 rounded-lg border border-gray-300 shadow-lg">
+                        <img
+                          src={generateQRUrl()}
+                          alt={t('adminWithdraw.qrCodeForBankTransfer')}
+                          className="w-full max-w-xs h-auto rounded-lg"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-3 text-center max-w-xs">
+                        {t('adminWithdraw.scanQRCodeToTransfer')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* Single column layout for CRYPTO withdrawal */
+              <div className="space-y-5">
                 {/* Withdrawal Type */}
                 {currentApproveRequest?.withdrawalType && (
                   <div>
                     <label className="block mb-1 font-medium text-gray-700">
                       {t('adminWithdraw.withdrawalType')}: <br></br>
                       <span className="text-blue-600 font-bold">
-                        {t('adminWithdraw.bankTransfer')}
+                        {t('adminWithdraw.cryptoWallet')}
                       </span>
                     </label>
                   </div>
                 )}
 
-                {/* Amount - Hiển thị đầy đủ thông tin */}
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <label className="block mb-3 font-semibold text-gray-800">
-                    {t('adminWithdraw.amount')}:{' '}
-                    <span className="text-blue-600">
+                {/* Amount */}
+                <div>
+                  <label className="block mb-1 font-medium text-gray-700">
+                    {t('adminWithdraw.amount')}: <br></br>
+                    <span className="font-semibold">
                       {currentApproveRequest?.amount} USDT
                     </span>
                   </label>
-                  {currentApproveRequest?.exchangeRate && (
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600">
-                          {t('adminWithdraw.exchangeRate')}:
-                        </span>
-                        <span className="font-medium">
-                          1 USDT ={' '}
-                          {currentApproveRequest.exchangeRate.toLocaleString(
-                            'vi-VN',
-                          )}{' '}
-                          VND
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600">
-                          {t('adminWithdraw.totalAmountVND')}:
-                        </span>
-                        <span className="font-semibold text-gray-800">
-                          {Math.floor(
-                            currentApproveRequest.amount *
-                              currentApproveRequest.exchangeRate,
-                          ).toLocaleString('vi-VN')}{' '}
-                          VND
-                        </span>
-                      </div>
-                      {currentApproveRequest?.tax && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600">
-                            {t('adminWithdraw.tax')} (10%):
-                          </span>
-                          <span className="text-red-600 font-medium">
-                            -
-                            {Math.floor(
-                              currentApproveRequest.tax *
-                                currentApproveRequest.exchangeRate,
-                            ).toLocaleString('vi-VN')}{' '}
-                            VND
-                          </span>
-                        </div>
-                      )}
-                      {currentApproveRequest?.fee && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600">
-                            {t('adminWithdraw.transactionFee')} (1 USDT):
-                          </span>
-                          <span className="text-red-600 font-medium">
-                            -
-                            {Math.floor(
-                              currentApproveRequest.fee *
-                                currentApproveRequest.exchangeRate,
-                            ).toLocaleString('vi-VN')}{' '}
-                            VND
-                          </span>
-                        </div>
-                      )}
-                      <div className="border-t border-gray-300 pt-2 mt-2">
-                        <div className="flex justify-between items-center">
-                          <span className="font-semibold text-gray-800">
-                            {t('adminWithdraw.totalReceived')}:
-                          </span>
-                          <span className="text-green-600 font-bold text-lg">
-                            {currentApproveRequest?.receivedAmount &&
-                            currentApproveRequest?.exchangeRate
-                              ? Math.floor(
-                                  currentApproveRequest.receivedAmount *
-                                    currentApproveRequest.exchangeRate,
-                                ).toLocaleString('vi-VN')
-                              : '-'}{' '}
-                            VND
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
-                {/* Bank Information - Lấy từ userInfo */}
+                {/* Crypto Wallet Information - Lấy từ userInfo */}
+                {/* Payment Method */}
                 <div>
                   <label className="block mb-1 font-medium text-gray-700">
-                    {t('adminWithdraw.bankName')}: <br></br>
+                    {t('adminWithdraw.paymentMethod')}: <br></br>
                     <span className="font-semibold">
-                      {currentApproveRequest?.userInfo?.bankName || 'N/A'}
-                    </span>
-                  </label>
-                </div>
-                <div>
-                  <label className="block mb-1 font-medium text-gray-700">
-                    {t('adminWithdraw.accountName')}: <br></br>
-                    <span className="font-semibold">
-                      {currentApproveRequest?.userInfo?.accountName || 'N/A'}
-                    </span>
-                  </label>
-                </div>
-                <div>
-                  <label className="block mb-1 font-medium text-gray-700">
-                    {t('adminWithdraw.accountNumber')}: <br></br>
-                    <span className="font-semibold">
-                      {currentApproveRequest?.userInfo?.accountNumber || 'N/A'}
+                      {currentApproveRequest?.userInfo?.paymentMethod || 'N/A'}
                     </span>
                   </label>
                 </div>
 
-                {/* Transfer Content */}
-                <div>
-                  <label className="block mb-2 font-medium text-gray-700">
-                    {t('adminWithdraw.transferContent')}
-                  </label>
-                  <input
-                    type="text"
-                    value={transferContent}
-                    readOnly
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-sm font-mono cursor-not-allowed"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    {t('adminWithdraw.transferContentDescription')}
-                  </p>
-                </div>
-              </div>
+                {/* Wallet Address */}
+                {currentApproveRequest?.userInfo?.walletAddress && (
+                  <div>
+                    <label className="block mb-1 font-medium text-gray-700">
+                      {t('adminWithdraw.walletAddress')}: <br></br>
+                      <span className="font-mono text-sm">
+                        {shortenWalletAddress(
+                          currentApproveRequest.userInfo.walletAddress,
+                        )}
+                      </span>
+                    </label>
+                  </div>
+                )}
 
-              {/* Right column: QR Code */}
-              <div className="flex flex-col items-center justify-start">
-                <label className="block mb-3 font-medium text-gray-700 w-full">
-                  {t('adminWithdraw.qrCodeForTransfer')}
-                </label>
+                {/* Account Name */}
+                {currentApproveRequest?.userInfo?.accountName && (
+                  <div>
+                    <label className="block mb-1 font-medium text-gray-700">
+                      {t('adminWithdraw.payoutDisplayName')}: <br></br>
+                      <span className="font-semibold">
+                        {currentApproveRequest.userInfo.accountName}
+                      </span>
+                    </label>
+                  </div>
+                )}
 
-                {/* Auto-generated QR Code */}
-                {generateQRUrl() && (
-                  <div className="w-full flex flex-col items-center">
-                    <p className="text-xs text-gray-600 mb-3 text-center">
-                      {t('adminWithdraw.autoGeneratedQRCode')}
-                    </p>
-                    <div className="bg-white p-4 rounded-lg border border-gray-300 shadow-lg">
-                      <img
-                        src={generateQRUrl()}
-                        alt={t('adminWithdraw.qrCodeForBankTransfer')}
-                        className="w-full max-w-xs h-auto rounded-lg"
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-3 text-center max-w-xs">
-                      {t('adminWithdraw.scanQRCodeToTransfer')}
+                {/* Email or Phone Number */}
+                {currentApproveRequest?.userInfo?.accountNumber && (
+                  <div>
+                    <label className="block mb-1 font-medium text-gray-700">
+                      {t('adminWithdraw.payoutEmailOrPhone')}: <br></br>
+                      <span className="font-semibold">
+                        {currentApproveRequest.userInfo.accountNumber}
+                      </span>
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {t('adminWithdraw.payoutDestination')}
                     </p>
                   </div>
                 )}
               </div>
-            </div>
-          ) : (
-            /* Single column layout for CRYPTO withdrawal */
-            <div className="space-y-5">
-              {/* Withdrawal Type */}
-              {currentApproveRequest?.withdrawalType && (
-                <div>
-                  <label className="block mb-1 font-medium text-gray-700">
-                    {t('adminWithdraw.withdrawalType')}: <br></br>
-                    <span className="text-blue-600 font-bold">
-                      {t('adminWithdraw.cryptoWallet')}
-                    </span>
-                  </label>
-                </div>
-              )}
+            )}
+          </div>
 
-              {/* Amount */}
-              <div>
-                <label className="block mb-1 font-medium text-gray-700">
-                  {t('adminWithdraw.amount')}: <br></br>
-                  <span className="font-semibold">
-                    {currentApproveRequest?.amount} USDT
-                  </span>
-                </label>
-              </div>
-
-              {/* Crypto Wallet Information - Lấy từ userInfo */}
-              {/* Payment Method */}
-              <div>
-                <label className="block mb-1 font-medium text-gray-700">
-                  {t('adminWithdraw.paymentMethod')}: <br></br>
-                  <span className="font-semibold">
-                    {currentApproveRequest?.userInfo?.paymentMethod || 'N/A'}
-                  </span>
-                </label>
-              </div>
-
-              {/* Wallet Address */}
-              {currentApproveRequest?.userInfo?.walletAddress && (
-                <div>
-                  <label className="block mb-1 font-medium text-gray-700">
-                    {t('adminWithdraw.walletAddress')}: <br></br>
-                    <span className="font-mono text-sm">
-                      {shortenWalletAddress(
-                        currentApproveRequest.userInfo.walletAddress,
-                      )}
-                    </span>
-                  </label>
-                </div>
-              )}
-
-              {/* Account Name */}
-              {currentApproveRequest?.userInfo?.accountName && (
-                <div>
-                  <label className="block mb-1 font-medium text-gray-700">
-                    {t('adminWithdraw.payoutDisplayName')}: <br></br>
-                    <span className="font-semibold">
-                      {currentApproveRequest.userInfo.accountName}
-                    </span>
-                  </label>
-                </div>
-              )}
-
-              {/* Email or Phone Number */}
-              {currentApproveRequest?.userInfo?.accountNumber && (
-                <div>
-                  <label className="block mb-1 font-medium text-gray-700">
-                    {t('adminWithdraw.payoutEmailOrPhone')}: <br></br>
-                    <span className="font-semibold">
-                      {currentApproveRequest.userInfo.accountNumber}
-                    </span>
-                  </label>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {t('adminWithdraw.payoutDestination')}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Nút xác nhận */}
-          <div className="pt-6 mt-6 border-t border-gray-200">
+          {/* Nút xác nhận - sticky ở bottom */}
+          <div className="pt-6 mt-6 border-t border-gray-200 flex-shrink-0 bg-white">
             <button
               onClick={handleBankApprove}
               disabled={loadingPayment}
