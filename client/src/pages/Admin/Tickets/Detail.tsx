@@ -53,7 +53,9 @@ export default function AdminTicketDetailPage() {
         setShowReplyForm(!response.data.ticket.adminResponse);
       } catch (error: any) {
         const message =
-          error.response?.data?.error || error.message || 'Failed to fetch ticket';
+          error.response?.data?.error ||
+          error.message ||
+          'Failed to fetch ticket';
         toast.error(t(message));
         navigate('/admin/tickets');
       } finally {
@@ -105,7 +107,9 @@ export default function AdminTicketDetailPage() {
       toast.success(t('ticket.markedResolved'));
     } catch (error: any) {
       const message =
-        error.response?.data?.error || error.message || 'Failed to mark as resolved';
+        error.response?.data?.error ||
+        error.message ||
+        'Failed to mark as resolved';
       toast.error(t(message));
     } finally {
       setSubmitting(false);
@@ -128,7 +132,9 @@ export default function AdminTicketDetailPage() {
       toast.success(t('ticket.closed'));
     } catch (error: any) {
       const message =
-        error.response?.data?.error || error.message || 'Failed to close ticket';
+        error.response?.data?.error ||
+        error.message ||
+        'Failed to close ticket';
       toast.error(t(message));
     } finally {
       setSubmitting(false);
@@ -137,13 +143,22 @@ export default function AdminTicketDetailPage() {
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { label: string; className: string }> = {
-      PENDING: { label: t('ticket.status.pending'), className: 'bg-yellow-100 text-yellow-700' },
+      PENDING: {
+        label: t('ticket.status.pending'),
+        className: 'bg-yellow-100 text-yellow-700',
+      },
       IN_PROGRESS: {
         label: t('ticket.status.inProgress'),
         className: 'bg-blue-100 text-blue-700',
       },
-      RESOLVED: { label: t('ticket.status.resolved'), className: 'bg-green-100 text-green-700' },
-      CLOSED: { label: t('ticket.status.closed'), className: 'bg-gray-100 text-gray-700' },
+      RESOLVED: {
+        label: t('ticket.status.resolved'),
+        className: 'bg-green-100 text-green-700',
+      },
+      CLOSED: {
+        label: t('ticket.status.closed'),
+        className: 'bg-gray-100 text-gray-700',
+      },
     };
     const statusInfo = statusMap[status] || statusMap.PENDING;
     return (
@@ -168,8 +183,6 @@ export default function AdminTicketDetailPage() {
   if (!ticket) {
     return null;
   }
-
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   return (
     <DefaultLayout>
@@ -198,7 +211,9 @@ export default function AdminTicketDetailPage() {
           <div className="bg-white p-6 rounded-lg border border-gray-200 mb-4">
             <div className="mb-4">
               <h3 className="font-semibold mb-2">{t('ticket.userMessage')}</h3>
-              <p className="text-gray-700 whitespace-pre-wrap">{ticket.message}</p>
+              <p className="text-gray-700 whitespace-pre-wrap">
+                {ticket.message}
+              </p>
             </div>
 
             {ticket.images && ticket.images.length > 0 && (
@@ -208,13 +223,13 @@ export default function AdminTicketDetailPage() {
                   {ticket.images.map((image, index) => (
                     <a
                       key={index}
-                      href={`${baseUrl}${image}`}
+                      href={`${import.meta.env.VITE_API_URL}${image}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block"
                     >
                       <img
-                        src={`${baseUrl}${image}`}
+                        src={`${import.meta.env.VITE_API_URL}${image}`}
                         alt={`Image ${index + 1}`}
                         className="w-full h-32 object-cover rounded-lg hover:opacity-80 transition"
                       />
@@ -236,11 +251,15 @@ export default function AdminTicketDetailPage() {
                 <h3 className="font-semibold mb-2 text-green-800">
                   {t('ticket.adminResponse')}
                 </h3>
-                <p className="text-gray-700 whitespace-pre-wrap">{ticket.adminResponse}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">
+                  {ticket.adminResponse}
+                </p>
               </div>
               <div className="text-sm text-gray-500">
                 {t('ticket.repliedAt')}:{' '}
-                {ticket.adminResponseAt ? formatDateTimeVN(ticket.adminResponseAt) : '-'}
+                {ticket.adminResponseAt
+                  ? formatDateTimeVN(ticket.adminResponseAt)
+                  : '-'}
               </div>
             </div>
           )}
@@ -249,7 +268,9 @@ export default function AdminTicketDetailPage() {
           {showReplyForm && (
             <div className="bg-blue-50 p-6 rounded-lg border border-blue-200 mb-4">
               <h3 className="font-semibold mb-4 text-blue-800">
-                {ticket.adminResponse ? t('ticket.updateResponse') : t('ticket.replyToTicket')}
+                {ticket.adminResponse
+                  ? t('ticket.updateResponse')
+                  : t('ticket.replyToTicket')}
               </h3>
               <textarea
                 value={adminResponse}
@@ -344,4 +365,3 @@ export default function AdminTicketDetailPage() {
     </DefaultLayout>
   );
 }
-
