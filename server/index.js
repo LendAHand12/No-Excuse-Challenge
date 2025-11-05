@@ -36,6 +36,7 @@ import moveSystemRoutes from "./routes/moveSystemRoutes.js";
 import swapRoutes from "./routes/swapRoutes.js";
 import preTier2Routes from "./routes/preTier2Routes.js";
 import bankWebhookRoutes from "./routes/bankWebhookRoutes.js";
+import ticketRoutes from "./routes/ticketRoutes.js";
 
 import {
   countChildToData,
@@ -105,6 +106,7 @@ app.use("/api/move-system", moveSystemRoutes);
 app.use("/api/swap", swapRoutes);
 app.use("/api/pre-tier-2", preTier2Routes);
 app.use("/api/bank-webhook", bankWebhookRoutes);
+app.use("/api/tickets", ticketRoutes);
 
 app.get("/api/test-tele", async (req, res) => {
   await sendTelegramMessage({ userName: "kiet" });

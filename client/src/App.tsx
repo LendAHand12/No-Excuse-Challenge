@@ -88,6 +88,11 @@ import UsersPassedTier2Page from './pages/User/UsersPassedTier2';
 import AdminWalletConnectHistoryPages from './pages/Admin/WalletConnectHistory';
 import UserAssetsPage from './pages/User/Assets';
 import ApprovePaymentPage from './pages/Admin/ApprovePayment';
+import UserTicketsPage from './pages/User/Tickets';
+import CreateTicketPage from './pages/User/Tickets/Create';
+import TicketDetailPage from './pages/User/Tickets/Detail';
+import AdminTicketsPage from './pages/Admin/Tickets';
+import AdminTicketDetailPage from './pages/Admin/Tickets/Detail';
 
 function App() {
   const { pathname } = useLocation();
@@ -473,6 +478,32 @@ function App() {
               <>
                 <PageTitle title="Export Claims | NoExcuseChallenge" />
                 <AdminExportClaimsPage />
+              </>
+            }
+          />
+        )}
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/tickets')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/tickets"
+            element={
+              <>
+                <PageTitle title="Support Tickets | NoExcuseChallenge" />
+                <AdminTicketsPage />
+              </>
+            }
+          />
+        )}
+        {userInfo?.permissions
+          ?.find((p) => p.page.path === '/admin/tickets/:id')
+          ?.actions.includes('read') && (
+          <Route
+            path="/admin/tickets/:id"
+            element={
+              <>
+                <PageTitle title="Ticket Detail | NoExcuseChallenge" />
+                <AdminTicketDetailPage />
               </>
             }
           />
@@ -883,6 +914,33 @@ function App() {
                 <>
                   <PageTitle title="Withdraws | NoExcuseChallenge" />
                   <WithdrawsPage />
+                </>
+              }
+            />
+            <Route
+              path="/user/tickets"
+              element={
+                <>
+                  <PageTitle title="Support Tickets | NoExcuseChallenge" />
+                  <UserTicketsPage />
+                </>
+              }
+            />
+            <Route
+              path="/user/tickets/create"
+              element={
+                <>
+                  <PageTitle title="Create Support Ticket | NoExcuseChallenge" />
+                  <CreateTicketPage />
+                </>
+              }
+            />
+            <Route
+              path="/user/tickets/:id"
+              element={
+                <>
+                  <PageTitle title="Ticket Detail | NoExcuseChallenge" />
+                  <TicketDetailPage />
                 </>
               }
             />

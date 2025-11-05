@@ -37,3 +37,5 @@ export const adjustSales = (arr, targetSales) => {
   const maxLimit = targetSales * 0.4;
   return arr.map((item) => (item > maxLimit ? maxLimit : item));
 };
+
+export { formatDateVN, formatDateTimeVN } from './dateFormat';

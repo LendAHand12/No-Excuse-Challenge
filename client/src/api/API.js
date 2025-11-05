@@ -17,10 +17,19 @@ API.interceptors.request.use(
       config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
     config.headers["Accept-Language"] = i18n.language;
-    config.headers["Content-Type"] = "application/json";
-    if (config.customContentType === "multipart/form-data") {
-      config.headers["Content-Type"] = "multipart/form-data";
+    
+    // Check if data is FormData or if customContentType is multipart/form-data
+    const isFormData = config.data instanceof FormData || config.customContentType === "multipart/form-data";
+    
+    // Don't set Content-Type for FormData - let axios handle it automatically
+    // Axios will set the correct Content-Type with boundary for FormData
+    if (!isFormData) {
+      config.headers["Content-Type"] = "application/json";
+    } else {
+      // Remove Content-Type header to let axios set it automatically with boundary
+      delete config.headers["Content-Type"];
     }
+    
     if (config.pageName) {
       config.headers["page-name"] = config.pageName;
     }

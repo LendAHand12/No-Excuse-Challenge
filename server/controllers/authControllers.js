@@ -148,6 +148,16 @@ const registerUser = asyncHandler(async (req, res) => {
     if (treeReceiveUser.userName === "NoExcuse 9" || treeReceiveUser.children.length < 2) {
       const parent = await User.findById(treeReceiveUser.userId);
 
+      // Parse dateOfBirth if provided, otherwise set to null
+      let parsedDateOfBirth = null;
+      if (dateOfBirth) {
+        const date = new Date(dateOfBirth);
+        // Only set if date is valid
+        if (!isNaN(date.getTime())) {
+          parsedDateOfBirth = date;
+        }
+      }
+
       const user = await User.create({
         userId,
         email: email.toLowerCase(),
@@ -164,7 +174,7 @@ const registerUser = asyncHandler(async (req, res) => {
         accountNumber,
         bankName,
         bankCode,
-        dateOfBirth: new Date(dateOfBirth),
+        dateOfBirth: parsedDateOfBirth,
       });
 
       const tree = await Tree.create({

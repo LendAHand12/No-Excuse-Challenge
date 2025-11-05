@@ -730,6 +730,7 @@ const updateUser = asyncHandler(async (req, res) => {
   });
   const userHaveWalletAddress = await User.find({
     $and: [
+      { walletAddress: { $ne: "" } },
       { walletAddress },
       { userId: { $ne: user.userId } },
       { isAdmin: false },
@@ -746,9 +747,9 @@ const updateUser = asyncHandler(async (req, res) => {
   });
 
   console.log({
-    userHavePhone,
-    userHaveWalletAddress,
-    userHaveEmail,
+    userHavePhone: userHavePhone[0],
+    userHaveWalletAddress: userHaveWalletAddress[0],
+    userHaveEmail: userHaveEmail[0],
   });
 
   if (userHavePhone.length >= 1 || userHaveWalletAddress.length >= 1 || userHaveEmail.length >= 1) {
@@ -837,6 +838,48 @@ const updateUser = asyncHandler(async (req, res) => {
       "accountNumber",
       "dateOfBirth",
     ]) {
+      // For dateOfBirth, allow null/empty values to be set
+      if (field === "dateOfBirth") {
+        const currentValue = user[field];
+        const newValue = req.body[field];
+
+        // Parse the date if provided
+        let parsedDate = null;
+        if (newValue) {
+          parsedDate = parseDateOfBirth(newValue);
+        }
+
+        // Check if value actually changed (including null changes)
+        const currentDateStr = currentValue ? new Date(currentValue).getTime() : null;
+        const newDateStr = parsedDate ? parsedDate.getTime() : null;
+
+        if (currentDateStr !== newDateStr) {
+          const historyEntry = {
+            userId: user._id,
+            field,
+            oldValue: currentValue || "",
+            newValue: parsedDate ? parsedDate.toISOString() : null,
+            status: kycConfig.value === true ? "approved" : "pending",
+            reviewedBy: kycConfig.value === true ? "AUTO" : "",
+          };
+
+          changes.push(historyEntry);
+
+          // Update user object immediately if auto-approved
+          if (kycConfig.value) {
+            user[field] = parsedDate;
+          }
+
+          // Delete pending history for this field
+          await UserHistory.deleteMany({
+            userId: user._id,
+            field,
+            status: "pending",
+          });
+        }
+        continue;
+      }
+
       if (!req.body[field]) continue;
 
       const currentValue = user[field];
@@ -849,9 +892,6 @@ const updateUser = asyncHandler(async (req, res) => {
       if (field === "phone") {
         normalizedCurrent = normalizePhone(currentValue);
         normalizedNew = normalizePhone(newValue);
-      } else if (field === "dateOfBirth") {
-        normalizedCurrent = new Date(currentValue);
-        normalizedNew = new Date(newValue);
       }
 
       // Check if value actually changed
@@ -860,12 +900,7 @@ const updateUser = asyncHandler(async (req, res) => {
           userId: user._id,
           field,
           oldValue: currentValue || "",
-          newValue:
-            field === "phone"
-              ? normalizedNew
-              : field === "dateOfBirth"
-              ? new Date(newValue)
-              : newValue,
+          newValue: field === "phone" ? normalizedNew : newValue,
           status: kycConfig.value === true ? "approved" : "pending",
           reviewedBy: kycConfig.value === true ? "AUTO" : "",
         };
@@ -876,9 +911,6 @@ const updateUser = asyncHandler(async (req, res) => {
         if (kycConfig.value) {
           if (field === "phone") {
             user[field] = normalizedNew; // Store with + prefix
-          } else if (field === "dateOfBirth") {
-            console.log({ newValue: moment(newValue, "DD/MM/YYYY").toISOString() });
-            user[field] = moment(newValue, "DD/MM/YYYY").toISOString();
           } else {
             user[field] = newValue;
           }

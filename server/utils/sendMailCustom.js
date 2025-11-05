@@ -246,6 +246,88 @@ export const sendMailContactWithAdmin = async (mailInfo) => {
   if (mailSent) return Promise.resolve(1);
 };
 
+export const sendTicketResponseEmail = async (ticketInfo) => {
+  const { userEmail, userName, ticketSubject, adminResponse, ticketId } = ticketInfo;
+  const frontendURL = process.env.FRONTEND_BASE_URL || "https://noexcuse.live";
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: userEmail,
+    subject: `Re: ${ticketSubject} - Support Ticket Response`,
+    html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #333; text-align: center;">Support Ticket Response</h2>
+      <div style="background-color: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0;">
+        <p style="margin: 10px 0;"><strong>Dear ${userName},</strong></p>
+        <p style="margin: 10px 0;">Thank you for contacting our support team. We have reviewed your ticket and here is our response:</p>
+        <div style="background-color: #fff; padding: 15px; border-left: 4px solid #4CAF50; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Your Ticket:</strong> ${ticketSubject}</p>
+          <p style="margin: 10px 0 0 0;"><strong>Our Response:</strong></p>
+          <div style="margin-top: 10px; padding: 10px; background-color: #f9f9f9; border-radius: 3px;">
+            ${adminResponse.replace(/\n/g, '<br>')}
+          </div>
+        </div>
+        <p style="margin: 10px 0;">You can view your ticket and respond by visiting: <a href="${frontendURL}/user/tickets">${frontendURL}/user/tickets</a></p>
+        <p style="margin: 10px 0;">If you have any further questions, please don't hesitate to contact us.</p>
+        <p style="margin: 20px 0 10px 0;">Best regards,<br><strong>Support Team</strong><br>No Excuse Challenge</p>
+      </div>
+    </div>
+    `,
+    cc: process.env.CC_MAIL,
+  };
+
+  const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.log("Error sending ticket response email:", err);
+    } else {
+      console.log("Ticket response email sent:", info);
+    }
+  });
+
+  if (mailSent) return Promise.resolve(1);
+};
+
+export const sendTicketResponseEmailToAdmin = async (ticketInfo) => {
+  const { userEmail, userName, ticketSubject, message, ticketId } = ticketInfo;
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: process.env.CC_MAIL,
+    subject: `New Support Ticket: ${ticketSubject}`,
+    html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #333; text-align: center;">New Support Ticket Created</h2>
+      <div style="background-color: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0;">
+        <p style="margin: 10px 0;"><strong>User Information:</strong></p>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+          <li><strong>Name:</strong> ${userName}</li>
+          <li><strong>Email:</strong> ${userEmail}</li>
+          <li><strong>Ticket ID:</strong> ${ticketId}</li>
+        </ul>
+        <div style="background-color: #fff; padding: 15px; border-left: 4px solid #2196F3; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Subject:</strong> ${ticketSubject}</p>
+          <p style="margin: 10px 0 0 0;"><strong>Message:</strong></p>
+          <div style="margin-top: 10px; padding: 10px; background-color: #f9f9f9; border-radius: 3px;">
+            ${message.replace(/\n/g, '<br>')}
+          </div>
+        </div>
+        <p style="margin: 10px 0;">Please review and respond to this ticket in the admin panel.</p>
+      </div>
+    </div>
+    `,
+  };
+
+  const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.log("Error sending ticket notification email to admin:", err);
+    } else {
+      console.log("Ticket notification email sent to admin:", info);
+    }
+  });
+
+  if (mailSent) return Promise.resolve(1);
+};
+
 export const sendMailChangeWalletToAdmin = async (mailInfo) => {
   const { userId, userName, phone, email } = mailInfo;
 
