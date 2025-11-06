@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import axios from "axios";
 import Claim from "../models/claimModel.js";
 import User from "../models/userModel.js";
+import Config from "../models/configModel.js";
 import sendHewe from "../services/sendHewe.js";
 import sendUsdt from "../services/sendUsdt.js";
 import Withdraw from "../models/withdrawModel.js";
@@ -28,6 +29,17 @@ const claimHewe = asyncHandler(async (req, res) => {
   }
 
   try {
+    // Kiểm tra giới hạn rút HEWE từ config
+    const limitConfig = await Config.findOne({ label: "LIMIT_AMOUNT_HEWE" });
+    const limitAmount = limitConfig ? Number(limitConfig.value) : 0;
+
+    // Nếu có config giới hạn và availableHewe chưa đạt giới hạn thì không cho rút
+    if (limitAmount > 0 && lockedUser.availableHewe < limitAmount) {
+      throw new Error(
+        `Minimum withdrawal amount is ${limitAmount} HEWE. Your available balance is ${lockedUser.availableHewe} HEWE.`
+      );
+    }
+
     if (lockedUser.availableHewe > 0) {
       // Gửi token HEWE
       const receipt = await sendHewe({

@@ -43,4 +43,24 @@ const getExchangeRate = asyncHandler(async (req, res) => {
   });
 });
 
-export { getAllConfigs, update, getExchangeRate };
+// Get config by label
+const getConfigByLabel = asyncHandler(async (req, res) => {
+  const { label } = req.params;
+
+  const config = await Config.findOne({ label });
+
+  if (!config) {
+    res.status(404).json({
+      error: "Config not found",
+    });
+    return;
+  }
+
+  res.json({
+    value: config.value,
+    label: config.label,
+    type: config.type,
+  });
+});
+
+export { getAllConfigs, update, getExchangeRate, getConfigByLabel };

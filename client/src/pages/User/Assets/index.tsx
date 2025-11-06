@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Claim from '@/api/Claim';
 import KYC from '@/api/KYC';
 import User from '@/api/User';
+import Config from '@/api/Config';
 import Loading from '@/components/Loading';
 import ClaimModal from '@/components/ClaimModal';
 import { ToastContainer, toast } from 'react-toastify';
@@ -59,6 +60,7 @@ export default function UserAssetsPage() {
     bankCode: '',
     bankName: '',
   });
+  const [limitAmountHewe, setLimitAmountHewe] = useState(0);
 
   // Calculate Reward HEWE
   const rewardHewe =
@@ -71,7 +73,20 @@ export default function UserAssetsPage() {
   // Fetch assets on component mount
   useEffect(() => {
     fetchAssets();
+    fetchLimitAmountHewe();
   }, []);
+
+  const fetchLimitAmountHewe = async () => {
+    try {
+      const response = await Config.getByLabel('LIMIT_AMOUNT_HEWE');
+      if (response?.data?.value) {
+        setLimitAmountHewe(Number(response.data.value));
+      }
+    } catch (error) {
+      // Config không tồn tại hoặc lỗi, không ảnh hưởng
+      console.log('LIMIT_AMOUNT_HEWE config not found or error:', error);
+    }
+  };
 
   useEffect(() => {
     setCurrentPage(1); // Reset to page 1 when coin filter changes
@@ -192,6 +207,12 @@ export default function UserAssetsPage() {
     assets.status === 'APPROVED' &&
     assets.facetecTid !== '';
 
+  // Check if can withdraw HEWE
+  // Nếu có config giới hạn, chỉ cho phép rút khi availableHewe >= limitAmountHewe
+  const canWithdrawHewe =
+    assets.availableHewe > 0 &&
+    (limitAmountHewe === 0 || assets.availableHewe >= limitAmountHewe);
+
   return (
     <DefaultLayout>
       <ToastContainer />
@@ -233,10 +254,15 @@ export default function UserAssetsPage() {
               </div>
               <button
                 className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
-                  assets.availableHewe === 0 ? 'opacity-30' : ''
+                  !canWithdrawHewe ? 'opacity-30' : ''
                 }`}
-                disabled={assets.availableHewe === 0}
+                disabled={!canWithdrawHewe}
                 onClick={claimHewe}
+                title={
+                  !canWithdrawHewe && limitAmountHewe > 0
+                    ? `Minimum withdrawal amount is ${limitAmountHewe.toLocaleString()} HEWE. Your available balance is ${assets.availableHewe.toLocaleString()} HEWE.`
+                    : ''
+                }
               >
                 {loadingClaimHewe && <Loading />}
                 WITHDRAW HEWE

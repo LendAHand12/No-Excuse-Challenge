@@ -366,7 +366,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
 
       // Get exchange rate for bank transfer
       const exchangeRate = await Config.findOne({ label: "USD_TO_VND_SELL" });
-      
+
       res.json({
         status: "PAY",
         payments,
@@ -490,8 +490,8 @@ const createBankOrder = asyncHandler(async (req, res) => {
       const timestamp = Date.now();
       const randomSuffix = Math.floor(Math.random() * 1000)
         .toString()
-        .padStart(3, '0'); // 3 chữ số random (000-999)
-      orderId = `NEC${String(timestamp).padStart(13, '0')}${randomSuffix}`.toUpperCase();
+        .padStart(3, "0"); // 3 chữ số random (000-999)
+      orderId = `NEC${String(timestamp).padStart(13, "0")}${randomSuffix}`.toUpperCase();
 
       // Try to create order
       order = await Order.create({
@@ -1150,6 +1150,16 @@ const onDoneTier2Payment = asyncHandler(async (req, res) => {
           let userReceive = await User.findOne({ _id: trans.userId_to });
           userReceive.availableUsdt = userReceive.availableUsdt + trans.amount;
           await userReceive.save();
+
+          // Tạo Income record để lưu lịch sử nhận USDT
+          const newIncome = new Income({
+            userId: trans.userId_to,
+            amount: trans.amount,
+            coin: "USDT",
+            from: trans.type || "Pre-Tier2 Payment",
+            type: trans.type || "",
+          });
+          await newIncome.save();
         }
       }
 

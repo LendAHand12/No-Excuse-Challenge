@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   createColumnHelper,
   flexRender,
@@ -10,29 +10,33 @@ import { useSelector } from 'react-redux';
 import { shortenWalletAddress } from '@/utils';
 import userStatus from '@/constants/userStatus';
 import { Badge } from '@/components/ui/badge';
-import { 
-  CheckCircle, 
-  Eye, 
-  TreePine, 
-  ArrowRightLeft, 
-  Trash2 
+import Modal from 'react-modal';
+import {
+  CheckCircle,
+  Eye,
+  TreePine,
+  ArrowRightLeft,
+  Trash2,
 } from 'lucide-react';
 
 const columnHelper = createColumnHelper();
 
-const AdminUsersTable = ({ 
-  data, 
-  loading, 
-  onApprove, 
-  onDetail, 
-  onTree, 
-  onMoveSystem, 
-  onDelete, 
+const AdminUsersTable = ({
+  data,
+  loading,
+  onApprove,
+  onDetail,
+  onTree,
+  onMoveSystem,
+  onDelete,
   onApprovePayment,
-  objectFilter 
+  objectFilter,
 }) => {
   const { t } = useTranslation();
   const { userInfo } = useSelector((state) => state.auth);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState('');
 
   const columns = useMemo(
     () => [
@@ -41,14 +45,49 @@ const AdminUsersTable = ({
         header: () => t('adminUsers.table.username'),
         cell: (info) => {
           const row = info.row.original;
-          return (
-            <div className="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap">
-              <div className="">
-                <div className="text-base font-semibold">{row.userId}</div>
-                <div className="font-normal text-gray-500">{row._id}</div>
+          const AvatarCell = () => {
+            const [imageError, setImageError] = useState(false);
+            const avatarUrl = row.facetecTid
+              ? `${import.meta.env.VITE_FACETEC_URL}/api/liveness/image?tid=${
+                  row.facetecTid
+                }`
+              : null;
+
+            const handleAvatarClick = (e) => {
+              if (avatarUrl) {
+                e.preventDefault();
+                setSelectedImageUrl(avatarUrl);
+                setSelectedUserId(row.userId);
+                setShowImageModal(true);
+              }
+            };
+
+            const showPlaceholder = !avatarUrl || imageError;
+
+            return (
+              <div className="flex items-center gap-3 px-6 py-4 text-gray-900 whitespace-nowrap">
+                {showPlaceholder ? (
+                  <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-500 text-sm font-medium">
+                    {row.userId?.charAt(0)?.toUpperCase() || '?'}
+                  </div>
+                ) : (
+                  <img
+                    src={avatarUrl}
+                    alt={`${row.userId} avatar`}
+                    className="w-10 h-10 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity border-2 border-gray-300"
+                    onClick={handleAvatarClick}
+                    onError={() => setImageError(true)}
+                  />
+                )}
+                <div className="">
+                  <div className="text-base font-semibold">{row.userId}</div>
+                  <div className="font-normal text-gray-500">{row._id}</div>
+                </div>
               </div>
-            </div>
-          );
+            );
+          };
+
+          return <AvatarCell />;
         },
       }),
       columnHelper.accessor('ageEstimate', {
@@ -67,16 +106,17 @@ const AdminUsersTable = ({
             return <p className="px-6 py-4">{row.availableHewe}</p>;
           }
           if (row.ageEstimate) {
-            const ageText = {
-              2: '8+',
-              3: '13+',
-              4: '16+',
-              5: '18+',
-              6: '21+',
-              7: '25+',
-              8: '30+',
-            }[row.ageEstimate] || '';
-            
+            const ageText =
+              {
+                2: '8+',
+                3: '13+',
+                4: '16+',
+                5: '18+',
+                6: '21+',
+                7: '25+',
+                8: '30+',
+              }[row.ageEstimate] || '';
+
             return (
               <div className="px-6 py-4">
                 <a
@@ -117,9 +157,7 @@ const AdminUsersTable = ({
                 <button
                   onClick={() => onApprovePayment(row._id)}
                   className={`${
-                    row.paymentProcessed
-                      ? 'bg-orange-400'
-                      : 'bg-green-500'
+                    row.paymentProcessed ? 'bg-orange-400' : 'bg-green-500'
                   } py-1 px-3 text-white text-lg max-w-fit rounded-lg`}
                   disabled={!row.paymentProcessed}
                 >
@@ -136,12 +174,16 @@ const AdminUsersTable = ({
         header: () => t('adminUsers.table.status'),
         cell: (info) => {
           const status = info.getValue();
-          const statusConfig = userStatus.find((item) => item.status === status);
+          const statusConfig = userStatus.find(
+            (item) => item.status === status,
+          );
           return (
             <div className="px-6 py-4">
-              <Badge 
+              <Badge
                 variant="secondary"
-                className={`${statusConfig?.color || 'bg-gray-500'} text-white border-0`}
+                className={`${
+                  statusConfig?.color || 'bg-gray-500'
+                } text-white border-0`}
               >
                 {t(status)}
               </Badge>
@@ -233,7 +275,17 @@ const AdminUsersTable = ({
         },
       }),
     ],
-    [t, objectFilter.coin, userInfo, onApprove, onDetail, onTree, onMoveSystem, onDelete, onApprovePayment]
+    [
+      t,
+      objectFilter.coin,
+      userInfo,
+      onApprove,
+      onDetail,
+      onTree,
+      onMoveSystem,
+      onDelete,
+      onApprovePayment,
+    ],
   );
 
   const table = useReactTable({
@@ -251,44 +303,119 @@ const AdminUsersTable = ({
   }
 
   return (
-    <div className="relative overflow-x-auto">
-      <table className="w-full text-sm text-left text-gray-500">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  scope="col"
-                  className="px-6 py-3"
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr
-              key={row.id}
-              className="bg-white border-b hover:bg-gray-50"
+    <>
+      {/* Image Modal */}
+      <Modal
+        isOpen={showImageModal}
+        onRequestClose={() => setShowImageModal(false)}
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+            padding: 0,
+            border: 'none',
+            background: 'transparent',
+            maxWidth: '90vw',
+            maxHeight: '90vh',
+          },
+          overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            zIndex: 1000,
+          },
+        }}
+      >
+        <div className="relative bg-white rounded-lg p-4 max-w-4xl max-h-[90vh] flex flex-col">
+          {/* Close button */}
+          <button
+            onClick={() => setShowImageModal(false)}
+            className="absolute top-2 right-2 z-10 text-gray-400 hover:text-gray-700 bg-white rounded-full p-1 shadow-md"
+            aria-label="Close"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          {/* Title */}
+          <h2 className="text-xl font-semibold text-gray-800 mb-4 pr-8">
+            KYC Image - {selectedUserId}
+          </h2>
+
+          {/* Image */}
+          <div className="flex-1 overflow-auto flex items-center justify-center bg-gray-100 rounded-lg p-4">
+            {selectedImageUrl ? (
+              <img
+                src={selectedImageUrl}
+                alt={`KYC Image - ${selectedUserId}`}
+                className="max-w-full max-h-[70vh] object-contain rounded-lg"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent && !parent.querySelector('.error-message')) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className =
+                      'error-message text-red-500 text-center';
+                    errorDiv.textContent = 'Failed to load image';
+                    parent.appendChild(errorDiv);
+                  }
+                }}
+              />
+            ) : (
+              <div className="text-gray-500 text-center">
+                No image available
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
+
+      <div className="relative overflow-x-auto">
+        <table className="w-full text-sm text-left text-gray-500">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th key={header.id} scope="col" className="px-6 py-3">
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id} className="bg-white border-b hover:bg-gray-50">
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 };
 

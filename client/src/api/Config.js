@@ -11,6 +11,9 @@ const Config = {
   getExchangeRate: () => {
     return API.get(`${URL_API_CONFIG}/exchange-rate`);
   },
+  getByLabel: (label) => {
+    return API.get(`${URL_API_CONFIG}/${label}`);
+  },
 };
 
 export default Config;

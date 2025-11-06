@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Order from "../models/orderModel.js";
 import User from "../models/userModel.js";
+import ContentParseLog from "../models/contentParseLogModel.js";
 import { sendMailPaymentForAdmin } from "../utils/sendMailCustom.js";
 
 /**
@@ -114,6 +115,7 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
     // Format: NEC{timestamp} (ví dụ: NEC1703123456789)
     // Cũng hỗ trợ format cũ AMERITEC cho tương thích ngược
     let orderId = null;
+    let matchedPattern = "NONE";
 
     // Tìm pattern mới: NEC + số (timestamp) + số random - format: NEC{13 chữ số timestamp}{3 chữ số random}
     // Format mới: NEC{13 số}{3 số} = 19 ký tự tổng cộng
@@ -123,22 +125,61 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
     const necMatch = necMatchNew || necMatchOld;
     if (necMatch) {
       orderId = necMatch[0]; // Giữ nguyên case gốc từ content
+      matchedPattern = necMatchNew ? "NEC_NEW" : "NEC_OLD";
     } else {
       // Fallback: Tìm pattern cũ AMERITEC (tương thích ngược với order cũ)
       const amritecMatch = contentTrimmed.match(/AMERITEC[\w\d]{13}/i);
       if (amritecMatch) {
         orderId = amritecMatch[0];
+        matchedPattern = "AMERITEC";
       } else {
         // Nếu không match pattern nào, thử dùng toàn bộ content nếu nó chỉ là orderId (không có text thêm)
         // Kiểm tra xem content có chứa khoảng trắng không
         if (!contentTrimmed.includes(" ")) {
           orderId = contentTrimmed;
+          matchedPattern = "FULL_CONTENT";
         }
       }
     }
 
+    // Lưu log parse content
+    const parseLogData = {
+      originalContent: content,
+      contentTrimmed: contentTrimmed,
+      parsedOrderId: orderId,
+      parseStatus: orderId ? "success" : "no_match",
+      matchedPattern: matchedPattern,
+      orderFound: false,
+      webhookData: {
+        sepayId: id,
+        gateway,
+        transactionDate,
+        accountNumber,
+        code,
+        transferType,
+        transferAmount,
+        accumulated,
+        subAccount,
+        referenceCode,
+        description,
+      },
+      processingResult: null,
+    };
+
     if (!orderId) {
       console.log("Could not extract orderId from content:", content);
+
+      // Lưu log với parseStatus = "no_match"
+      await ContentParseLog.create({
+        ...parseLogData,
+        parseStatus: "no_match",
+        processingResult: "no_order_id",
+        responseSent: {
+          success: true,
+          message: "Webhook received (could not extract orderId)",
+        },
+      });
+
       // Trả về success: true để SePay không retry
       // Nhưng log để theo dõi
       return res.status(201).json({
@@ -166,9 +207,28 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
 
     console.log("Looking for order with orderId:", orderId);
 
+    // Cập nhật log với thông tin order tìm thấy
+    parseLogData.orderFound = !!order;
+    if (order) {
+      parseLogData.foundOrderId = order.orderId;
+      parseLogData.foundOrderStatus = order.status;
+    }
+
     // Nếu vẫn không tìm thấy, tìm order PENDING gần nhất của accountNumber (nếu match)
     if (!order) {
       console.log("Order not found with orderId/userId:", orderId);
+
+      // Lưu log với orderFound = false
+      await ContentParseLog.create({
+        ...parseLogData,
+        processingResult: "order_not_found",
+        responseSent: {
+          success: true,
+          message: "Webhook received (order not found)",
+          orderId: orderId,
+        },
+      });
+
       // Trả về success: true để SePay không retry
       return res.status(201).json({
         success: true,
@@ -180,6 +240,18 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
     // Kiểm tra replay - order đã được xử lý
     if (order.status === "SUCCESS") {
       console.log("Order already processed:", order.orderId);
+
+      // Lưu log với processingResult = "order_already_processed"
+      await ContentParseLog.create({
+        ...parseLogData,
+        processingResult: "order_already_processed",
+        responseSent: {
+          success: true,
+          message: "Order already processed",
+          orderId: order.orderId,
+        },
+      });
+
       return res.status(201).json({
         success: true,
         message: "Order already processed",
@@ -198,6 +270,21 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
         difference: amountDiff,
         orderId: order.orderId,
       });
+
+      // Lưu log với processingResult = "amount_mismatch"
+      await ContentParseLog.create({
+        ...parseLogData,
+        processingResult: "amount_mismatch",
+        errorMessage: `Amount mismatch: expected ${order.amount}, received ${transferAmount}, difference: ${amountDiff}`,
+        responseSent: {
+          success: true,
+          message: "Webhook received (amount mismatch logged)",
+          orderId: order.orderId,
+          expected: order.amount,
+          received: transferAmount,
+        },
+      });
+
       // Trả về success: true nhưng log lỗi để theo dõi
       // SePay sẽ không retry, nhưng admin có thể xử lý thủ công
       return res.status(201).json({
@@ -245,6 +332,19 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
 
     if (!user) {
       console.warn("User not found for order:", order.orderId, "userId:", userId);
+
+      // Lưu log với processingResult = "user_not_found"
+      await ContentParseLog.create({
+        ...parseLogData,
+        processingResult: "user_not_found",
+        errorMessage: `User not found for order: ${order.orderId}, userId: ${userId}`,
+        responseSent: {
+          success: true,
+          message: "Order processed but user not found",
+          orderId: order.orderId,
+        },
+      });
+
       return res.status(201).json({
         success: true,
         message: "Order processed but user not found",
@@ -280,6 +380,19 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
       sepayId: id,
     });
 
+    // Lưu log với processingResult = "success"
+    await ContentParseLog.create({
+      ...parseLogData,
+      processingResult: "success",
+      responseSent: {
+        success: true,
+        message: "Order processed successfully",
+        orderId: order.orderId,
+        userId: user.userId,
+        countPay: user.countPay,
+      },
+    });
+
     // Trả về status 201 theo yêu cầu SePay cho response thành công
     return res.status(201).json({
       success: true,
@@ -290,6 +403,41 @@ const bankWebhookNotify = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("❌ SePay webhook error:", error);
+
+    // Lưu log với processingResult = "error"
+    try {
+      await ContentParseLog.create({
+        originalContent: req.body?.content || "",
+        contentTrimmed: req.body?.content?.trim() || "",
+        parsedOrderId: null,
+        parseStatus: "failed",
+        matchedPattern: "NONE",
+        orderFound: false,
+        webhookData: {
+          sepayId: req.body?.id,
+          gateway: req.body?.gateway,
+          transactionDate: req.body?.transactionDate,
+          accountNumber: req.body?.accountNumber,
+          code: req.body?.code,
+          transferType: req.body?.transferType,
+          transferAmount: req.body?.transferAmount,
+          accumulated: req.body?.accumulated,
+          subAccount: req.body?.subAccount,
+          referenceCode: req.body?.referenceCode,
+          description: req.body?.description,
+        },
+        processingResult: "error",
+        errorMessage: error.message,
+        responseSent: {
+          success: true,
+          message: "Webhook received (error logged)",
+          error: error.message,
+        },
+      });
+    } catch (logError) {
+      console.error("Failed to save error log:", logError);
+    }
+
     // Trả về success: true ngay cả khi có lỗi để SePay không retry nhiều lần
     // Admin có thể xem log để xử lý
     return res.status(201).json({
