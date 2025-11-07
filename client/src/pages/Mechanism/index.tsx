@@ -1,184 +1,115 @@
 import React from 'react';
 import DefaultLayout from '../../layout/DefaultLayout';
+import { useTranslation } from 'react-i18next';
 
 const Mechanism: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <DefaultLayout>
       <div className="w-full md:p-24 py-24 px-10 space-y-10">
         <div>
-          <h1 className="text-3xl font-bold mb-4">
-            NoExcuseChallenge Mechanism
-          </h1>
-          <p className="">
-            At NoExcuseChallenge, we operate on a robust and transparent
-            mechanism designed to foster growth, fairness, and collaboration
-            within the community. Our mechanism ensures that all members
-            contribute meaningfully while benefiting from the ecosystem. Below
-            are the key components of the NoExcuseChallenge mechanism:
-          </p>
+          <h1 className="text-3xl font-bold mb-4">{t('mechanism.title')}</h1>
+          <p className="">{t('mechanism.intro')}</p>
         </div>
         <div className="space-y-8">
           <div className="space-y-4">
-            <b className="text-xl font-bold">
-              1. Member Contribution Mechanism
-            </b>
+            <b className="text-xl font-bold">{t('mechanism.section1.title')}</b>
+            <p>{t('mechanism.section1.intro')}</p>
             <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
-              <li className="ml-6">
-                Members are required to actively participate in the growth of
-                NoExcuseChallenge by introducing a minimum of 2 new members to
-                qualify for any rewards and benefits.
-              </li>
-              <li className="ml-6">
-                This mechanism incentivizes members to build the community,
-                ensuring a thriving and engaged network.
-              </li>
+              <li className="ml-6">{t('mechanism.section1.itemA')}</li>
+              <li className="ml-6">{t('mechanism.section1.itemB')}</li>
+              <li className="ml-6">{t('mechanism.section1.itemC')}</li>
+              <li className="ml-6">{t('mechanism.section1.itemD')}</li>
+              <li className="ml-6">{t('mechanism.section1.itemE')}</li>
+              <li className="ml-6">{t('mechanism.section1.itemF')}</li>
+            </ul>
+          </div>
+        </div>
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <b className="text-xl font-bold">{t('mechanism.section2.title')}</b>
+            <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
+              <li className="ml-6">{t('mechanism.section2.item1')}</li>
+              <li className="ml-6">{t('mechanism.section2.item2')}</li>
+            </ul>
+          </div>
+        </div>
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <b className="text-xl font-bold">{t('mechanism.section3.title')}</b>
+            <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
+              <li className="ml-6">{t('mechanism.section3.item1')}</li>
+              <li className="ml-6">{t('mechanism.section3.item2')}</li>
+            </ul>
+          </div>
+        </div>
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <b className="text-xl font-bold">{t('mechanism.section4.title')}</b>
+            <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
+              <li className="ml-6">{t('mechanism.section4.item1')}</li>
+              <li className="ml-6">{t('mechanism.section4.item2')}</li>
+            </ul>
+          </div>
+        </div>
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <b className="text-xl font-bold">{t('mechanism.section5.title')}</b>
+            <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
+              <li className="ml-6">{t('mechanism.section5.item1')}</li>
+            </ul>
+          </div>
+        </div>
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <b className="text-xl font-bold">{t('mechanism.section6.title')}</b>
+            <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
+              <li className="ml-6">{t('mechanism.section6.item1')}</li>
+              <li className="ml-6">{t('mechanism.section6.item2')}</li>
+            </ul>
+          </div>
+        </div>
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <b className="text-xl font-bold">{t('mechanism.section7.title')}</b>
+            <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
+              <li className="ml-6">{t('mechanism.section7.item1')}</li>
+              <li className="ml-6">{t('mechanism.section7.item2')}</li>
+            </ul>
+          </div>
+        </div>
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <b className="text-xl font-bold">{t('mechanism.section8.title')}</b>
+            <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
+              <li className="ml-6">{t('mechanism.section8.item1')}</li>
+              <li className="ml-6">{t('mechanism.section8.item2')}</li>
+            </ul>
+          </div>
+        </div>
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <b className="text-xl font-bold">{t('mechanism.section9.title')}</b>
+            <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
+              <li className="ml-6">{t('mechanism.section9.item1')}</li>
+              <li className="ml-6">{t('mechanism.section9.item2')}</li>
             </ul>
           </div>
         </div>
         <div className="space-y-8">
           <div className="space-y-4">
             <b className="text-xl font-bold">
-              2. Benefit Distribution Mechanism
+              {t('mechanism.section10.title')}
             </b>
             <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
-              <li className="ml-6">
-                NoExcuseChallenge ensures that rewards and benefits are
-                distributed transparently and fairly.
-              </li>
-              <li className="ml-6">
-                The allocation of benefits is based on each member’s
-                contributions, including their referrals, engagement in
-                activities, and adherence to NoExcuseChallenge guidelines.
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <b className="text-xl font-bold">
-              3. Blockchain Transparency Mechanism
-            </b>
-            <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
-              <li className="ml-6">
-                All transactions, contributions, and benefit distributions are
-                recorded, crypto transaction are recorded on the blockchain,
-                ensuring transparency, security, and accountability.
-              </li>
-              <li className="ml-6">
-                Members can view their contributions and rewards on the
-                platform, reinforcing trust within the community.
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <b className="text-xl font-bold">
-              4. KYC and Identity Verification Mechanism
-            </b>
-            <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
-              <li className="ml-6">
-                To maintain the integrity and security of the platform, members
-                must complete the KYC (Know Your Customer) process.
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <b className="text-xl font-bold">
-              5. Giving and Receiving Mechanism
-            </b>
-            <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
-              <li className="ml-6">
-                NoExcuseChallenge operates on a giving and receiving model,
-                where members contribute to the community and, in turn, receive
-                support to achieve their dreams.
-              </li>
-              <li className="ml-6">
-                This mechanism fosters collaboration and ensures that resources
-                are distributed in a way that benefits everyone in the
-                ecosystem.
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <b className="text-xl font-bold">
-              6. Community Governance Mechanism
-            </b>
-            <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
-              <li className="ml-6">
-                Members are encouraged to participate in decision-making
-                processes, such as voting on community projects and initiatives.
-              </li>
-              <li className="ml-6">
-                This mechanism ensures that the community has a voice in shaping
-                NoExcuseChallenge’s future, creating a sense of ownership and
-                accountability.
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <b className="text-xl font-bold">
-              7. Mobile and Web Accessibility Mechanism
-            </b>
-            <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
-              <li className="ml-6">
-                Members can access NoExcuseChallenge services anytime, anywhere
-                through user-friendly mobile and web applications.
-              </li>
-              <li className="ml-6">
-                The platform is designed for seamless interaction, allowing
-                members to track their contributions, rewards, and overall
-                engagement.
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <b className="text-xl font-bold">
-              8. Security and Compliance Mechanism
-            </b>
-            <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
-              <li className="ml-6">
-                NoExcuseChallenge prioritizes member data security and complies
-                with relevant regulations to protect sensitive information.
-              </li>
-              <li className="ml-6">
-                All member activities and interactions on the platform are
-                safeguarded by advanced security protocols, including mobile
-                security features.
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <b className="text-xl font-bold">9. Growth Incentive Mechanism</b>
-            <ul className="grid md:grid-cols-2 list-disc gap-4 md:gap-8">
-              <li className="ml-6">
-                Members who actively contribute to community growth and meet
-                specific milestones, such as introducing new members, receive
-                additional rewards and recognition.
-              </li>
-              <li className="ml-6">
-                This mechanism motivates ongoing engagement and ensures
-                NoExcuseChallenge remains vibrant and dynamic.
-              </li>
+              <li className="ml-6">{t('mechanism.section10.item1')}</li>
+              <li className="ml-6">{t('mechanism.section10.item2')}</li>
             </ul>
           </div>
         </div>
         <div className="bg-[#F2F4F7] p-4 rounded-2xl">
-          NoExcuseChallenge’s mechanism is designed to balance growth, fairness,
-          and community-driven collaboration. By aligning individual
-          contributions with collective success, NoExcuseChallenge empowers
-          members to achieve their dreams while fostering a supportive and
-          thriving ecosystem.
+          {t('mechanism.conclusion')}
         </div>
       </div>
     </DefaultLayout>

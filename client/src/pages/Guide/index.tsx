@@ -1,143 +1,144 @@
 import React from 'react';
 import DefaultLayout from '../../layout/DefaultLayout';
+import { useTranslation } from 'react-i18next';
 
 const GuidePage: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <DefaultLayout>
       <div className="w-full md:p-24 py-24 px-10 space-y-10">
         <div>
-          <h1 className="text-3xl font-bold mb-4">
-            NO EXCUSE - MEMBER’S GUIDELINES
-          </h1>
-          <p className="mb-4 font-semibold">
-            NO EXCUSE CHALLENGE is your Path to Prosperity and Purpose By
-            DreamChain
-          </p>
-          <p className="">
-            Congratulations on stepping into a world where your dreams are not
-            just aspirations but achievable goals! DreamChain is more than a
-            platform; it’s a community-driven revolution empowering individuals
-            to turn their ambitions into reality. This guide will show you how
-            to unlock your potential as a DreamChain member and make the most of
-            this groundbreaking opportunity.
-          </p>
+          <h1 className="text-3xl font-bold mb-4">{t('guide.title')}</h1>
+          <p className="mb-4 font-semibold">{t('guide.subtitle')}</p>
+          <p className="">{t('guide.intro')}</p>
         </div>
         <div className="space-y-8">
           <div className="space-y-4">
-            <b className="text-xl font-bold">Step 1: How DreamChain Works</b>
-            <p className="">
-              DreamChain is built for dreamers and doers—those who have the
-              vision to achieve greatness and the drive to make it happen.
-              Membership is entirely voluntary, with no pressure or obligation
-              to join. When a new member joins DreamChain, they contribute 100
-              USDT, which is distributed as follows:
-            </p>
+            <b className="text-xl font-bold">{t('guide.step1.title')}</b>
+            <p className="">{t('guide.step1.description')}</p>
             <ul className="grid gap-4">
               <li className="flex items-start gap-6">
                 <span>
-                  <span className="font-semibold">1. Direct Commission:</span>{' '}
-                  The person who recruits the new member receives 15 USDT as a
-                  direct commission.
-                </span>
-              </li>
-              <li className="flex items-start gap-6">
-                <span>
-                  <span className="font-semibold">2. Member Fee: 5 USDT </span>{' '}
-                  is allocated for platform operations and services.
-                </span>
-              </li>
-              <li className="flex items-start gap-6">
-                <span>
                   <span className="font-semibold">
-                    3. DreamPool Contribution: 5 USDT
+                    {t('guide.step1.item1.label')}
                   </span>{' '}
-                  is contributed to the DreamPool, a community-driven reward
-                  system.
+                  {t('guide.step1.item1.text')}
                 </span>
               </li>
               <li className="flex items-start gap-6">
                 <span>
                   <span className="font-semibold">
-                    4. HEWE Token Holding: 25 USDT
+                    {t('guide.step1.item2.label')}{' '}
+                  </span>{' '}
+                  {t('guide.step1.item2.text')}
+                </span>
+              </li>
+              <li className="flex items-start gap-6">
+                <span>
+                  <span className="font-semibold">
+                    {t('guide.step1.item3.label')}
+                  </span>{' '}
+                  {t('guide.step1.item3.text')}
+                </span>
+              </li>
+              <li className="flex items-start gap-6">
+                <span>
+                  <span className="font-semibold">
+                    {t('guide.step1.item4.label')}
+                  </span>{' '}
+                  {t('guide.step1.item4.text')}{' '}
+                  <span className="font-semibold">
+                    {t('guide.step1.item4.benefit')}
+                  </span>{' '}
+                  <span className="font-semibold">
+                    {t('guide.step1.item4.period')}
                   </span>
-                  is allocated to holding HEWE tokens at the current price.
-                  Members will benefit from{' '}
-                  <span className="font-semibold">
-                    100 USDT worth of HEWE tokens
-                  </span>{' '}
-                  over a <span className="font-semibold">540-day period.</span>
                 </span>
               </li>
               <li className="flex items-start gap-6">
                 <span>
-                  <span className="font-semibold">5. Community Support:</span>{' '}
-                  The remaining <span className="font-semibold">50 USDT</span>
-                  is distributed among 10 members who joined DreamChain before
-                  you, with each receiving{' '}
-                  <span className="font-semibold">5 USDT</span>.
+                  <span className="font-semibold">
+                    {t('guide.step1.item5.label')}
+                  </span>{' '}
+                  {t('guide.step1.item5.text')}{' '}
+                  <span className="font-semibold">
+                    {t('guide.step1.item5.amount')}
+                  </span>{' '}
+                  {t('guide.step1.item5.distributed')}{' '}
+                  {t('guide.step1.item5.each')}
+                </span>
+              </li>
+              <li className="flex items-start gap-6">
+                <span>
+                  <span className="font-semibold">
+                    {t('guide.step1.item6.label')}
+                  </span>
                 </span>
               </li>
             </ul>
-            <div className="text-xl font-bold">For US and Canada</div>
-            <p className="">
-              DreamChain is built for dreamers and doers — those with the vision
-              to achieve greatness and the drive to make it happen. Membership
-              is entirely voluntary, with no pressure or obligation to join.When
-              a new member joins DreamChain, they contribute $200.00, which is
-              distributed as follows:Due to differences in the cost of living
-              across countries, the Tier 1 membership fee and contribution for
-              the No Excuse Challenge vary by country. Starting from Tier 2, the
-              fee and contribution are the same globally.
-            </p>
+            <div className="text-xl font-bold">
+              {t('guide.step1.usCanada.title')}
+            </div>
+            <p className="">{t('guide.step1.usCanada.description')}</p>
             <ul className="grid gap-4">
               <li className="flex items-start gap-6">
                 <span>
-                  <span className="font-semibold">1. Appreciation Reward:</span>{' '}
-                  The person who successfully invites a new member will receive
-                  <b> $55.00</b> as an appreciation reward..
-                </span>
-              </li>
-              <li className="flex items-start gap-6">
-                <span>
-                  <span className="font-semibold">2. Member Fee: $10.00 </span>{' '}
-                  is allocated for platform operations and services
-                </span>
-              </li>
-              <li className="flex items-start gap-6">
-                <span>
                   <span className="font-semibold">
-                    3. DreamPool Contribution: 5 USDT
+                    {t('guide.step1.usCanada.item1.label')}
                   </span>{' '}
-                  is contributed to the DreamPool, a community-driven reward
-                  system.
+                  {t('guide.step1.usCanada.item1.text')}
+                  <b> {t('guide.step1.usCanada.item1.amount')}</b>{' '}
+                  {t('guide.step1.usCanada.item1.suffix')}
                 </span>
               </li>
               <li className="flex items-start gap-6">
                 <span>
                   <span className="font-semibold">
-                    4. HEWE Token Holding: 25 USDT
+                    {t('guide.step1.usCanada.item2.label')}{' '}
+                  </span>{' '}
+                  {t('guide.step1.usCanada.item2.text')}
+                </span>
+              </li>
+              <li className="flex items-start gap-6">
+                <span>
+                  <span className="font-semibold">
+                    {t('guide.step1.usCanada.item3.label')}
+                  </span>{' '}
+                  {t('guide.step1.usCanada.item3.text')}
+                </span>
+              </li>
+              <li className="flex items-start gap-6">
+                <span>
+                  <span className="font-semibold">
+                    {t('guide.step1.usCanada.item4.label')}
+                  </span>{' '}
+                  {t('guide.step1.usCanada.item4.text')}{' '}
+                  <span className="font-semibold">
+                    {t('guide.step1.usCanada.item4.benefit')}
+                  </span>{' '}
+                  <span className="font-semibold">
+                    {t('guide.step1.usCanada.item4.period')}
                   </span>
-                  is allocated to holding HEWE tokens at the current price.
-                  Members will benefit from{' '}
+                </span>
+              </li>
+              <li className="flex items-start gap-6">
+                <span>
                   <span className="font-semibold">
-                    100 USDT worth of HEWE tokens
+                    {t('guide.step1.usCanada.item5.label')}
                   </span>{' '}
-                  over a <span className="font-semibold">540-day period.</span>
-                </span>
-              </li>
-              <li className="flex items-start gap-6">
-                <span>
-                  <span className="font-semibold">5. Community Support:</span>{' '}
-                  The remaining <span className="font-semibold">100 USDT</span>
-                  is distributed among 10 members who joined DreamChain before
-                  you, with each receiving{' '}
-                  <span className="font-semibold">10 USDT</span>.
+                  {t('guide.step1.usCanada.item5.text')}{' '}
+                  <span className="font-semibold">
+                    {t('guide.step1.usCanada.item5.amount')}
+                  </span>{' '}
+                  {t('guide.step1.usCanada.item5.distributed')}{' '}
+                  {t('guide.step1.usCanada.item5.each')}
                 </span>
               </li>
               <li className="flex items-start gap-6">
                 <span>
                   <span className="font-semibold">
-                    6. KYC Face Recognition and Transaction Fees: $5.00
+                    {t('guide.step1.usCanada.item6.label')}
                   </span>
                 </span>
               </li>
@@ -146,39 +147,42 @@ const GuidePage: React.FC = () => {
         </div>
         <div className="space-y-8">
           <div className="space-y-4">
-            <b className="text-xl font-bold">Step 2: Additional Rewards</b>
-            <p className="">
-              DreamChain offers numerous opportunities to maximize your
-              benefits:
-            </p>
+            <b className="text-xl font-bold">{t('guide.step2.title')}</b>
+            <p className="">{t('guide.step2.description')}</p>
             <ul className="grid gap-4 list-disc">
               <li className="flex items-start gap-6">
                 <span>
-                  • <span className="font-semibold">Quick Start Bonus:</span>{' '}
-                  Recruit{' '}
+                  •{' '}
                   <span className="font-semibold">
-                    2 direct members within 45 days
+                    {t('guide.step2.item1.label')}
                   </span>{' '}
-                  and receive an additional{' '}
-                  <span className="font-semibold">10 USDT</span> as a bonus if
-                  member achieved 2 direct refurral within 15 days
-                </span>
-              </li>
-              <li className="flex items-start gap-6">
-                <span>
-                  <span className="font-semibold">• Unlimited Potential:</span>
-                  Recruit as many members as you want and earn{' '}
-                  <span className="font-semibold">15 USDT</span> as direct
-                  commission for each recruit—no limits on earning potential.
-                </span>
-              </li>
-              <li className="flex items-start gap-6">
-                <span>
-                  <span className="font-semibold">• Rank Achievements:</span>
-                  Members who achieve new ranks are rewarded with exclusive
-                  prizes and benefits, including travel experiences,{' '}
+                  {t('guide.step2.item1.text')}{' '}
                   <span className="font-semibold">
-                    luxury gifts, cars, and even homes.
+                    {t('guide.step2.item1.requirement')}
+                  </span>{' '}
+                  {t('guide.step2.item1.bonus')}
+                </span>
+              </li>
+              <li className="flex items-start gap-6">
+                <span>
+                  <span className="font-semibold">
+                    • {t('guide.step2.item2.label')}
+                  </span>{' '}
+                  {t('guide.step2.item2.text')}{' '}
+                  <span className="font-semibold">
+                    {t('guide.step2.item2.amount')}
+                  </span>{' '}
+                  {t('guide.step2.item2.suffix')}
+                </span>
+              </li>
+              <li className="flex items-start gap-6">
+                <span>
+                  <span className="font-semibold">
+                    • {t('guide.step2.item3.label')}
+                  </span>{' '}
+                  {t('guide.step2.item3.text')}{' '}
+                  <span className="font-semibold">
+                    {t('guide.step2.item3.rewards')}
                   </span>
                 </span>
               </li>
@@ -187,102 +191,70 @@ const GuidePage: React.FC = () => {
         </div>
         <div className="space-y-8">
           <div className="space-y-4">
-            <b className="text-xl font-bold">Step 3: DreamPool Rewards</b>
-            <p className="">
-              The <b>DreamPool</b> is a unique feature designed to reward and
-              energize the community. It operates through the{' '}
-              <b>Year-End Splash Party</b>, creating excitement and offering
-              members the chance to earn substantial rewards.
-            </p>
+            <b className="text-xl font-bold">{t('guide.step3.title')}</b>
+            <p className="">{t('guide.step3.description')}</p>
             <div className="space-y-4">
-              <b>How It Works:</b>
+              <b>{t('guide.step3.howItWorks.title')}</b>
+              <p>{t('guide.step3.howItWorks.text')}</p>
               <p>
-                Each tier has its own DreamPool, and each pool includes a
-                different draw held every December. These drawings bring energy
-                and incentive to active members across all tiers
-              </p>
-              <p>
-                For <b>Tier 1 DreamPool</b>, members who achieve{' '}
-                <b>2 direct referrals within 15 days</b> will receive an{' '}
-                <b>extra reward of 10 USDT out of Tier 1 DreamPool.</b>
+                {t('guide.step3.tier1.text')}{' '}
+                <b>{t('guide.step3.tier1.requirement')}</b>{' '}
+                <b>{t('guide.step3.tier1.reward')}</b>
               </p>
             </div>
             <div className="space-y-4">
               <p>
-                At the <b>Year-End Splash Party</b>, the company will determine:
+                <b>{t('guide.step3.yearEnd.title')}</b>
               </p>
               <ul className="grid gap-4 list-disc">
                 <li className="flex items-start gap-6">
-                  <span>• The number of draws</span>
+                  <span>• {t('guide.step3.yearEnd.item1')}</span>
                 </li>
                 <li className="flex items-start gap-6">
-                  • The number of winners
+                  • {t('guide.step3.yearEnd.item2')}
                 </li>
                 <li className="flex items-start gap-6">
-                  • Both are based on the remaining balance in each tier’s
-                  DreamPool
+                  • {t('guide.step3.yearEnd.item3')}
                 </li>
               </ul>
             </div>
             <div className="space-y-4">
-              <b>DreamPool Rewards – Tier 2 and Above</b>
-              <p>
-                Rewards from Tier 2 and higher DreamPools are distributed as
-                follows
-              </p>
+              <b>{t('guide.step3.tier2.title')}</b>
+              <p>{t('guide.step3.tier2.description')}</p>
               <ul className="grid gap-4 list-disc">
                 <li className="flex items-start gap-6">
                   <span>
-                    • <b>50%</b> shared among the <b>top 4 members</b> with the
-                    most active team members in Tier 2
+                    • <b>50%</b> {t('guide.step3.tier2.item1.text')}
                   </span>
                 </li>
                 <li className="flex items-start gap-6">
                   <span>
-                    • <b>25%</b> awarded through a <b>lucky draw</b> to the
-                    <b>25 luckiest members</b>
+                    • <b>25%</b> {t('guide.step3.tier2.item2.text')}
                   </span>
                 </li>
                 <li className="flex items-start gap-6">
                   <span>
-                    • <b>25%</b> awarded through a <b>lucky draw</b> to
-                    <b>50 additional lucky members</b>
+                    • <b>25%</b> {t('guide.step3.tier2.item3.text')}
                   </span>
                 </li>
               </ul>
               <p>
-                <b>Note:</b> These percentages apply{' '}
-                <b>only when a tier is completely filled</b>. If the tier is not
-                full, the company will adjust the number of draws and winners
-                accordingly, based on the remaining balance in the pool
+                <b>{t('guide.step3.tier2.note')}</b>
               </p>
             </div>
           </div>
         </div>
         <div className="space-y-8">
           <div className="space-y-4">
-            <b className="text-xl font-bold">Step 4: Building Your Community</b>
-            <p className="">
-              DreamChain thrives on the collective strength of its members.
-              Here’s how you can actively grow your community:
-            </p>
+            <b className="text-xl font-bold">{t('guide.step4.title')}</b>
+            <p className="">{t('guide.step4.description')}</p>
             <ul className="grid gap-4 list-disc">
               <li className="flex items-start gap-6">
                 <span>
                   <span className="font-semibold">
-                    • Recruitment Requirements:{' '}
+                    • {t('guide.step4.item1.label')}
                   </span>{' '}
-                  Recruit at least 2 direct members to qualify for DreamChain
-                  rewards.
-                </span>
-              </li>
-              <li className="flex items-start gap-6">
-                <span>
-                  <span className="font-semibold">• Strategic Placement:</span>{' '}
-                  Place direct recruits within your
-                  <span className="font-semibold">10-rank structure</span> to
-                  ensure your direct commission for maximum growth and
-                  flexibility.
+                  {t('guide.step4.item1.text')}
                 </span>
               </li>
             </ul>
@@ -290,44 +262,26 @@ const GuidePage: React.FC = () => {
         </div>
         <div className="space-y-8">
           <div className="space-y-4">
-            <b className="text-xl font-bold">
-              Step 5: Rising Through the Ranks
-            </b>
-            <p className="">
-              DreamChain recognizes dedication and rewards achievement:
-            </p>
+            <b className="text-xl font-bold">{t('guide.step5.title')}</b>
+            <p className="">{t('guide.step5.description')}</p>
             <ul className="grid gap-4 list-disc">
               <li className="flex items-start gap-6">
-                <span>
-                  • As you rise through the ranks, you unlock increasingly
-                  valuable rewards.
-                </span>
+                <span>• {t('guide.step5.item1')}</span>
               </li>
               <li className="flex items-start gap-6">
-                <span>
-                  • From exclusive travel experiences to luxury items and even
-                  homeownership, your journey with DreamChain is filled with
-                  milestones worth celebrating.
-                </span>
+                <span>• {t('guide.step5.item2')}</span>
               </li>
             </ul>
           </div>
         </div>
         <div className="space-y-8">
           <div className="space-y-4">
-            <b className="text-xl font-bold">
-              Final Words: Welcome to the Future of Success
-            </b>
-            <p className="">
-              DreamChain is more than a financial opportunity; it’s a movement
-              driven by collective ambition and mutual support. Together, we’re
-              not just dreaming—we’re building a legacy of empowerment,
-              prosperity, and shared success.
-            </p>
+            <b className="text-xl font-bold">{t('guide.final.title')}</b>
+            <p className="">{t('guide.final.text1')}</p>
             <p>
-              Your dreams deserve a platform to flourish. Welcome to DreamChain—{' '}
+              {t('guide.final.text2')}{' '}
               <span className="font-semibold">
-                where dreams meet destiny, and success knows no limits!
+                {t('guide.final.highlight')}
               </span>
             </p>
           </div>

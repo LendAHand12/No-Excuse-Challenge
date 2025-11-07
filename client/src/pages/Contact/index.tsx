@@ -39,11 +39,10 @@ const ContactPage: React.FC = () => {
       <div className="w-full mt-16 lg:mt-10 p-10 lg:p-16 text-black text-lg space-y-24">
         <div className="space-y-10">
           <div className="space-y-2">
-            <h3 className="lg:text-3xl text-2xl font-bold">Contact Us</h3>
-            <p className="text-[16px]">
-              Donec amet est quisque etiam sollicitudin pharetra tortor
-              phasellus enim.
-            </p>
+            <h3 className="lg:text-3xl text-2xl font-bold">
+              {t('contact.title')}
+            </h3>
+            <p className="text-[16px]">{t('contact.subtitle')}</p>
           </div>
           <div className="space-y-10">
             <div className="flex flex-col lg:flex-row gap-10 lg:gap-12">
@@ -61,7 +60,7 @@ const ContactPage: React.FC = () => {
                   />
                 </svg>
                 <div className="space-y-2">
-                  <p className="font-bold">Phone</p>
+                  <p className="font-bold">{t('contact.phone')}</p>
                   <p>+1(844)446-9477</p>
                 </div>
               </div>
@@ -80,7 +79,7 @@ const ContactPage: React.FC = () => {
                 </svg>
 
                 <div className="space-y-2">
-                  <p className="font-bold">Email</p>
+                  <p className="font-bold">{t('contact.email')}</p>
                   <p>support@noexcuse.live</p>
                 </div>
               </div>
@@ -107,7 +106,9 @@ const ContactPage: React.FC = () => {
         </div>
         <div className="space-y-10">
           <div>
-            <h3 className="lg:text-3xl text-2xl font-bold">Contact Direct</h3>
+            <h3 className="lg:text-3xl text-2xl font-bold">
+              {t('contact.contactDirect')}
+            </h3>
             {/* <p className="text-[16px]">
               Donec amet est quisque etiam sollicitudin pharetra tortor
               phasellus enim.
@@ -118,56 +119,56 @@ const ContactPage: React.FC = () => {
               <div className="mb-4.5">
                 <input
                   type="text"
-                  placeholder="Full name"
+                  placeholder={t('contact.form.fullName')}
                   {...register('userName', {
                     required: t('fullname is required'),
                   })}
                   className="w-full rounded-xl placeholder:text-gray-500 border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-NoExcuseChallenge active:border-NoExcuseChallenge disabled:cursor-default disabled:bg-whiter"
                 />
                 <p className="text-red-500 text-sm">
-                  {errors.userName?.message}
+                  {errors.userName?.message as string}
                 </p>
               </div>
               <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                 <div className="w-full xl:w-1/2">
                   <input
                     type="text"
-                    placeholder="Phone number"
+                    placeholder={t('contact.form.phoneNumber')}
                     {...register('phone', {
                       required: t('phone is required'),
                     })}
                     className="w-full rounded-xl placeholder:text-gray-500 border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-NoExcuseChallenge active:border-NoExcuseChallenge disabled:cursor-default disabled:bg-whiter"
                   />
                   <p className="text-red-500 text-sm">
-                    {errors.phone?.message}
+                    {errors.phone?.message as string}
                   </p>
                 </div>
 
                 <div className="w-full xl:w-1/2">
                   <input
                     type="text"
-                    placeholder="Your email"
+                    placeholder={t('contact.form.yourEmail')}
                     {...register('email', {
                       required: t('email is required'),
                     })}
                     className="w-full rounded-xl placeholder:text-gray-500 border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-NoExcuseChallenge active:border-NoExcuseChallenge disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
                   <p className="text-red-500 text-sm">
-                    {errors.email?.message}
+                    {errors.email?.message as string}
                   </p>
                 </div>
               </div>
               <div className="mb-6">
                 <textarea
                   rows={6}
-                  placeholder="Type your message"
+                  placeholder={t('contact.form.typeMessage')}
                   {...register('message', {
                     required: t('message is required'),
                   })}
                   className="w-full rounded-xl placeholder:text-gray-500 border-black border-[1.5px] bg-transparent py-3 px-5 text-black outline-none transition focus:border-NoExcuseChallenge active:border-NoExcuseChallenge disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                 ></textarea>
                 <p className="text-red-500 text-sm">
-                  {errors.message?.message}
+                  {errors.message?.message as string}
                 </p>
               </div>
 
@@ -175,7 +176,7 @@ const ContactPage: React.FC = () => {
                 type="submit"
                 className="flex w-36 text-[16px] justify-center rounded-xl border-black bg-black p-3 font-medium text-NoExcuseChallenge hover:bg-opacity-90"
               >
-                Advise Me
+                {t('contact.form.submitButton')}
                 {loading && <Loading />}
               </button>
             </form>

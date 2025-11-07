@@ -892,5 +892,426 @@
       "notAvailable": "N/A"
     },
     "noContent": "No pending orders or transactions found"
+  },
+  "guide": {
+    "title": "NO EXCUSE - MEMBER'S GUIDELINES",
+    "subtitle": "NO EXCUSE CHALLENGE is your Path to Prosperity and Purpose By NO EXCUSE CHALLENGE",
+    "intro": "Congratulations on stepping into a world where your dreams are not just aspirations but achievable goals! NO EXCUSE CHALLENGE is more than a platform; it's a community-driven revolution empowering individuals to turn their ambitions into reality. This guide will show you how to unlock your potential as a NO EXCUSE CHALLENGE member and make the most of this groundbreaking opportunity.",
+    "step1": {
+      "title": "Step 1: How No Excuse Challenge Works",
+      "description": "No Excuse Challenge is built for dreamers and doers—those who have the vision to achieve greatness and the drive to make it happen. Membership is entirely voluntary, with no pressure or obligation to join. When a new member joins No Excuse Challenge, they contribute 102.2 USDT, which is distributed as follows:",
+      "item1": {
+        "label": "1. Community Appreciation reward:",
+        "text": "The person who recruits the new member receives 15 USDT as a direct commission."
+      },
+      "item2": {
+        "label": "2. Member Fee: 5 USDT",
+        "text": "is allocated for platform operations and services."
+      },
+      "item3": {
+        "label": "3. DreamPool Contribution: 5 USDT",
+        "text": "is contributed to the DreamPool, a community-driven reward system."
+      },
+      "item4": {
+        "label": "4. HEWE Token Holding: 25 USDT",
+        "text": "is allocated to holding HEWE tokens at the current price. Members will benefit from",
+        "benefit": "100 USDT worth of HEWE tokens",
+        "period": "over a 540-day period."
+      },
+      "item5": {
+        "label": "5. Community Support:",
+        "text": "The remaining",
+        "amount": "50 USDT",
+        "distributed": "is distributed among 10 members who joined No Excuse Challenge before you, with each receiving",
+        "each": "5 USDT"
+      },
+      "item6": {
+        "label": "6. KYC Face Recognition and Transaction Fees: 2.20 USDT"
+      },
+      "usCanada": {
+        "title": "For US and Canada",
+        "description": "No Excuse Challenge is built for dreamers and doers — those with the vision to achieve greatness and the drive to make it happen. Membership is entirely voluntary, with no pressure or obligation to join.When a new member joins No Excuse Challenge, they contribute $200.00, which is distributed as follows:Due to differences in the cost of living across countries, the Tier 1 membership fee and contribution for the No Excuse Challenge vary by country. Starting from Tier 2, the fee and contribution are the same globally.",
+        "item1": {
+          "label": "1. Community Appreciation Reward:",
+          "text": "The person who successfully invites a new member will receive",
+          "amount": "$55.00",
+          "suffix": "as an appreciation reward.."
+        },
+        "item2": {
+          "label": "2. Member Fee: $10.00",
+          "text": "is allocated for platform operations and services"
+        },
+        "item3": {
+          "label": "3. DreamPool Contribution: 5 USDT",
+          "text": "is contributed to the DreamPool, a community-driven reward system."
+        },
+        "item4": {
+          "label": "4. HEWE Token Holding: 25 USDT",
+          "text": "is allocated to holding HEWE tokens at the current price. Members will benefit from",
+          "benefit": "100 USDT worth of HEWE tokens",
+          "period": "over a 540-day period."
+        },
+        "item5": {
+          "label": "5. Community Support:",
+          "text": "The remaining",
+          "amount": "100 USDT",
+          "distributed": "is distributed among 10 members who joined No Excuse Challenge before you, with each receiving",
+          "each": "10 USDT"
+        },
+        "item6": {
+          "label": "6. KYC Face Recognition and Transaction Fees: $5.00"
+        }
+      }
+    },
+    "step2": {
+      "title": "Step 2: Additional Rewards",
+      "description": "No Excuse Challenge offers numerous opportunities to maximize your benefits:",
+      "item1": {
+        "label": "Quick Start Bonus:",
+        "text": "Recruit",
+        "requirement": "2 direct members within 30 days",
+        "bonus": "and receive an additional 10 USDT as a bonus if member achieved 2 direct refurral within 15 days"
+      },
+      "item2": {
+        "label": "Unlimited Potential:",
+        "text": "Recruit as many members as you want and earn",
+        "amount": "15 USDT",
+        "suffix": "as direct commission for each recruit—no limits on earning potential."
+      },
+      "item3": {
+        "label": "Achievements:",
+        "text": "Members who achieve new ranks are rewarded with exclusive prizes and benefits, including travel experiences,",
+        "rewards": "luxury gifts, cars, and even homes."
+      }
+    },
+    "step3": {
+      "title": "Step 3: DreamPool Rewards",
+      "description": "The DreamPool is a unique feature designed to reward and energize the community. It operates through the Year-End Splash Party, creating excitement and offering members the chance to earn substantial rewards.",
+      "howItWorks": {
+        "title": "How It Works:",
+        "text": "Each tier has its own DreamPool, and each pool includes a different draw held every December. These drawings bring energy and incentive to active members across all tiers"
+      },
+      "tier1": {
+        "text": "For Tier 1 DreamPool, members who achieve",
+        "requirement": "2 direct referrals within 15 days",
+        "reward": "will receive an extra reward of 10 USDT out of Tier 1 DreamPool."
+      },
+      "yearEnd": {
+        "title": "At the Year-End Splash Party, the company will determine:",
+        "item1": "The number of draws",
+        "item2": "The number of winners",
+        "item3": "Both are based on the remaining balance in each tier's DreamPool"
+      },
+      "tier2": {
+        "title": "DreamPool Rewards – Tier 2 and Above",
+        "description": "Rewards from Tier 2 and higher DreamPools are distributed as follows",
+        "item1": {
+          "text": "50% shared among the top 4 members with the most active team members in Tier 2"
+        },
+        "item2": {
+          "text": "25% awarded through a lucky draw to the 25 luckiest members"
+        },
+        "item3": {
+          "text": "25% awarded through a lucky draw to 50 additional lucky members"
+        },
+        "note": "Note: These percentages apply only when a tier is completely filled. If the tier is not full, the company will adjust the number of draws and winners accordingly, based on the remaining balance in the pool"
+      }
+    },
+    "step4": {
+      "title": "Step 4: Building Your Community",
+      "description": "No Excuse Challenge thrives on the collective strength of its members. Here's how you can actively grow your community:",
+      "item1": {
+        "label": "Premium Member Requirements:",
+        "text": "Recruit at least 2 direct members to qualify for No Excuse Challenge rewards."
+      }
+    },
+    "step5": {
+      "title": "Step 5: Rising Through the Ranks",
+      "description": "No Excuse Challenge recognizes dedication and rewards achievement:",
+      "item1": "As you rise through the ranks, you unlock increasingly valuable rewards.",
+      "item2": "From exclusive travel experiences to luxury items and even homeownership, your journey with No Excuse Challenge is filled with milestones worth celebrating."
+    },
+    "final": {
+      "title": "Final Words: Welcome to the Future of Success",
+      "text1": "No Excuse Challenge is more than a financial opportunity; it's a movement driven by collective ambition and mutual support. Together, we're not just dreaming—we're building a legacy of empowerment, prosperity, and shared success.",
+      "text2": "Your dreams deserve a platform to flourish. Welcome to No Excuse Challenge—",
+      "highlight": "where dreams meet destiny, and success knows no limits!"
+    }
+  },
+  "terms": {
+    "title": "NoExcuseChallenge TERMS & CONDITIONS",
+    "effectiveDate": "Effective Date: April 12, 2025",
+    "section1": {
+      "title": "1. Acceptance of Terms",
+      "content": "By accessing or using the NoExcuseChallenge website (noexcuse.live), our services, technology products, or management programs, you (\"User\" or \"you\") agree to be bound by these Terms & Conditions. If you do not agree to all of these Terms, please do not use the Services."
+    },
+    "section2": {
+      "title": "2. Eligibility",
+      "content": "You must be at least the age of majority in your jurisdiction to use the Services. By using the Site, you represent and warrant that you have the legal capacity to enter into a binding agreement and that all information you provide is accurate and truthful"
+    },
+    "section3": {
+      "title": "3. Changes to Terms",
+      "content": "NoExcuseChallenge reserves the right, at our discretion, to modify, update, or replace these Terms at any time. Any changes will be effective immediately upon posting. It is your responsibility to review these Terms periodically for updates. Your continued use of the Services after changes are posted constitutes acceptance of the updated Terms."
+    },
+    "section4": {
+      "title": "4. Intellectual Property",
+      "content": "All content, logos, designs, text, graphics, images, and other materials on the Site are the property of NoExcuseChallenge or its licensors and are protected by intellectual property laws. You agree not to reproduce, distribute, modify, create derivative works, or otherwise exploit any content without our express written permission."
+    },
+    "section5": {
+      "title": "5. User Conduct",
+      "intro": "You agree not to use the Site or Services for any unlawful purpose or in a manner that violates these Terms. Prohibited activities include, but are not limited to:",
+      "item1": "Impersonating any person or entity, or falsely stating or misrepresenting your affiliation with any person or entity.",
+      "item2": "Posting or transmitting content that is unlawful, harmful, threatening, defamatory, obscene, or otherwise objectionable.",
+      "item3": "Attempting to gain unauthorized access to our systems or the accounts of other users."
+    },
+    "section6": {
+      "title": "6. Third-Party Links",
+      "content": "The Site may contain links to third-party websites or resources. NoExcuseChallenge does not endorse and is not responsible for the accuracy or content of these external sites. Your use of third-party websites is at your own risk and subject to their respective terms and conditions."
+    },
+    "section7": {
+      "title": "7. Disclaimers",
+      "content": "The Services are provided on an \"as is\" and \"as available\" basis without warranties of any kind, whether express or implied. NoExcuseChallenge does not guarantee that the Services will be secure, error-free, uninterrupted, or meet your specific requirements."
+    },
+    "section8": {
+      "title": "8. Limitation of Liability",
+      "content": "To the fullest extent permitted by law, NoExcuseChallenge and its officers, directors, employees, agents, and affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or related to your use of the Services."
+    },
+    "section9": {
+      "title": "9. Indemnification",
+      "content": "You agree to indemnify, defend, and hold harmless NoExcuseChallenge and its affiliates, officers, directors, employees, and agents from and against any claims, liabilities, damages, losses, and expenses arising from your use of the Services or violation of these Terms."
+    },
+    "section10": {
+      "title": "10. Governing Law",
+      "content": "These Terms shall be governed by and construed in accordance with the laws of [Your Country/State], without regard to conflict of law principles. Any disputes arising from these Terms or your use of the Services shall be resolved exclusively in the courts located in United State International law."
+    },
+    "section11": {
+      "title": "11. Termination",
+      "content": "We may, at our sole discretion, suspend or terminate your access to the Services at any time, with or without notice, for any reason, including if we believe you have violated these Terms."
+    },
+    "section12": {
+      "title": "12. Severability",
+      "content": "If any provision of these Terms is found to be invalid or unenforceable, that provision shall be enforced to the maximum extent permissible, and the remaining provisions shall remain in full force and effect."
+    },
+    "section13": {
+      "title": "13. Personal Data Processing and Transfer",
+      "item1": "\"Personal data\" refers to electronic information in the form of symbols, letters, numbers, images, sounds, or equivalents associated with an individual or used to identify an individual. Personal data includes both general personal data and sensitive personal data, as defined and regulated under applicable laws and regulations.",
+      "item2": "By accessing this website and/or using the Services, you acknowledge and agree that your personal data may be collected, stored, processed, and transferred to relevant third parties for the purpose of providing, maintaining, and improving the Services.",
+      "item3": "Such personal data may be transferred outside the territory of Vietnam, where our servers or service providers are located. We are committed to complying with all applicable Vietnamese laws on personal data protection and will require receiving parties to implement appropriate security measures to ensure the safety of your data."
+    },
+    "section14": {
+      "title": "14. Entire Agreement",
+      "content": "These Terms constitute the entire agreement between you and NoExcuseChallenge concerning your use of the Services, superseding any prior agreements."
+    }
+  },
+  "mechanism": {
+    "title": "NoExcuseChallenge Mechanism",
+    "intro": "At NoExcuseChallenge, we operate on a robust and transparent mechanism designed to foster growth, fairness, and collaboration within the community. Our mechanism ensures that all members contribute meaningfully while benefiting from the ecosystem. Below are the key components of the NoExcuseChallenge mechanism:",
+    "section1": {
+      "title": "1. Member Benefits",
+      "intro": "As a member of the No Excuse Challenge community, you receive:",
+      "itemA": "A- Access to the No Excuse Challenge Platform — where transformation begins.",
+      "itemB": "B- Access to our Premium Walking App — walk for your health, earn for your growth.",
+      "itemC": "C- Access to the AmChain Blockchain — built for speed, security, and real-world use.",
+      "itemD": "D- Access to our Quantum Wallet — a post-quantum, -secure wallet for the future.",
+      "itemE": "E- Reward HEWE worth of the membership fee — your Health & Wealth digital asset.",
+      "itemF": "F- Eligibility to Upgrade and Maintain Premium Membership — giving you continued participation in the Challenge Program, where you receive community contributions, appreciation rewards, and exclusive company bonuses."
+    },
+    "section2": {
+      "title": "2. Premium Member Contribution Mechanism",
+      "item1": "Premium members are required to actively participate in the growth of No Excuse Challenge by introducing a minimum of 2 new members to qualify for any rewards and benefits.",
+      "item2": "This mechanism incentivizes members to build the community, ensuring a thriving and engaged network."
+    },
+    "section3": {
+      "title": "3. Benefit Distribution Mechanism",
+      "item1": "NoExcuseChallenge ensures that rewards and benefits are distributed transparently and fairly.",
+      "item2": "The allocation of benefits is based on each member's contributions, including their referrals, engagement in activities, and adherence to NoExcuseChallenge guidelines."
+    },
+    "section4": {
+      "title": "4. Blockchain Transparency Mechanism",
+      "item1": "All transactions, contributions, and benefit distributions are recorded, crypto transaction are recorded on the blockchain, ensuring transparency, security, and accountability.",
+      "item2": "Members can view their contributions and rewards on the platform, reinforcing trust within the community."
+    },
+    "section5": {
+      "title": "5. KYC and Identity Verification Mechanism",
+      "item1": "To maintain the integrity and security of the platform, members must complete the KYC (Know Your Customer) process."
+    },
+    "section6": {
+      "title": "6. Giving and Receiving Mechanism",
+      "item1": "NoExcuseChallenge operates on a giving and receiving model, where members contribute to the community and, in turn, receive support to achieve their dreams.",
+      "item2": "This mechanism fosters collaboration and ensures that resources are distributed in a way that benefits everyone in the ecosystem."
+    },
+    "section7": {
+      "title": "7. Community Governance Mechanism",
+      "item1": "Members are encouraged to participate in decision-making processes, such as voting on community projects and initiatives.",
+      "item2": "This mechanism ensures that the community has a voice in shaping NoExcuseChallenge's future, creating a sense of ownership and accountability."
+    },
+    "section8": {
+      "title": "8. Mobile and Web Accessibility Mechanism",
+      "item1": "Members can access NoExcuseChallenge services anytime, anywhere through user-friendly mobile and web applications.",
+      "item2": "The platform is designed for seamless interaction, allowing members to track their contributions, rewards, and overall engagement."
+    },
+    "section9": {
+      "title": "9. Security and Compliance Mechanism",
+      "item1": "NoExcuseChallenge prioritizes member data security and complies with relevant regulations to protect sensitive information.",
+      "item2": "All member activities and interactions on the platform are safeguarded by advanced security protocols, including mobile security features."
+    },
+    "section10": {
+      "title": "9. Growth Incentive Mechanism",
+      "item1": "Members who actively contribute to community growth and meet specific milestones, such as introducing new members, receive additional rewards and recognition.",
+      "item2": "This mechanism motivates ongoing engagement and ensures NoExcuseChallenge remains vibrant and dynamic."
+    },
+    "conclusion": "NoExcuseChallenge's mechanism is designed to balance growth, fairness, and community-driven collaboration. By aligning individual contributions with collective success, NoExcuseChallenge empowers members to achieve their dreams while fostering a supportive and thriving ecosystem."
+  },
+  "rules": {
+    "title": "🚀 No Excuse Challenge",
+    "subtitle": "RULES & REGULATIONS",
+    "section1": {
+      "title": "1. Platform Policy",
+      "item1": "We provide a platform for peer-to-peer contributions and community-driven support. All decisions are made independently by participants.",
+      "item2": "Ameritec IPS, a U.S. corporation, proudly provides this platform, operating under U.S. regulations."
+    },
+    "section2": {
+      "title": "2. General Terms",
+      "item1": {
+        "label": "One ID Per Person",
+        "text": "Duplicate or fake accounts are strictly prohibited. Violations result in immediate termination."
+      },
+      "item2": {
+        "label": "No Negative Talk",
+        "text": "Speaking negatively about the company, program, or community is prohibited. Violators will receive a warning, suspension, or termination."
+      },
+      "item3": {
+        "label": "No System Abuse",
+        "text": "Manipulation, cheating, or exploiting the system will lead to immediate account termination."
+      },
+      "item4": {
+        "label": "No Cross-Recruiting",
+        "text": "Recruiting Lend A Hand (or DreamChain) members into other programs or MLMs is prohibited. Violation = Warning → Permanent Ban."
+      },
+      "item5": {
+        "label": "Stay Active & Committed",
+        "text": "Members must actively participate to maintain their benefits. Extended inactivity may result in benefit loss or removal."
+      },
+      "item6": {
+        "label": "Respect & Integrity",
+        "text": "Treat all members fairly and professionally."
+      },
+      "item7": {
+        "label": "No Unauthorized Transfers",
+        "text": "Selling, gifting, or transferring accounts without written approval is forbidden."
+      },
+      "item8": {
+        "label": "Compliance",
+        "text": "All members must follow DreamChain's official policies and guidelines. Non-compliance may lead to account restrictions or termination."
+      }
+    },
+    "section3": {
+      "title": "3. Participation Requirements",
+      "premium": {
+        "label": "Premium Requirement:",
+        "item1": "Members must personally refer at least two (2) live direct referrals within 45 days of registration.",
+        "item2": "Failure to comply will result in account disqualification and loss of all benefits from the No Excuse Challenge community."
+      },
+      "penalty": {
+        "label": "Penalty for Disqualification:",
+        "item1": "Disqualified members must wait 365 days before re-registering.",
+        "item2": "A 100 USDT penalty contribution will be required, which will be added to the Tier 1 DreamPool Fund to support active participants."
+      },
+      "binary": {
+        "label": "Binary System Clarification:",
+        "item1": "No Excuse Challenge uses a binary concept.",
+        "item2": "Members will only benefit from the branch (left or right) where they have placed their direct referrals.",
+        "item3": "Branches without direct referrals will not generate contribution benefits."
+      }
+    },
+    "section4": {
+      "title": "4. Accounts and Eligibility",
+      "item1": "Members must maintain 62 active IDs (direct and indirect) in Tier 1 to unlock and keep access to benefits in Tier 2 and beyond.",
+      "item2": "Main accounts are eligible for promotions and rewards.",
+      "item3": "Sub-accounts (recycling accounts) are for system support and are not eligible for promotions or bonuses."
+    },
+    "section5": {
+      "title": "5. Important Legal Notes",
+      "item1": "No Excuse Challenge, DreamChain, and Ameritec IPS, American Technology are not financial advisors.",
+      "item2": "The platform facilitates giving and receiving contributions within the community in a transparent and fair manner.",
+      "item3": "Participation is voluntary. Participants are responsible for their own physical, emotional, and financial well-being.",
+      "item4": "Organizers are not liable for any personal loss, injury, or damage."
+    },
+    "section6": {
+      "title": "6. Registration and Honesty",
+      "item1": "Members must register through the official platform, website, or app.",
+      "item2": "Members must complete tasks and challenges with honesty and integrity.",
+      "item3": "Membership is open worldwide unless prohibited by local laws.",
+      "item4": "Participants must be 18 years or older."
+    },
+    "section7": {
+      "title": "7. Compliance and Enforcement",
+      "item1": "Failure to comply with these Terms and Conditions may result in immediate disqualification.",
+      "item2": "The organizers reserve the right to disqualify participants to preserve the integrity and spirit of the No Excuse Challenge."
+    },
+    "section8": {
+      "title": "🚀 Our Core Principles: R.O.S.C.A.",
+      "item1": "🔴 Rotate: Move assets to keep the system alive.",
+      "item2": "🟠 Offer: Help others through contribution.",
+      "item3": "🟡 Support: Circulate wealth within the community.",
+      "item4": "🟢 Contribute: Actively play your role.",
+      "item5": "🔵 Advance: The more you give, the more the community grows."
+    },
+    "section9": {
+      "title": "IMPORTANT: NO EXCUSE CHALLENGE is a challenge program.",
+      "item1": "This is not an investment.",
+      "item2": "This is not multi-level marketing.",
+      "item3": "This is a movement — a global community of dreamers, doers, and believers.",
+      "text1": "We are the No Excuse Challenge we awaken potential, we share values, we change lives.",
+      "text2": "Remember: Recruitment is optional, but to unlock your full potential and enjoy all benefits, upgrade yourself to become a Premium Member."
+    }
+  },
+  "service": {
+    "title": "NoExcuseChallenge Services",
+    "intro": "At NoExcuseChallenge, we are committed to empowering individuals and fostering a thriving community through innovative software solutions. Our services include:",
+    "conclusion": {
+      "title": "NoExcuseChallenge is more than a platform",
+      "text": "it's a community-driven ecosystem where technology meets purpose, helping you turn dreams into reality. Join us and take the first step toward achieving your aspirations."
+    },
+    "features": {
+      "feature1": {
+        "title": "Mobile Security Solutions",
+        "desc": "We provide advanced mobile security for our members, safeguarding personal data and ensuring a secure environment for all transactions."
+      },
+      "feature2": {
+        "title": "Community-Building Platform",
+        "desc": "NoExcuseChallenge helps create a supportive community where members collaborate, contribute, and help each other achieve their dreams through a giving and receiving model."
+      },
+      "feature3": {
+        "title": "Transparent and Fair Benefit Distribution",
+        "desc": "Our software ensures transparency and fairness, accurately distributing benefits to members based on their contributions and engagement."
+      },
+      "feature4": {
+        "title": "Token-Based",
+        "desc": "Enable your dreams by connecting with like-minded supporters and leveraging blockchain-powered tokenized opportunities."
+      },
+      "feature5": {
+        "title": "Seamless Accessibility",
+        "desc": "Access NoExcuseChallenge services anytime, anywhere with our intuitive mobile and web applications designed for a seamless and user-friendly experience."
+      },
+      "feature6": {
+        "title": "Support for Meaningful Causes",
+        "desc": "Make a real impact by supporting initiatives with blockchain transparency, ensuring your contributions create meaningful change."
+      }
+    }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Donec amet est quisque etiam sollicitudin pharetra tortor phasellus enim.",
+    "phone": "Phone",
+    "email": "Email",
+    "contactDirect": "Contact Direct",
+    "form": {
+      "fullName": "Full name",
+      "phoneNumber": "Phone number",
+      "yourEmail": "Your email",
+      "typeMessage": "Type your message",
+      "submitButton": "Advise Me"
+    }
   }
 }
