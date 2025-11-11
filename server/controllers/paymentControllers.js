@@ -289,6 +289,18 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
               if (p.userId !== refUser.userId) {
                 haveParentNotPayEnough = true;
               }
+            } else {
+              let childrenWithCountPay13 = 0;
+              for (const childTree of listRefOfReceiver) {
+                const childUser = await User.findById(childTree.userId).select("countPay");
+                if (childUser && childUser.countPay === 13) {
+                  childrenWithCountPay13++;
+                }
+              }
+
+              if (childrenWithCountPay13 < 2) {
+                haveParentNotPayEnough = true;
+              }
             }
           }
 
@@ -362,8 +374,8 @@ const createBankOrder = asyncHandler(async (req, res) => {
       const timestamp = Date.now();
       const randomSuffix = Math.floor(Math.random() * 1000)
         .toString()
-        .padStart(3, '0'); // 3 chữ số random (000-999)
-      orderId = `NEC${String(timestamp).padStart(13, '0')}${randomSuffix}`.toUpperCase();
+        .padStart(3, "0"); // 3 chữ số random (000-999)
+      orderId = `NEC${String(timestamp).padStart(13, "0")}${randomSuffix}`.toUpperCase();
 
       // Try to create order
       order = await Order.create({
@@ -1662,14 +1674,8 @@ const searchPendingOrder = asyncHandler(async (req, res) => {
 // @access  Private/Admin
 const approveBankPayment = asyncHandler(async (req, res) => {
   const { user: admin } = req;
-  const {
-    orderId,
-    transactionIds,
-    bankTransactionId,
-    transferContent,
-    amount,
-    adminNote,
-  } = req.body;
+  const { orderId, transactionIds, bankTransactionId, transferContent, amount, adminNote } =
+    req.body;
 
   if (!orderId && !transactionIds) {
     res.status(400);
@@ -1708,9 +1714,7 @@ const approveBankPayment = asyncHandler(async (req, res) => {
 
   // Update transactions if provided
   if (transactionIds && transactionIds.length > 0) {
-    const transIdsList = Array.isArray(transactionIds)
-      ? transactionIds
-      : [transactionIds];
+    const transIdsList = Array.isArray(transactionIds) ? transactionIds : [transactionIds];
 
     for (let transId of transIdsList) {
       const transaction = await Transaction.findById(transId);
@@ -1746,8 +1750,7 @@ const approveBankPayment = asyncHandler(async (req, res) => {
             // Update recipient user's available USDT
             const userReceive = await User.findById(transaction.userId_to);
             if (userReceive) {
-              userReceive.availableUsdt =
-                (userReceive.availableUsdt || 0) + transaction.amount;
+              userReceive.availableUsdt = (userReceive.availableUsdt || 0) + transaction.amount;
               await userReceive.save();
             }
           }
@@ -1764,8 +1767,7 @@ const approveBankPayment = asyncHandler(async (req, res) => {
           // Handle error if needed
         }
         const hewePriceConfig = await Config.findOne({ label: "HEWE_PRICE" });
-        const hewePrice =
-          responseHewe?.data?.ticker?.latest || hewePriceConfig?.value || 0;
+        const hewePrice = responseHewe?.data?.ticker?.latest || hewePriceConfig?.value || 0;
         const totalPriceHewe = userObj.city === "IN" ? 200 : 100;
         const totalDayReturnHewe = userObj.city === "IN" ? 730 : 540;
         const totalHewe = Math.round(totalPriceHewe / hewePrice);

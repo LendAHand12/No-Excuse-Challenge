@@ -173,10 +173,10 @@ const Profile = () => {
           if (
             response.data.errLahCode !== 'OVER45' &&
             (!response.data.bankName ||
-            !response.data.bankCode ||
-            !response.data.accountName ||
-            !response.data.accountNumber ||
-            !response.data.dateOfBirth)
+              !response.data.bankCode ||
+              !response.data.accountName ||
+              !response.data.accountNumber ||
+              !response.data.dateOfBirth)
           ) {
             setShowBankInfoModal(true);
           }
@@ -743,7 +743,7 @@ const Profile = () => {
           </div>
         )}
 
-        {tier === 2 && dieTime && (
+        {tier === 2 && dieTime && countdown > 0 && countdown <= 15 && (
           <div
             className="text-lg w-fit bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
             role="alert"
@@ -755,7 +755,7 @@ const Profile = () => {
           </div>
         )}
 
-        {tier === 1 && dieTime && (
+        {tier === 1 && dieTime && countdown > 0 && countdown <= 15 && (
           <div
             className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
             role="alert"

@@ -530,29 +530,35 @@ const UserProfile = () => {
             </div>
           )} */}
 
-          {data.tier === 2 && data.dieTime && data.countdown > 0 && (
-            <div
-              className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
-              role="alert"
-            >
-              <span className="block sm:inline">
-                You have only <b>{data.countdown}</b> days left to complete the
-                62 required IDs to be eligible for Tier 2 benefits.
-              </span>
-            </div>
-          )}
+          {data.tier === 2 &&
+            data.dieTime &&
+            data.countdown > 0 &&
+            data.countdown <= 15 && (
+              <div
+                className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
+                role="alert"
+              >
+                <span className="block sm:inline">
+                  You have only <b>{data.countdown}</b> days left to complete
+                  the 62 required IDs to be eligible for Tier 2 benefits.
+                </span>
+              </div>
+            )}
 
-          {data.tier === 1 && data.dieTime && data.countdown > 0 && (
-            <div
-              className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
-              role="alert"
-            >
-              <span className="block sm:inline">
-                You have only <b>{data.countdown}</b> days left to complete
-                referring at least 2 people in 2 different branches.
-              </span>
-            </div>
-          )}
+          {data.tier === 1 &&
+            data.dieTime &&
+            data.countdown > 0 &&
+            data.countdown <= 15 && (
+              <div
+                className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
+                role="alert"
+              >
+                <span className="block sm:inline">
+                  You have only <b>{data.countdown}</b> days left to complete
+                  referring at least 2 people in 2 different branches.
+                </span>
+              </div>
+            )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="md:flex no-wrap">
             <div className="w-full lg:w-3/12 lg:mx-2 mb-4 lg:mb-0">
