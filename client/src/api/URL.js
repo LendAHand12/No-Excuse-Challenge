@@ -31,3 +31,4 @@ export const URL_API_MOVE_SYSTEM = '/api/move-system';
 export const URL_API_SWAP = '/api/swap';
 export const URL_API_PRE_TIER_2 = '/api/pre-tier-2';
 export const URL_API_TICKET = '/api/tickets';
+export const URL_API_NOTIFICATION = '/api/notifications';

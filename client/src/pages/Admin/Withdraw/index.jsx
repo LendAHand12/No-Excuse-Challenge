@@ -40,6 +40,7 @@ const AdminWithdrawPages = () => {
   const [keyword, setKeyword] = useState(key);
   const [showPaymentInfo, setShowPaymentInfo] = useState(false);
   const [transferContent, setTransferContent] = useState('');
+  const [cancelReason, setCancelReason] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const onSearch = (e) => {
@@ -75,6 +76,7 @@ const AdminWithdrawPages = () => {
 
   const closeModal = () => {
     setShowModal(false);
+    setCancelReason('');
   };
 
   const pushParamsToUrl = (pageNumber, searchStatus, keyword) => {
@@ -264,17 +266,24 @@ const AdminWithdrawPages = () => {
     setShowModal(true);
     setCurrentRequestStatus('cancel');
     setCurrentCancelRequest(request);
+    setCancelReason('');
   };
 
   const cancelWithdraw = useCallback(async () => {
+    if (!cancelReason.trim()) {
+      toast.error('Vui lòng nhập lý do hủy yêu cầu rút tiền');
+      return;
+    }
     await Admin.updateWithdraw({
       hash: '',
       status: 'CANCEL',
       id: currentCancelRequest._id,
+      cancelReason: cancelReason.trim(),
     })
       .then((response) => {
         toast.success(t(response.data.message));
         setShowModal(false);
+        setCancelReason('');
         setRefresh(!refresh);
       })
       .catch((error) => {
@@ -284,7 +293,7 @@ const AdminWithdrawPages = () => {
             : error.message;
         toast.error(t(message));
       });
-  }, [currentCancelRequest]);
+  }, [currentCancelRequest, cancelReason]);
 
   const handleExportWithdraw = async () => {
     navigate('/admin/withdraw/export');
@@ -353,6 +362,22 @@ const AdminWithdrawPages = () => {
               <p className="mb-4 text-gray-500 ">
                 Are you sure you want to {currentRequestStatus} this request?
               </p>
+              {currentRequestStatus === 'cancel' && (
+                <div className="mb-4">
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Lý do hủy yêu cầu rút tiền{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    placeholder="Nhập lý do hủy yêu cầu rút tiền..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    rows="3"
+                    required
+                  />
+                </div>
+              )}
               <div className="flex justify-center items-center space-x-4">
                 <button
                   onClick={closeModal}

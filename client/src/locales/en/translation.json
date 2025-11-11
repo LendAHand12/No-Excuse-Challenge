@@ -1313,5 +1313,31 @@
       "typeMessage": "Type your message",
       "submitButton": "Advise Me"
     }
+  },
+  "notification": {
+    "title": "Notifications",
+    "markAllAsRead": "Mark all as read",
+    "loading": "Loading...",
+    "noNotifications": "No notifications",
+    "markAsRead": "Mark as read",
+    "delete": "Delete",
+    "loadMore": "Load more",
+    "justNow": "Just now",
+    "minutesAgo": "m ago",
+    "hoursAgo": "h ago",
+    "daysAgo": "d ago",
+    "failedToLoad": "Failed to load notifications",
+    "failedToMarkAsRead": "Failed to mark notification as read",
+    "allMarkedAsRead": "All notifications marked as read",
+    "failedToMarkAllAsRead": "Failed to mark all as read",
+    "failedToDelete": "Failed to delete notification",
+    "showUnreadOnly": "Unread only",
+    "showAll": "Show all",
+    "types": {
+      "INFO": "Info",
+      "WARNING": "Warning",
+      "SUCCESS": "Success",
+      "ERROR": "Error"
+    }
   }
 }

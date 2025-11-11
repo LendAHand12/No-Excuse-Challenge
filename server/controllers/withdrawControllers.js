@@ -2,8 +2,10 @@ import asyncHandler from "express-async-handler";
 import Withdraw from "../models/withdrawModel.js";
 import User from "../models/userModel.js";
 import Claim from "../models/claimModel.js";
+import Notification from "../models/notificationModel.js";
 import { removeAccents } from "../utils/methods.js";
 import mongoose from "mongoose";
+import moment from "moment";
 
 const getAllWithdraws = asyncHandler(async (req, res) => {
   let { pageNumber, status, keyword } = req.query;
@@ -142,24 +144,25 @@ const getAllWithdrawsForExport = asyncHandler(async (req, res) => {
 
 const updateWithdraw = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { hash, status, transferContent } = req.body;
+  const { hash, status, transferContent, cancelReason } = req.body;
   const { user: admin } = req;
 
   try {
     const withdraw = await Withdraw.findById(id);
     const user = await User.findById(withdraw.userId);
-    
+
     if (status === "APPROVED") {
-      withdraw.hash = hash || '';
-      
+      withdraw.hash = hash || "";
+      const processedAt = new Date();
+
       if (withdraw.withdrawalType === "BANK") {
         // Bank withdrawal: Save transfer content and admin processing info
         if (transferContent) {
           withdraw.transferContent = transferContent;
         }
         withdraw.processedBy = admin.id;
-        withdraw.processedAt = new Date();
-        
+        withdraw.processedAt = processedAt;
+
         // Create claim record for bank withdrawal
         // Use transferContent as hash for bank transfers
         const claimHash = transferContent || `BANK_${withdraw._id}_${Date.now()}`;
@@ -178,13 +181,13 @@ const updateWithdraw = asyncHandler(async (req, res) => {
       } else {
         // Crypto withdrawal: Update claimed USDT
         user.claimedUsdt = user.claimedUsdt + withdraw.amount;
-        
+
         // Calculate receivedAmount for CRYPTO withdrawal
         const amountUsdt = withdraw.amount || 0;
         const tax = withdraw.tax || 0;
         const fee = withdraw.fee || 0;
         const receivedAmount = amountUsdt - tax - fee; // Số tiền thực tế nhận được (USDT)
-        
+
         // Create claim record for crypto withdrawal
         // Use transaction hash from blockchain
         const claimHash = hash || `CRYPTO_${withdraw._id}_${Date.now()}`;
@@ -200,13 +203,52 @@ const updateWithdraw = asyncHandler(async (req, res) => {
           receivedAmount: receivedAmount, // Số tiền thực tế nhận được (USDT)
         });
       }
+
+      // Create notification for approved withdrawal
+      const processedTime = moment(processedAt).format("DD/MM/YYYY HH:mm:ss");
+      let amountText = "";
+      if (withdraw.withdrawalType === "BANK") {
+        const receivedAmountUsdt = withdraw.receivedAmount || withdraw.amount;
+        const receivedAmountVnd =
+          withdraw.receivedAmount && withdraw.exchangeRate
+            ? Math.floor(withdraw.receivedAmount * withdraw.exchangeRate)
+            : 0;
+        amountText =
+          receivedAmountVnd > 0
+            ? `${receivedAmountUsdt.toLocaleString(
+                "vi-VN"
+              )} USDT (${receivedAmountVnd.toLocaleString("vi-VN")} VND)`
+            : `${receivedAmountUsdt.toLocaleString("vi-VN")} USDT`;
+      } else {
+        const receivedAmount = (withdraw.amount || 0) - (withdraw.tax || 0) - (withdraw.fee || 0);
+        amountText = `${receivedAmount.toLocaleString("vi-VN")} USDT`;
+      }
+
+      await Notification.create({
+        userId: withdraw.userId,
+        title: "Yêu cầu rút tiền đã được giải quyết",
+        message: `Yêu cầu rút tiền của bạn đã được giải quyết vào lúc ${processedTime} với số tiền ${amountText}.`,
+        type: "SUCCESS",
+        createdBy: admin.id,
+      });
     }
-    
+
     if (status === "CANCEL") {
       // Refund USDT to user's available balance
       user.availableUsdt = user.availableUsdt + withdraw.amount;
+
+      // Create notification for cancelled withdrawal
+      const reason = cancelReason || "Không có lý do cụ thể";
+      const amountText = `${withdraw.amount.toLocaleString("vi-VN")} USDT`;
+      await Notification.create({
+        userId: withdraw.userId,
+        title: "Rút tiền thất bại",
+        message: `Yêu cầu rút tiền ${amountText} đã bị hủy với lí do: ${reason}`,
+        type: "ERROR",
+        createdBy: admin.id,
+      });
     }
-    
+
     withdraw.status = status;
     await user.save();
     await withdraw.save();

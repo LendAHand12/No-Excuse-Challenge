@@ -1,6 +1,6 @@
 import { Link, NavLink } from 'react-router-dom';
 // import DropdownMessage from './DropdownMessage';
-// import DropdownNotification from './DropdownNotification';
+import DropdownNotification from './DropdownNotification';
 import DropdownUser from './DropdownUser';
 // import DarkModeSwitcher from './DarkModeSwitcher';
 import Logo from '../../images/logo/logo.png';
@@ -59,12 +59,9 @@ const Header = (props: {
         </div>
 
         <div className="flex items-center gap-3 2xsm:gap-6">
-          {/* <ul className="flex items-center gap-2 2xsm:gap-4">
-            <DropdownNotification />
-            <DropdownMessage />
-          </ul> */}
           {userInfo && (
             <>
+              <DropdownNotification />
               <WalletUser />
               <DropdownUser />
             </>

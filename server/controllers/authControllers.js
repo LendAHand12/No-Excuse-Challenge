@@ -143,8 +143,6 @@ const registerUser = asyncHandler(async (req, res) => {
   } else {
     const treeReceiveUser = await Tree.findById(receiveId);
 
-    console.log({ treeReceiveUser });
-
     if (treeReceiveUser.userName === "NoExcuse 9" || treeReceiveUser.children.length < 2) {
       const parent = await User.findById(treeReceiveUser.userId);
 

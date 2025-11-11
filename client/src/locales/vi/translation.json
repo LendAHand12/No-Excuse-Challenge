@@ -1399,5 +1399,31 @@
       "typeMessage": "Nhập tin nhắn của bạn",
       "submitButton": "Tư vấn cho tôi"
     }
+  },
+  "notification": {
+    "title": "Thông báo",
+    "markAllAsRead": "Đánh dấu tất cả đã đọc",
+    "loading": "Đang tải...",
+    "noNotifications": "Không có thông báo",
+    "markAsRead": "Đánh dấu đã đọc",
+    "delete": "Xóa",
+    "loadMore": "Tải thêm",
+    "justNow": "Vừa xong",
+    "minutesAgo": "phút trước",
+    "hoursAgo": "giờ trước",
+    "daysAgo": "ngày trước",
+    "failedToLoad": "Không thể tải thông báo",
+    "failedToMarkAsRead": "Không thể đánh dấu đã đọc",
+    "allMarkedAsRead": "Đã đánh dấu tất cả đã đọc",
+    "failedToMarkAllAsRead": "Không thể đánh dấu tất cả đã đọc",
+    "failedToDelete": "Không thể xóa thông báo",
+    "showUnreadOnly": "Chưa đọc",
+    "showAll": "Tất cả",
+    "types": {
+      "INFO": "Thông tin",
+      "WARNING": "Cảnh báo",
+      "SUCCESS": "Thành công",
+      "ERROR": "Lỗi"
+    }
   }
 }

@@ -1799,7 +1799,6 @@ const changeSystem = asyncHandler(async (req, res) => {
         const parentTree = await Tree.findById(movePersonTree.refId);
         const parentUser = await User.findById(parentTree.userId);
         const listRefOfParent = await Tree.find({ refId: parentTree._id });
-        console.log({ listRefOfParent });
         if (listRefOfParent.length < 3) {
           if (parentUser.timeRetryOver45) {
             parentUser.timeRetryOver45 = moment(parentUser.timeRetryOver45)
@@ -1865,7 +1864,6 @@ const changeSystem = asyncHandler(async (req, res) => {
           const parentTree = await Tree.findById(movePersonTree.refId);
           const parentUser = await User.findById(parentTree.userId);
           const listRefOfParent = await Tree.find({ refId: parentTree._id });
-          console.log({ listRefOfParent });
           if (listRefOfParent.length < 3) {
             if (parentUser.timeRetryOver45) {
               parentUser.timeRetryOver45 = moment(parentUser.timeRetryOver45)
