@@ -2,15 +2,6 @@ import { useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import PageTitle from './components/PageTitle';
-// import Calendar from './pages/Calendar';
-// import Chart from './pages/Chart';
-// import FormElements from './pages/Form/FormElements';
-// import FormLayout from './pages/Form/FormLayout';
-// import Profile from './pages/Profile';
-// import Settings from './pages/Settings';
-// import Tables from './pages/Tables';
-// import Alerts from './pages/UiElements/Alerts';
-// import Buttons from './pages/UiElements/Buttons';
 import HomePage from './pages/Homepage';
 import Mechanism from './pages/Mechanism';
 import PolicyPage from './pages/Policy';
@@ -944,15 +935,6 @@ function App() {
                 </>
               }
             />
-            <Route
-              path="/user/kyc"
-              element={
-                <>
-                  <PageTitle title="Register KYC | NoExcuseChallenge" />
-                  <RegisterKYCPage />
-                </>
-              }
-            />
             {userInfo?.tier > 1 && (
               <Route
                 path="/user/tier2"
@@ -1002,6 +984,15 @@ function App() {
           <>
             <PageTitle title="Claim KYC | NoExcuseChallenge" />
             <ClaimKYCPage />
+          </>
+        }
+      />
+      <Route
+        path="/user/kyc"
+        element={
+          <>
+            <PageTitle title="Register KYC | NoExcuseChallenge" />
+            <RegisterKYCPage />
           </>
         }
       />

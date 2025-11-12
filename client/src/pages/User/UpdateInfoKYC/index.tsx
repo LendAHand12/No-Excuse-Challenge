@@ -10,10 +10,8 @@ import DefaultLayout from '../../../layout/DefaultLayout';
 import { useSelector } from 'react-redux';
 
 const UpdateInfoKYCPage = () => {
-  const { userInfo } = useSelector((auth) => auth.auth);
   const { t } = useTranslation();
   const location = useLocation();
-  const navigate = useNavigate();
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
 

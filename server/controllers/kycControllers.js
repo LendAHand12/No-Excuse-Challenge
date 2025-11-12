@@ -1,5 +1,5 @@
 import expressAsyncHandler from "express-async-handler";
-import { createCallbackToken } from "../utils/methods.js";
+import { createCallbackToken, decodeCallbackToken } from "../utils/methods.js";
 import User from "../models/userModel.js";
 import Config from "../models/configModel.js";
 import mongoose from "mongoose";
@@ -26,7 +26,7 @@ const claimKYC = expressAsyncHandler(async (req, res) => {
 
   const token = createCallbackToken(user._id);
   let callbackUrl = `${process.env.FRONTEND_BASE_URL}/user/claim?coin=${coin}&token=${token}&amount=${amount}`;
-  
+
   // Add withdrawalType and exchangeRate to callback if provided
   if (withdrawalType) {
     callbackUrl += `&withdrawalType=${withdrawalType}`;
@@ -56,12 +56,35 @@ const moveSystemKyc = expressAsyncHandler(async (req, res) => {
 });
 
 const register = expressAsyncHandler(async (req, res) => {
-  const { facetect_tid, user_id } = req.body;
-  const { user } = req;
+  const { facetect_tid, user_id, token } = req.body;
 
   try {
-    if (user_id !== user.id) {
-      return res.status(400).json({ message: "Unknown user" });
+    // Verify callback token
+    if (!token) {
+      return res.status(400).json({ message: "Token is required" });
+    }
+
+    let decodedToken;
+    try {
+      decodedToken = decodeCallbackToken(token);
+    } catch (error) {
+      return res.status(400).json({ message: error.message || "Invalid or expired token" });
+    }
+
+    // Verify token purpose
+    if (decodedToken.purpose !== "kyc") {
+      return res.status(400).json({ message: "Invalid token purpose" });
+    }
+
+    // Verify userId from token matches user_id from request
+    if (decodedToken.userId !== user_id) {
+      return res.status(400).json({ message: "Token user mismatch" });
+    }
+
+    // Get user from decoded token
+    const user = await User.findById(decodedToken.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
     const faceTecDataRes = await getFaceTecData({ userId: user.id });
