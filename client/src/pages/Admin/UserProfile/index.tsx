@@ -1140,24 +1140,6 @@ const UserProfile = () => {
                   </div>
                 </div>
               )}
-              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
-                <p className="uppercase mt-2 font-bold">{t('oldParent')}</p>
-                {data.listOldParent.length > 0 && (
-                  <div className="py-2">
-                    <ul>
-                      {data.listOldParent.map((ele) => (
-                        <li className="bg-white hover:bg-gray-50" key={ele._id}>
-                          <div className="py-2">
-                            <div className="text-base">
-                              <span className="">{ele.userId}</span>
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
               {/* <div className="py-10">
                 <div className="max-w-sm">
                   <Doughnut
