@@ -149,11 +149,50 @@ const registerUser = asyncHandler(async (req, res) => {
       // Parse dateOfBirth if provided, otherwise set to null
       let parsedDateOfBirth = null;
       if (dateOfBirth) {
-        const date = new Date(dateOfBirth);
-        // Only set if date is valid
-        if (!isNaN(date.getTime())) {
-          parsedDateOfBirth = date;
-        }
+        // Helper function to parse date from DD/MM/YYYY format
+        const parseDateOfBirth = (dateString) => {
+          if (!dateString) return null;
+
+          // If it's already a Date object, return it if valid
+          if (dateString instanceof Date) {
+            return isNaN(dateString.getTime()) ? null : dateString;
+          }
+
+          const str = dateString.toString().trim();
+
+          // Try to parse DD/MM/YYYY format
+          const ddMmYyyyMatch = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+          if (ddMmYyyyMatch) {
+            const [, day, month, year] = ddMmYyyyMatch;
+            const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+            // Validate date
+            if (
+              date.getFullYear() === parseInt(year) &&
+              date.getMonth() === parseInt(month) - 1 &&
+              date.getDate() === parseInt(day)
+            ) {
+              return date;
+            }
+          }
+
+          // Try ISO format (YYYY-MM-DD)
+          const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+          if (isoMatch) {
+            const [, year, month, day] = isoMatch;
+            const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+            if (
+              date.getFullYear() === parseInt(year) &&
+              date.getMonth() === parseInt(month) - 1 &&
+              date.getDate() === parseInt(day)
+            ) {
+              return date;
+            }
+          }
+
+          return null;
+        };
+
+        parsedDateOfBirth = parseDateOfBirth(dateOfBirth);
       }
 
       const user = await User.create({

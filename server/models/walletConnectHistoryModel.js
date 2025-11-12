@@ -40,6 +40,14 @@ const walletConnectionHistorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Indexes for better query performance
+walletConnectionHistorySchema.index({ userId: 1 });
+walletConnectionHistorySchema.index({ walletAddress: 1 });
+walletConnectionHistorySchema.index({ userWalletAddress: 1 });
+walletConnectionHistorySchema.index({ createdAt: -1 });
+walletConnectionHistorySchema.index({ userId: 1, createdAt: -1 });
+walletConnectionHistorySchema.index({ walletAddress: 1, createdAt: -1 });
+
 const WalletConnectionHistory = mongoose.model(
   "WalletConnectionHistory",
   walletConnectionHistorySchema

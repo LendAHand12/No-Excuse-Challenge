@@ -305,6 +305,11 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+// Indexes for better query performance
+userSchema.index({ walletAddress: 1 });
+userSchema.index({ userId: 1 });
+userSchema.index({ email: 1 });
+
 const User = mongoose.model("User", userSchema);
 
 export default User;

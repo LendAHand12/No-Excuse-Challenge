@@ -134,8 +134,17 @@ const getAllConnectWallets = asyncHandler(async (req, res) => {
 
   const keywordRegex = keyword ? { $regex: removeAccents(keyword), $options: "i" } : null;
 
+  // If keyword exists, try to filter early on WalletConnectionHistory fields first
+  if (keywordRegex) {
+    matchStage.$or = [
+      { walletAddress: keywordRegex },
+      { userWalletAddress: keywordRegex },
+    ];
+  }
+
   const pipeline = [
     { $match: matchStage },
+    { $sort: { createdAt: -1 } }, // Sort early for better performance
 
     // accountUser: chủ tài khoản (theo userId)
     {
@@ -144,6 +153,18 @@ const getAllConnectWallets = asyncHandler(async (req, res) => {
         localField: "userId",
         foreignField: "_id",
         as: "accountUser",
+        pipeline: [
+          {
+            $project: {
+              _id: 1,
+              userId: 1,
+              email: 1,
+              walletAddress: 1,
+              phone: 1,
+              status: 1,
+            },
+          },
+        ],
       },
     },
     {
@@ -160,6 +181,18 @@ const getAllConnectWallets = asyncHandler(async (req, res) => {
         localField: "walletAddress",
         foreignField: "walletAddress",
         as: "connectorUser",
+        pipeline: [
+          {
+            $project: {
+              _id: 1,
+              userId: 1,
+              email: 1,
+              walletAddress: 1,
+              phone: 1,
+              status: 1,
+            },
+          },
+        ],
       },
     },
     {
@@ -170,6 +203,7 @@ const getAllConnectWallets = asyncHandler(async (req, res) => {
     },
   ];
 
+  // Filter on user fields after lookup
   if (keywordRegex) {
     pipeline.push({
       $match: {
@@ -180,8 +214,6 @@ const getAllConnectWallets = asyncHandler(async (req, res) => {
           { "connectorUser.userId": keywordRegex },
           { "connectorUser.email": keywordRegex },
           { "connectorUser.walletAddress": keywordRegex },
-          { walletAddress: keywordRegex },
-          { userWalletAddress: keywordRegex },
         ],
       },
     });
@@ -195,7 +227,6 @@ const getAllConnectWallets = asyncHandler(async (req, res) => {
   const total = countAggregation[0]?.total || 0;
 
   pipeline.push(
-    { $sort: { createdAt: -1 } },
     { $skip: pageSize * (page - 1) },
     { $limit: pageSize },
     {
