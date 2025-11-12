@@ -140,13 +140,15 @@ export default function WithdrawModal({
           background: 'transparent',
           maxWidth: '600px',
           width: '90%',
+          maxHeight: '90vh',
+          overflow: 'hidden',
         },
         overlay: { backgroundColor: 'rgba(0,0,0,0.5)' },
       }}
     >
-      <div className="w-full bg-gray-900 rounded-xl shadow-2xl overflow-hidden">
+      <div className="w-full bg-gray-900 rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex justify-between items-center p-5 border-b border-gray-700">
+        <div className="flex justify-between items-center p-5 border-b border-gray-700 flex-shrink-0">
           <h3 className="text-lg font-semibold text-white">
             {t('withdrawModal.title')}
           </h3>
@@ -158,8 +160,8 @@ export default function WithdrawModal({
           </button>
         </div>
 
-        {/* Logo + Icon */}
-        <div className="flex flex-col items-center p-6 space-y-4">
+        {/* Logo + Icon - Scrollable content */}
+        <div className="flex flex-col items-center p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
           {/* Logo công ty */}
           {/* <img
             src={LOGO}
@@ -336,7 +338,7 @@ export default function WithdrawModal({
         </div>
 
         {/* Footer buttons */}
-        <div className="flex justify-end space-x-3 p-5 border-t border-gray-700">
+        <div className="flex justify-end space-x-3 p-5 border-t border-gray-700 flex-shrink-0">
           <button
             onClick={closeModal}
             disabled={loadingClaimUsdt}
