@@ -167,19 +167,8 @@ const Profile = () => {
           if (response.data.preTier2Status === 'PASSED') {
             setShowPreTier2Commit(false);
           }
-          // Check if bank information is missing after getting user data
-          // Required for bank withdrawal: bankName, bankCode, accountName, accountNumber
-          // Only show if errLahCode !== "OVER45"
-          if (
-            response.data.errLahCode !== 'OVER45' &&
-            (!response.data.bankName ||
-              !response.data.bankCode ||
-              !response.data.accountName ||
-              !response.data.accountNumber ||
-              !response.data.dateOfBirth)
-          ) {
-            setShowBankInfoModal(true);
-          }
+          // Bank info modal will only show when user clicks "Update Bank Information" button
+          // No longer auto-show when bank info is missing
         })
         .catch((error) => {
           let message =

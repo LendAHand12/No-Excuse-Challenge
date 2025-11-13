@@ -42,17 +42,22 @@ export default function WithdrawModal({
 
   const handleChange = (e) => {
     const value = e.target.value;
-    if (
-      value === '' ||
-      (Number(value) >= 0 && Number(value) <= availableUsdt)
-    ) {
+    // Allow empty string
+    if (value === '') {
+      setAmount('');
+      return;
+    }
+    // Parse as float to handle decimals properly
+    const numValue = parseFloat(value);
+    // Check if valid number and within range
+    if (!isNaN(numValue) && numValue >= 0 && numValue <= availableUsdt) {
       setAmount(value);
     }
   };
 
   const calculateCryptoAmount = () => {
     if (!amount) return { amount: 0, tax: 0, fee: 0, received: 0 };
-    const amountUsdt = Number(amount);
+    const amountUsdt = parseFloat(amount) || 0;
     const tax = amountUsdt * 0.1; // 10% tax
     const fee = 1; // Transaction fee 1 USDT
     const received = amountUsdt - tax - fee;
@@ -87,7 +92,7 @@ export default function WithdrawModal({
     if (!amount || !exchangeRate)
       return { total: 0, tax: 0, fee: 0, received: 0 };
     // Calculate all values in USDT first
-    const amountUsdt = Number(amount);
+    const amountUsdt = parseFloat(amount) || 0;
     const taxUsdt = amountUsdt * 0.1; // 10% tax (USDT)
     const feeUsdt = 1; // Transaction fee 1 USDT
     const receivedUsdt = amountUsdt - taxUsdt - feeUsdt; // Received amount (USDT)
@@ -231,12 +236,23 @@ export default function WithdrawModal({
               {t('withdrawModal.amount')}
             </label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               min="0"
               step="0.01"
               max={availableUsdt}
               value={amount}
               onChange={handleChange}
+              onBlur={(e) => {
+                // Normalize value on blur: remove trailing zeros and dots
+                const value = e.target.value.trim();
+                if (value && !isNaN(parseFloat(value))) {
+                  const numValue = parseFloat(value);
+                  if (numValue > 0 && numValue <= availableUsdt) {
+                    setAmount(numValue.toString());
+                  }
+                }
+              }}
               placeholder={t('withdrawModal.amountPlaceholder')}
               className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
             />
