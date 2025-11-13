@@ -59,13 +59,16 @@ const Header = (props: {
         </div>
 
         <div className="flex items-center gap-3 2xsm:gap-6">
+          {/* User icons - visible when logged in */}
           {userInfo && (
-            <>
+            <div className="flex items-center gap-3 2xsm:gap-6">
               <DropdownNotification />
               <WalletUser />
               <DropdownUser />
-            </>
+            </div>
           )}
+          
+          {/* Menu button - always visible on mobile, hidden on desktop, positioned at the rightmost */}
           <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
             <button
               aria-controls="sidebar"

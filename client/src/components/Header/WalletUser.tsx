@@ -54,7 +54,7 @@ const WalletUser = () => {
         className="flex items-center text-sm gap-2 rounded-3xl"
         to="#"
       >
-        <button className="flex items-center gap-2 bg-[#F2F4F7] font-bold rounded-full p-2 pr-4">
+        <button className="flex items-center gap-2 bg-[#F2F4F7] font-bold rounded-full p-2 lg:pr-4">
           <span className="bg-black p-2 text-white rounded-full">
             <svg
               className="w-4 h-auto"
@@ -68,7 +68,9 @@ const WalletUser = () => {
               ></path>
             </svg>
           </span>
-          {isConnected ? shortenWalletAddress(address, 8) : 'Connect'}
+          <span className="hidden lg:inline">
+            {isConnected ? shortenWalletAddress(address, 8) : 'Connect'}
+          </span>
         </button>
       </Link>
       {dropdownOpen && (
