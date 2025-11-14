@@ -14,16 +14,49 @@ export default function WithdrawModal({
   userInfo,
 }) {
   const { t } = useTranslation();
+  const enableWithdrawCrypto = userInfo?.enableWithdrawCrypto !== undefined ? userInfo.enableWithdrawCrypto : false;
+  const enableWithdrawBank = userInfo?.enableWithdrawBank !== undefined ? userInfo.enableWithdrawBank : true;
+  
+  // Set default withdrawal type based on enabled gateways
+  const getDefaultWithdrawalType = (): 'CRYPTO' | 'BANK' => {
+    if (enableWithdrawBank) return 'BANK';
+    if (enableWithdrawCrypto) return 'CRYPTO';
+    return 'BANK'; // fallback
+  };
+  
   const [amount, setAmount] = useState('');
-  const [withdrawalType, setWithdrawalType] = useState('BANK'); // CRYPTO or BANK
+  const [withdrawalType, setWithdrawalType] = useState<'CRYPTO' | 'BANK'>(getDefaultWithdrawalType());
   const [exchangeRate, setExchangeRate] = useState(0);
   const [loadingRate, setLoadingRate] = useState(false);
+
+  // Set default amount to available USDT when modal opens
+  useEffect(() => {
+    if (showModal && availableUsdt > 0) {
+      setAmount(String(availableUsdt));
+    } else if (showModal && availableUsdt === 0) {
+      setAmount('');
+    }
+  }, [showModal, availableUsdt]);
 
   useEffect(() => {
     if (showModal && withdrawalType === 'BANK') {
       fetchExchangeRate();
     }
   }, [showModal, withdrawalType]);
+  
+  // Update withdrawal type when enabled gateways change
+  useEffect(() => {
+    if (showModal) {
+      // If current method is disabled, switch to available method
+      if (withdrawalType === 'CRYPTO' && !enableWithdrawCrypto && enableWithdrawBank) {
+        setWithdrawalType('BANK');
+      } else if (withdrawalType === 'BANK' && !enableWithdrawBank && enableWithdrawCrypto) {
+        setWithdrawalType('CRYPTO');
+      } else if (!enableWithdrawCrypto && !enableWithdrawBank) {
+        setWithdrawalType('BANK'); // fallback
+      }
+    }
+  }, [showModal, enableWithdrawCrypto, enableWithdrawBank]);
 
   const fetchExchangeRate = async () => {
     setLoadingRate(true);
@@ -180,35 +213,50 @@ export default function WithdrawModal({
           </p>
 
           {/* Withdrawal Type Selection */}
-          <div className="w-full">
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              {t('withdrawModal.withdrawalMethod')}
-            </label>
-            <div className="flex gap-2">
-              {/* <button
-                type="button"
-                onClick={() => setWithdrawalType('CRYPTO')}
-                className={`flex-1 px-4 py-2 rounded-lg border transition ${
-                  withdrawalType === 'CRYPTO'
-                    ? 'bg-green-600 border-green-500 text-white'
-                    : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'
-                }`}
-              >
-                {t('withdrawModal.cryptoWallet')}
-              </button> */}
-              <button
-                type="button"
-                onClick={() => setWithdrawalType('BANK')}
-                className={`flex-1 px-4 py-2 rounded-lg border transition ${
-                  withdrawalType === 'BANK'
-                    ? 'bg-green-600 border-green-500 text-white'
-                    : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'
-                }`}
-              >
-                {t('withdrawModal.bankTransfer')}
-              </button>
+          {(enableWithdrawCrypto || enableWithdrawBank) && (
+            <div className="w-full">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                {t('withdrawModal.withdrawalMethod')}
+              </label>
+              <div className="flex gap-2">
+                {enableWithdrawCrypto && (
+                  <button
+                    type="button"
+                    onClick={() => setWithdrawalType('CRYPTO')}
+                    className={`flex-1 px-4 py-2 rounded-lg border transition ${
+                      withdrawalType === 'CRYPTO'
+                        ? 'bg-green-600 border-green-500 text-white'
+                        : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'
+                    }`}
+                  >
+                    {t('withdrawModal.cryptoWallet')}
+                  </button>
+                )}
+                {enableWithdrawBank && (
+                  <button
+                    type="button"
+                    onClick={() => setWithdrawalType('BANK')}
+                    className={`flex-1 px-4 py-2 rounded-lg border transition ${
+                      withdrawalType === 'BANK'
+                        ? 'bg-green-600 border-green-500 text-white'
+                        : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'
+                    }`}
+                  >
+                    {t('withdrawModal.bankTransfer')}
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
+          
+          {!enableWithdrawCrypto && !enableWithdrawBank && (
+            <div className="w-full bg-red-900 border border-red-700 rounded-lg p-3 text-red-200 text-sm">
+              <p className="font-semibold">
+                {t('withdrawModal.noWithdrawalMethods')}
+              </p>
+              <p>{t('withdrawModal.noWithdrawalMethodsDesc')}</p>
+            </div>
+          )}
 
           {/* Bank Withdrawal Notice */}
           {withdrawalType === 'BANK' && (
@@ -373,6 +421,7 @@ export default function WithdrawModal({
             disabled={
               loadingClaimUsdt ||
               !amount ||
+              (!enableWithdrawCrypto && !enableWithdrawBank) ||
               (withdrawalType === 'BANK' && !hasBankInfo()) ||
               (withdrawalType === 'BANK' && loadingRate) ||
               (withdrawalType === 'CRYPTO' &&

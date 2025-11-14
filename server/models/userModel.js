@@ -282,6 +282,24 @@ const userSchema = mongoose.Schema(
     bankCode: {
       type: String,
     },
+    // Payment gateway settings
+    enablePaymentCrypto: {
+      type: Boolean,
+      default: true, // Default: enable crypto payment
+    },
+    enablePaymentBank: {
+      type: Boolean,
+      default: true, // Default: enable bank payment
+    },
+    // Withdrawal gateway settings
+    enableWithdrawCrypto: {
+      type: Boolean,
+      default: false, // Default: disable crypto withdrawal
+    },
+    enableWithdrawBank: {
+      type: Boolean,
+      default: true, // Default: enable bank withdrawal
+    },
   },
   {
     timestamps: true,

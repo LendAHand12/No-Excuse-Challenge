@@ -893,7 +893,9 @@
     "amountTooSmall": "Số tiền quá nhỏ sau khi trừ phí",
     "cancel": "Hủy",
     "confirm": "Xác nhận",
-    "failedToFetchExchangeRate": "Không thể tải tỷ giá"
+    "failedToFetchExchangeRate": "Không thể tải tỷ giá",
+    "noWithdrawalMethods": "Không có phương thức rút tiền",
+    "noWithdrawalMethodsDesc": "Tất cả phương thức rút tiền đã bị tắt. Vui lòng liên hệ hỗ trợ."
   },
 
   "adminWithdraw": {
@@ -1426,6 +1428,13 @@
       "ERROR": "Lỗi"
     }
   },
+  "Payment Gateways": "Cổng thanh toán",
+  "Enable Payment - Crypto": "Bật thanh toán - Crypto",
+  "Enable Payment - Bank": "Bật thanh toán - Ngân hàng",
+  "Withdrawal Gateways": "Cổng rút tiền",
+  "Enable Withdraw - Crypto": "Bật rút tiền - Crypto",
+  "Enable Withdraw - Bank": "Bật rút tiền - Ngân hàng",
+  "No payment methods available": "Không có phương thức thanh toán nào",
   "REGIDTRATION & MANAGEMENT FEE": "Phí đăng ký và quản lý",
   "COMMUNITY REWARD": "Thưởng cộng đồng",
   "REWARD POOL": "Quỹ thưởng",

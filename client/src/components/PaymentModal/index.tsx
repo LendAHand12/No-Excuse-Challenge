@@ -4,6 +4,7 @@ import { useAccount, useConnect } from 'wagmi';
 import Modal from 'react-modal';
 import Payment from '@/api/Payment';
 import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -30,8 +31,19 @@ const PaymentModal = ({
   checkOrderStatus: customCheckOrderStatus,
 }: PaymentModalProps) => {
   const { t } = useTranslation();
+  const { userInfo } = useSelector((state: any) => state.auth);
+  const enablePaymentCrypto = userInfo?.enablePaymentCrypto !== undefined ? userInfo.enablePaymentCrypto : true;
+  const enablePaymentBank = userInfo?.enablePaymentBank !== undefined ? userInfo.enablePaymentBank : true;
+  
+  // Set default payment method based on enabled gateways
+  const getDefaultPaymentMethod = (): 'wallet' | 'bank' => {
+    if (enablePaymentCrypto) return 'wallet';
+    if (enablePaymentBank) return 'bank';
+    return 'wallet'; // fallback
+  };
+  
   const [paymentMethod, setPaymentMethod] = useState<'wallet' | 'bank'>(
-    'wallet',
+    getDefaultPaymentMethod(),
   );
   const [orderId, setOrderId] = useState<string | null>(null);
   const [loadingOrder, setLoadingOrder] = useState(false);
@@ -57,11 +69,25 @@ const PaymentModal = ({
   useEffect(() => {
     if (!isOpen) {
       setOrderId(null);
-      setPaymentMethod('wallet');
+      setPaymentMethod(getDefaultPaymentMethod());
       setPaymentStatus('idle');
       setIsCheckingPayment(false);
     }
   }, [isOpen]);
+  
+  // Update payment method when enabled gateways change
+  useEffect(() => {
+    if (isOpen) {
+      // If current method is disabled, switch to available method
+      if (paymentMethod === 'wallet' && !enablePaymentCrypto && enablePaymentBank) {
+        setPaymentMethod('bank');
+      } else if (paymentMethod === 'bank' && !enablePaymentBank && enablePaymentCrypto) {
+        setPaymentMethod('wallet');
+      } else if (!enablePaymentCrypto && !enablePaymentBank) {
+        setPaymentMethod('wallet'); // fallback
+      }
+    }
+  }, [isOpen, enablePaymentCrypto, enablePaymentBank]);
 
   // Polling để check order status khi đang checking payment
   useEffect(() => {
@@ -240,22 +266,31 @@ const PaymentModal = ({
 
         {/* Payment Method Tabs */}
         <div className="payment-tabs">
-          <button
-            className={`payment-tab ${
-              paymentMethod === 'wallet' ? 'active' : ''
-            }`}
-            onClick={() => setPaymentMethod('wallet')}
-          >
-            {t('E-Wallet')}
-          </button>
-          <button
-            className={`payment-tab ${
-              paymentMethod === 'bank' ? 'active' : ''
-            }`}
-            onClick={() => setPaymentMethod('bank')}
-          >
-            {t('Bank Transfer')}
-          </button>
+          {enablePaymentCrypto && (
+            <button
+              className={`payment-tab ${
+                paymentMethod === 'wallet' ? 'active' : ''
+              }`}
+              onClick={() => setPaymentMethod('wallet')}
+            >
+              {t('E-Wallet')}
+            </button>
+          )}
+          {enablePaymentBank && (
+            <button
+              className={`payment-tab ${
+                paymentMethod === 'bank' ? 'active' : ''
+              }`}
+              onClick={() => setPaymentMethod('bank')}
+            >
+              {t('Bank Transfer')}
+            </button>
+          )}
+          {!enablePaymentCrypto && !enablePaymentBank && (
+            <div className="payment-tab disabled">
+              {t('No payment methods available')}
+            </div>
+          )}
         </div>
 
         {/* Wallet Payment Method */}

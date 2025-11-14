@@ -807,7 +807,9 @@
     "amountTooSmall": "Amount is too small after fees",
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "failedToFetchExchangeRate": "Failed to fetch exchange rate"
+    "failedToFetchExchangeRate": "Failed to fetch exchange rate",
+    "noWithdrawalMethods": "No withdrawal methods available",
+    "noWithdrawalMethodsDesc": "All withdrawal methods have been disabled. Please contact support."
   },
 
   "adminWithdraw": {
@@ -1339,5 +1341,12 @@
       "SUCCESS": "Success",
       "ERROR": "Error"
     }
-  }
+  },
+  "Payment Gateways": "Payment Gateways",
+  "Enable Payment - Crypto": "Enable Payment - Crypto",
+  "Enable Payment - Bank": "Enable Payment - Bank",
+  "Withdrawal Gateways": "Withdrawal Gateways",
+  "Enable Withdraw - Crypto": "Enable Withdraw - Crypto",
+  "Enable Withdraw - Bank": "Enable Withdraw - Bank",
+  "No payment methods available": "No payment methods available"
 }

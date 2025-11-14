@@ -59,6 +59,9 @@ export default function UserAssetsPage() {
     accountNumber: '',
     bankCode: '',
     bankName: '',
+    // Withdrawal gateway settings
+    enableWithdrawCrypto: false,
+    enableWithdrawBank: true,
   });
   const [limitAmountHewe, setLimitAmountHewe] = useState(0);
 
@@ -116,6 +119,9 @@ export default function UserAssetsPage() {
           accountNumber: response.data.accountNumber || '',
           bankCode: response.data.bankCode || '',
           bankName: response.data.bankName || '',
+          // Withdrawal gateway settings
+          enableWithdrawCrypto: response.data.enableWithdrawCrypto !== undefined ? response.data.enableWithdrawCrypto : false,
+          enableWithdrawBank: response.data.enableWithdrawBank !== undefined ? response.data.enableWithdrawBank : true,
         });
       }
     } catch (error: any) {

@@ -437,6 +437,11 @@ const getUserById = asyncHandler(async (req, res) => {
       bankName: user.bankName,
       bankCode: user.bankCode,
       dateOfBirth: user.dateOfBirth,
+      // Payment and withdrawal gateway settings
+      enablePaymentCrypto: user.enablePaymentCrypto !== undefined ? user.enablePaymentCrypto : true,
+      enablePaymentBank: user.enablePaymentBank !== undefined ? user.enablePaymentBank : true,
+      enableWithdrawCrypto: user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
+      enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
     });
   } else {
     res.status(404);
@@ -479,6 +484,11 @@ const getUserAssets = asyncHandler(async (req, res) => {
     accountNumber: user.accountNumber || "",
     bankCode: user.bankCode || "",
     bankName: user.bankName || "",
+    // Payment and withdrawal gateway settings
+    enablePaymentCrypto: user.enablePaymentCrypto !== undefined ? user.enablePaymentCrypto : true,
+    enablePaymentBank: user.enablePaymentBank !== undefined ? user.enablePaymentBank : true,
+    enableWithdrawCrypto: user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
+    enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
   });
 });
 
@@ -685,6 +695,11 @@ const getUserInfo = asyncHandler(async (req, res) => {
       bankName: user.bankName,
       bankCode: user.bankCode,
       dateOfBirth: user.dateOfBirth,
+      // Payment and withdrawal gateway settings
+      enablePaymentCrypto: user.enablePaymentCrypto !== undefined ? user.enablePaymentCrypto : true,
+      enablePaymentBank: user.enablePaymentBank !== undefined ? user.enablePaymentBank : true,
+      enableWithdrawCrypto: user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
+      enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
     });
   } else {
     res.status(404);
@@ -1076,8 +1091,13 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     dieTime,
     termDie,
     preTier2Status,
+    enablePaymentCrypto,
+    enablePaymentBank,
+    enableWithdrawCrypto,
+    enableWithdrawBank,
   } = req.body;
   console.log({ totalHewe, availableHewe, hewePerDay });
+  console.log('Gateway settings:', { enablePaymentCrypto, enablePaymentBank, enableWithdrawCrypto, enableWithdrawBank });
   if (userId) {
     const userExistsUserId = await User.findOne({
       userId,
@@ -1242,6 +1262,28 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     user.closeLah = closeLah;
     if (lockKyc) {
       user.lockKyc = lockKyc;
+    }
+    // Update payment and withdrawal gateway settings
+    // FormData sends boolean as string, so we need to handle both boolean and string
+    if (enablePaymentCrypto !== undefined && enablePaymentCrypto !== null && enablePaymentCrypto !== '') {
+      const value = enablePaymentCrypto === true || enablePaymentCrypto === 'true' || String(enablePaymentCrypto).toLowerCase() === 'true';
+      user.enablePaymentCrypto = value;
+      console.log('Updated enablePaymentCrypto:', value, 'from:', enablePaymentCrypto);
+    }
+    if (enablePaymentBank !== undefined && enablePaymentBank !== null && enablePaymentBank !== '') {
+      const value = enablePaymentBank === true || enablePaymentBank === 'true' || String(enablePaymentBank).toLowerCase() === 'true';
+      user.enablePaymentBank = value;
+      console.log('Updated enablePaymentBank:', value, 'from:', enablePaymentBank);
+    }
+    if (enableWithdrawCrypto !== undefined && enableWithdrawCrypto !== null && enableWithdrawCrypto !== '') {
+      const value = enableWithdrawCrypto === true || enableWithdrawCrypto === 'true' || String(enableWithdrawCrypto).toLowerCase() === 'true';
+      user.enableWithdrawCrypto = value;
+      console.log('Updated enableWithdrawCrypto:', value, 'from:', enableWithdrawCrypto);
+    }
+    if (enableWithdrawBank !== undefined && enableWithdrawBank !== null && enableWithdrawBank !== '') {
+      const value = enableWithdrawBank === true || enableWithdrawBank === 'true' || String(enableWithdrawBank).toLowerCase() === 'true';
+      user.enableWithdrawBank = value;
+      console.log('Updated enableWithdrawBank:', value, 'from:', enableWithdrawBank);
     }
     if (req.files && req.files.imgFront && req.files.imgFront[0]) {
       user.imgFront = req.files.imgFront[0].filename || user.imgFront;

@@ -35,6 +35,10 @@ const UserProfile = () => {
   const [currentCloseLah, setCurrentCloseLah] = useState(null);
   const [currentLockKyc, setCurrentLockKyc] = useState(null);
   const [currentTermDie, setCurrentTermDie] = useState(null);
+  const [enablePaymentCrypto, setEnablePaymentCrypto] = useState(true);
+  const [enablePaymentBank, setEnablePaymentBank] = useState(true);
+  const [enableWithdrawCrypto, setEnableWithdrawCrypto] = useState(false);
+  const [enableWithdrawBank, setEnableWithdrawBank] = useState(true);
   const [phone, setPhone] = useState('');
   const [errorPhone, setErrPhone] = useState(false);
   const [isBonusRef, setIsBonusRef] = useState(false);
@@ -77,6 +81,10 @@ const UserProfile = () => {
             accountName,
             accountNumber,
             dateOfBirth,
+            enablePaymentCrypto,
+            enablePaymentBank,
+            enableWithdrawCrypto,
+            enableWithdrawBank,
           } = response.data;
           setValue('userId', userId);
           setValue('email', email);
@@ -94,6 +102,10 @@ const UserProfile = () => {
           setCurrentOpenLah(openLah);
           setCurrentCloseLah(closeLah);
           setCurrentLockKyc(lockKyc);
+          setEnablePaymentCrypto(enablePaymentCrypto !== undefined ? enablePaymentCrypto : true);
+          setEnablePaymentBank(enablePaymentBank !== undefined ? enablePaymentBank : true);
+          setEnableWithdrawCrypto(enableWithdrawCrypto !== undefined ? enableWithdrawCrypto : false);
+          setEnableWithdrawBank(enableWithdrawBank !== undefined ? enableWithdrawBank : true);
           setCurrentTermDie(errLahCode === 'OVER45' ? true : false);
           setIsBonusRef(bonusRef);
           setKycFee(kycFee);
@@ -157,6 +169,30 @@ const UserProfile = () => {
       }
       if (currentCloseLah !== data.closeLah) {
         formData.append('closeLah', currentCloseLah);
+      }
+      // Always send gateway settings if they exist (FormData converts boolean to string)
+      // Compare with actual data value, using default values if data doesn't have the field
+      const currentEnablePaymentCrypto = (data.enablePaymentCrypto !== undefined && data.enablePaymentCrypto !== null) ? data.enablePaymentCrypto : true;
+      const currentEnablePaymentBank = (data.enablePaymentBank !== undefined && data.enablePaymentBank !== null) ? data.enablePaymentBank : true;
+      const currentEnableWithdrawCrypto = (data.enableWithdrawCrypto !== undefined && data.enableWithdrawCrypto !== null) ? data.enableWithdrawCrypto : false;
+      const currentEnableWithdrawBank = (data.enableWithdrawBank !== undefined && data.enableWithdrawBank !== null) ? data.enableWithdrawBank : true;
+      
+      // Always send if value changed or if data doesn't have the field
+      if (enablePaymentCrypto !== undefined && enablePaymentCrypto !== currentEnablePaymentCrypto) {
+        formData.append('enablePaymentCrypto', String(enablePaymentCrypto));
+        console.log('Sending enablePaymentCrypto:', enablePaymentCrypto, 'current:', currentEnablePaymentCrypto);
+      }
+      if (enablePaymentBank !== undefined && enablePaymentBank !== currentEnablePaymentBank) {
+        formData.append('enablePaymentBank', String(enablePaymentBank));
+        console.log('Sending enablePaymentBank:', enablePaymentBank, 'current:', currentEnablePaymentBank);
+      }
+      if (enableWithdrawCrypto !== undefined && enableWithdrawCrypto !== currentEnableWithdrawCrypto) {
+        formData.append('enableWithdrawCrypto', String(enableWithdrawCrypto));
+        console.log('Sending enableWithdrawCrypto:', enableWithdrawCrypto, 'current:', currentEnableWithdrawCrypto);
+      }
+      if (enableWithdrawBank !== undefined && enableWithdrawBank !== currentEnableWithdrawBank) {
+        formData.append('enableWithdrawBank', String(enableWithdrawBank));
+        console.log('Sending enableWithdrawBank:', enableWithdrawBank, 'current:', currentEnableWithdrawBank);
       }
       if (values.newStatus !== data.status) {
         formData.append('newStatus', values.newStatus);
@@ -241,6 +277,10 @@ const UserProfile = () => {
       currentTermDie,
       isBonusRef,
       kycFee,
+      enablePaymentCrypto,
+      enablePaymentBank,
+      enableWithdrawCrypto,
+      enableWithdrawBank,
     ],
   );
 
@@ -490,6 +530,26 @@ const UserProfile = () => {
     [currentTermDie],
   );
 
+  const handleChangeEnablePaymentCrypto = useCallback(
+    () => setEnablePaymentCrypto(!enablePaymentCrypto),
+    [enablePaymentCrypto],
+  );
+
+  const handleChangeEnablePaymentBank = useCallback(
+    () => setEnablePaymentBank(!enablePaymentBank),
+    [enablePaymentBank],
+  );
+
+  const handleChangeEnableWithdrawCrypto = useCallback(
+    () => setEnableWithdrawCrypto(!enableWithdrawCrypto),
+    [enableWithdrawCrypto],
+  );
+
+  const handleChangeEnableWithdrawBank = useCallback(
+    () => setEnableWithdrawBank(!enableWithdrawBank),
+    [enableWithdrawBank],
+  );
+
   return (
     <DefaultLayout>
       <ToastContainer />
@@ -718,6 +778,81 @@ const UserProfile = () => {
                       )}
                     </span>
                   </li>
+                  
+                  {/* Payment Gateway Settings */}
+                  <li className="flex items-center py-3 border-t border-gray-200 mt-2">
+                    <span className="font-semibold text-gray-700">
+                      {t('Payment Gateways')}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>{t('Enable Payment - Crypto')}</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Switch
+                          checked={enablePaymentCrypto}
+                          onChange={handleChangeEnablePaymentCrypto}
+                        />
+                      ) : enablePaymentCrypto ? (
+                        'True'
+                      ) : (
+                        'False'
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>{t('Enable Payment - Bank')}</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Switch
+                          checked={enablePaymentBank}
+                          onChange={handleChangeEnablePaymentBank}
+                        />
+                      ) : enablePaymentBank ? (
+                        'True'
+                      ) : (
+                        'False'
+                      )}
+                    </span>
+                  </li>
+                  
+                  {/* Withdrawal Gateway Settings */}
+                  <li className="flex items-center py-3 border-t border-gray-200 mt-2">
+                    <span className="font-semibold text-gray-700">
+                      {t('Withdrawal Gateways')}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>{t('Enable Withdraw - Crypto')}</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Switch
+                          checked={enableWithdrawCrypto}
+                          onChange={handleChangeEnableWithdrawCrypto}
+                        />
+                      ) : enableWithdrawCrypto ? (
+                        'True'
+                      ) : (
+                        'False'
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-center py-3">
+                    <span>{t('Enable Withdraw - Bank')}</span>
+                    <span className="ml-auto">
+                      {isEditting ? (
+                        <Switch
+                          checked={enableWithdrawBank}
+                          onChange={handleChangeEnableWithdrawBank}
+                        />
+                      ) : enableWithdrawBank ? (
+                        'True'
+                      ) : (
+                        'False'
+                      )}
+                    </span>
+                  </li>
+                  
                   {data.status === 'LOCKED' && (
                     <li className="flex items-center py-3">
                       <span>{t('lockedTime')}</span>
@@ -1861,7 +1996,7 @@ const UserProfile = () => {
                     </div>
                   )}
 
-                {userInfo?.permissions
+                {/* {userInfo?.permissions
                   .find((p) => p.page.pageName === 'admin-users-details')
                   ?.actions.includes('update') &&
                   data.preTier2Status === '' &&
@@ -1873,7 +2008,7 @@ const UserProfile = () => {
                       {loadingPushToPreTier2 && <Loading />}
                       Push to Pre Tier 2
                     </div>
-                  )}
+                  )} */}
               </div>
             </div>
           </form>
