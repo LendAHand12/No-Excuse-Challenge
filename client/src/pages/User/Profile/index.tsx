@@ -79,12 +79,12 @@ const Profile = () => {
   const [selectedBank, setSelectedBank] = useState<any>(null);
   const [errAgrre, setErrAgrre] = useState(false);
   const [valueCheckAgrree, setValueCheckAgrree] = useState('');
-  const [showPreTier2Commit, setShowPreTier2Commit] = useState(
-    tier === 1 &&
-      (preTier2Status === 'APPROVED' || preTier2Status === 'ACHIEVED')
-      ? true
-      : false,
-  );
+  // const [showPreTier2Commit, setShowPreTier2Commit] = useState(
+  //   tier === 1 &&
+  //     (preTier2Status === 'APPROVED' || preTier2Status === 'ACHIEVED')
+  //     ? true
+  //     : false,
+  // );
   const [showBankInfoModal, setShowBankInfoModal] = useState(false);
   const [showNextTier, setShowNextTier] = useState(false);
 
@@ -164,9 +164,9 @@ const Profile = () => {
           if (response.data.checkCanNextTier) {
             setShowNextTier(true);
           }
-          if (response.data.preTier2Status === 'PASSED') {
-            setShowPreTier2Commit(false);
-          }
+          // if (response.data.preTier2Status === 'PASSED') {
+          //   setShowPreTier2Commit(false);
+          // }
           // Bank info modal will only show when user clicks "Update Bank Information" button
           // No longer auto-show when bank info is missing
         })
@@ -556,7 +556,7 @@ const Profile = () => {
         </div>
       </Modal>
 
-      <Modal
+      {/* <Modal
         isOpen={showPreTier2Commit}
         onRequestClose={() => setShowPreTier2Commit(false)}
         style={{
@@ -651,7 +651,7 @@ const Profile = () => {
             </div>
           </div>
         </div>
-      </Modal>
+      </Modal> */}
 
       <div className="px-2 lg:px-24 py-24 space-y-6 lg:space-y-8">
         {/* {tier === 1 &&

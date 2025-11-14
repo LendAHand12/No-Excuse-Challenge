@@ -790,7 +790,7 @@ function App() {
                 </>
               }
             />
-            {(userInfo?.preTier2Status === 'APPROVED' ||
+            {/* {(userInfo?.preTier2Status === 'APPROVED' ||
               userInfo?.preTier2Status === 'ACHIEVED') && (
               <Route
                 path="/user/payment-pre-tier-2"
@@ -801,7 +801,7 @@ function App() {
                   </>
                 }
               />
-            )}
+            )} */}
 
             {userInfo?.preTier2Status === 'PASSED' && (
               <Route

@@ -229,17 +229,17 @@ const cronFetchVnUsdRates = new CronJob(
   VIETNAM_TIMEZONE
 );
 
-const cron7 = new CronJob(
-  "00 06 * * *", // 6h giờ Việt Nam
-  async () => {
-    console.log("Check user pre tier 2 start");
-    await checkUserPreTier2();
-    console.log("Check user pre tier 2 end");
-  },
-  null,
-  true,
-  VIETNAM_TIMEZONE
-);
+// const cron7 = new CronJob(
+//   "00 06 * * *", // 6h giờ Việt Nam
+//   async () => {
+//     console.log("Check user pre tier 2 start");
+//     await checkUserPreTier2();
+//     console.log("Check user pre tier 2 end");
+//   },
+//   null,
+//   true,
+//   VIETNAM_TIMEZONE
+// );
 
 // await resetErrLahCode();
 
@@ -258,7 +258,7 @@ cron2.start();
 cron3.start();
 cron4.start();
 cron6.start();
-cron7.start();
+// cron7.start();
 cronFetchVnUsdRates.start();
 
 const PORT = process.env.PORT || 5000;

@@ -91,14 +91,14 @@ const CronjobPage = () => {
         'Automatically run every day at 05:00',
       ],
     },
-    {
-      id: 6,
-      title: 'Check Pre Tier 2 Pending List',
-      descs: [
-        'Check eligible users (50 IDs) for Pre Tier 2 approval',
-        'Automatically run every day at 06:00',
-      ],
-    },
+    // {
+    //   id: 6,
+    //   title: 'Check Pre Tier 2 Pending List',
+    //   descs: [
+    //     'Check eligible users (50 IDs) for Pre Tier 2 approval',
+    //     'Automatically run every day at 06:00',
+    //   ],
+    // },
   ];
 
   return (
