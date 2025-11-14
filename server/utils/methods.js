@@ -629,11 +629,19 @@ export const getTotalLevel1ToLevel10OfUser = async (
 // Lấy root branch con trực tiếp của refId (B hoặc C)
 const getBranchRoot = (nodeId, rootId, parentMap) => {
   let currentId = nodeId;
+  const visited = new Set(); // Track visited nodes to prevent infinite loops
+  
   while (
     currentId &&
     parentMap[currentId] &&
     String(parentMap[currentId]) !== String(rootId)
   ) {
+    // Check for circular reference (infinite loop)
+    if (visited.has(currentId)) {
+      return null; // Return null to prevent infinite loop
+    }
+    
+    visited.add(currentId);
     currentId = parentMap[currentId];
   }
   return currentId ? String(currentId) : null;
@@ -674,6 +682,7 @@ export const hasTwoBranches = async (refId) => {
     if (branchRoot) branches.add(branchRoot);
     if (branches.size >= 2) return true; // tối ưu: có đủ 2 nhánh thì dừng luôn
   }
+
 
   return false;
 };

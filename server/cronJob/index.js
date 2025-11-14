@@ -419,14 +419,14 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
       isAdmin: false,
       status: { $ne: "DELETED" },
       errLahCode: { $ne: "OVER45" },
-      adminChangeToDie: false,
     }).sort({
       createdAt: -1,
     });
     const currentDay = moment();
 
     for (let user of listUsers) {
-      console.log({ userName: user.userId });
+      console.log({name: user.userId});
+    // const user = await User.findById("68610d7b9fd2c5445f751333");
       const treeOfUser = await Tree.findOne({
         userId: user._id,
         isSubId: false,
@@ -439,7 +439,6 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
           isSubId: false,
         });
         const diffDateFromCreated = currentDay.diff(user.createdAt, "days");
-
         const listRefUsers = [];
         for (let tree of listRefTrees) {
           const refUser = await User.findById(tree.userId);
