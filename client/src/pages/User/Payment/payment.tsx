@@ -45,7 +45,7 @@ const PaymentPage = () => {
             (accumulator, currentValue) => accumulator + currentValue.amount,
             0,
           );
-          const fee = userInfo.city === 'VN' ? 0.2 : 0;
+          const fee = 0;
           setTotal(totalPayment + fee);
           setPaymentIdsList(paymentIds);
           setPaymentsList(payments);
@@ -179,29 +179,33 @@ const PaymentPage = () => {
                           <div className="">
                             <span className="font-medium">
                               {payment.type === 'REGISTER'
-                                ? t('Membership')
+                                ? t('REGIDTRATION & MANAGEMENT FEE')
                                 : payment.type === 'DIRECT'
-                                ? t('commissionFee')
+                                ? t('COMMUNITY REWARD')
                                 : payment.type === 'FINE'
                                 ? t('fine')
                                 : payment.type === 'PIG'
-                                ? t('Dream Pool')
+                                ? t('REWARD POOL')
                                 : payment.type === 'COMPANY'
-                                ? 'HEWE'
+                                ? t('EXCHANGE FOR HEWE')
                                 : payment.type === 'KYC'
                                 ? t('KYC Fee')
-                                : t('Foundation Contribution')}
+                                : t('COMMUNITY SUPPORT REWARD')}
                               <span> : </span>
                             </span>
                             <span>{payment.amount} USDT</span>
                           </div>
                           <div className="">
-                            <span className="mx-2 text-black">
-                              <span className="font-medium mr-2">
-                                {t('To')} :{' '}
-                              </span>
-                              <span className="">{payment.to}</span>
-                            </span>
+                            {
+                              (payment.type === 'DIRECT' || payment.type === 'REFERRAL') && (
+                                <span className="mx-2 text-black">
+                                  <span className="font-medium mr-2">
+                                    {t('To')} :{' '}
+                                  </span>
+                                  <span className="">{payment.to}</span>
+                                </span>
+                              )
+                            }
                           </div>
                         </div>
                       </div>

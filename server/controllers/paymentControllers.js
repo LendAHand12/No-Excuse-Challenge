@@ -79,15 +79,14 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
       } else {
         const refUser = await getRefParentUser(user.id, user.tier);
         let haveRefNotPayEnough = false;
-        let registerFee = user.city === "VN" ? 5 : 10;
+        let registerFee = 10;
         let pigFee = 5;
-        let companyFee = 25;
-        let kycFee = user.city === "VN" ? 2 : 5;
-        let directCommissionFee = user.city === "VN" ? 15 : 55;
-        let referralCommissionFee = user.city === "VN" ? 5 : 10;
+        let companyFee = 30;
+        let directCommissionFee = 55;
+        let referralCommissionFee = 10;
         // giao dich dang ky
         payments.push({
-          userName: "Registration Fee",
+          userName: "REGIDTRATION & MANAGEMENT FEE",
           amount: registerFee,
         });
         const transactionRegister = await Transaction.create({
@@ -95,7 +94,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           amount: registerFee,
           userCountPay: user.countPay,
           userId_to: admin._id,
-          username_to: "Registration Fee",
+          username_to: "REGIDTRATION & MANAGEMENT FEE",
           tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
@@ -106,11 +105,11 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           type: "REGISTER",
           id: transactionRegister._id,
           amount: registerFee,
-          to: "Registration Fee",
+          to: "REGIDTRATION & MANAGEMENT FEE",
         });
         // giao dich con heo
         payments.push({
-          userName: "DreamPool",
+          userName: "REWARD POOL",
           amount: pigFee,
         });
         const transactionPig = await Transaction.create({
@@ -118,7 +117,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           amount: pigFee,
           userCountPay: user.countPay,
           userId_to: admin._id,
-          username_to: "DreamPool",
+          username_to: "REWARD POOL",
           tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
@@ -129,11 +128,11 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           type: "PIG",
           id: transactionPig._id,
           amount: pigFee,
-          to: "DreamPool",
+          to: "REWARD POOL",
         });
         // giao dich hewe cho cong ty
         payments.push({
-          userName: "Purchased HEWE",
+          userName: "EXCHANGE FOR HEWE",
           amount: companyFee,
         });
         const transactionCompany = await Transaction.create({
@@ -141,7 +140,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           amount: companyFee,
           userCountPay: user.countPay,
           userId_to: admin._id,
-          username_to: "Purchased HEWE",
+          username_to: "EXCHANGE FOR HEWE",
           tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
@@ -152,30 +151,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           type: "COMPANY",
           id: transactionCompany._id,
           amount: companyFee,
-          to: "Purchased HEWE",
-        });
-        // KYC
-        payments.push({
-          userName: "KYC Fee",
-          amount: kycFee,
-        });
-        const transactionKYC = await Transaction.create({
-          userId: user.id,
-          amount: kycFee,
-          userCountPay: user.countPay,
-          userId_to: admin._id,
-          username_to: "KYC Fee",
-          tier: user.tier,
-          buyPackage: user.buyPackage,
-          hash: "",
-          type: "KYC",
-          status: "PENDING",
-        });
-        paymentIds.push({
-          type: "KYC",
-          id: transactionKYC._id,
-          amount: kycFee,
-          to: "KYC Fee",
+          to: "EXCHANGE FOR HEWE",
         });
 
         // giao dich hoa hong truc tiep
@@ -953,8 +929,8 @@ const onDonePayment = asyncHandler(async (req, res) => {
       }
       const hewePriceConfig = await Config.findOne({ label: "HEWE_PRICE" });
       const hewePrice = responseHewe?.data?.ticker?.latest || hewePriceConfig.value;
-      const totalPriceHewe = user.city === "IN" ? 200 : 100;
-      const totalDayReturnHewe = user.city === "IN" ? 730 : 540;
+      const totalPriceHewe = 200;
+      const totalDayReturnHewe = 730;
       const totalHewe = Math.round(totalPriceHewe / hewePrice);
       const hewePerDay = Math.round(totalHewe / totalDayReturnHewe);
 
