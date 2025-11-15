@@ -1348,5 +1348,11 @@
   "Withdrawal Gateways": "Withdrawal Gateways",
   "Enable Withdraw - Crypto": "Enable Withdraw - Crypto",
   "Enable Withdraw - Bank": "Enable Withdraw - Bank",
-  "No payment methods available": "No payment methods available"
+  "No payment methods available": "No payment methods available",
+  "paymentTerms": {
+    "title": "Member Acknowledgment & Agreement",
+    "agreeText": "I have read and agree",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  }
 }
