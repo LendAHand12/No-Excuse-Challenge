@@ -86,7 +86,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         let referralCommissionFee = 10;
         // giao dich dang ky
         payments.push({
-          userName: "REGIDTRATION & MANAGEMENT FEE",
+          userName: "REGISTRATION & MANAGEMENT FEE",
           amount: registerFee,
         });
         const transactionRegister = await Transaction.create({
@@ -94,7 +94,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           amount: registerFee,
           userCountPay: user.countPay,
           userId_to: admin._id,
-          username_to: "REGIDTRATION & MANAGEMENT FEE",
+          username_to: "REGISTRATION & MANAGEMENT FEE",
           tier: user.tier,
           buyPackage: user.buyPackage,
           hash: "",
@@ -105,7 +105,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           type: "REGISTER",
           id: transactionRegister._id,
           amount: registerFee,
-          to: "REGIDTRATION & MANAGEMENT FEE",
+          to: "REGISTRATION & MANAGEMENT FEE",
         });
         // giao dich con heo
         payments.push({

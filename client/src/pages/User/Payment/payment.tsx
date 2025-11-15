@@ -179,7 +179,7 @@ const PaymentPage = () => {
                           <div className="">
                             <span className="font-medium">
                               {payment.type === 'REGISTER'
-                                ? t('REGIDTRATION & MANAGEMENT FEE')
+                                ? t('REGISTRATION & MANAGEMENT FEE')
                                 : payment.type === 'DIRECT'
                                 ? t('COMMUNITY REWARD')
                                 : payment.type === 'FINE'
@@ -190,7 +190,7 @@ const PaymentPage = () => {
                                 ? t('EXCHANGE FOR HEWE')
                                 : payment.type === 'KYC'
                                 ? t('KYC Fee')
-                                : t('COMMUNITY SUPPORT REWARD')}
+                                : t('COMMUNITY SUPPORT REWARDS')}
                               <span> : </span>
                             </span>
                             <span>{payment.amount} USDT</span>
