@@ -779,6 +779,33 @@ function App() {
             </>
           }
         />
+        <Route
+          path="/user/tickets"
+          element={
+            <>
+              <PageTitle title="Support Tickets | NoExcuseChallenge" />
+              <UserTicketsPage />
+            </>
+          }
+        />
+        <Route
+          path="/user/tickets/create"
+          element={
+            <>
+              <PageTitle title="Create Support Ticket | NoExcuseChallenge" />
+              <CreateTicketPage />
+            </>
+          }
+        />
+        <Route
+          path="/user/tickets/:id"
+          element={
+            <>
+              <PageTitle title="Ticket Detail | NoExcuseChallenge" />
+              <TicketDetailPage />
+            </>
+          }
+        />
         {userInfo?.errLahCode !== 'OVER45' && (
           <>
             <Route
@@ -905,33 +932,6 @@ function App() {
                 <>
                   <PageTitle title="Withdraws | NoExcuseChallenge" />
                   <WithdrawsPage />
-                </>
-              }
-            />
-            <Route
-              path="/user/tickets"
-              element={
-                <>
-                  <PageTitle title="Support Tickets | NoExcuseChallenge" />
-                  <UserTicketsPage />
-                </>
-              }
-            />
-            <Route
-              path="/user/tickets/create"
-              element={
-                <>
-                  <PageTitle title="Create Support Ticket | NoExcuseChallenge" />
-                  <CreateTicketPage />
-                </>
-              }
-            />
-            <Route
-              path="/user/tickets/:id"
-              element={
-                <>
-                  <PageTitle title="Ticket Detail | NoExcuseChallenge" />
-                  <TicketDetailPage />
                 </>
               }
             />

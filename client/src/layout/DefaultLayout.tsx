@@ -34,7 +34,7 @@ const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
       } else {
         routes =
           userInfo.errLahCode === 'OVER45'
-            ? UserRoutes.filter((route) => route.link === '/user/profile' || route.link === '/user/assets')
+            ? UserRoutes.filter((route) => route.link === '/user/profile' || route.link === '/user/assets' || route.link === '/user/tickets')
             : userInfo.tier === 1
             ? UserRoutes.filter((route) => route.link !== '/user/tier2')
             : UserRoutes;
