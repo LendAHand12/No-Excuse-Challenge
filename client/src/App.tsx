@@ -830,7 +830,7 @@ function App() {
               />
             )} */}
 
-            {userInfo?.preTier2Status === 'PASSED' && (
+            {/* {userInfo?.preTier2Status === 'PASSED' && (
               <Route
                 path="/user/payment-for-tier-with-pre-tier-2-pool"
                 element={
@@ -840,9 +840,9 @@ function App() {
                   </>
                 }
               />
-            )}
+            )} */}
 
-            <Route
+            {/* <Route
               path="/user/users-passed-tier-2"
               element={
                 <>
@@ -860,7 +860,7 @@ function App() {
                   <UsersPreTier2 />
                 </>
               }
-            />
+            /> */}
 
             <Route
               path="/user/pre-tier-2-pool"
