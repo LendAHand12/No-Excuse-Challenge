@@ -26,13 +26,20 @@ export const getClientIp = (req) => {
 };
 
 /**
- * Detect country from IP address using ip-api.com (free service)
+ * Detect country from IP address using ipapi.co (free service)
  * @param {String} ip - IP address
  * @returns {Promise<Object>} - { country, countryCode, success }
  */
 export const detectCountryFromIp = async (ip) => {
   // Skip detection for localhost/private IPs
-  if (!ip || ip === "unknown" || ip.startsWith("127.") || ip.startsWith("192.168.") || ip.startsWith("10.") || ip.startsWith("172.")) {
+  if (
+    !ip ||
+    ip === "unknown" ||
+    ip.startsWith("127.") ||
+    ip.startsWith("192.168.") ||
+    ip.startsWith("10.") ||
+    ip.startsWith("172.")
+  ) {
     return {
       country: "Vietnam",
       countryCode: "VN",
@@ -41,20 +48,26 @@ export const detectCountryFromIp = async (ip) => {
   }
 
   try {
-    // Using ip-api.com free service (no API key required, 45 requests/minute limit)
-    const response = await axios.get(`http://ip-api.com/json/${ip}?fields=status,message,country,countryCode`, {
+    // Using ipapi.co free service (no API key required, 1000 requests/day limit)
+    // Response format: { country_name, country_code, ... }
+    const response = await axios.get(`https://ipapi.co/${ip}/json/`, {
       timeout: 5000, // 5 second timeout
     });
 
-    if (response.data && response.data.status === "success") {
+    if (response.data && response.data.country_code) {
+      // Check for error in response (ipapi.co returns error field if IP is invalid)
+      if (response.data.error) {
+        throw new Error(response.data.reason || "Invalid IP address");
+      }
+
       return {
-        country: response.data.country || "Unknown",
-        countryCode: response.data.countryCode || "",
+        country: response.data.country_name || "Unknown",
+        countryCode: response.data.country_code || "",
         success: true,
       };
     }
 
-    // Fallback to Vietnam if API fails
+    // Fallback to Vietnam if API response is invalid
     return {
       country: "Vietnam",
       countryCode: "VN",
@@ -79,4 +92,3 @@ export const detectCountryFromIp = async (ip) => {
 export const isVietnam = (countryCode) => {
   return countryCode === "VN";
 };
-
