@@ -645,6 +645,43 @@ const registerSerepay = asyncHandler(async (req, res) => {
   console.log({ wallet });
 });
 
+// Test endpoint to get IP and location info
+const testGetIp = asyncHandler(async (req, res) => {
+  try {
+    const clientIp = getClientIp(req);
+    const locationInfo = await detectCountryFromIp(clientIp);
+    const isUserInVietnam = isVietnam(locationInfo.countryCode);
+
+    res.status(200).json({
+      success: true,
+      ip: {
+        raw: clientIp,
+        fromHeader: req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || req.headers["cf-connecting-ip"] || "none",
+        fromConnection: req.connection?.remoteAddress || req.socket?.remoteAddress || "none",
+        fromReq: req.ip || "none",
+      },
+      location: {
+        country: locationInfo.country,
+        countryCode: locationInfo.countryCode,
+        isVietnam: isUserInVietnam,
+      },
+      headers: {
+        "x-forwarded-for": req.headers["x-forwarded-for"] || "none",
+        "x-real-ip": req.headers["x-real-ip"] || "none",
+        "cf-connecting-ip": req.headers["cf-connecting-ip"] || "none",
+      },
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Error in testGetIp:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      ip: getClientIp(req),
+    });
+  }
+});
+
 export {
   checkSendMail,
   checkLinkRef,
@@ -659,4 +696,5 @@ export {
   updateData,
   getNewPass,
   registerSerepay,
+  testGetIp,
 };

@@ -13,6 +13,7 @@ import {
   updateData,
   getNewPass,
   registerSerepay,
+  testGetIp,
 } from "../controllers/authControllers.js";
 
 const router = express.Router();
@@ -30,5 +31,6 @@ router.route("/resetPassword").put(resetUserPassword);
 router.route("/refresh").post(getAccessToken);
 router.route("/getLinkVerify").post(getLinkVerify);
 router.route("/registerSerepay").post(registerSerepay);
+router.route("/test-ip").get(testGetIp);
 
 export default router;
