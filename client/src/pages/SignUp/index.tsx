@@ -60,6 +60,8 @@ const SignUpPage = () => {
   const [selectedBank, setSelectedBank] = useState<any>(null);
   const [isVietnam, setIsVietnam] = useState<boolean | null>(null); // null = detecting, true/false = detected
   const [detectingCountry, setDetectingCountry] = useState(true);
+  const [countryDetected, setCountryDetected] = useState(false); // true when country is successfully detected
+  const [countryError, setCountryError] = useState<string | null>(null); // error message if detection fails
   const [userIp, setUserIp] = useState<string>('');
   const [userCountry, setUserCountry] = useState<string>('');
   const [userCountryCode, setUserCountryCode] = useState<string>('');
@@ -146,26 +148,42 @@ const SignUpPage = () => {
           setUserCountry(isTestVietnam ? 'Vietnam' : 'Test Country');
           setUserCountryCode(testCountry.toUpperCase());
           setDetectingCountry(false);
+          setCountryDetected(true);
+          setCountryError(null);
         } else {
           // Detect from client-side to get real user IP
           const locationInfo = await detectIpLocationFromClient();
+          
+          // Check if detection was successful
+          if (!locationInfo.success) {
+            throw new Error('Failed to detect location');
+          }
+          
           setIsVietnam(locationInfo.isVietnam);
           setUserIp(locationInfo.ip);
           setUserCountry(locationInfo.country);
           setUserCountryCode(locationInfo.countryCode);
           setDetectingCountry(false);
+          setCountryDetected(true);
+          setCountryError(null);
         }
       } catch (error) {
         console.error('Error detecting country:', error);
-        // Default to Vietnam if detection fails
-        setIsVietnam(true);
-        setUserIp('unknown');
-        setUserCountry('Vietnam');
-        setUserCountryCode('VN');
         setDetectingCountry(false);
+        setCountryDetected(false);
+        setCountryError(
+          error instanceof Error
+            ? error.message
+            : t('Failed to detect your location. Please refresh the page and try again.') ||
+                'Failed to detect your location. Please refresh the page and try again.'
+        );
+        toast.error(
+          t('Failed to detect your location. Please refresh the page and try again.') ||
+            'Failed to detect your location. Please refresh the page and try again.'
+        );
       }
     })();
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     (async () => {
@@ -200,14 +218,39 @@ const SignUpPage = () => {
                         {t('Signup')}
                       </h1>
                       <div className="w-full flex-1 mt-8">
+                        {/* Show loading when detecting country */}
                         {detectingCountry && (
                           <div className="text-center mb-4">
-                            <p className="text-gray-600 text-sm">
+                            <Loading />
+                            <p className="text-gray-600 text-sm mt-4">
                               {t('Detecting your location...') || 'Detecting your location...'}
                             </p>
                           </div>
                         )}
-                        <form
+                        
+                        {/* Show error if country detection failed */}
+                        {countryError && !detectingCountry && (
+                          <div className="text-center mb-4 max-w-md mx-auto">
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                              <p className="text-red-800 font-semibold mb-2">
+                                {t('Location Detection Failed') || 'Location Detection Failed'}
+                              </p>
+                              <p className="text-red-600 text-sm mb-4">
+                                {countryError}
+                              </p>
+                              <button
+                                onClick={() => window.location.reload()}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                              >
+                                {t('Refresh Page') || 'Refresh Page'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Only show form when country is successfully detected */}
+                        {countryDetected && !detectingCountry && !countryError && (
+                          <form
                           className="mx-auto w-[350px] xl:w-[500px]"
                           onSubmit={handleSubmit(onSubmit)}
                           autoComplete="off"
@@ -670,6 +713,7 @@ const SignUpPage = () => {
                             </Link>
                           </p>
                         </form>
+                        )}
                       </div>
                     </div>
                   </div>
