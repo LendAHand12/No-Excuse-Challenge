@@ -6,7 +6,6 @@ import axios from "axios";
  * @returns {String} - IP address
  */
 export const getClientIp = (req) => {
-  console.log({ headers: req.headers, connection: req.connection, socket: req.socket, ip: req.ip });
   // Check various headers for IP address (in case of proxies/load balancers)
   const forwarded = req.headers["x-forwarded-for"];
   const realIp = req.headers["x-real-ip"];
@@ -32,7 +31,6 @@ export const getClientIp = (req) => {
  * @returns {Promise<Object>} - { country, countryCode, success }
  */
 export const detectCountryFromIp = async (ip) => {
-  console.log({ ip });
   // Skip detection for localhost/private IPs
   if (
     !ip ||

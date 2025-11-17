@@ -10,6 +10,7 @@ import Loading from '@/components/Loading';
 import Auth from '@/api/Auth';
 import banks from '@/lib/banks.json';
 import PhoneInput from 'react-phone-number-input';
+import { detectIpLocationFromClient } from '@/utils/detectIpLocation';
 
 import 'react-phone-number-input/style.css';
 import './index.css';
@@ -59,6 +60,9 @@ const SignUpPage = () => {
   const [selectedBank, setSelectedBank] = useState<any>(null);
   const [isVietnam, setIsVietnam] = useState<boolean | null>(null); // null = detecting, true/false = detected
   const [detectingCountry, setDetectingCountry] = useState(true);
+  const [userIp, setUserIp] = useState<string>('');
+  const [userCountry, setUserCountry] = useState<string>('');
+  const [userCountryCode, setUserCountryCode] = useState<string>('');
 
   const onSubmit = useCallback(
     async (data) => {
@@ -103,6 +107,10 @@ const SignUpPage = () => {
         accountName: accountName ? accountName.trim() : '',
         accountNumber: accountNumber ? accountNumber.trim() : '',
         dateOfBirth: dateOfBirth, // Send as string "DD/MM/YYYY" format
+        // Send IP and location info detected from client
+        clientIp: userIp,
+        clientCountry: userCountry,
+        clientCountryCode: userCountryCode,
       })
         .then((response) => {
           setLoading(false);
@@ -118,10 +126,10 @@ const SignUpPage = () => {
           setLoading(false);
         });
     },
-    [phone],
+    [phone, userIp, userCountry, userCountryCode],
   );
 
-  // Detect user's country from IP
+  // Detect user's country from IP (from client-side to get real IP)
   useEffect(() => {
     (async () => {
       try {
@@ -130,21 +138,30 @@ const SignUpPage = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const testCountry = urlParams.get('testCountry');
         
-        let response;
         if (testCountry && process.env.NODE_ENV !== 'production') {
-          // Use test mode
-          response = await Auth.detectCountry(`?testCountry=${testCountry}`);
+          // Use test mode - simulate country
+          const isTestVietnam = testCountry.toUpperCase() === 'VN';
+          setIsVietnam(isTestVietnam);
+          setUserIp('test-ip');
+          setUserCountry(isTestVietnam ? 'Vietnam' : 'Test Country');
+          setUserCountryCode(testCountry.toUpperCase());
+          setDetectingCountry(false);
         } else {
-          response = await Auth.detectCountry();
+          // Detect from client-side to get real user IP
+          const locationInfo = await detectIpLocationFromClient();
+          setIsVietnam(locationInfo.isVietnam);
+          setUserIp(locationInfo.ip);
+          setUserCountry(locationInfo.country);
+          setUserCountryCode(locationInfo.countryCode);
+          setDetectingCountry(false);
         }
-        
-        const { isVietnam: detectedIsVietnam } = response.data;
-        setIsVietnam(detectedIsVietnam);
-        setDetectingCountry(false);
       } catch (error) {
         console.error('Error detecting country:', error);
         // Default to Vietnam if detection fails
         setIsVietnam(true);
+        setUserIp('unknown');
+        setUserCountry('Vietnam');
+        setUserCountryCode('VN');
         setDetectingCountry(false);
       }
     })();
