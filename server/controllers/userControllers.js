@@ -440,7 +440,8 @@ const getUserById = asyncHandler(async (req, res) => {
       // Payment and withdrawal gateway settings
       enablePaymentCrypto: user.enablePaymentCrypto !== undefined ? user.enablePaymentCrypto : true,
       enablePaymentBank: user.enablePaymentBank !== undefined ? user.enablePaymentBank : true,
-      enableWithdrawCrypto: user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
+      enableWithdrawCrypto:
+        user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
       enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
     });
   } else {
@@ -487,7 +488,8 @@ const getUserAssets = asyncHandler(async (req, res) => {
     // Payment and withdrawal gateway settings
     enablePaymentCrypto: user.enablePaymentCrypto !== undefined ? user.enablePaymentCrypto : true,
     enablePaymentBank: user.enablePaymentBank !== undefined ? user.enablePaymentBank : true,
-    enableWithdrawCrypto: user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
+    enableWithdrawCrypto:
+      user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
     enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
   });
 });
@@ -698,7 +700,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
       // Payment and withdrawal gateway settings
       enablePaymentCrypto: user.enablePaymentCrypto !== undefined ? user.enablePaymentCrypto : true,
       enablePaymentBank: user.enablePaymentBank !== undefined ? user.enablePaymentBank : true,
-      enableWithdrawCrypto: user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
+      enableWithdrawCrypto:
+        user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
       enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
     });
   } else {
@@ -1097,7 +1100,12 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     enableWithdrawBank,
   } = req.body;
   console.log({ totalHewe, availableHewe, hewePerDay });
-  console.log('Gateway settings:', { enablePaymentCrypto, enablePaymentBank, enableWithdrawCrypto, enableWithdrawBank });
+  console.log("Gateway settings:", {
+    enablePaymentCrypto,
+    enablePaymentBank,
+    enableWithdrawCrypto,
+    enableWithdrawBank,
+  });
   if (userId) {
     const userExistsUserId = await User.findOne({
       userId,
@@ -1265,25 +1273,49 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     }
     // Update payment and withdrawal gateway settings
     // FormData sends boolean as string, so we need to handle both boolean and string
-    if (enablePaymentCrypto !== undefined && enablePaymentCrypto !== null && enablePaymentCrypto !== '') {
-      const value = enablePaymentCrypto === true || enablePaymentCrypto === 'true' || String(enablePaymentCrypto).toLowerCase() === 'true';
+    if (
+      enablePaymentCrypto !== undefined &&
+      enablePaymentCrypto !== null &&
+      enablePaymentCrypto !== ""
+    ) {
+      const value =
+        enablePaymentCrypto === true ||
+        enablePaymentCrypto === "true" ||
+        String(enablePaymentCrypto).toLowerCase() === "true";
       user.enablePaymentCrypto = value;
-      console.log('Updated enablePaymentCrypto:', value, 'from:', enablePaymentCrypto);
+      console.log("Updated enablePaymentCrypto:", value, "from:", enablePaymentCrypto);
     }
-    if (enablePaymentBank !== undefined && enablePaymentBank !== null && enablePaymentBank !== '') {
-      const value = enablePaymentBank === true || enablePaymentBank === 'true' || String(enablePaymentBank).toLowerCase() === 'true';
+    if (enablePaymentBank !== undefined && enablePaymentBank !== null && enablePaymentBank !== "") {
+      const value =
+        enablePaymentBank === true ||
+        enablePaymentBank === "true" ||
+        String(enablePaymentBank).toLowerCase() === "true";
       user.enablePaymentBank = value;
-      console.log('Updated enablePaymentBank:', value, 'from:', enablePaymentBank);
+      console.log("Updated enablePaymentBank:", value, "from:", enablePaymentBank);
     }
-    if (enableWithdrawCrypto !== undefined && enableWithdrawCrypto !== null && enableWithdrawCrypto !== '') {
-      const value = enableWithdrawCrypto === true || enableWithdrawCrypto === 'true' || String(enableWithdrawCrypto).toLowerCase() === 'true';
+    if (
+      enableWithdrawCrypto !== undefined &&
+      enableWithdrawCrypto !== null &&
+      enableWithdrawCrypto !== ""
+    ) {
+      const value =
+        enableWithdrawCrypto === true ||
+        enableWithdrawCrypto === "true" ||
+        String(enableWithdrawCrypto).toLowerCase() === "true";
       user.enableWithdrawCrypto = value;
-      console.log('Updated enableWithdrawCrypto:', value, 'from:', enableWithdrawCrypto);
+      console.log("Updated enableWithdrawCrypto:", value, "from:", enableWithdrawCrypto);
     }
-    if (enableWithdrawBank !== undefined && enableWithdrawBank !== null && enableWithdrawBank !== '') {
-      const value = enableWithdrawBank === true || enableWithdrawBank === 'true' || String(enableWithdrawBank).toLowerCase() === 'true';
+    if (
+      enableWithdrawBank !== undefined &&
+      enableWithdrawBank !== null &&
+      enableWithdrawBank !== ""
+    ) {
+      const value =
+        enableWithdrawBank === true ||
+        enableWithdrawBank === "true" ||
+        String(enableWithdrawBank).toLowerCase() === "true";
       user.enableWithdrawBank = value;
-      console.log('Updated enableWithdrawBank:', value, 'from:', enableWithdrawBank);
+      console.log("Updated enableWithdrawBank:", value, "from:", enableWithdrawBank);
     }
     if (req.files && req.files.imgFront && req.files.imgFront[0]) {
       user.imgFront = req.files.imgFront[0].filename || user.imgFront;
@@ -1498,70 +1530,139 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
 });
 
 const buildUserTree = async (userId) => {
-  const user = await User.findOne({ _id: userId }).select("userId children");
-  const tree = { _id: user._id, name: user.userId, children: [] };
-  for (const childId of user.children) {
-    const childTree = await buildUserTree(childId);
-    if (childTree) {
-      tree.children.push(childTree);
-    }
-  }
+  const visited = new Set(); // Track visited nodes to prevent infinite loops
 
-  return tree;
+  const buildRecursive = async (currentUserId) => {
+    // Check for circular reference (infinite loop)
+    if (visited.has(currentUserId.toString())) {
+      console.warn(`Circular reference detected at userId: ${currentUserId}`);
+      return null; // Return null to prevent infinite loop
+    }
+
+    visited.add(currentUserId.toString());
+
+    const user = await User.findOne({ _id: currentUserId }).select("userId children");
+    if (!user) {
+      return null;
+    }
+
+    const tree = { _id: user._id, name: user.userId, children: [] };
+    for (const childId of user.children) {
+      if (!childId) continue; // Skip invalid childId
+
+      const childTree = await buildRecursive(childId);
+      if (childTree) {
+        tree.children.push(childTree);
+      }
+    }
+
+    return tree;
+  };
+
+  return await buildRecursive(userId);
 };
 
 const getAllChildren = async (userId) => {
-  const user = await User.findById(userId).select("userId children");
+  const visited = new Set(); // Track visited nodes to prevent infinite loops
 
-  if (!user) {
-    return [];
-  }
+  const getAllRecursive = async (currentUserId) => {
+    // Check for circular reference (infinite loop)
+    if (visited.has(currentUserId.toString())) {
+      console.warn(`Circular reference detected at userId: ${currentUserId}`);
+      return []; // Return empty array to prevent infinite loop
+    }
 
-  let children = [];
-  for (const childId of user.children) {
-    const child = await getAllChildren(childId);
-    children = children.concat(child);
-  }
+    visited.add(currentUserId.toString());
 
-  return [user.userId, ...children];
+    const user = await User.findById(currentUserId).select("userId children");
+    if (!user) {
+      return [];
+    }
+
+    let children = [];
+    for (const childId of user.children) {
+      if (!childId) continue; // Skip invalid childId
+
+      const child = await getAllRecursive(childId);
+      children = children.concat(child);
+    }
+
+    return [user.userId, ...children];
+  };
+
+  return await getAllRecursive(userId);
 };
 
 const getCountAllChildren = async (treeId, tier) => {
-  const tree = await Tree.findById(treeId).select("userId children createdAt");
+  const visited = new Set(); // Track visited nodes to prevent infinite loops
 
-  if (!tree) {
-    return 0;
-  }
+  const countRecursive = async (currentTreeId) => {
+    // Check for circular reference (infinite loop)
+    if (visited.has(currentTreeId.toString())) {
+      console.warn(`Circular reference detected at treeId: ${currentTreeId}`);
+      return 0; // Return 0 to prevent infinite loop
+    }
 
-  let result = tree.children.length;
-  for (const childId of tree.children) {
-    const treeOfChild = await Tree.findById(childId);
-    const count = await getCountAllChildren(treeOfChild._id, tier);
-    result += count;
-  }
+    visited.add(currentTreeId.toString());
 
-  return result;
+    const tree = await Tree.findById(currentTreeId).select("userId children createdAt");
+    if (!tree) {
+      return 0;
+    }
+
+    let result = tree.children.length;
+    for (const childId of tree.children) {
+      if (!childId) continue; // Skip invalid childId
+
+      const treeOfChild = await Tree.findById(childId);
+      if (!treeOfChild) continue; // Skip if child not found
+
+      const count = await countRecursive(treeOfChild._id);
+      result += count;
+    }
+
+    return result;
+  };
+
+  return await countRecursive(treeId);
 };
 
 const getCountIncome = async (treeId, tier) => {
-  const tree = await Tree.findById(treeId).select("userId children createdAt");
+  const visited = new Set(); // Track visited nodes to prevent infinite loops
 
-  if (!tree) {
-    return 0;
-  }
-
-  let result = tree.children.length;
-  for (const childId of tree.children) {
-    const treeOfChild = await Tree.findById(childId);
-    const child = await User.findById(treeOfChild.userId);
-    if (child.countPay === 0) {
-      result = result - 1;
+  const countRecursive = async (currentTreeId) => {
+    // Check for circular reference (infinite loop)
+    if (visited.has(currentTreeId.toString())) {
+      console.warn(`Circular reference detected at treeId: ${currentTreeId}`);
+      return 0; // Return 0 to prevent infinite loop
     }
-    const count = await getCountIncome(treeOfChild._id, tier);
-    result += count;
-  }
 
-  return result;
+    visited.add(currentTreeId.toString());
+
+    const tree = await Tree.findById(currentTreeId).select("userId children createdAt");
+    if (!tree) {
+      return 0;
+    }
+
+    let result = tree.children.length;
+    for (const childId of tree.children) {
+      if (!childId) continue; // Skip invalid childId
+
+      const treeOfChild = await Tree.findById(childId);
+      if (!treeOfChild) continue; // Skip if child not found
+
+      const child = await User.findById(treeOfChild.userId);
+      if (child && child.countPay === 0) {
+        result = result - 1;
+      }
+      const count = await countRecursive(treeOfChild._id);
+      result += count;
+    }
+
+    return result;
+  };
+
+  return await countRecursive(treeId);
 };
 
 const getUserProfile = asyncHandler(async (req, res) => {

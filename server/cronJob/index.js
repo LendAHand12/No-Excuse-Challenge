@@ -162,10 +162,17 @@ export const countChildToData = asyncHandler(async () => {
   const listTrees = await Tree.find({}).select("tier countChild userId userName");
 
   for (let t of listTrees) {
+    // const t = await Tree.findById("68176977299e3ad047c0368e").select(
+    //   "tier countChild userId userName"
+    // );
     try {
       console.log({ name: t.userName });
+
       const countChild = await getCountAllChildren(t._id, t.tier);
       const income = await getCountIncome(t._id, t.tier);
+      // if (t.userName === "DINHLIEU" && t.tier === 2) {
+      //   console.log({ countChild, income });
+      // }
       t.countChild = countChild;
       t.income = income;
       await t.save();
@@ -425,8 +432,8 @@ export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
     const currentDay = moment();
 
     for (let user of listUsers) {
-      console.log({name: user.userId});
-    // const user = await User.findById("68610d7b9fd2c5445f751333");
+      console.log({ name: user.userId });
+      // const user = await User.findById("68610d7b9fd2c5445f751333");
       const treeOfUser = await Tree.findOne({
         userId: user._id,
         isSubId: false,

@@ -20,7 +20,7 @@ const DropdownNotification = () => {
 
   // Fetch unread count
   const fetchUnreadCount = async () => {
-    if (!userInfo) return;
+    if (!userInfo || userInfo.role !== 'user') return;
     try {
       const response = await Notification.getUnreadCount();
       if (response?.data?.unreadCount !== undefined) {
@@ -33,7 +33,7 @@ const DropdownNotification = () => {
 
   // Fetch notifications
   const fetchNotifications = async (pageNum = 1, reset = false) => {
-    if (!userInfo || loading) return;
+    if (!userInfo || userInfo.role !== 'user' || loading) return;
     setLoading(true);
     try {
       const isReadParam = showOnlyUnread ? 'false' : undefined;
@@ -66,7 +66,7 @@ const DropdownNotification = () => {
 
   // Load notifications when dropdown opens or filter changes
   useEffect(() => {
-    if (dropdownOpen && userInfo) {
+    if (dropdownOpen && userInfo && userInfo.role === 'user') {
       fetchNotifications(1, true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,7 +102,7 @@ const DropdownNotification = () => {
 
   // Poll for unread count every 30 seconds
   useEffect(() => {
-    if (!userInfo) return;
+    if (!userInfo || userInfo.role !== 'user') return;
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 30000);
     return () => clearInterval(interval);
