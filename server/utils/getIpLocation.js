@@ -6,7 +6,7 @@ import axios from "axios";
  * @returns {String} - IP address
  */
 export const getClientIp = (req) => {
-  console.log({ headers: req.headers });
+  console.log({ headers: req.headers, connection: req.connection, socket: req.socket, ip: req.ip });
   // Check various headers for IP address (in case of proxies/load balancers)
   const forwarded = req.headers["x-forwarded-for"];
   const realIp = req.headers["x-real-ip"];
