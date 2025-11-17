@@ -20,6 +20,7 @@ import axios from "axios";
 import Honor from "../models/honorModel.js";
 import mongoose from "mongoose";
 import moment from "moment";
+import { getClientIp, detectCountryFromIp, isVietnam } from "../utils/getIpLocation.js";
 
 const checkLinkRef = asyncHandler(async (req, res) => {
   const { ref, receiveId } = req.body;
@@ -98,19 +99,25 @@ const registerUser = asyncHandler(async (req, res) => {
         status: { $ne: "DELETED" },
       })
     : null;
-  const userExistsAccountNumber = await User.findOne({
-    accountNumber,
-    status: { $ne: "DELETED" },
-  });
+  // Only check for duplicate account number if accountNumber is provided
+  const userExistsAccountNumber = accountNumber
+    ? await User.findOne({
+        accountNumber,
+        status: { $ne: "DELETED" },
+      })
+    : null;
 
-  // Check duplicate bank account (bankCode + accountNumber)
-  const userExistsBankAccount = await User.findOne({
-    $and: [
-      { bankCode: bankCode },
-      { accountNumber: accountNumber },
-      { status: { $ne: "DELETED" } },
-    ],
-  });
+  // Check duplicate bank account (bankCode + accountNumber) - only if both are provided
+  const userExistsBankAccount =
+    bankCode && accountNumber
+      ? await User.findOne({
+          $and: [
+            { bankCode: bankCode },
+            { accountNumber: accountNumber },
+            { status: { $ne: "DELETED" } },
+          ],
+        })
+      : null;
 
   if (userExistsUserId) {
     let message = "duplicateInfoUserId";
@@ -145,6 +152,11 @@ const registerUser = asyncHandler(async (req, res) => {
 
     if (treeReceiveUser.userName === "NoExcuse 9" || treeReceiveUser.children.length < 2) {
       const parent = await User.findById(treeReceiveUser.userId);
+
+      // Get IP address and detect country
+      const clientIp = getClientIp(req);
+      const locationInfo = await detectCountryFromIp(clientIp);
+      const isUserInVietnam = isVietnam(locationInfo.countryCode);
 
       // Parse dateOfBirth if provided, otherwise set to null
       let parsedDateOfBirth = null;
@@ -195,6 +207,29 @@ const registerUser = asyncHandler(async (req, res) => {
         parsedDateOfBirth = parseDateOfBirth(dateOfBirth);
       }
 
+      // Set payment and withdrawal defaults based on country
+      // If user is NOT in Vietnam: crypto only (enable crypto, disable bank)
+      // If user is in Vietnam: both enabled by default (current behavior)
+      const enablePaymentCrypto = isUserInVietnam ? false : true; // Always enable crypto
+      const enablePaymentBank = isUserInVietnam ? true : false; // Only enable bank for Vietnam users
+      const enableWithdrawCrypto = true; // Always enable crypto withdrawal
+      const enableWithdrawBank = isUserInVietnam ? false : true; // Only enable bank withdrawal for Vietnam users
+
+      // Only save bank information if user is in Vietnam, otherwise leave empty
+      const bankInfo = isUserInVietnam
+        ? {
+            accountName: accountName || "",
+            accountNumber: accountNumber || "",
+            bankName: bankName || "",
+            bankCode: bankCode || "",
+          }
+        : {
+            accountName: "",
+            accountNumber: "",
+            bankName: "",
+            bankCode: "",
+          };
+
       const user = await User.create({
         userId,
         email: email.toLowerCase(),
@@ -207,11 +242,18 @@ const registerUser = asyncHandler(async (req, res) => {
         kycFee: true,
         changeCreatedAt: new Date(),
         city: parent.city,
-        accountName,
-        accountNumber,
-        bankName,
-        bankCode,
         dateOfBirth: parsedDateOfBirth,
+        // Bank information (only for Vietnam users)
+        ...bankInfo,
+        // Payment and withdrawal gateway settings
+        enablePaymentCrypto,
+        enablePaymentBank,
+        enableWithdrawCrypto,
+        enableWithdrawBank,
+        // IP and location tracking
+        registrationIp: clientIp,
+        registrationCountry: locationInfo.country,
+        registrationCountryCode: locationInfo.countryCode,
       });
 
       const tree = await Tree.create({
@@ -589,6 +631,48 @@ const registerSerepay = asyncHandler(async (req, res) => {
   console.log({ wallet });
 });
 
+// Public endpoint to detect user's country from IP
+const detectUserCountry = asyncHandler(async (req, res) => {
+  try {
+    // Test mode: Allow override country via query parameter (for development/testing)
+    // Usage: /api/auth/detectCountry?testCountry=US or ?testCountry=VN
+    const testCountry = req.query.testCountry;
+    if (testCountry && process.env.NODE_ENV !== "production") {
+      const isTestVietnam = testCountry.toUpperCase() === "VN";
+      return res.status(200).json({
+        success: true,
+        ip: "test-ip",
+        country: isTestVietnam ? "Vietnam" : "Test Country",
+        countryCode: testCountry.toUpperCase(),
+        isVietnam: isTestVietnam,
+        testMode: true,
+      });
+    }
+
+    const clientIp = getClientIp(req);
+    const locationInfo = await detectCountryFromIp(clientIp);
+    const isUserInVietnam = isVietnam(locationInfo.countryCode);
+
+    res.status(200).json({
+      success: true,
+      ip: clientIp,
+      country: locationInfo.country,
+      countryCode: locationInfo.countryCode,
+      isVietnam: isUserInVietnam,
+    });
+  } catch (error) {
+    console.error("Error detecting user country:", error);
+    // Fallback to Vietnam on error
+    res.status(200).json({
+      success: false,
+      ip: getClientIp(req),
+      country: "Vietnam",
+      countryCode: "VN",
+      isVietnam: true,
+    });
+  }
+});
+
 export {
   checkSendMail,
   checkLinkRef,
@@ -603,4 +687,5 @@ export {
   updateData,
   getNewPass,
   registerSerepay,
+  detectUserCountry,
 };

@@ -285,20 +285,33 @@ const userSchema = mongoose.Schema(
     // Payment gateway settings
     enablePaymentCrypto: {
       type: Boolean,
-      default: true, // Default: enable crypto payment
+      default: true, // Default: enable crypto payment (primary method)
     },
     enablePaymentBank: {
       type: Boolean,
-      default: true, // Default: enable bank payment
+      default: false, // Default: disable bank payment (only for Vietnam users)
     },
     // Withdrawal gateway settings
     enableWithdrawCrypto: {
       type: Boolean,
-      default: false, // Default: disable crypto withdrawal
+      default: true, // Default: enable crypto withdrawal (primary method)
     },
     enableWithdrawBank: {
       type: Boolean,
-      default: true, // Default: enable bank withdrawal
+      default: false, // Default: disable bank withdrawal (only for Vietnam users)
+    },
+    // IP and location tracking
+    registrationIp: {
+      type: String,
+      default: "",
+    },
+    registrationCountry: {
+      type: String,
+      default: "",
+    },
+    registrationCountryCode: {
+      type: String,
+      default: "",
     },
   },
   {

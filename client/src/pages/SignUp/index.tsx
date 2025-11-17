@@ -57,6 +57,8 @@ const SignUpPage = () => {
   const [bankSearch, setBankSearch] = useState('');
   const [showBankDropdown, setShowBankDropdown] = useState(false);
   const [selectedBank, setSelectedBank] = useState<any>(null);
+  const [isVietnam, setIsVietnam] = useState<boolean | null>(null); // null = detecting, true/false = detected
+  const [detectingCountry, setDetectingCountry] = useState(true);
 
   const onSubmit = useCallback(
     async (data) => {
@@ -119,6 +121,35 @@ const SignUpPage = () => {
     [phone],
   );
 
+  // Detect user's country from IP
+  useEffect(() => {
+    (async () => {
+      try {
+        // Check for test country in URL query params (for development/testing)
+        // Usage: /signup?testCountry=US or /signup?testCountry=VN
+        const urlParams = new URLSearchParams(window.location.search);
+        const testCountry = urlParams.get('testCountry');
+        
+        let response;
+        if (testCountry && process.env.NODE_ENV !== 'production') {
+          // Use test mode
+          response = await Auth.detectCountry(`?testCountry=${testCountry}`);
+        } else {
+          response = await Auth.detectCountry();
+        }
+        
+        const { isVietnam: detectedIsVietnam } = response.data;
+        setIsVietnam(detectedIsVietnam);
+        setDetectingCountry(false);
+      } catch (error) {
+        console.error('Error detecting country:', error);
+        // Default to Vietnam if detection fails
+        setIsVietnam(true);
+        setDetectingCountry(false);
+      }
+    })();
+  }, []);
+
   useEffect(() => {
     (async () => {
       await Auth.checkLinkRef({ ref, receiveId })
@@ -152,6 +183,13 @@ const SignUpPage = () => {
                         {t('Signup')}
                       </h1>
                       <div className="w-full flex-1 mt-8">
+                        {detectingCountry && (
+                          <div className="text-center mb-4">
+                            <p className="text-gray-600 text-sm">
+                              {t('Detecting your location...') || 'Detecting your location...'}
+                            </p>
+                          </div>
+                        )}
                         <form
                           className="mx-auto w-[350px] xl:w-[500px]"
                           onSubmit={handleSubmit(onSubmit)}
@@ -211,15 +249,21 @@ const SignUpPage = () => {
                               {errors.idCode?.message}
                             </p>
                           </div>
-                          {/* Wallet address - Optional */}
+                          {/* Wallet address - Required for non-VN, Optional for VN */}
                           <div>
                             <input
                               className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
                               type="text"
-                              placeholder={`${t(
-                                'Wallet address',
-                              )} (Optional) : Oxbx7...`}
+                              placeholder={
+                                isVietnam === false
+                                  ? `${t('Wallet address')} : Oxbx7...`
+                                  : `${t('Wallet address')} (${t('Optional')}) : Oxbx7...`
+                              }
                               {...register('walletAddress', {
+                                required:
+                                  isVietnam === false
+                                    ? t('Wallet address is required')
+                                    : false,
                                 pattern: {
                                   value: /^0x[a-fA-F0-9]{40}$/g,
                                   message: t(
@@ -227,23 +271,27 @@ const SignUpPage = () => {
                                   ),
                                 },
                               })}
-                              disabled={loading}
+                              disabled={loading || detectingCountry}
                             />
                             <p className="text-red-500 mt-1 text-sm">
                               {errors.walletAddress?.message}
                             </p>
                           </div>
 
-                          {/* Bank Name */}
-                          <div className="relative mt-5">
-                            {/* Hidden input for form validation */}
-                            <input
-                              type="hidden"
-                              {...register('bankCode', {
-                                required: t('bank name is required'),
-                              })}
-                              value={selectedBank?.code || ''}
-                            />
+                          {/* Bank Name - Required for VN, Hidden for non-VN */}
+                          {isVietnam !== false && (
+                            <div className="relative mt-5">
+                              {/* Hidden input for form validation */}
+                              <input
+                                type="hidden"
+                                {...register('bankCode', {
+                                  required:
+                                    isVietnam === true
+                                      ? t('bank name is required')
+                                      : false,
+                                })}
+                                value={selectedBank?.code || ''}
+                              />
 
                             {/* Search Input */}
                             <div className="relative">
@@ -252,8 +300,10 @@ const SignUpPage = () => {
                                 placeholder={
                                   selectedBank
                                     ? `(${selectedBank.code}) ${selectedBank.name}`
-                                    : t('Search bank name') ||
-                                      'Search bank name...'
+                                    : isVietnam === true
+                                    ? t('Search bank name') || 'Search bank name...'
+                                    : `${t('Search bank name')} (${t('Optional')})` ||
+                                      `Search bank name... (${t('Optional')})`
                                 }
                                 value={
                                   showBankDropdown
@@ -276,7 +326,7 @@ const SignUpPage = () => {
                                 }}
                                 className="text-white w-full px-4 py-3 pr-10 rounded-lg bg-black border text-sm focus:outline-none"
                                 autoComplete="off"
-                                disabled={loading}
+                                disabled={loading || detectingCountry}
                               />
                               {selectedBank && (
                                 <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -372,38 +422,57 @@ const SignUpPage = () => {
                               {errors.bankCode?.message}
                             </p>
                           </div>
+                          )}
 
-                          {/* Bank Account Name */}
-                          <div>
-                            <input
-                              className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
-                              type="text"
-                              placeholder={`${t('bank account name')}`}
-                              {...register('accountName', {
-                                required: t('bank account name is required'),
-                              })}
-                              disabled={loading}
-                            />
-                            <p className="text-red-500 mt-1 text-sm">
-                              {errors.accountName?.message}
-                            </p>
-                          </div>
+                          {/* Bank Account Name - Required for VN, Hidden for non-VN */}
+                          {isVietnam !== false && (
+                            <div>
+                              <input
+                                className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
+                                type="text"
+                                placeholder={
+                                  isVietnam === true
+                                    ? t('bank account name')
+                                    : `${t('bank account name')} (${t('Optional')})`
+                                }
+                                {...register('accountName', {
+                                  required:
+                                    isVietnam === true
+                                      ? t('bank account name is required')
+                                      : false,
+                                })}
+                                disabled={loading || detectingCountry}
+                              />
+                              <p className="text-red-500 mt-1 text-sm">
+                                {errors.accountName?.message}
+                              </p>
+                            </div>
+                          )}
 
-                          {/* Bank Account Number */}
-                          <div>
-                            <input
-                              className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
-                              type="text"
-                              placeholder={`${t('bank account number')}`}
-                              {...register('accountNumber', {
-                                required: t('bank account number is required'),
-                              })}
-                              disabled={loading}
-                            />
-                            <p className="text-red-500 mt-1 text-sm">
-                              {errors.accountNumber?.message}
-                            </p>
-                          </div>
+                          {/* Bank Account Number - Required for VN, Hidden for non-VN */}
+                          {isVietnam !== false && (
+                            <div>
+                              <input
+                                className="text-white w-full px-4 py-3 rounded-lg bg-black border text-sm focus:outline-none mt-5"
+                                type="text"
+                                placeholder={
+                                  isVietnam === true
+                                    ? t('bank account number')
+                                    : `${t('bank account number')} (${t('Optional')})`
+                                }
+                                {...register('accountNumber', {
+                                  required:
+                                    isVietnam === true
+                                      ? t('bank account number is required')
+                                      : false,
+                                })}
+                                disabled={loading || detectingCountry}
+                              />
+                              <p className="text-red-500 mt-1 text-sm">
+                                {errors.accountNumber?.message}
+                              </p>
+                            </div>
+                          )}
 
                           {/* Date of Birth */}
                           <div>
@@ -566,10 +635,13 @@ const SignUpPage = () => {
                           </div>
                           <button
                             type="submit"
-                            className="w-full flex justify-center font-semibold rounded-3xl border py-4 mt-10 border-black text-black duration-100 ease-linear"
+                            className="w-full flex justify-center font-semibold rounded-3xl border py-4 mt-10 border-black text-black duration-100 ease-linear disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={loading || detectingCountry}
                           >
                             {loading && <Loading />}
-                            {t('confirm')}
+                            {detectingCountry
+                              ? t('Detecting location...') || 'Detecting location...'
+                              : t('confirm')}
                           </button>
                           <p className="mt-12 text-gray-600 font-medium">
                             {t('alreadyHaveAccount')}{' '}
