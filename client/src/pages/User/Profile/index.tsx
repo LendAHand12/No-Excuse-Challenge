@@ -63,6 +63,8 @@ const Profile = () => {
     shortfallAmount,
     tier2ChildUsers,
     dieTime,
+    enablePaymentBank,
+    enableWithdrawBank,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -338,70 +340,6 @@ const Profile = () => {
           </div>
         </div>
       </Modal>
-      {/* <Modal
-        isOpen={showNextTier}
-        onRequestClose={() => setShowNextTier(false)}
-        style={{
-          content: {
-            top: '50%',
-            left: '50%',
-            right: 'auto',
-            bottom: 'auto',
-            marginRight: '-50%',
-            transform: 'translate(-50%, -50%)',
-          },
-        }}
-      >
-        <div className="overflow-y-auto overflow-x-hidden justify-center items-center w-full md:inset-0 h-modal md:h-full">
-          <div className="relative w-full max-w-md h-full md:h-auto">
-            <div className="relative text-center bg-white rounded-lg sm:p-5">
-              <button
-                onClick={() => setShowNextTier(false)}
-                className="text-gray-400 absolute top-2.5 right-2.5 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
-              >
-                <svg
-                  aria-hidden="true"
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-                <span className="sr-only">Close modal</span>
-              </button>
-              <div className="pr-6 flex flex-col items-center">
-                <div
-                  className="text-left text-gray-700 font-medium rounded relative mb-5"
-                  role="alert"
-                >
-                  <span className="text-xl">🎉 Congratulations! </span>
-                  <br></br>
-                  You have conquered Tier 1 and are now qualified to rise into{' '}
-                  <b>Tier 2</b>!<br></br>🚀 This achievement proves your
-                  commitment, discipline, and belief in yourself. But this is
-                  only the beginning — greater challenges bring greater rewards.
-                  <br></br>🔥 Keep pushing. Keep growing. Keep conquering.
-                  Because every step you take brings you closer to becoming a
-                  Legend.
-                </div>
-                <div>
-                  <button
-                    onClick={() => navigate('/user/payment')}
-                    className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:opacity-70"
-                  >
-                    Proceed to Payment
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Modal> */}
       <Modal
         isOpen={showLockKyc}
         onRequestClose={() => {
@@ -556,120 +494,7 @@ const Profile = () => {
         </div>
       </Modal>
 
-      {/* <Modal
-        isOpen={showPreTier2Commit}
-        onRequestClose={() => setShowPreTier2Commit(false)}
-        style={{
-          content: {
-            top: '50%',
-            left: '50%',
-            right: 'auto',
-            bottom: 'auto',
-            marginRight: '-50%',
-            transform: 'translate(-50%, -50%)',
-          },
-        }}
-      >
-        <div className="overflow-y-auto overflow-x-hidden justify-center items-center w-full md:inset-0 h-modal md:h-full">
-          <div className="relative w-full max-w-md h-full md:h-auto">
-            <div className="relative text-center bg-white rounded-lg sm:p-5">
-              <button
-                onClick={() => setShowPreTier2Commit(false)}
-                className="text-gray-400 absolute top-2.5 right-2.5 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
-              >
-                <svg
-                  aria-hidden="true"
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-                <span className="sr-only">Close modal</span>
-              </button>
-              <div className="pr-6 flex flex-col items-center">
-                <div
-                  className="text-left text-gray-900 rounded relative mb-5"
-                  role="alert"
-                >
-                  <div className="mb-4">
-                    <p className="text-center font-semibold text-lg mb-2">
-                      Pre-Tier 2 (Mutual Support Fund)
-                    </p>
-                    <ul className="list-disc">
-                      <li className="ml-4">
-                        To enter Pre-Tier 2, contribute 332 USDT to the Support
-                        Fund.
-                      </li>
-                    </ul>
-                  </div>
-                  <div>
-                    <p className="text-center font-semibold text-lg mb-2">
-                      Tier 2 (Global Fund)
-                    </p>
-                    <ul className="list-disc">
-                      <li className="ml-4">
-                        When you qualify for Tier 2, your{' '}
-                        <b>
-                          total package is 603 USDT for Tier 2 and recycle back
-                          to tier 1
-                        </b>
-                        , which includes a <b>302 USDT</b> Support Pool loan.
-                      </li>
-                      <li className="ml-4">
-                        The <b>302 USDT</b> loan will be{' '}
-                        <b>deducted from your Tier 2 benefits</b> until it’s
-                        fully repaid.
-                      </li>
-                      <li className="ml-4">
-                        After completing Tier 2, you{' '}
-                        <b>recycle back to Tier 1.</b>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-                <div className="flex items-center gap-10">
-                  <button
-                    onClick={() => setShowPreTier2Commit(false)}
-                    className="flex items-center gap-2 px-6 py-2 bg-red-600 text-white rounded-md hover:opacity-70"
-                  >
-                    I DISAGREED
-                  </button>
-                  <button
-                    onClick={handleMoveSystem}
-                    className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:opacity-70"
-                  >
-                    <Link to="/user/payment-pre-tier-2">I AGREED</Link>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Modal> */}
-
       <div className="px-2 lg:px-24 py-24 space-y-6 lg:space-y-8">
-        {/* {tier === 1 &&
-          (preTier2Status === 'APPROVED' || preTier2Status === 'ACHIEVED') && (
-            <div
-              className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-5 font-medium"
-              role="alert"
-            >
-              <span className="block sm:inline">
-                Congratulations! You’re eligible for Pre-Tier 2.{' '}
-                <Link to="/user/payment-pre-tier-2" className="underline">
-                  {' '}
-                  Go to the payment page now.
-                </Link>
-              </span>
-            </div>
-          )} */}
-
         {tier === 1 && preTier2Status === 'PASSED' && !preTier2User && (
           <div
             className="bg-blue-100 border w-fit border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-5 font-medium"
@@ -757,44 +582,47 @@ const Profile = () => {
         )}
 
         {/* Bank Information Warning */}
-        {errLahCode !== 'OVER45' && !hasCompleteBankInfo() && (
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-yellow-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-yellow-700">
-                  <span className="font-semibold">
-                    {t('Bank information required for bank withdrawal')}
-                  </span>
-                  <br />
-                  {t(
-                    'Please update your bank information (Bank Name, Account Name, Account Number) to enable bank transfer withdrawal.',
-                  )}
-                </p>
-                <div className="mt-2">
-                  <button
-                    onClick={() => setShowBankInfoModal(true)}
-                    className="text-sm font-medium text-yellow-800 underline hover:text-yellow-900"
+        {enablePaymentBank &&
+          enableWithdrawBank &&
+          errLahCode !== 'OVER45' &&
+          !hasCompleteBankInfo() && (
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg
+                    className="h-5 w-5 text-yellow-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
                   >
-                    {t('Update Bank Information')}
-                  </button>
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700">
+                    <span className="font-semibold">
+                      {t('Bank information required for bank withdrawal')}
+                    </span>
+                    <br />
+                    {t(
+                      'Please update your bank information (Bank Name, Account Name, Account Number) to enable bank transfer withdrawal.',
+                    )}
+                  </p>
+                  <div className="mt-2">
+                    <button
+                      onClick={() => setShowBankInfoModal(true)}
+                      className="text-sm font-medium text-yellow-800 underline hover:text-yellow-900"
+                    >
+                      {t('Update Bank Information')}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
         <div className={`grid gap-10 font-semibold`}>
           <div className={`grid lg:grid-cols-2 gap-2`}>
