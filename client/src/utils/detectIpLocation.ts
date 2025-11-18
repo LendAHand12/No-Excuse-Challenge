@@ -54,12 +54,51 @@ const detectWithIpApi = async (): Promise<IpLocationResult> => {
 };
 
 /**
+ * Check if running in local/development environment
+ * @returns {boolean}
+ */
+const isLocalEnvironment = (): boolean => {
+  const hostname = window.location.hostname;
+  // Check if hostname is localhost or 127.0.0.1
+  if (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '0.0.0.0'
+  ) {
+    return true;
+  }
+
+  // Check if port is common dev port (3000, 5173 for Vite, etc.)
+  const port = window.location.port;
+  if (port && (port === '3000' || port === '5173' || port === '8080')) {
+    return true;
+  }
+
+  return false;
+};
+
+/**
  * Detect IP and country from client using ipapi.co
  * Falls back to ip-api.com if rate limited
+ * In local environment, skip API call and return Vietnam by default
  * @returns {Promise<IpLocationResult>}
  */
 export const detectIpLocationFromClient =
   async (): Promise<IpLocationResult> => {
+    // Skip API call in local/development environment
+    if (isLocalEnvironment()) {
+      console.log(
+        'Local environment detected: Skipping IP detection, defaulting to Vietnam',
+      );
+      return {
+        ip: 'localhost',
+        country: 'Vietnam',
+        countryCode: 'VN',
+        isVietnam: true,
+        success: true,
+      };
+    }
+
     try {
       // Try ipapi.co first
       const response = await fetch('https://ipapi.co/json/', {
