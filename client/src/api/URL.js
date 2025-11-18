@@ -6,6 +6,7 @@ export const URL_API_AUTH_FORGOT_PASSWORD = '/api/auth/forgotPassword';
 export const URL_API_AUTH_RESET_PASSWORD = '/api/auth/resetPassword';
 export const URL_API_AUTH_REFRESH = '/api/auth/refresh';
 export const URL_API_AUTH_GET_VERIFY = '/api/auth/getLinkVerify';
+export const URL_API_AUTH_GET_IP_AND_LOCATION = '/api/auth/getIpAndLocation';
 
 export const URL_API_USER = '/api/user';
 export const URL_API_PAYMENT = '/api/payment';

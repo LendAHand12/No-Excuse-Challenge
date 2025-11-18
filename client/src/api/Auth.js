@@ -8,6 +8,7 @@ import {
   URL_API_AUTH_RESET_PASSWORD,
   URL_API_AUTH_REFRESH,
   URL_API_AUTH_GET_VERIFY,
+  URL_API_AUTH_GET_IP_AND_LOCATION,
 } from "./URL";
 
 const Auth = {
@@ -34,6 +35,9 @@ const Auth = {
   },
   getLinkVerify: (body) => {
     return API.post(URL_API_AUTH_GET_VERIFY, body);
+  },
+  getIpAndLocation: () => {
+    return API.get(URL_API_AUTH_GET_IP_AND_LOCATION);
   },
 };
 

@@ -10,7 +10,6 @@ import Loading from '@/components/Loading';
 import Auth from '@/api/Auth';
 import banks from '@/lib/banks.json';
 import PhoneInput from 'react-phone-number-input';
-import { detectIpLocationFromClient } from '@/utils/detectIpLocation';
 
 import 'react-phone-number-input/style.css';
 import './index.css';
@@ -131,7 +130,7 @@ const SignUpPage = () => {
     [phone, userIp, userCountry, userCountryCode],
   );
 
-  // Detect user's country from IP (from client-side to get real IP)
+  // Detect user's country from IP (call BE API to get IP and location)
   useEffect(() => {
     (async () => {
       try {
@@ -151,18 +150,18 @@ const SignUpPage = () => {
           setCountryDetected(true);
           setCountryError(null);
         } else {
-          // Detect from client-side to get real user IP
-          const locationInfo = await detectIpLocationFromClient();
+          // Call BE API to get IP and location
+          const response = await Auth.getIpAndLocation();
+          const { ip, country, countryCode, isVietnam: detectedIsVietnam } = response.data;
           
-          // Check if detection was successful
-          if (!locationInfo.success) {
+          if (!response.data.success) {
             throw new Error('Failed to detect location');
           }
           
-          setIsVietnam(locationInfo.isVietnam);
-          setUserIp(locationInfo.ip);
-          setUserCountry(locationInfo.country);
-          setUserCountryCode(locationInfo.countryCode);
+          setIsVietnam(detectedIsVietnam);
+          setUserIp(ip);
+          setUserCountry(country);
+          setUserCountryCode(countryCode);
           setDetectingCountry(false);
           setCountryDetected(true);
           setCountryError(null);

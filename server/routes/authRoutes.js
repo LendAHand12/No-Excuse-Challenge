@@ -13,6 +13,7 @@ import {
   updateData,
   getNewPass,
   registerSerepay,
+  getUserIpAndLocation,
   testGetIp,
 } from "../controllers/authControllers.js";
 
@@ -31,6 +32,7 @@ router.route("/resetPassword").put(resetUserPassword);
 router.route("/refresh").post(getAccessToken);
 router.route("/getLinkVerify").post(getLinkVerify);
 router.route("/registerSerepay").post(registerSerepay);
+router.route("/getIpAndLocation").get(getUserIpAndLocation);
 router.route("/test-ip").get(testGetIp);
 
 export default router;

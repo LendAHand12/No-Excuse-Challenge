@@ -638,7 +638,34 @@ const registerSerepay = asyncHandler(async (req, res) => {
   console.log({ wallet });
 });
 
-// Test endpoint to get IP and location info
+// API endpoint to get user's IP and location info (for frontend)
+const getUserIpAndLocation = asyncHandler(async (req, res) => {
+  try {
+    const clientIp = getClientIp(req);
+    const locationInfo = await detectCountryFromIp(clientIp);
+    const isUserInVietnam = isVietnam(locationInfo.countryCode);
+
+    res.status(200).json({
+      success: true,
+      ip: clientIp,
+      country: locationInfo.country,
+      countryCode: locationInfo.countryCode,
+      isVietnam: isUserInVietnam,
+    });
+  } catch (error) {
+    console.error("Error in getUserIpAndLocation:", error);
+    // Fallback to Vietnam on error
+    res.status(200).json({
+      success: false,
+      ip: getClientIp(req),
+      country: "Vietnam",
+      countryCode: "VN",
+      isVietnam: true,
+    });
+  }
+});
+
+// Test endpoint to get IP and location info (for debugging)
 const testGetIp = asyncHandler(async (req, res) => {
   try {
     const clientIp = getClientIp(req);
@@ -693,5 +720,6 @@ export {
   updateData,
   getNewPass,
   registerSerepay,
+  getUserIpAndLocation,
   testGetIp,
 };
