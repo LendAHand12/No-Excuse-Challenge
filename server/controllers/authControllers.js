@@ -158,17 +158,10 @@ const registerUser = asyncHandler(async (req, res) => {
       const parent = await User.findById(treeReceiveUser.userId);
 
       // Use IP and country info from client (detected from browser)
-      // If not provided, fallback to server-side detection
-      let finalIp = clientIp || getClientIp(req);
-      let finalCountry = clientCountry || "Vietnam";
-      let finalCountryCode = clientCountryCode || "VN";
-
-      // If client didn't provide location info, try to detect from server
-      if (!clientIp || !clientCountryCode) {
-        const locationInfo = await detectCountryFromIp(finalIp);
-        finalCountry = locationInfo.country || finalCountry;
-        finalCountryCode = locationInfo.countryCode || finalCountryCode;
-      }
+      // Default to Vietnam if not provided
+      const finalIp = clientIp || "unknown";
+      const finalCountry = clientCountry || "Vietnam";
+      const finalCountryCode = clientCountryCode || "VN";
 
       const isUserInVietnam = isVietnam(finalCountryCode);
 
@@ -226,8 +219,8 @@ const registerUser = asyncHandler(async (req, res) => {
       // If user is in Vietnam: both enabled by default (current behavior)
       const enablePaymentCrypto = isUserInVietnam ? false : true; // Always enable crypto
       const enablePaymentBank = isUserInVietnam ? true : false; // Only enable bank for Vietnam users
-      const enableWithdrawCrypto = true; // Always enable crypto withdrawal
-      const enableWithdrawBank = isUserInVietnam ? false : true; // Only enable bank withdrawal for Vietnam users
+      const enableWithdrawCrypto = isUserInVietnam ? false : true; // Always enable crypto withdrawal
+      const enableWithdrawBank = isUserInVietnam ? true : false; // Only enable bank withdrawal for Vietnam users
 
       // Only save bank information if user is in Vietnam, otherwise leave empty
       const bankInfo = isUserInVietnam
@@ -656,7 +649,11 @@ const testGetIp = asyncHandler(async (req, res) => {
       success: true,
       ip: {
         raw: clientIp,
-        fromHeader: req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || req.headers["cf-connecting-ip"] || "none",
+        fromHeader:
+          req.headers["x-forwarded-for"] ||
+          req.headers["x-real-ip"] ||
+          req.headers["cf-connecting-ip"] ||
+          "none",
         fromConnection: req.connection?.remoteAddress || req.socket?.remoteAddress || "none",
         fromReq: req.ip || "none",
       },
