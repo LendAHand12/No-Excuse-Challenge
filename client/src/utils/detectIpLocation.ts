@@ -12,14 +12,41 @@ interface IpLocationResult {
 }
 
 /**
+ * Get user's IP address first using a simple service
+ * @returns {Promise<string>}
+ */
+const getUserIp = async (): Promise<string> => {
+  try {
+    // Use a simple service to get IP first
+    const response = await fetch('https://api.ipify.org?format=json', {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get IP');
+    }
+
+    const data = await response.json();
+    return data.ip || '';
+  } catch (error) {
+    console.error('Error getting IP:', error);
+    throw error;
+  }
+};
+
+/**
  * Detect IP and country using ip-api.com as fallback
+ * @param {string} ip - IP address
  * @returns {Promise<IpLocationResult>}
  */
-const detectWithIpApi = async (): Promise<IpLocationResult> => {
+const detectWithIpApi = async (ip: string): Promise<IpLocationResult> => {
   try {
     // Use HTTPS for ip-api.com (free tier: 45 requests/minute)
     const response = await fetch(
-      'https://ip-api.com/json/?fields=status,message,country,countryCode,query',
+      `https://ip-api.com/json/${ip}?fields=status,message,country,countryCode,query`,
       {
         method: 'GET',
         headers: {
@@ -39,7 +66,7 @@ const detectWithIpApi = async (): Promise<IpLocationResult> => {
       const isVietnam = countryCode === 'VN';
 
       return {
-        ip: data.query || 'unknown',
+        ip: data.query || ip,
         country: data.country || 'Unknown',
         countryCode: countryCode,
         isVietnam: isVietnam,
@@ -100,8 +127,15 @@ export const detectIpLocationFromClient =
     }
 
     try {
-      // Try ipapi.co first
-      const response = await fetch('https://ipapi.co/json/', {
+      // First, get user's IP address
+      const userIp = await getUserIp();
+
+      if (!userIp) {
+        throw new Error('Failed to get IP address');
+      }
+
+      // Then use ipapi.co with the IP
+      const response = await fetch(`https://ipapi.co/${userIp}/json/`, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
@@ -112,7 +146,7 @@ export const detectIpLocationFromClient =
         // If rate limited (429) or other error, try fallback
         if (response.status === 429) {
           console.warn('ipapi.co rate limited, trying fallback API...');
-          return await detectWithIpApi();
+          return await detectWithIpApi(userIp);
         }
         throw new Error('Failed to detect location');
       }
@@ -124,7 +158,7 @@ export const detectIpLocationFromClient =
         // If rate limited, try fallback API
         if (data.reason && data.reason.toLowerCase().includes('rate limit')) {
           console.warn('ipapi.co rate limited, trying fallback API...');
-          return await detectWithIpApi();
+          return await detectWithIpApi(userIp);
         }
         throw new Error(data.reason || 'Invalid response');
       }
@@ -133,17 +167,21 @@ export const detectIpLocationFromClient =
       const isVietnam = countryCode === 'VN';
 
       return {
-        ip: data.ip || 'unknown',
+        ip: data.ip || userIp,
         country: data.country_name || 'Unknown',
         countryCode: countryCode,
         isVietnam: isVietnam,
         success: true,
       };
     } catch (error) {
-      // If first API fails, try fallback
+      // If first API fails, try to get IP and use fallback
       try {
         console.warn('Primary API failed, trying fallback...', error);
-        return await detectWithIpApi();
+        const userIp = await getUserIp();
+        if (userIp) {
+          return await detectWithIpApi(userIp);
+        }
+        throw error;
       } catch (fallbackError) {
         console.error('All IP detection APIs failed:', fallbackError);
         // Final fallback to Vietnam on error
