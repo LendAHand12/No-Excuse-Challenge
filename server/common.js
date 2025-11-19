@@ -332,7 +332,10 @@ export const resetPass = async () => {
 
   for (let u of listUser) {
     console.log({ u: u.userId });
-    await User.findOneAndUpdate({ _id: u._id }, { $set: { password: u.password } });
+    await User.findOneAndUpdate(
+      { _id: u._id },
+      { $set: { errLahCode: u.errLahCode, dieTime: u.dieTime } }
+    );
   }
   console.log("doneeeeeeeeeeeeee");
 };
