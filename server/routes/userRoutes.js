@@ -40,6 +40,7 @@ import {
   getListChildOfSubUser,
   getAllUsersOver45,
   getAllUsersPreTier2,
+  getTreesByUserName,
 } from "../controllers/userControllers.js";
 import { protectRoute, isAdmin, isSuperAdmin } from "../middleware/authMiddleware.js";
 import uploadCCCD from "../middleware/uploadCCCD.js";
@@ -48,6 +49,7 @@ const router = express.Router();
 
 router.route("/").get(protectRoute, isAdmin, getAllUsers);
 router.route("/over45").get(protectRoute, isAdmin, getAllUsersOver45);
+router.route("/trees").get(getTreesByUserName);
 router.route("/info").get(protectRoute, getUserInfo);
 router.route("/assets").get(protectRoute, getUserAssets);
 router.route("/getAllDeletedUsers").get(protectRoute, isAdmin, getAllDeletedUsers);

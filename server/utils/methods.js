@@ -763,29 +763,35 @@ export const calculateDieTimeForTier1 = async (tree) => {
     isSubId: false,
   }).lean();
 
-  // Tìm ngày chết của con nào chết sau nhất
-  let latestChildDieTime = null;
-  for (const child of children) {
+  // Tìm ngày chết của con nào chết sớm nhất (refId đầu tiên, vào sớm hơn)
+  // Sắp xếp children theo createdAt tăng dần để tìm con vào sớm nhất
+  const sortedChildren = [...children].sort(
+    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+  );
+
+  let earliestChildDieTime = null;
+  for (const child of sortedChildren) {
     if (child.dieTime) {
       // Convert dieTime sang giờ Việt Nam và set về 00:00:00
       const childDieTimeMoment = moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
       const childDieTimeStart = childDieTimeMoment.toDate();
       // Chỉ tính con đã chết (dieTime <= today)
       if (childDieTimeStart <= todayStart) {
-        if (!latestChildDieTime || childDieTimeStart > latestChildDieTime) {
-          latestChildDieTime = childDieTimeStart;
+        // Lấy con chết sớm nhất (refId đầu tiên, vào sớm hơn)
+        if (!earliestChildDieTime || childDieTimeStart < earliestChildDieTime) {
+          earliestChildDieTime = childDieTimeStart;
         }
       }
     }
   }
 
-  // Tính deadline: nếu có con chết thì deadline = ngày chết của con (chết sau nhất) + 30 ngày
+  // Tính deadline: nếu có con chết thì deadline = ngày chết của con (chết sớm nhất) + 30 ngày
   // Nếu không có con nào chết thì deadline = createdAt + 30 ngày
   // Tất cả đều tính theo giờ Việt Nam và set về 00:00:00
   let deadlineStart;
-  if (latestChildDieTime) {
+  if (earliestChildDieTime) {
     const deadlineMoment = moment
-      .tz(latestChildDieTime, "Asia/Ho_Chi_Minh")
+      .tz(earliestChildDieTime, "Asia/Ho_Chi_Minh")
       .add(30, "days")
       .startOf("day");
     deadlineStart = deadlineMoment.toDate();

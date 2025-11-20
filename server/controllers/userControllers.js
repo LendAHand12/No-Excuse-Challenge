@@ -3213,6 +3213,64 @@ const getSubUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
+// Lấy tất cả tree dựa vào userId
+const getTreesByUserName = asyncHandler(async (req, res) => {
+  const { userId } = req.query;
+  console.log({ userId });
+
+  if (!userId) {
+    res.status(400);
+    throw new Error("userId is required");
+  }
+
+  // Tìm user theo userId (có thể là _id hoặc userId field)
+  let user;
+  if (userId.match(/^[0-9a-fA-F]{24}$/)) {
+    // Nếu là ObjectId thì tìm theo _id
+    user = await User.findById(userId).select("_id userId email");
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+    // Tìm tree theo userId = user._id.toString()
+    var trees = await Tree.find({ userId: user._id.toString() }).sort({ createdAt: -1 });
+  } else {
+    // Nếu không phải ObjectId thì tìm theo userId field
+    user = await User.findOne({ userId: userId }).select("_id userId email");
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+    // Tìm tree theo userId = user._id.toString() (vì trong Tree, userId thường là user._id dạng string)
+    var trees = await Tree.find({ userId: user._id.toString() }).sort({ createdAt: -1 });
+  }
+
+  res.json({
+    success: true,
+    user: {
+      _id: user._id,
+      userId: user.userId,
+      email: user.email,
+    },
+    trees: trees.map((tree) => ({
+      _id: tree._id,
+      userName: tree.userName,
+      userId: tree.userId,
+      tier: tree.tier,
+      isSubId: tree.isSubId,
+      dieTime: tree.dieTime,
+      createdAt: tree.createdAt,
+      updatedAt: tree.updatedAt,
+      parentId: tree.parentId,
+      refId: tree.refId,
+      children: tree.children,
+      countChild: tree.countChild,
+      income: tree.income,
+    })),
+    count: trees.length,
+  });
+});
+
 export {
   getUserProfile,
   getAllUsers,
@@ -3258,4 +3316,5 @@ export {
   getListChildOfSubUser,
   getAllUsersOver45,
   getAllUsersPreTier2,
+  getTreesByUserName,
 };
