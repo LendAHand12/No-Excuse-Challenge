@@ -76,12 +76,16 @@ const ExportClaimsPage = () => {
         }
 
         const excelData = convertResponseDataToExportData(exportData, {
-          [t('order')]: null,
-          [t('user')]: null,
-          [t('email')]: null,
-          [t('amount')]: null,
-          [t('coin')]: null,
-          [t('hash')]: null,
+          [t('Time')]: null,
+          [t('Claimer')]: null,
+          [t('Email')]: null,
+          [t('Withdraw Amount')]: null,
+          [t('Tax')]: null,
+          [t('Transaction Fee')]: null,
+          [t('Received Amount')]: null,
+          [t('Withdrawal Method')]: null,
+          [t('Status')]: null,
+          [t('Tx Hash')]: null,
         });
         exportToExcel(
           excelData,
@@ -100,13 +104,96 @@ const ExportClaimsPage = () => {
 
   const convertResponseDataToExportData = (responseData, nullObj) => {
     return responseData.map((item, i) => {
-      item.order = i + 1;
-      return Object.assign(
-        { ...nullObj },
-        Object.fromEntries(
-          Object.entries(item).map(([key, value]) => [t(`${key}`), value]),
-        ),
-      );
+      // Determine if hash is a crypto transaction (starts with 0x)
+      const isCryptoHash = item.hash && item.hash.startsWith('0x');
+      const withdrawalMethod =
+        item.withdrawalType ||
+        (isCryptoHash ? 'CRYPTO' : item.coin === 'USDT' ? 'BANK' : null);
+
+      // For BANK withdrawal: calculate amounts in VND
+      const isBank = withdrawalMethod === 'BANK' && item.coin === 'USDT';
+      const exchangeRate = item.exchangeRate || 0;
+
+      // Calculate amounts - All values stored in USDT, calculate VND when displaying
+      const tax = item.tax || 0;
+      const fee = item.fee || 0;
+      const receivedAmount =
+        item.receivedAmount !== undefined
+          ? item.receivedAmount // Use value from backend (USDT)
+          : item.amount - tax - fee; // For both CRYPTO and BANK (USDT)
+
+      // Calculate VND values for BANK withdrawal display
+      const totalVND =
+        isBank && exchangeRate > 0 ? item.amount * exchangeRate : 0;
+      const taxVND = isBank && exchangeRate > 0 ? tax * exchangeRate : 0;
+      const feeVND = isBank && exchangeRate > 0 ? fee * exchangeRate : 0;
+      const receivedAmountVND =
+        isBank && exchangeRate > 0 ? receivedAmount * exchangeRate : 0;
+
+      // Format withdrawal amount
+      const withdrawAmountDisplay =
+        isBank && exchangeRate > 0
+          ? `${Number(item.amount).toLocaleString()} USDT (≈ ${Number(
+              totalVND,
+            ).toLocaleString()} VND)`
+          : `${Number(item.amount).toLocaleString()} ${item.coin}`;
+
+      // Format tax
+      const taxDisplay =
+        tax > 0
+          ? isBank && exchangeRate > 0
+            ? `-${Math.floor(taxVND).toLocaleString()} VND`
+            : `-${Number(tax).toLocaleString()} ${item.coin}`
+          : '-';
+
+      // Format fee
+      const feeDisplay =
+        fee > 0
+          ? isBank && exchangeRate > 0
+            ? `-${Math.floor(feeVND).toLocaleString()} VND`
+            : `-${Number(fee).toLocaleString()} ${item.coin}`
+          : '-';
+
+      // Format received amount
+      const receivedAmountDisplay =
+        isBank && exchangeRate > 0
+          ? `${Math.floor(receivedAmountVND).toLocaleString()} VND`
+          : `${Number(receivedAmount).toLocaleString()} ${item.coin}`;
+
+      // Format withdrawal method
+      const withdrawalMethodDisplay = withdrawalMethod
+        ? withdrawalMethod === 'CRYPTO'
+          ? t('Crypto Wallet')
+          : t('Bank Transfer')
+        : '-';
+
+      // Format status (always SUCCESS for claims)
+      const statusDisplay = 'SUCCESS';
+
+      // Format time
+      const timeDisplay = new Date(item.createdAt).toLocaleString();
+
+      // Format claimer (userId)
+      const claimerDisplay = item.user || '-';
+
+      // Format email
+      const emailDisplay = item.email || '-';
+
+      // Format hash
+      const hashDisplay = item.hash || '-';
+
+      return {
+        [t('Time')]: timeDisplay,
+        [t('Claimer')]: claimerDisplay,
+        [t('Email')]: emailDisplay,
+        [t('Withdraw Amount')]: withdrawAmountDisplay,
+        [t('Tax')]: taxDisplay,
+        [t('Transaction Fee')]: feeDisplay,
+        [t('Received Amount')]: receivedAmountDisplay,
+        [t('Withdrawal Method')]: withdrawalMethodDisplay,
+        [t('Status')]: statusDisplay,
+        [t('Tx Hash')]: hashDisplay,
+      };
     });
   };
 

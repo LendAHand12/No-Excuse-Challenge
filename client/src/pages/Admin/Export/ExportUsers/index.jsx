@@ -73,19 +73,17 @@ const ExportUsersPage = () => {
         }
 
         const excelData = convertResponseDataToExportData(exportData, {
-          [t('order')]: null,
           [t('name')]: null,
           [t('email')]: null,
           [t('phone')]: null,
+          [t('idCode')]: null,
           [t('walletAddress')]: null,
-          [t('memberSince')]: null,
+          [t('createdAt')]: null,
           [t('tier')]: null,
-          [t('count pay')]: null,
-          [t('fine')]: null,
           [t('status')]: null,
-          [t('countChild')]: null,
+          [t('bankName')]: null,
+          [t('bankAccount')]: null,
           [t('refUserName')]: null,
-          [t('refUserEmail')]: null,
           [t('note')]: null,
         });
         exportToExcel(
@@ -105,21 +103,31 @@ const ExportUsersPage = () => {
 
   const convertResponseDataToExportData = (responseData, nullObj) => {
     return responseData.map((item, i) => {
-      item.order = i + 1;
-      return Object.assign(
-        { ...nullObj },
-        Object.fromEntries(
-          Object.entries(item).map(([key, value]) => [
-            t(`${key}`),
-            key === 'type' &&
-            (value === 'REFERRALHOLD' || value === 'DIRECTHOLD')
-              ? t(`${value}t`)
-              : key === 'status' || key === 'type' || key === 'isHoldRefund'
-              ? t(value)
-              : value,
-          ]),
-        ),
-      );
+      // Format createdAt
+      const createdAtDisplay = item.createdAt
+        ? new Date(item.createdAt).toLocaleString()
+        : '';
+
+      // Format status
+      const statusDisplay = item.status ? t(item.status) : '';
+
+      // Format tier
+      const tierDisplay = item.tier ? String(item.tier) : '';
+
+      return {
+        [t('name')]: item.name || '',
+        [t('email')]: item.email || '',
+        [t('phone')]: item.phone || '',
+        [t('idCode')]: item.idCode || '',
+        [t('walletAddress')]: item.walletAddress || '',
+        [t('createdAt')]: createdAtDisplay,
+        [t('tier')]: tierDisplay,
+        [t('status')]: statusDisplay,
+        [t('bankName')]: item.bankName || '',
+        [t('bankAccount')]: item.bankAccount || '',
+        [t('refUserName')]: item.refUserName || '',
+        [t('note')]: item.note || '',
+      };
     });
   };
 

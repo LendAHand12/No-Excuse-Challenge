@@ -2215,6 +2215,9 @@ const getAllUsersForExport = asyncHandler(async (req, res) => {
         phone: 1,
         createdAt: 1,
         note: 1,
+        idCode: 1,
+        bankName: 1,
+        accountNumber: 1,
         treeData: "$treeData",
         parent: "$parent",
         parentUser: "$parentUser",
@@ -2231,17 +2234,17 @@ const getAllUsersForExport = asyncHandler(async (req, res) => {
   for (let u of users) {
     result.push({
       name: u.userId,
-      email: u.email,
-      phone: u.phone,
-      walletAddress: u.walletAddress,
-      memberSince: u.createdAt,
-      tier: u.tier,
-      "count pay": u.countPay,
-      fine: u.fine,
-      status: u.status,
-      refUserName: u.parent ? u.parent.userName : "",
-      refUserEmail: u.parentUser ? u.parentUser.email : "",
-      note: u.note ? u.note : "",
+      email: u.email || "",
+      phone: u.phone || "",
+      idCode: u.idCode || "",
+      walletAddress: u.walletAddress || "",
+      createdAt: u.createdAt,
+      tier: u.tier || "",
+      status: u.status || "",
+      bankName: u.bankName || "",
+      bankAccount: u.accountNumber || "",
+      refUserName: u.parentUser ? u.parentUser.userId : "",
+      note: u.note || "",
     });
   }
 

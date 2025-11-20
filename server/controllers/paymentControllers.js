@@ -1764,8 +1764,8 @@ const approveBankPayment = asyncHandler(async (req, res) => {
         }
         const hewePriceConfig = await Config.findOne({ label: "HEWE_PRICE" });
         const hewePrice = responseHewe?.data?.ticker?.latest || hewePriceConfig?.value || 0;
-        const totalPriceHewe = userObj.city === "IN" ? 200 : 100;
-        const totalDayReturnHewe = userObj.city === "IN" ? 730 : 540;
+        const totalPriceHewe = 200;
+        const totalDayReturnHewe = 730;
         const totalHewe = Math.round(totalPriceHewe / hewePrice);
         const hewePerDay = Math.round(totalHewe / totalDayReturnHewe);
 

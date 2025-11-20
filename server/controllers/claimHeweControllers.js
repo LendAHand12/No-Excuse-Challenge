@@ -430,6 +430,11 @@ const getAllClaimsForExport = asyncHandler(async (req, res) => {
       coin: claim.coin,
       hash: claim.hash,
       createdAt: claim.createdAt,
+      tax: claim.tax || 0,
+      fee: claim.fee || 0,
+      receivedAmount: claim.receivedAmount !== undefined ? claim.receivedAmount : (claim.amount - (claim.tax || 0) - (claim.fee || 0)),
+      withdrawalType: claim.withdrawalType,
+      exchangeRate: claim.exchangeRate || 0,
     });
   }
 

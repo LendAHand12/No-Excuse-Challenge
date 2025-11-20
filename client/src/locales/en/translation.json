@@ -1354,5 +1354,6 @@
     "agreeText": "I have read and agree",
     "confirm": "Confirm",
     "cancel": "Cancel"
-  }
+  },
+  "status": "Status"
 }
