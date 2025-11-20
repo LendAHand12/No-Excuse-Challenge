@@ -126,7 +126,7 @@ app.use(notFound);
 // configure a custome error handler middleware
 app.use(errorHandler);
 
-// await recalculateTreeDieTimeForOldData();
+await recalculateTreeDieTimeForOldData();
 
 // Cấu hình timezone Việt Nam (GMT+7)
 const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";

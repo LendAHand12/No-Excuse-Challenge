@@ -561,8 +561,9 @@ export const testCalculateDieTimeForTree = async (treeId) => {
       log(`\n⏰ STEP 1: Calculate deadline`);
       log(`  - Created At: ${tree.createdAt.toISOString()}`);
 
-      // Tìm ngày chết của con nào chết sớm nhất (refId đầu tiên, vào sớm hơn)
-      // Sắp xếp children theo createdAt tăng dần để tìm con vào sớm nhất
+      // Tìm ngày chết của con dựa trên số lượng children:
+      // - Nếu children.length <= 2 → lấy ngày chết của con sớm nhất
+      // - Nếu children.length > 2 → lấy ngày chết của con trễ nhất
       const children = await Tree.find({
         refId: tree._id.toString(),
         isSubId: false,
@@ -570,9 +571,12 @@ export const testCalculateDieTimeForTree = async (treeId) => {
         .lean()
         .sort({ createdAt: 1 });
 
-      const sortedChildren = [...children];
+      const sortedChildren = [...children].sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+      );
 
-      let earliestChildDieTime = null;
+      let selectedChildDieTime = null;
+      let selectedReason = "";
       for (const child of sortedChildren) {
         if (child.dieTime) {
           // Convert dieTime sang giờ Việt Nam và set về 00:00:00
@@ -580,27 +584,38 @@ export const testCalculateDieTimeForTree = async (treeId) => {
           const childDieTimeStart = childDieTimeMoment.toDate();
           // Chỉ tính con đã chết (dieTime <= today)
           if (childDieTimeStart <= todayStart) {
-            // Lấy con chết sớm nhất (refId đầu tiên, vào sớm hơn)
-            if (!earliestChildDieTime || childDieTimeStart < earliestChildDieTime) {
-              earliestChildDieTime = childDieTimeStart;
+            if (children.length <= 2) {
+              // Nếu <= 2 children: Lấy con chết sớm nhất
+              if (!selectedChildDieTime || childDieTimeStart < selectedChildDieTime) {
+                selectedChildDieTime = childDieTimeStart;
+                selectedReason = `children.length (${children.length}) <= 2 → lấy con chết sớm nhất`;
+              }
+            } else {
+              // Nếu > 2 children: Lấy con chết trễ nhất
+              if (!selectedChildDieTime || childDieTimeStart > selectedChildDieTime) {
+                selectedChildDieTime = childDieTimeStart;
+                selectedReason = `children.length (${children.length}) > 2 → lấy con chết trễ nhất`;
+              }
             }
           }
         }
       }
 
-      // Tính deadline: nếu có con chết thì deadline = ngày chết của con (chết sớm nhất) + 30 ngày
+      // Tính deadline: nếu có con chết thì deadline = ngày chết của con (đã chọn) + 30 ngày
       // Nếu không có con nào chết thì deadline = createdAt + 30 ngày
       // Tất cả đều tính theo giờ Việt Nam và set về 00:00:00
       let deadlineStart;
-      if (earliestChildDieTime) {
+      if (selectedChildDieTime) {
         const deadlineMoment = moment
-          .tz(earliestChildDieTime, "Asia/Ho_Chi_Minh")
+          .tz(selectedChildDieTime, "Asia/Ho_Chi_Minh")
           .add(30, "days")
           .startOf("day");
         deadlineStart = deadlineMoment.toDate();
-        log(`  - Earliest child dieTime: ${earliestChildDieTime.toISOString()}`);
         log(
-          `  - Deadline (earliest child dieTime + 30 days, Vietnam time, 00:00:00): ${deadlineStart.toISOString()}`
+          `  - Selected child dieTime: ${selectedChildDieTime.toISOString()} (${selectedReason})`
+        );
+        log(
+          `  - Deadline (selected child dieTime + 30 days, Vietnam time, 00:00:00): ${deadlineStart.toISOString()}`
         );
       } else {
         const deadlineMoment = moment
