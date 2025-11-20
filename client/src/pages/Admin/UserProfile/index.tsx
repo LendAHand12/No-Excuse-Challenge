@@ -75,6 +75,8 @@ const UserProfile = () => {
             changeCreatedAt,
             lockKyc,
             dieTime,
+            dieTimeTier1,
+            dieTimeTier2,
             errLahCode,
             bankName,
             bankCode,
@@ -93,7 +95,14 @@ const UserProfile = () => {
           setValue('tier', tier);
           setValue('walletAddress', walletAddress);
           setValue('changeCreatedAt', changeCreatedAt);
-          setValue('dieTime', dieTime);
+          // Set dieTime theo tier hiện tại
+          const currentDieTime =
+            tier === 1
+              ? response.data.dieTimeTier1 || dieTime
+              : tier === 2
+              ? response.data.dieTimeTier2 || dieTime
+              : dieTime;
+          setValue('dieTime', currentDieTime);
           setValue('bankName', bankName);
           setValue('bankCode', bankCode);
           setValue('accountName', accountName);
@@ -102,10 +111,18 @@ const UserProfile = () => {
           setCurrentOpenLah(openLah);
           setCurrentCloseLah(closeLah);
           setCurrentLockKyc(lockKyc);
-          setEnablePaymentCrypto(enablePaymentCrypto !== undefined ? enablePaymentCrypto : true);
-          setEnablePaymentBank(enablePaymentBank !== undefined ? enablePaymentBank : true);
-          setEnableWithdrawCrypto(enableWithdrawCrypto !== undefined ? enableWithdrawCrypto : false);
-          setEnableWithdrawBank(enableWithdrawBank !== undefined ? enableWithdrawBank : true);
+          setEnablePaymentCrypto(
+            enablePaymentCrypto !== undefined ? enablePaymentCrypto : true,
+          );
+          setEnablePaymentBank(
+            enablePaymentBank !== undefined ? enablePaymentBank : true,
+          );
+          setEnableWithdrawCrypto(
+            enableWithdrawCrypto !== undefined ? enableWithdrawCrypto : false,
+          );
+          setEnableWithdrawBank(
+            enableWithdrawBank !== undefined ? enableWithdrawBank : true,
+          );
           setCurrentTermDie(errLahCode === 'OVER45' ? true : false);
           setIsBonusRef(bonusRef);
           setKycFee(kycFee);
@@ -172,27 +189,74 @@ const UserProfile = () => {
       }
       // Always send gateway settings if they exist (FormData converts boolean to string)
       // Compare with actual data value, using default values if data doesn't have the field
-      const currentEnablePaymentCrypto = (data.enablePaymentCrypto !== undefined && data.enablePaymentCrypto !== null) ? data.enablePaymentCrypto : true;
-      const currentEnablePaymentBank = (data.enablePaymentBank !== undefined && data.enablePaymentBank !== null) ? data.enablePaymentBank : true;
-      const currentEnableWithdrawCrypto = (data.enableWithdrawCrypto !== undefined && data.enableWithdrawCrypto !== null) ? data.enableWithdrawCrypto : false;
-      const currentEnableWithdrawBank = (data.enableWithdrawBank !== undefined && data.enableWithdrawBank !== null) ? data.enableWithdrawBank : true;
-      
+      const currentEnablePaymentCrypto =
+        data.enablePaymentCrypto !== undefined &&
+        data.enablePaymentCrypto !== null
+          ? data.enablePaymentCrypto
+          : true;
+      const currentEnablePaymentBank =
+        data.enablePaymentBank !== undefined && data.enablePaymentBank !== null
+          ? data.enablePaymentBank
+          : true;
+      const currentEnableWithdrawCrypto =
+        data.enableWithdrawCrypto !== undefined &&
+        data.enableWithdrawCrypto !== null
+          ? data.enableWithdrawCrypto
+          : false;
+      const currentEnableWithdrawBank =
+        data.enableWithdrawBank !== undefined &&
+        data.enableWithdrawBank !== null
+          ? data.enableWithdrawBank
+          : true;
+
       // Always send if value changed or if data doesn't have the field
-      if (enablePaymentCrypto !== undefined && enablePaymentCrypto !== currentEnablePaymentCrypto) {
+      if (
+        enablePaymentCrypto !== undefined &&
+        enablePaymentCrypto !== currentEnablePaymentCrypto
+      ) {
         formData.append('enablePaymentCrypto', String(enablePaymentCrypto));
-        console.log('Sending enablePaymentCrypto:', enablePaymentCrypto, 'current:', currentEnablePaymentCrypto);
+        console.log(
+          'Sending enablePaymentCrypto:',
+          enablePaymentCrypto,
+          'current:',
+          currentEnablePaymentCrypto,
+        );
       }
-      if (enablePaymentBank !== undefined && enablePaymentBank !== currentEnablePaymentBank) {
+      if (
+        enablePaymentBank !== undefined &&
+        enablePaymentBank !== currentEnablePaymentBank
+      ) {
         formData.append('enablePaymentBank', String(enablePaymentBank));
-        console.log('Sending enablePaymentBank:', enablePaymentBank, 'current:', currentEnablePaymentBank);
+        console.log(
+          'Sending enablePaymentBank:',
+          enablePaymentBank,
+          'current:',
+          currentEnablePaymentBank,
+        );
       }
-      if (enableWithdrawCrypto !== undefined && enableWithdrawCrypto !== currentEnableWithdrawCrypto) {
+      if (
+        enableWithdrawCrypto !== undefined &&
+        enableWithdrawCrypto !== currentEnableWithdrawCrypto
+      ) {
         formData.append('enableWithdrawCrypto', String(enableWithdrawCrypto));
-        console.log('Sending enableWithdrawCrypto:', enableWithdrawCrypto, 'current:', currentEnableWithdrawCrypto);
+        console.log(
+          'Sending enableWithdrawCrypto:',
+          enableWithdrawCrypto,
+          'current:',
+          currentEnableWithdrawCrypto,
+        );
       }
-      if (enableWithdrawBank !== undefined && enableWithdrawBank !== currentEnableWithdrawBank) {
+      if (
+        enableWithdrawBank !== undefined &&
+        enableWithdrawBank !== currentEnableWithdrawBank
+      ) {
         formData.append('enableWithdrawBank', String(enableWithdrawBank));
-        console.log('Sending enableWithdrawBank:', enableWithdrawBank, 'current:', currentEnableWithdrawBank);
+        console.log(
+          'Sending enableWithdrawBank:',
+          enableWithdrawBank,
+          'current:',
+          currentEnableWithdrawBank,
+        );
       }
       if (values.newStatus !== data.status) {
         formData.append('newStatus', values.newStatus);
@@ -590,35 +654,100 @@ const UserProfile = () => {
             </div>
           )} */}
 
-          {data.tier === 2 &&
-            data.dieTime &&
-            data.countdown > 0 &&
-            data.countdown <= 15 && (
-              <div
-                className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
-                role="alert"
-              >
-                <span className="block sm:inline">
-                  You have only <b>{data.countdown}</b> days left to complete
-                  the 62 required IDs to be eligible for Tier 2 benefits.
-                </span>
-              </div>
-            )}
+          {(() => {
+            // Hàm helper để chuyển đổi date sang giờ Việt Nam và set về 00:00:00
+            const convertToVietnamDate = (
+              dateString: string | Date | null | undefined,
+            ): Date | null => {
+              if (!dateString) return null;
+              const date = new Date(dateString);
+              if (isNaN(date.getTime())) return null;
 
-          {data.tier === 1 &&
-            data.dieTime &&
-            data.countdown > 0 &&
-            data.countdown <= 15 && (
-              <div
-                className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
-                role="alert"
-              >
-                <span className="block sm:inline">
-                  You have only <b>{data.countdown}</b> days left to complete
-                  referring at least 2 people in 2 different branches.
-                </span>
-              </div>
-            )}
+              // Lấy UTC time (milliseconds)
+              const utcTime = date.getTime() + date.getTimezoneOffset() * 60000;
+              // Chuyển sang giờ Việt Nam (UTC+7 = 7 * 60 * 60 * 1000 ms)
+              const vietnamOffset = 7 * 60 * 60 * 1000; // 7 giờ tính bằng milliseconds
+              const vietnamTime = new Date(utcTime + vietnamOffset);
+
+              // Set về 00:00:00 của ngày đó
+              return new Date(
+                vietnamTime.getFullYear(),
+                vietnamTime.getMonth(),
+                vietnamTime.getDate(),
+              );
+            };
+
+            // Lấy ngày hiện tại theo giờ Việt Nam, set về 00:00:00
+            const now = new Date();
+            const today = convertToVietnamDate(now);
+            if (!today) return null;
+
+            // Tính countdown cho tier 2
+            if (data.tier === 2 && data.dieTimeTier2) {
+              const tier2DieTime = convertToVietnamDate(data.dieTimeTier2);
+              if (tier2DieTime) {
+                const countdown = Math.ceil(
+                  (tier2DieTime.getTime() - today.getTime()) /
+                    (1000 * 60 * 60 * 24),
+                );
+                return (
+                  <div
+                    className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
+                    role="alert"
+                  >
+                    <span className="block sm:inline">
+                      {countdown > 0 ? (
+                        <>
+                          You have only <b>{countdown}</b> days left to complete
+                          the 62 required IDs to be eligible for Tier 2
+                          benefits.
+                        </>
+                      ) : (
+                        <>
+                          Your Tier 2 deadline has passed. You need to complete
+                          the 62 required IDs to be eligible for Tier 2
+                          benefits.
+                        </>
+                      )}
+                    </span>
+                  </div>
+                );
+              }
+            }
+
+            // Tính countdown cho tier 1
+            if (data.tier === 1 && data.dieTimeTier1) {
+              const tier1DieTime = convertToVietnamDate(data.dieTimeTier1);
+              if (tier1DieTime) {
+                const countdown = Math.ceil(
+                  (tier1DieTime.getTime() - today.getTime()) /
+                    (1000 * 60 * 60 * 24),
+                );
+                return (
+                  <div
+                    className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
+                    role="alert"
+                  >
+                    <span className="block sm:inline">
+                      {countdown > 0 ? (
+                        <>
+                          You have only <b>{countdown}</b> days left to complete
+                          referring at least 2 people in 2 different branches.
+                        </>
+                      ) : (
+                        <>
+                          Your Tier 1 deadline has passed. You need to refer at
+                          least 2 people in 2 different branches.
+                        </>
+                      )}
+                    </span>
+                  </div>
+                );
+              }
+            }
+
+            return null;
+          })()}
 
           <form onSubmit={handleSubmit(onSubmit)} className="md:flex no-wrap">
             <div className="w-full lg:w-3/12 lg:mx-2 mb-4 lg:mb-0">
@@ -763,22 +892,6 @@ const UserProfile = () => {
                       )}
                     </span>
                   </li>
-                  <li className="flex items-center py-3">
-                    <span>Temporary Die</span>
-                    <span className="ml-auto">
-                      {isEditting ? (
-                        <Switch
-                          checked={currentTermDie}
-                          onChange={handleChangeTermDie}
-                        />
-                      ) : currentTermDie ? (
-                        'True'
-                      ) : (
-                        'False'
-                      )}
-                    </span>
-                  </li>
-                  
                   {/* Payment Gateway Settings */}
                   <li className="flex items-center py-3 border-t border-gray-200 mt-2">
                     <span className="font-semibold text-gray-700">
@@ -815,7 +928,7 @@ const UserProfile = () => {
                       )}
                     </span>
                   </li>
-                  
+
                   {/* Withdrawal Gateway Settings */}
                   <li className="flex items-center py-3 border-t border-gray-200 mt-2">
                     <span className="font-semibold text-gray-700">
@@ -852,7 +965,7 @@ const UserProfile = () => {
                       )}
                     </span>
                   </li>
-                  
+
                   {data.status === 'LOCKED' && (
                     <li className="flex items-center py-3">
                       <span>{t('lockedTime')}</span>
@@ -895,19 +1008,103 @@ const UserProfile = () => {
                     <div className="flex items-center justify-between">
                       <div>Tier 1 :</div>
                       <div
-                        className={`w-10 h-5 rounded-md ${
-                          data.isRed
-                            ? 'bg-[#ee0000]'
-                            : data.isBlue
-                            ? 'bg-[#0033ff]'
-                            : data.isBrown
-                            ? 'bg-[#663300]'
-                            : data.isYellow
-                            ? 'bg-[#ffcc00]'
-                            : data.isPink
-                            ? 'bg-[#ff3399]'
-                            : 'bg-[#009933]'
-                        }`}
+                        className={`w-10 h-5 rounded-md ${(() => {
+                          // Hàm helper để chuyển đổi date sang giờ Việt Nam và set về 00:00:00
+                          const convertToVietnamDate = (
+                            dateString: string | Date | null | undefined,
+                          ): Date | null => {
+                            if (!dateString) return null;
+                            const date = new Date(dateString);
+                            if (isNaN(date.getTime())) return null;
+
+                            // Lấy UTC time (milliseconds)
+                            const utcTime =
+                              date.getTime() + date.getTimezoneOffset() * 60000;
+                            // Chuyển sang giờ Việt Nam (UTC+7 = 7 * 60 * 60 * 1000 ms)
+                            const vietnamOffset = 7 * 60 * 60 * 1000; // 7 giờ tính bằng milliseconds
+                            const vietnamTime = new Date(
+                              utcTime + vietnamOffset,
+                            );
+
+                            // Set về 00:00:00 của ngày đó
+                            return new Date(
+                              vietnamTime.getFullYear(),
+                              vietnamTime.getMonth(),
+                              vietnamTime.getDate(),
+                            );
+                          };
+
+                          // Lấy ngày hiện tại theo giờ Việt Nam, set về 00:00:00
+                          const now = new Date();
+                          const today = convertToVietnamDate(now);
+                          if (!today) return 'bg-[#009933]'; // Fallback nếu không tính được
+
+                          // Kiểm tra tier 1
+                          let tier1DaysRemaining: number | null = null;
+                          if (data.dieTimeTier1) {
+                            const tier1DieTime = convertToVietnamDate(
+                              data.dieTimeTier1,
+                            );
+                            if (tier1DieTime) {
+                              tier1DaysRemaining = Math.ceil(
+                                (tier1DieTime.getTime() - today.getTime()) /
+                                  (1000 * 60 * 60 * 24),
+                              );
+                            }
+                          }
+
+                          // Kiểm tra tier 2
+                          let tier2DaysRemaining: number | null = null;
+                          if (data.dieTimeTier2) {
+                            const tier2DieTime = convertToVietnamDate(
+                              data.dieTimeTier2,
+                            );
+                            if (tier2DieTime) {
+                              tier2DaysRemaining = Math.ceil(
+                                (tier2DieTime.getTime() - today.getTime()) /
+                                  (1000 * 60 * 60 * 24),
+                              );
+                            }
+                          }
+
+                          // Logic màu sắc mới
+                          // Nếu user đã chết ở tier 1 (dieTime đã qua)
+                          if (
+                            tier1DaysRemaining !== null &&
+                            tier1DaysRemaining <= 0
+                          ) {
+                            return 'bg-[#0033ff]'; // Màu xanh dương
+                          }
+
+                          // Nếu user đã chết ở tier 2 (dieTime đã qua)
+                          if (
+                            tier2DaysRemaining !== null &&
+                            tier2DaysRemaining <= 0
+                          ) {
+                            return 'bg-[#663300]'; // Màu nâu
+                          }
+
+                          // Nếu user tier 1 còn 10 ngày nữa chết
+                          if (
+                            tier1DaysRemaining !== null &&
+                            tier1DaysRemaining > 0 &&
+                            tier1DaysRemaining <= 10
+                          ) {
+                            return 'bg-[#ffcc00]'; // Màu vàng
+                          }
+
+                          // Nếu user tier 2 còn 5 ngày nữa chết
+                          if (
+                            tier2DaysRemaining !== null &&
+                            tier2DaysRemaining > 0 &&
+                            tier2DaysRemaining <= 5
+                          ) {
+                            return 'bg-[#ffcc00]'; // Màu vàng
+                          }
+
+                          // Còn lại màu xanh lá
+                          return 'bg-[#009933]';
+                        })()}`}
                       ></div>
                     </div>
                     {data.tier === 2 && (
@@ -926,7 +1123,14 @@ const UserProfile = () => {
                     )}
                   </li>
                   <li className="flex items-center py-3">
-                    <span>Die Time</span>
+                    <span>
+                      Die Time{' '}
+                      {data.tier === 1
+                        ? '(Tier 1)'
+                        : data.tier === 2
+                        ? '(Tier 2)'
+                        : ''}
+                    </span>
                     <span className="ml-auto">
                       {isEditting ? (
                         <Controller
@@ -942,19 +1146,20 @@ const UserProfile = () => {
                             />
                           )}
                         />
-                      ) : data.dieTime ? (
-                        new Date(data.dieTime).toLocaleDateString('vi')
                       ) : (
-                        ''
+                        (() => {
+                          // Hiển thị dieTime theo tier
+                          const currentDieTime =
+                            data.tier === 1
+                              ? data.dieTimeTier1 || data.dieTime
+                              : data.tier === 2
+                              ? data.dieTimeTier2 || data.dieTime
+                              : data.dieTime;
+                          return currentDieTime
+                            ? new Date(currentDieTime).toLocaleDateString('vi')
+                            : '';
+                        })()
                       )}
-                    </span>
-                  </li>
-                  <li className="flex items-center py-3">
-                    <span>{t('tier1Time')}</span>
-                    <span className="ml-auto">
-                      {data.tier1Time
-                        ? new Date(data.tier1Time).toLocaleDateString('vi')
-                        : ''}
                     </span>
                   </li>
                   <li className="flex items-center py-3">
@@ -1774,23 +1979,6 @@ const UserProfile = () => {
                         </div>
                       </>
                     )}
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        Overdue referral
-                      </div>
-                      <div className="px-4 py-2">
-                        {isEditting && data.errLahCode !== '' && (
-                          <div className="flex gap-4">
-                            <input
-                              type="radio"
-                              {...register('removeErrLahCode')}
-                            ></input>
-                            <p>Reset</p>
-                          </div>
-                        )}
-                        {!isEditting && data.errLahCode}
-                      </div>
-                    </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">{t('fine')}</div>
                       {isEditting ? (

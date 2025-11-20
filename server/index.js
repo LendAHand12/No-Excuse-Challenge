@@ -50,9 +50,14 @@ import {
   checkUserPreTier2,
   checkRefAndTotalChildOfUser,
   fetchVnUsdRates,
+  calculateTreeDieTime,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
-import { fixParentChildLinks } from "./common.js";
+import {
+  fixParentChildLinks,
+  recalculateTreeDieTimeForOldData,
+  testCalculateDieTimeForTree,
+} from "./common.js";
 import Tree from "./models/treeModel.js";
 import { getTotalLevel1ToLevel10OfUser, getTotalLevel6ToLevel10OfUser } from "./utils/methods.js";
 
@@ -121,9 +126,7 @@ app.use(notFound);
 // configure a custome error handler middleware
 app.use(errorHandler);
 
-// const nextUser = await getNextUserTier2();
-
-// await resetPass();
+// await recalculateTreeDieTimeForOldData();
 
 // Cấu hình timezone Việt Nam (GMT+7)
 const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";
@@ -241,13 +244,21 @@ const cronFetchVnUsdRates = new CronJob(
 //   VIETNAM_TIMEZONE
 // );
 
-// await resetErrLahCode();
-
-// const tree = await Tree.findById("67e54106fe1364e3848c714b");
-// const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(tree, true);
-// console.log({ countChild1, countChild2 });
-
-// await checkUserErrLahCodeDuoi45Ngay();
+const cronCalculateTreeDieTime = new CronJob(
+  "00 04 * * *", // 4h sáng giờ Việt Nam (sau khi delete user)
+  async () => {
+    try {
+      console.log("Calculate tree dieTime start");
+      await calculateTreeDieTime();
+      console.log("Calculate tree dieTime done");
+    } catch (e) {
+      console.error("Calculate tree dieTime error:", e?.message || e);
+    }
+  },
+  null,
+  true,
+  VIETNAM_TIMEZONE
+);
 
 await fixParentChildLinks();
 
@@ -259,6 +270,7 @@ cron3.start();
 cron4.start();
 cron6.start();
 // cron7.start();
+cronCalculateTreeDieTime.start();
 cronFetchVnUsdRates.start();
 
 const PORT = process.env.PORT || 5000;

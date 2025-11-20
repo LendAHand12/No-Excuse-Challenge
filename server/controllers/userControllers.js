@@ -340,6 +340,21 @@ const getUserById = asyncHandler(async (req, res) => {
       isSubId: false,
     });
 
+    // Lấy dieTime từ Tree model theo tier
+    let dieTimeTier1 = null;
+    let dieTimeTier2 = null;
+
+    if (tree) {
+      dieTimeTier1 = tree.dieTime || null;
+    }
+
+    if (treeTier2OfUser) {
+      dieTimeTier2 = treeTier2OfUser.dieTime || null;
+    }
+
+    // dieTime sẽ là dieTime của tier hiện tại
+    const dieTime = user.tier === 1 ? dieTimeTier1 : user.tier === 2 ? dieTimeTier2 : null;
+
     const diffDaySinceCreate = moment().diff(moment(user.createdAt), "days");
 
     res.json({
@@ -422,7 +437,9 @@ const getUserById = asyncHandler(async (req, res) => {
       preTier2Status: user.preTier2Status,
       shortfallAmount: user.shortfallAmount,
       tier2ChildUsers: tier2Users,
-      dieTime: user.dieTime,
+      dieTime: dieTime, // dieTime từ Tree model theo tier
+      dieTimeTier1: dieTimeTier1, // dieTime của tier 1
+      dieTimeTier2: dieTimeTier2, // dieTime của tier 2
       isRed:
         user.tier === 1 && user.countPay === 0
           ? true
@@ -569,10 +586,39 @@ const getUserInfo = asyncHandler(async (req, res) => {
     if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 3 || user.tier > 1) {
       notEnoughtChild = await getTotalLevel1ToLevel10OfUser(tree);
     }
+
+    // Lấy dieTime từ Tree model thay vì User model
+    const treeTier1 = await Tree.findOne({
+      userId: user._id,
+      tier: 1,
+      isSubId: false,
+    });
+
+    let treeTier2;
+    if (user.tier === 2) {
+      treeTier2 = await Tree.findOne({
+        userId: user._id,
+        tier: 2,
+        isSubId: false,
+      });
+    }
+
+    // Tính countdown dựa trên dieTime của tier hiện tại
     let countdown = 0;
-    if (user.dieTime) {
+    const currentDieTime =
+      user.tier === 1
+        ? treeTier1
+          ? treeTier1.dieTime
+          : null
+        : user.tier === 2
+        ? treeTier2
+          ? treeTier2.dieTime
+          : null
+        : null;
+
+    if (currentDieTime) {
       const currentDay = moment(); // ngày hiện tại
-      countdown = moment(new Date(user.dieTime)).diff(currentDay, "days"); // số ngày còn lại
+      countdown = moment(new Date(currentDieTime)).diff(currentDay, "days"); // số ngày còn lại
     }
 
     const isMoveSystem = await MoveSystem.find({
@@ -692,7 +738,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
       preTier2User: preTier2User,
       shortfallAmount: user.shortfallAmount,
       tier2ChildUsers: tier2Users,
-      dieTime: user.dieTime,
+      dieTimeTier1: treeTier1 ? treeTier1.dieTime : null,
+      dieTimeTier2: treeTier2 ? treeTier2.dieTime : null,
       timeToTry: user.timeToTry,
       bankName: user.bankName,
       bankCode: user.bankCode,
@@ -1344,6 +1391,14 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
       let childs = [...newParent.children];
       newParent.children = [...childs, user._id];
       await newParent.save();
+      // Tính dieTime ban đầu: tier 1 = +30 ngày, tier 2 = +45 ngày
+      const initialDieTime =
+        tier === 1
+          ? moment().add(30, "days").toDate()
+          : tier === 2
+          ? moment().add(45, "days").toDate()
+          : null;
+
       await Tree.create({
         userName: user.userId,
         userId: user._id,
@@ -1352,6 +1407,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
         tier,
         buyPackage: "A",
         children: [],
+        dieTime: initialDieTime,
       });
     }
     const updatedUser = await user.save();
@@ -2455,6 +2511,14 @@ const onAcceptIncreaseTier = asyncHandler(async (req, res) => {
       await newParent.save();
 
       const highestIndexOfLevel = await findHighestIndexOfLevel(nextTier);
+      // Tính dieTime ban đầu: tier 1 = +30 ngày, tier 2 = +45 ngày
+      const initialDieTime =
+        nextTier === 1
+          ? moment().add(30, "days").toDate()
+          : nextTier === 2
+          ? moment().add(45, "days").toDate()
+          : null;
+
       const tree = await Tree.create({
         userName: u.userId,
         userId: u._id,
@@ -2462,6 +2526,7 @@ const onAcceptIncreaseTier = asyncHandler(async (req, res) => {
         refId: newParentId,
         tier: nextTier,
         children: [],
+        dieTime: initialDieTime,
         indexOnLevel: highestIndexOfLevel,
       });
 
@@ -2642,6 +2707,8 @@ const adminCreateUser = asyncHandler(async (req, res) => {
     const parentTreeTier1 = await Tree.findById(parentTier1);
     const parentTreeTier2 = await Tree.findById(parentTier2);
 
+    // Tính dieTime ban đầu cho tier 1: +30 ngày
+    const initialDieTimeTier1 = moment().add(30, "days").toDate();
     const treeOfUserTier1 = await Tree.create({
       userName: newUser.userId,
       userId: newUser._id,
@@ -2650,8 +2717,11 @@ const adminCreateUser = asyncHandler(async (req, res) => {
       tier: 1,
       children: [],
       indexOnLevel: 0,
+      dieTime: initialDieTimeTier1,
     });
 
+    // Tính dieTime ban đầu cho tier 2: +45 ngày
+    const initialDieTimeTier2 = moment().add(45, "days").toDate();
     const treeOfUserTier2 = await Tree.create({
       userName: newUser.userId,
       userId: newUser._id,
@@ -2660,6 +2730,7 @@ const adminCreateUser = asyncHandler(async (req, res) => {
       tier: 2,
       children: [],
       indexOnLevel: 0,
+      dieTime: initialDieTimeTier2,
     });
 
     let childs1 = [...parentTreeTier1.children];

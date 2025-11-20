@@ -74,11 +74,11 @@ const AdminSystemPage = () => {
           style={{
             backgroundColor: isRed
               ? '#ee0000'
+              : isBrown
+              ? '#663300'
               : isBlue
               ? // ? '#149af6'
                 '#0033ff'
-              : isBrown
-              ? '#663300'
               : isYellow
               ? '#ffcc00'
               : isPink

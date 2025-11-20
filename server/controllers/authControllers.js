@@ -263,12 +263,16 @@ const registerUser = asyncHandler(async (req, res) => {
         registrationCountryCode: finalCountryCode,
       });
 
+      // Tính dieTime ban đầu cho tree tier 1: createdAt + 30 ngày
+      const initialDieTime = moment().add(30, "days").toDate();
+
       const tree = await Tree.create({
         userName: user.userId,
         userId: user._id,
         parentId: receiveId,
         refId: ref,
         children: [],
+        dieTime: initialDieTime,
       });
 
       await sendMail(user._id, email, "email verification");

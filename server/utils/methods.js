@@ -1,4 +1,4 @@
-import moment from "moment";
+import moment from "moment-timezone";
 import NextUserTier from "../models/nextUserTierModel.js";
 import Tree from "../models/treeModel.js";
 import User from "../models/userModel.js";
@@ -48,39 +48,21 @@ export const findNextUser = async (tier) => {
   const admin = await User.findById("6494e9101e2f152a593b66f2");
   if (!admin) throw "Unknow admin";
   const adminTree = await Tree.findOne({ userId: admin._id, tier });
-  const listUserLevel = await findUsersAtLevel(
-    adminTree._id,
-    admin.currentLayer[tier - 1],
-    2,
-    1
-  );
+  const listUserLevel = await findUsersAtLevel(adminTree._id, admin.currentLayer[tier - 1], 2, 1);
 
-  const sortedData = listUserLevel.sort(
-    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-  );
+  const sortedData = listUserLevel.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
   const itemWithMinLength = sortedData.reduce((minItem, currentItem) => {
-    return currentItem.children.length < minItem.children.length
-      ? currentItem
-      : minItem;
+    return currentItem.children.length < minItem.children.length ? currentItem : minItem;
   }, sortedData[0]);
-  return itemWithMinLength
-    ? itemWithMinLength.userId
-    : "6494e9101e2f152a593b66f2";
+  return itemWithMinLength ? itemWithMinLength.userId : "6494e9101e2f152a593b66f2";
 };
 
 export const findNextUserNotIncludeNextUserTier = async (tier) => {
   const admin = await User.findById("6494e9101e2f152a593b66f2");
   if (!admin) throw "Unknow admin";
-  const listUserLevel = await findUsersAtLevel(
-    admin._id,
-    admin.currentLayer[tier - 1],
-    2,
-    1
-  );
-  const sortedData = listUserLevel.sort(
-    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-  );
+  const listUserLevel = await findUsersAtLevel(admin._id, admin.currentLayer[tier - 1], 2, 1);
+  const sortedData = listUserLevel.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
   // for (let user of sortedData) {
   //   console.log({
   //     userName: user.userName,
@@ -90,13 +72,9 @@ export const findNextUserNotIncludeNextUserTier = async (tier) => {
   // }
 
   const itemWithMinLength = sortedData.reduce((minItem, currentItem) => {
-    return currentItem.children.length < minItem.children.length
-      ? currentItem
-      : minItem;
+    return currentItem.children.length < minItem.children.length ? currentItem : minItem;
   }, sortedData[0]);
-  return itemWithMinLength
-    ? itemWithMinLength.userId
-    : "6494e9101e2f152a593b66f2";
+  return itemWithMinLength ? itemWithMinLength.userId : "6494e9101e2f152a593b66f2";
 };
 
 // export const findUsersAtLevel = async (
@@ -132,12 +110,7 @@ export const findNextUserNotIncludeNextUserTier = async (tier) => {
 //   return usersAtLevel;
 // };
 
-export const findUsersAtLevel = async (
-  rootTreeId,
-  targetLevel,
-  tier,
-  currentLevel = 1
-) => {
+export const findUsersAtLevel = async (rootTreeId, targetLevel, tier, currentLevel = 1) => {
   if (currentLevel > targetLevel) {
     return [];
   }
@@ -159,12 +132,7 @@ export const findUsersAtLevel = async (
   let treesAtTargetLevel = [];
 
   for (const childId of rootTree.children) {
-    const treesFromChild = await findUsersAtLevel(
-      childId,
-      targetLevel,
-      tier,
-      currentLevel + 1
-    );
+    const treesFromChild = await findUsersAtLevel(childId, targetLevel, tier, currentLevel + 1);
     treesAtTargetLevel = treesAtTargetLevel.concat(treesFromChild);
   }
 
@@ -372,9 +340,7 @@ export const mergeIntoThreeGroups = (A) => {
   // Assign groups
   const group1 = sorted[0].countChild;
   const group2 = sorted[1]?.countChild || 0;
-  const group3 = sorted
-    .slice(2)
-    .reduce((sum, item) => sum + item.countChild, 0);
+  const group3 = sorted.slice(2).reduce((sum, item) => sum + item.countChild, 0);
 
   return [group1, group2, group3];
 };
@@ -491,11 +457,8 @@ export const countChildOfEachLevel = async (rootId, includesDieId = false) => {
 
     if (includesDieId) {
       // Đếm tất cả children ở level (tier + 1)
-      result[`level${tier + 1}`] =
-        (result[`level${tier + 1}`] || 0) + allChildIds.length;
-      nextLevelChildIds = allChildIds.map(
-        (id) => new mongoose.Types.ObjectId(id)
-      );
+      result[`level${tier + 1}`] = (result[`level${tier + 1}`] || 0) + allChildIds.length;
+      nextLevelChildIds = allChildIds.map((id) => new mongoose.Types.ObjectId(id));
     } else {
       // Chỉ đếm user hợp lệ
       const trees = await Tree.find({ _id: { $in: allChildIds } })
@@ -519,12 +482,9 @@ export const countChildOfEachLevel = async (rootId, includesDieId = false) => {
       }
 
       // ✅ Đếm vào level (tier + 1)
-      result[`level${tier + 1}`] =
-        (result[`level${tier + 1}`] || 0) + workingChildIds.length;
+      result[`level${tier + 1}`] = (result[`level${tier + 1}`] || 0) + workingChildIds.length;
 
-      nextLevelChildIds = allChildIds.map(
-        (id) => new mongoose.Types.ObjectId(id)
-      );
+      nextLevelChildIds = allChildIds.map((id) => new mongoose.Types.ObjectId(id));
     }
 
     if (nextLevelChildIds.length > 0) {
@@ -564,17 +524,12 @@ export const sumLevels = (obj, fromLevel = 5, toLevel = 9) => {
 };
 
 export const checkUserCanNextTier = async (treeOfUser) => {
-  const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(
-    treeOfUser
-  );
+  const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(treeOfUser);
   // console.log({ countChild1, countChild2 });
 
   if (treeOfUser.countChild >= 62) {
     // if (treeOfUser.countChild >= 126) {
-    if (
-      (countChild1 >= 20 && countChild2 >= 42) ||
-      (countChild1 >= 42 && countChild2 >= 20)
-    ) {
+    if ((countChild1 >= 20 && countChild2 >= 42) || (countChild1 >= 42 && countChild2 >= 20)) {
       // if (countChild1 >= 0 && countChild2 >= 0) {
       return true;
     } else {
@@ -586,12 +541,8 @@ export const checkUserCanNextTier = async (treeOfUser) => {
 };
 
 export const getTotalLevel6ToLevel10OfUser = async (treeOfUser) => {
-  const countWithLevelChild1 = await countChildOfEachLevel(
-    treeOfUser.children[0]
-  );
-  const countWithLevelChild2 = await countChildOfEachLevel(
-    treeOfUser.children[1]
-  );
+  const countWithLevelChild1 = await countChildOfEachLevel(treeOfUser.children[0]);
+  const countWithLevelChild2 = await countChildOfEachLevel(treeOfUser.children[1]);
 
   // console.log({ countWithLevelChild1, countWithLevelChild2 });
 
@@ -603,18 +554,9 @@ export const getTotalLevel6ToLevel10OfUser = async (treeOfUser) => {
   return { countChild1, countChild2 };
 };
 
-export const getTotalLevel1ToLevel10OfUser = async (
-  treeOfUser,
-  includesDieId
-) => {
-  const countWithLevelChild1 = await countChildOfEachLevel(
-    treeOfUser.children[0],
-    includesDieId
-  );
-  const countWithLevelChild2 = await countChildOfEachLevel(
-    treeOfUser.children[1],
-    includesDieId
-  );
+export const getTotalLevel1ToLevel10OfUser = async (treeOfUser, includesDieId) => {
+  const countWithLevelChild1 = await countChildOfEachLevel(treeOfUser.children[0], includesDieId);
+  const countWithLevelChild2 = await countChildOfEachLevel(treeOfUser.children[1], includesDieId);
 
   // console.log({ countWithLevelChild1, countWithLevelChild2 });
 
@@ -630,17 +572,13 @@ export const getTotalLevel1ToLevel10OfUser = async (
 const getBranchRoot = (nodeId, rootId, parentMap) => {
   let currentId = nodeId;
   const visited = new Set(); // Track visited nodes to prevent infinite loops
-  
-  while (
-    currentId &&
-    parentMap[currentId] &&
-    String(parentMap[currentId]) !== String(rootId)
-  ) {
+
+  while (currentId && parentMap[currentId] && String(parentMap[currentId]) !== String(rootId)) {
     // Check for circular reference (infinite loop)
     if (visited.has(currentId)) {
       return null; // Return null to prevent infinite loop
     }
-    
+
     visited.add(currentId);
     currentId = parentMap[currentId];
   }
@@ -674,19 +612,13 @@ export const hasTwoBranches = async (refId) => {
   // Tìm branch root của mỗi F1
   const branches = new Set();
   for (let f1 of f1s) {
-    const branchRoot = getBranchRoot(
-      f1._id.toString(),
-      refId.toString(),
-      parentMap
-    );
+    const branchRoot = getBranchRoot(f1._id.toString(), refId.toString(), parentMap);
     if (branchRoot) branches.add(branchRoot);
     if (branches.size >= 2) return true; // tối ưu: có đủ 2 nhánh thì dừng luôn
   }
 
-
   return false;
 };
-
 
 export const getAllDescendantsTier2Users = async (userId) => {
   // tìm node gốc trong Tree
@@ -725,9 +657,7 @@ export const getAllDescendantsTier2Users = async (userId) => {
         if (t.isSubId) continue;
 
         // tìm user tier = 2, chỉ lấy userId
-        const u = await User.findOne({ _id: t.userId, tier: 2 })
-          .select("userId")
-          .lean();
+        const u = await User.findOne({ _id: t.userId, tier: 2 }).select("userId").lean();
         if (u) resultSet.add(u.userId);
       }
     }
@@ -762,4 +692,199 @@ export const isLowestAchievedUser = async (userId) => {
 
 export const addDays = (dateA, daysToAdd) => {
   return moment(dateA).add(daysToAdd, "days");
+};
+
+/**
+ * Đếm số id sống trong một nhánh (dựa trên tree.dieTime)
+ * Id sống: tree.dieTime === null hoặc tree.dieTime > today
+ * @param {String} branchRootId - ID của tree root của nhánh
+ * @returns {Number} - Số lượng id sống trong nhánh (từ level 0 đến level 9)
+ */
+export const countAliveIdsInBranch = async (branchRootId) => {
+  if (!branchRootId) return 0;
+
+  let count = 0;
+  let queue = [branchRootId];
+  const visited = new Set();
+  // Lấy ngày hiện tại theo giờ Việt Nam, set về 00:00:00
+  const today = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+
+  while (queue.length > 0) {
+    const batchIds = queue.splice(0, queue.length);
+    const trees = await Tree.find({
+      _id: { $in: batchIds.map((id) => new mongoose.Types.ObjectId(id)) },
+    })
+      .select("children dieTime")
+      .lean();
+
+    for (const tree of trees) {
+      if (visited.has(tree._id.toString())) continue;
+      visited.add(tree._id.toString());
+
+      // Thêm children vào queue để duyệt tiếp
+      if (tree.children && tree.children.length > 0) {
+        queue.push(...tree.children);
+      }
+
+      // Kiểm tra tree này có sống không
+      // Tree sống: dieTime === null hoặc dieTime > today
+      // Convert dieTime sang giờ Việt Nam và set về 00:00:00
+      const isAlive =
+        !tree.dieTime || moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day").isAfter(today);
+
+      if (isAlive) {
+        count++;
+      }
+    }
+  }
+
+  return count;
+};
+
+/**
+ * Tính dieTime cho tree tier 1
+ * Logic: 30 ngày từ ngày chết của con (chết sau nhất) để có ít nhất 2 tree con sống (refId = tree._id)
+ * Nếu không có con nào chết, deadline = createdAt + 30 ngày
+ * @param {Object} tree - Tree object (tier = 1)
+ * @returns {Date|null} - dieTime hoặc null nếu đã đủ điều kiện
+ */
+export const calculateDieTimeForTier1 = async (tree) => {
+  if (tree.tier !== 1) {
+    throw new Error("Tree must be tier 1");
+  }
+
+  // Lấy ngày hiện tại theo giờ Việt Nam, set về 00:00:00
+  const todayMoment = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+  const todayStart = todayMoment.toDate();
+
+  // Tìm tất cả tree con (refId = tree._id, isSubId = false)
+  const children = await Tree.find({
+    refId: tree._id.toString(),
+    isSubId: false,
+  }).lean();
+
+  // Tìm ngày chết của con nào chết sau nhất
+  let latestChildDieTime = null;
+  for (const child of children) {
+    if (child.dieTime) {
+      // Convert dieTime sang giờ Việt Nam và set về 00:00:00
+      const childDieTimeMoment = moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+      const childDieTimeStart = childDieTimeMoment.toDate();
+      // Chỉ tính con đã chết (dieTime <= today)
+      if (childDieTimeStart <= todayStart) {
+        if (!latestChildDieTime || childDieTimeStart > latestChildDieTime) {
+          latestChildDieTime = childDieTimeStart;
+        }
+      }
+    }
+  }
+
+  // Tính deadline: nếu có con chết thì deadline = ngày chết của con (chết sau nhất) + 30 ngày
+  // Nếu không có con nào chết thì deadline = createdAt + 30 ngày
+  // Tất cả đều tính theo giờ Việt Nam và set về 00:00:00
+  let deadlineStart;
+  if (latestChildDieTime) {
+    const deadlineMoment = moment
+      .tz(latestChildDieTime, "Asia/Ho_Chi_Minh")
+      .add(30, "days")
+      .startOf("day");
+    deadlineStart = deadlineMoment.toDate();
+  } else {
+    const deadlineMoment = moment
+      .tz(tree.createdAt, "Asia/Ho_Chi_Minh")
+      .add(30, "days")
+      .startOf("day");
+    deadlineStart = deadlineMoment.toDate();
+  }
+
+  // Đếm số tree con sống
+  let aliveCount = 0;
+  for (const child of children) {
+    // Convert dieTime sang giờ Việt Nam và set về 00:00:00
+    const childDieTime = child.dieTime
+      ? moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day").toDate()
+      : null;
+    const isAlive = !childDieTime || childDieTime > todayStart;
+    if (isAlive) {
+      aliveCount++;
+    }
+  }
+
+  // Ưu tiên kiểm tra: Nếu có đủ 2 tree con sống thì dieTime = null (bất kể deadline đã qua hay chưa)
+  if (aliveCount >= 2) {
+    // Đã đủ điều kiện -> dieTime = null
+    return null;
+  }
+
+  // Nếu không đủ 2 children sống, kiểm tra deadline
+  // Kiểm tra xem đã quá hạn chưa (chỉ dùng >, không dùng >=, để nhất quán với hàm test)
+  const isDeadlinePassed = todayStart > deadlineStart;
+
+  // Nếu đã quá hạn và không đủ children sống thì không thể hồi sinh
+  if (isDeadlinePassed) {
+    // Nếu đã quá hạn và không đủ children sống thì không thể hồi sinh, trả về deadline
+    return deadlineStart;
+  }
+
+  // Chưa quá hạn nhưng chưa đủ children sống -> dieTime = deadline
+  return deadlineStart;
+};
+
+/**
+ * Tính dieTime cho tree tier 2
+ * Logic: Nếu không đủ 62 id sống ở tier 1 thì có 45 ngày kể từ ngày chạy cronjob phát hiện thiếu
+ * Nếu đủ 62 id sống (tổng >= 62, mỗi nhánh >= 20) thì dieTime = null
+ * Lưu ý: Tính 62 id sống trong cây tier 1 của cùng user, không phải cây tier 2
+ * @param {Object} tree - Tree object (tier = 2)
+ * @returns {Date|null} - dieTime hoặc null nếu đã đủ điều kiện
+ */
+export const calculateDieTimeForTier2 = async (tree) => {
+  if (tree.tier !== 2) {
+    throw new Error("Tree must be tier 2");
+  }
+
+  // Tìm tree tier 1 của cùng user (isSubId = false)
+  const treeTier1 = await Tree.findOne({
+    userId: tree.userId,
+    tier: 1,
+    isSubId: false,
+  });
+
+  if (!treeTier1) {
+    // Nếu không tìm thấy tree tier 1, tính dieTime = today + 45 ngày (theo giờ Việt Nam, 00:00:00)
+    const deadline = moment.tz("Asia/Ho_Chi_Minh").add(45, "days").startOf("day");
+    return deadline.toDate();
+  }
+
+  // Lấy ngày hiện tại theo giờ Việt Nam, set về 00:00:00
+  const today = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+
+  // Đếm id sống trong 2 nhánh của tree tier 1
+  const branch1Count = await countAliveIdsInBranch(treeTier1.children[0]);
+  const branch2Count = await countAliveIdsInBranch(treeTier1.children[1]);
+  const totalCount = branch1Count + branch2Count;
+
+  // Kiểm tra điều kiện
+  const hasEnough = totalCount >= 62 && branch1Count >= 20 && branch2Count >= 20;
+
+  if (hasEnough) {
+    // Đã đủ điều kiện -> dieTime = null
+    return null;
+  } else {
+    // Chưa đủ -> dieTime = today + 45 ngày (45 ngày kể từ ngày phát hiện thiếu)
+    // Tất cả đều tính theo giờ Việt Nam và set về 00:00:00
+    // Nếu đã có dieTime và chưa quá hạn thì giữ nguyên, nếu quá hạn hoặc chưa có thì set mới
+    if (tree.dieTime) {
+      const currentDieTime = moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+      // Nếu đã quá hạn thì không thể hồi sinh, giữ nguyên dieTime
+      if (today.isAfter(currentDieTime)) {
+        return currentDieTime.toDate();
+      }
+      // Nếu chưa quá hạn thì cập nhật lại = today + 45 ngày (theo giờ Việt Nam, 00:00:00)
+      return moment.tz("Asia/Ho_Chi_Minh").add(45, "days").startOf("day").toDate();
+    } else {
+      // Chưa có dieTime -> set = today + 45 ngày (theo giờ Việt Nam, 00:00:00)
+      return moment.tz("Asia/Ho_Chi_Minh").add(45, "days").startOf("day").toDate();
+    }
+  }
 };

@@ -48,6 +48,10 @@ const treeSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    dieTime: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );

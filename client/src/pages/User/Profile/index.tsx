@@ -62,9 +62,11 @@ const Profile = () => {
     preTier2User,
     shortfallAmount,
     tier2ChildUsers,
-    dieTime,
     enablePaymentBank,
     enableWithdrawBank,
+    dieTime,
+    dieTimeTier1,
+    dieTimeTier2,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -557,29 +559,106 @@ const Profile = () => {
           </div>
         )}
 
-        {tier === 2 && dieTime && countdown > 0 && countdown <= 15 && (
-          <div
-            className="text-lg w-fit bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
-            role="alert"
-          >
-            <span className="block sm:inline">
-              {`You have only ${countdown} days left to complete the 62
-              required IDs to be eligible for Tier 2 benefits.`}
-            </span>
-          </div>
-        )}
+        {(() => {
+          // Hàm helper để chuyển đổi date sang giờ Việt Nam và set về 00:00:00
+          const convertToVietnamDate = (
+            dateString: string | Date | null | undefined,
+          ): Date | null => {
+            if (!dateString) return null;
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return null;
 
-        {tier === 1 && dieTime && countdown > 0 && countdown <= 15 && (
-          <div
-            className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
-            role="alert"
-          >
-            <span className="block sm:inline">
-              You have only <b>{countdown}</b> days left to complete referring
-              at least 2 people in 2 different branches.
-            </span>
-          </div>
-        )}
+            // Lấy UTC time (milliseconds)
+            const utcTime = date.getTime() + date.getTimezoneOffset() * 60000;
+            // Chuyển sang giờ Việt Nam (UTC+7 = 7 * 60 * 60 * 1000 ms)
+            const vietnamOffset = 7 * 60 * 60 * 1000; // 7 giờ tính bằng milliseconds
+            const vietnamTime = new Date(utcTime + vietnamOffset);
+
+            // Set về 00:00:00 của ngày đó
+            return new Date(
+              vietnamTime.getFullYear(),
+              vietnamTime.getMonth(),
+              vietnamTime.getDate(),
+            );
+          };
+
+          // Lấy ngày hiện tại theo giờ Việt Nam, set về 00:00:00
+          const now = new Date();
+          const today = convertToVietnamDate(now);
+          if (!today) return null;
+
+          // Tính countdown cho tier 2
+          if (tier === 2) {
+            const currentDieTimeTier2 = dieTimeTier2 || dieTime;
+            if (currentDieTimeTier2) {
+              const tier2DieTime = convertToVietnamDate(currentDieTimeTier2);
+              if (tier2DieTime) {
+                const countdown = Math.ceil(
+                  (tier2DieTime.getTime() - today.getTime()) /
+                    (1000 * 60 * 60 * 24),
+                );
+                return (
+                  <div
+                    className="text-lg w-fit bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
+                    role="alert"
+                  >
+                    <span className="block sm:inline">
+                      {countdown > 0 ? (
+                        <>
+                          You have only <b>{countdown}</b> days left to complete
+                          the 62 required IDs to be eligible for Tier 2
+                          benefits.
+                        </>
+                      ) : (
+                        <>
+                          Your Tier 2 deadline has passed. You need to complete
+                          the 62 required IDs to be eligible for Tier 2
+                          benefits.
+                        </>
+                      )}
+                    </span>
+                  </div>
+                );
+              }
+            }
+          }
+
+          // Tính countdown cho tier 1
+          if (tier === 1) {
+            const currentDieTimeTier1 = dieTimeTier1 || dieTime;
+            if (currentDieTimeTier1) {
+              const tier1DieTime = convertToVietnamDate(currentDieTimeTier1);
+              if (tier1DieTime) {
+                const countdown = Math.ceil(
+                  (tier1DieTime.getTime() - today.getTime()) /
+                    (1000 * 60 * 60 * 24),
+                );
+                return (
+                  <div
+                    className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
+                    role="alert"
+                  >
+                    <span className="block sm:inline">
+                      {countdown > 0 ? (
+                        <>
+                          You have only <b>{countdown}</b> days left to complete
+                          referring at least 2 people in 2 different branches.
+                        </>
+                      ) : (
+                        <>
+                          Your Tier 1 deadline has passed. You need to refer at
+                          least 2 people in 2 different branches.
+                        </>
+                      )}
+                    </span>
+                  </div>
+                );
+              }
+            }
+          }
+
+          return null;
+        })()}
 
         {/* Bank Information Warning */}
         {enablePaymentBank &&

@@ -28,6 +28,7 @@ import { getPriceHewe } from "../utils/getPriceHewe.js";
 import PreTier2Pool from "../models/preTier2PoolModel.js";
 import { getListChildNotEnoughBranchOfUser } from "./userControllers.js";
 import Order from "../models/orderModel.js";
+import moment from "moment";
 
 const getPaymentInfo = asyncHandler(async (req, res) => {
   const { user } = req;
@@ -1008,6 +1009,14 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
         const mainTree = await Tree.findOne({ tier: 1, userId: user._id, isSubId: false });
         let childsOfChild = [...newChildParent.children];
 
+        // Tính dieTime ban đầu: tier 1 = +30 ngày, tier 2 = +45 ngày
+        const initialDieTimeSub =
+          user.tier === 1
+            ? moment().add(30, "days").toDate()
+            : user.tier === 2
+            ? moment().add(45, "days").toDate()
+            : null;
+
         const newTreeTier1 = await Tree.create({
           userName: user.userId + "1-1",
           userId: user._id,
@@ -1017,6 +1026,7 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
           buyPackage: "A",
           children: [],
           isSubId: true,
+          dieTime: initialDieTimeSub,
         });
 
         newChildParent.children = [...childsOfChild, newTreeTier1._id];
@@ -1029,14 +1039,24 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
         });
 
         const highestIndexOfLevel = await findHighestIndexOfLevel(user.tier + 1);
+        // Tính dieTime ban đầu: tier 1 = +30 ngày, tier 2 = +45 ngày
+        const nextTier = user.tier + 1;
+        const initialDieTimeTier2 =
+          nextTier === 1
+            ? moment().add(30, "days").toDate()
+            : nextTier === 2
+            ? moment().add(45, "days").toDate()
+            : null;
+
         const treeOfUserTier2 = await Tree.create({
           userName: user.userId,
           userId: user._id,
           parentId: newParent._id,
           refId: newParent._id,
-          tier: user.tier + 1,
+          tier: nextTier,
           children: [],
           indexOnLevel: highestIndexOfLevel + 1,
+          dieTime: initialDieTimeTier2,
         });
 
         let childs = [...newParent.children];

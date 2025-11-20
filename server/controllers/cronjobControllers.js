@@ -8,7 +8,9 @@ import {
   distributionHewe,
   rankingCalc,
   checkUserPreTier2,
+  calculateTreeDieTime,
 } from "../cronJob/index.js";
+import { recalculateTreeDieTimeForOldData, testCalculateDieTimeForTree } from "../common.js";
 
 const cronjobs = [
   {
@@ -38,6 +40,14 @@ const cronjobs = [
   {
     title: "Check Pre Tier 2 Pending List",
     func: checkUserPreTier2,
+  },
+  {
+    title: "Calculate Tree DieTime",
+    func: calculateTreeDieTime,
+  },
+  {
+    title: "Recalculate Tree DieTime For Old Data",
+    func: recalculateTreeDieTimeForOldData,
   },
 ];
 
@@ -82,4 +92,27 @@ const runCronjob = asyncHandler(async (req, res) => {
   });
 });
 
-export { runCronjob };
+const testTreeDieTime = asyncHandler(async (req, res) => {
+  // Hỗ trợ cả GET (query param hoặc route param) và POST (body)
+  const treeId = req.params.treeId || req.query.treeId || req.body.treeId;
+
+  if (!treeId) {
+    res.status(400);
+    throw new Error(
+      "treeId is required. Use GET /api/cronjob/test-tree-dietime/:treeId or POST with body { treeId }"
+    );
+  }
+
+  try {
+    const result = await testCalculateDieTimeForTree(treeId);
+    res.json({
+      success: true,
+      result,
+    });
+  } catch (err) {
+    res.status(500);
+    throw new Error(err.message || "Error testing tree dieTime");
+  }
+});
+
+export { runCronjob, testTreeDieTime };
