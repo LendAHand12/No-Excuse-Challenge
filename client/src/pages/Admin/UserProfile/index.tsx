@@ -682,16 +682,19 @@ const UserProfile = () => {
             const today = convertToVietnamDate(now);
             if (!today) return null;
 
-            // Tính countdown cho tier 2
-            if (data.tier === 2 && data.dieTimeTier2) {
+            const alerts = [];
+
+            // Tính countdown cho tier 2 (nếu có dieTimeTier2)
+            if (data.dieTimeTier2) {
               const tier2DieTime = convertToVietnamDate(data.dieTimeTier2);
               if (tier2DieTime) {
                 const countdown = Math.ceil(
                   (tier2DieTime.getTime() - today.getTime()) /
                     (1000 * 60 * 60 * 24),
                 );
-                return (
+                alerts.push(
                   <div
+                    key="tier2"
                     className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
                     role="alert"
                   >
@@ -710,21 +713,22 @@ const UserProfile = () => {
                         </>
                       )}
                     </span>
-                  </div>
+                  </div>,
                 );
               }
             }
 
-            // Tính countdown cho tier 1
-            if (data.tier === 1 && data.dieTimeTier1) {
+            // Tính countdown cho tier 1 (nếu có dieTimeTier1)
+            if (data.dieTimeTier1) {
               const tier1DieTime = convertToVietnamDate(data.dieTimeTier1);
               if (tier1DieTime) {
                 const countdown = Math.ceil(
                   (tier1DieTime.getTime() - today.getTime()) /
                     (1000 * 60 * 60 * 24),
                 );
-                return (
+                alerts.push(
                   <div
+                    key="tier1"
                     className="w-full text-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-5"
                     role="alert"
                   >
@@ -741,12 +745,12 @@ const UserProfile = () => {
                         </>
                       )}
                     </span>
-                  </div>
+                  </div>,
                 );
               }
             }
 
-            return null;
+            return alerts.length > 0 ? <>{alerts}</> : null;
           })()}
 
           <form onSubmit={handleSubmit(onSubmit)} className="md:flex no-wrap">
@@ -1123,14 +1127,7 @@ const UserProfile = () => {
                     )}
                   </li>
                   <li className="flex items-center py-3">
-                    <span>
-                      Die Time{' '}
-                      {data.tier === 1
-                        ? '(Tier 1)'
-                        : data.tier === 2
-                        ? '(Tier 2)'
-                        : ''}
-                    </span>
+                    <span>Die Time (Tier 1)</span>
                     <span className="ml-auto">
                       {isEditting ? (
                         <Controller
@@ -1149,12 +1146,7 @@ const UserProfile = () => {
                       ) : (
                         (() => {
                           // Hiển thị dieTime theo tier
-                          const currentDieTime =
-                            data.tier === 1
-                              ? data.dieTimeTier1 || data.dieTime
-                              : data.tier === 2
-                              ? data.dieTimeTier2 || data.dieTime
-                              : data.dieTime;
+                          const currentDieTime = data.dieTimeTier1;
                           return currentDieTime
                             ? new Date(currentDieTime).toLocaleDateString('vi')
                             : '';
@@ -1162,6 +1154,39 @@ const UserProfile = () => {
                       )}
                     </span>
                   </li>
+                  {data.tier === 2 && (
+                    <li className="flex items-center py-3">
+                      <span>Die Time (Tier 2)</span>
+                      <span className="ml-auto">
+                        {isEditting ? (
+                          <Controller
+                            control={control}
+                            name="dieTime"
+                            render={({ field }) => (
+                              <DatePicker
+                                placeholderText={t('fromDate')}
+                                onChange={(date) => field.onChange(date)}
+                                selected={field.value}
+                                dateFormat="dd/MM/yyyy"
+                                className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                              />
+                            )}
+                          />
+                        ) : (
+                          (() => {
+                            // Hiển thị dieTime theo tier
+                            const currentDieTime = data.dieTimeTier2;
+                            return currentDieTime
+                              ? new Date(currentDieTime).toLocaleDateString(
+                                  'vi',
+                                )
+                              : '';
+                          })()
+                        )}
+                      </span>
+                    </li>
+                  )}
+
                   <li className="flex items-center py-3">
                     <span>{t('tier2Time')}</span>
                     <span className="ml-auto">

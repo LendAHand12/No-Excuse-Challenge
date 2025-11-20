@@ -812,23 +812,140 @@ export const calculateDieTimeForTier1 = async (tree) => {
     deadlineStart = deadlineMoment.toDate();
   }
 
-  // Đếm số tree con sống
-  let aliveCount = 0;
-  for (const child of children) {
-    // Convert dieTime sang giờ Việt Nam và set về 00:00:00
-    const childDieTime = child.dieTime
-      ? moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day").toDate()
-      : null;
-    const isAlive = !childDieTime || childDieTime > todayStart;
-    if (isAlive) {
-      aliveCount++;
-    }
-  }
+  // Kiểm tra xem có đủ 2 refId sống ở 2 nhánh khác nhau không
+  // Lấy 2 nhánh của tree (children[0] và children[1])
+  const branch1Root = tree.children && tree.children[0] ? tree.children[0] : null;
+  const branch2Root = tree.children && tree.children[1] ? tree.children[1] : null;
 
-  // Ưu tiên kiểm tra: Nếu có đủ 2 tree con sống thì dieTime = null (bất kể deadline đã qua hay chưa)
-  if (aliveCount >= 2) {
-    // Đã đủ điều kiện -> dieTime = null
-    return null;
+  // Nếu tree có 2 nhánh, kiểm tra xem có refId sống ở cả 2 nhánh không
+  if (branch1Root && branch2Root) {
+    // Lấy parentId cho toàn bộ cây để xác định nhánh
+    const allNodes = await Tree.find({}).select("_id parentId").lean();
+    const parentMap = {};
+    for (let n of allNodes) {
+      parentMap[n._id.toString()] = n.parentId ? n.parentId.toString() : null;
+    }
+
+    // Đếm số refId sống ở mỗi nhánh
+    let branch1AliveCount = 0;
+    let branch2AliveCount = 0;
+
+    for (const child of children) {
+      // Convert dieTime sang giờ Việt Nam và set về 00:00:00
+      const childDieTime = child.dieTime
+        ? moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day").toDate()
+        : null;
+      const isAlive = !childDieTime || childDieTime > todayStart;
+
+      if (isAlive) {
+        // Xác định nhánh của child
+        const branchRoot = getBranchRoot(child._id.toString(), tree._id.toString(), parentMap);
+        if (branchRoot === branch1Root) {
+          branch1AliveCount++;
+        } else if (branchRoot === branch2Root) {
+          branch2AliveCount++;
+        }
+      }
+    }
+
+    // Nếu có ít nhất 1 refId sống ở nhánh 1 VÀ ít nhất 1 refId sống ở nhánh 2
+    // thì dieTime = null (đã đủ điều kiện)
+    if (branch1AliveCount >= 1 && branch2AliveCount >= 1) {
+      return null;
+    }
+  } else {
+    // Nếu tree chưa có đủ 2 nhánh:
+    // 1. Xác định nhánh có refId sống và nhánh không có refId sống
+    // 2. Tìm refId (bất kể sống hay chết) thuộc nhánh không có refId sống
+    // 3. Nếu có refId đã chết → lấy dieTime của refId chết gần nhất + 30 ngày
+    // 4. Nếu không có refId nào thuộc nhánh không có refId sống → dieTime = createdAt + 30 ngày
+
+    // Nếu chưa có nhánh nào → dieTime = createdAt + 30 ngày
+    if (!branch1Root && !branch2Root) {
+      const deadlineMoment = moment
+        .tz(tree.createdAt, "Asia/Ho_Chi_Minh")
+        .add(30, "days")
+        .startOf("day");
+      return deadlineMoment.toDate();
+    }
+
+    // Lấy parentId cho toàn bộ cây để xác định nhánh của refId
+    const allNodes = await Tree.find({}).select("_id parentId").lean();
+    const parentMap = {};
+    for (let n of allNodes) {
+      parentMap[n._id.toString()] = n.parentId ? n.parentId.toString() : null;
+    }
+
+    // Xác định nhánh nào có refId sống
+    let branchWithAliveRefId = null;
+    let branchWithoutAliveRefId = null;
+
+    for (const child of children) {
+      const childDieTime = child.dieTime
+        ? moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day").toDate()
+        : null;
+      const isAlive = !childDieTime || childDieTime > todayStart;
+
+      if (isAlive) {
+        const branchRoot = getBranchRoot(child._id.toString(), tree._id.toString(), parentMap);
+        if (branchRoot === branch1Root) {
+          branchWithAliveRefId = branch1Root;
+          branchWithoutAliveRefId = branch2Root;
+          break;
+        } else if (branchRoot === branch2Root) {
+          branchWithAliveRefId = branch2Root;
+          branchWithoutAliveRefId = branch1Root;
+          break;
+        }
+      }
+    }
+
+    // Nếu không tìm thấy nhánh có refId sống, xác định nhánh còn lại
+    if (!branchWithAliveRefId) {
+      // Tất cả refId đều chết hoặc không có refId sống
+      // Xác định nhánh còn lại dựa trên nhánh có sẵn
+      branchWithoutAliveRefId = branch1Root ? branch2Root : branch1Root;
+    }
+
+    // Kiểm tra nhánh không có refId sống: tìm refId (bất kể sống hay chết) thuộc nhánh này
+    if (branchWithoutAliveRefId) {
+      // Tìm refId đã chết ở nhánh không có refId sống
+      let latestDeadDieTime = null;
+
+      for (const child of children) {
+        const branchRoot = getBranchRoot(child._id.toString(), tree._id.toString(), parentMap);
+        if (branchRoot === branchWithoutAliveRefId) {
+          // Tìm thấy refId thuộc nhánh không có refId sống
+          const childDieTime = child.dieTime
+            ? moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day").toDate()
+            : null;
+          const isAlive = !childDieTime || childDieTime > todayStart;
+
+          if (!isAlive && childDieTime) {
+            // RefId đã chết → lấy dieTime của refId chết gần nhất (chết sau nhất)
+            if (!latestDeadDieTime || childDieTime > latestDeadDieTime) {
+              latestDeadDieTime = childDieTime;
+            }
+          }
+        }
+      }
+
+      if (latestDeadDieTime) {
+        // Nhánh không có refId sống có refId đã chết → dieTime = dieTime của refId chết gần nhất + 30 ngày
+        const deadlineMoment = moment
+          .tz(latestDeadDieTime, "Asia/Ho_Chi_Minh")
+          .add(30, "days")
+          .startOf("day");
+        return deadlineMoment.toDate();
+      }
+    }
+
+    // Nhánh không có refId sống không có refId nào (hoặc chỉ có refId sống) → dieTime = createdAt + 30 ngày
+    const deadlineMoment = moment
+      .tz(tree.createdAt, "Asia/Ho_Chi_Minh")
+      .add(30, "days")
+      .startOf("day");
+    return deadlineMoment.toDate();
   }
 
   // Nếu không đủ 2 children sống, kiểm tra deadline
