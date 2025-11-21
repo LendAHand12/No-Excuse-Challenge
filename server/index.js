@@ -56,6 +56,7 @@ import { sendTelegramMessage } from "./utils/sendTelegram.js";
 import {
   checkAliveTreesInXuyen116Branch,
   fixParentChildLinks,
+  getDescendantsAndGive7DaysBonus,
   recalculateTreeDieTimeForOldData,
   testCalculateDieTimeForTree,
 } from "./common.js";
@@ -129,6 +130,7 @@ app.use(errorHandler);
 
 // await recalculateTreeDieTimeForOldData();
 // await checkAliveTreesInXuyen116Branch();
+// await getDescendantsAndGive7DaysBonus("67e51addfe1364e3848c589f");
 
 // Cấu hình timezone Việt Nam (GMT+7)
 const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";

@@ -23,7 +23,7 @@ const wildCardSchema = mongoose.Schema(
     },
     usedBy: {
       type: String,
-      enum: ["USER", "ADMIN"],
+      enum: ["USER", "ADMIN", "AUTO"], // AUTO: tự động thêm tay
       default: null,
     },
     appliedToUserId: {

@@ -313,6 +313,15 @@ const userSchema = mongoose.Schema(
       type: String,
       default: "",
     },
+    // 7 days bonus tracking
+    received7DaysBonus: {
+      type: Boolean,
+      default: false,
+    },
+    received7DaysAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

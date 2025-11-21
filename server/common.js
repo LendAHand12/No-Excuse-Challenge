@@ -947,3 +947,179 @@ export const checkAliveTreesInXuyen116Branch = async () => {
     return false;
   }
 };
+
+/**
+ * Lấy danh sách con cháu của treeId và tặng 7 ngày cho những tree có dieTime !== null
+ * @param {string} treeId - ID của tree node gốc
+ */
+export const getDescendantsAndGive7DaysBonus = async (treeId) => {
+  try {
+    // Tìm tree node gốc
+    const rootTree = await Tree.findById(treeId);
+    if (!rootTree) {
+      console.log(`❌ Tree not found with _id: ${treeId}`);
+      return;
+    }
+
+    console.log(
+      `\n📌 ROOT TREE: ${rootTree.userName} (ID: ${rootTree._id}, Tier: ${rootTree.tier})`
+    );
+
+    // Lấy ngày hiện tại theo giờ Việt Nam, set về 00:00:00
+    const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day").toDate();
+
+    // Danh sách tất cả descendants
+    const allDescendants = [];
+    const visited = new Set(); // Để tránh vòng lặp vô hạn
+
+    // Hàm đệ quy để lấy tất cả children từ field children
+    const getChildrenRecursive = async (parentId) => {
+      if (visited.has(parentId.toString())) {
+        return;
+      }
+      visited.add(parentId.toString());
+
+      // Lấy tree node để lấy field children
+      const tree = await Tree.findById(parentId).select("children");
+      if (!tree || !tree.children || tree.children.length === 0) {
+        return;
+      }
+
+      // Lấy tất cả children từ field children
+      const children = await Tree.find({
+        _id: { $in: tree.children },
+      }).lean();
+
+      for (const child of children) {
+        allDescendants.push(child);
+        // Đệ quy để lấy children của child này
+        await getChildrenRecursive(child._id);
+      }
+    };
+
+    await getChildrenRecursive(rootTree._id);
+
+    console.log(`\n📊 Tổng số descendants: ${allDescendants.length}`);
+
+    // Tìm các tree có dieTime !== null
+    const treesWithDieTime = allDescendants.filter((tree) => tree.dieTime !== null);
+    // Tìm các tree có dieTime = null
+    const treesWithNullDieTime = allDescendants.filter((tree) => tree.dieTime === null);
+
+    console.log(`\n🎯 Số tree có dieTime !== null: ${treesWithDieTime.length}`);
+    console.log(`\n✅ Số tree có dieTime = null: ${treesWithNullDieTime.length}`);
+
+    if (treesWithDieTime.length === 0) {
+      console.log(`\n✅ Không có tree nào cần tặng 7 ngày bonus`);
+      return;
+    }
+
+    // Tặng 7 ngày bonus cho các tree có dieTime !== null
+    console.log(`\n🎁 Đang tặng 7 ngày bonus...`);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const tree of treesWithDieTime) {
+      try {
+        // Kiểm tra xem tree có userId không
+        if (!tree.userId) {
+          console.log(`  ⚠️  Tree ${tree.userName} (ID: ${tree._id}) không có userId, bỏ qua`);
+          failCount++;
+          continue;
+        }
+
+        // Kiểm tra xem user có tồn tại không
+        const user = await User.findById(tree.userId);
+        if (!user) {
+          console.log(
+            `  ⚠️  User không tồn tại cho tree ${tree.userName} (ID: ${tree._id}), bỏ qua`
+          );
+          failCount++;
+          continue;
+        }
+
+        // Kiểm tra xem đã nhận 7 ngày bonus chưa (tránh tặng trùng)
+        if (user.received7DaysBonus) {
+          console.log(
+            `  ⚠️  User ${user.userId} (Tree ${tree.userName}, ID: ${tree._id}) đã nhận 7 ngày bonus, bỏ qua`
+          );
+          continue;
+        }
+
+        // Lấy dieTime của tree và convert sang giờ Việt Nam
+        const treeDieTime = tree.dieTime
+          ? moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day").toDate()
+          : null;
+
+        if (!treeDieTime) {
+          console.log(`  ⚠️  Tree ${tree.userName} (ID: ${tree._id}) không có dieTime, bỏ qua`);
+          failCount++;
+          continue;
+        }
+
+        // Tính dieTime mới
+        let newDieTime;
+        if (treeDieTime <= todayStart) {
+          // Trường hợp 1: dieTime quá hạn (đã chết) → lấy ngày hôm nay + 7 ngày
+          newDieTime = moment
+            .tz(todayStart, "Asia/Ho_Chi_Minh")
+            .add(7, "days")
+            .startOf("day")
+            .toDate();
+          console.log(
+            `  📅 Tree ${tree.userName} (ID: ${
+              tree._id
+            }) - dieTime quá hạn: ${treeDieTime.toISOString()} → mới: ${newDieTime.toISOString()}`
+          );
+        } else {
+          // Trường hợp 2: dieTime chưa quá hạn (chưa chết) → lấy dieTime hiện tại + 7 ngày
+          newDieTime = moment
+            .tz(treeDieTime, "Asia/Ho_Chi_Minh")
+            .add(7, "days")
+            .startOf("day")
+            .toDate();
+          console.log(
+            `  📅 Tree ${tree.userName} (ID: ${
+              tree._id
+            }) - dieTime chưa quá hạn: ${treeDieTime.toISOString()} → mới: ${newDieTime.toISOString()}`
+          );
+        }
+
+        // Cập nhật dieTime cho tree
+        const treeToUpdate = await Tree.findById(tree._id);
+        if (!treeToUpdate) {
+          console.log(
+            `  ⚠️  Không tìm thấy tree để cập nhật ${tree.userName} (ID: ${tree._id}), bỏ qua`
+          );
+          failCount++;
+          continue;
+        }
+
+        treeToUpdate.dieTime = newDieTime;
+        await treeToUpdate.save();
+
+        // Chỉ đánh dấu user đã nhận 7 ngày bonus sau khi cập nhật dieTime thành công
+        user.received7DaysBonus = true;
+        user.received7DaysAt = new Date();
+        await user.save();
+
+        successCount++;
+        console.log(
+          `  ✅ Đã tặng 7 ngày bonus cho ${tree.userName} (User ID: ${tree.userId}, Tree ID: ${tree._id})`
+        );
+      } catch (err) {
+        failCount++;
+        console.log(
+          `  ❌ Lỗi khi tặng 7 ngày bonus cho ${tree.userName} (ID: ${tree._id}): ${err.message}`
+        );
+      }
+    }
+
+    console.log(`\n✅ Hoàn thành:`);
+    console.log(`  - Thành công: ${successCount} user`);
+    console.log(`  - Thất bại: ${failCount} user`);
+    console.log(`  - Tổng số tree có dieTime !== null: ${treesWithDieTime.length}`);
+  } catch (err) {
+    console.log(`\n❌ ERROR: ${err.message}`);
+  }
+};
