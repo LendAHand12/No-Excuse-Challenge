@@ -559,7 +559,7 @@ export const testCalculateDieTimeForTree = async (treeId) => {
       log("=".repeat(80));
 
       log(`\n⏰ STEP 1: Calculate deadline`);
-      log(`  - Created At: ${tree.createdAt.toISOString()}`);
+      log(`  - Created At: ${tree.createdAt}`);
 
       // Tìm ngày chết của con dựa trên số lượng children:
       // - Nếu children.length <= 2 → lấy ngày chết của con sớm nhất
@@ -611,11 +611,9 @@ export const testCalculateDieTimeForTree = async (treeId) => {
           .add(30, "days")
           .startOf("day");
         deadlineStart = deadlineMoment.toDate();
+        log(`  - Selected child dieTime: ${selectedChildDieTime} (${selectedReason})`);
         log(
-          `  - Selected child dieTime: ${selectedChildDieTime.toISOString()} (${selectedReason})`
-        );
-        log(
-          `  - Deadline (selected child dieTime + 30 days, Vietnam time, 00:00:00): ${deadlineStart.toISOString()}`
+          `  - Deadline (selected child dieTime + 30 days, Vietnam time, 00:00:00): ${deadlineStart}`
         );
       } else {
         const deadlineMoment = moment
@@ -624,9 +622,7 @@ export const testCalculateDieTimeForTree = async (treeId) => {
           .startOf("day");
         deadlineStart = deadlineMoment.toDate();
         log(`  - No child has died yet`);
-        log(
-          `  - Deadline (createdAt + 30 days, Vietnam time, 00:00:00): ${deadlineStart.toISOString()}`
-        );
+        log(`  - Deadline (createdAt + 30 days, Vietnam time, 00:00:00): ${deadlineStart}`);
       }
 
       log(
@@ -645,26 +641,68 @@ export const testCalculateDieTimeForTree = async (treeId) => {
       log(`  - Found ${children.length} children`);
 
       // Helper function để xác định nhánh (copy từ methods.js)
+      // Logic: Tìm direct child (refId = rootId) đầu tiên trong cây con của nodeId
+      // Nếu nodeId chính là direct child → trả về nodeId
+      // Nếu nodeId không phải direct child → đi ngược lên tìm direct child đầu tiên
       const getBranchRoot = (nodeId, rootId, parentMap) => {
-        let currentId = nodeId;
-        const visited = new Set();
-        while (
-          currentId &&
-          parentMap[currentId] &&
-          String(parentMap[currentId]) !== String(rootId)
-        ) {
-          if (visited.has(currentId)) {
-            return null;
-          }
-          visited.add(currentId);
-          currentId = parentMap[currentId];
+        // Kiểm tra xem nodeId có phải là direct child của rootId không
+        // (tức là parentId của nodeId = rootId)
+        if (parentMap[nodeId] && String(parentMap[nodeId]) === String(rootId)) {
+          return String(nodeId); // nodeId chính là root của nhánh
         }
-        return currentId ? String(currentId) : null;
+
+        // Nếu không phải direct child, đi ngược lên tìm direct child đầu tiên
+        let currentId = nodeId;
+        const visited = new Set(); // Track visited nodes to prevent infinite loops
+
+        while (currentId && parentMap[currentId]) {
+          // Check for circular reference (infinite loop)
+          if (visited.has(currentId)) {
+            return null; // Return null to prevent infinite loop
+          }
+
+          visited.add(currentId);
+          const parentId = parentMap[currentId];
+
+          // Nếu parent là rootId, thì currentId là direct child → trả về currentId
+          if (String(parentId) === String(rootId)) {
+            return String(currentId);
+          }
+
+          currentId = parentId;
+        }
+
+        return null;
       };
 
-      // Lấy 2 nhánh của tree
-      const branch1Root = tree.children && tree.children[0] ? tree.children[0] : null;
-      const branch2Root = tree.children && tree.children[1] ? tree.children[1] : null;
+      // Xác định nhánh dựa trên direct children (refId = tree._id)
+      // `children` array đã chứa tất cả direct children (refId = tree._id, isSubId = false)
+      // Tìm direct children trong tree.children để xác định thứ tự nhánh
+      const directChildrenIds = children.map((c) => c._id.toString());
+
+      // Tìm direct children trong tree.children theo thứ tự
+      const sortedDirectChildren = [];
+      if (tree.children && tree.children.length > 0) {
+        for (const childId of tree.children) {
+          const childIdStr = childId.toString();
+          if (directChildrenIds.includes(childIdStr)) {
+            const child = children.find((c) => c._id.toString() === childIdStr);
+            if (child) {
+              sortedDirectChildren.push(child);
+            }
+          }
+        }
+      }
+
+      // Nếu không tìm thấy trong tree.children, sắp xếp theo createdAt
+      if (sortedDirectChildren.length === 0 && children.length > 0) {
+        sortedDirectChildren.push(
+          ...children.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+        );
+      }
+
+      const branch1Root = sortedDirectChildren[0] ? sortedDirectChildren[0]._id.toString() : null;
+      const branch2Root = sortedDirectChildren[1] ? sortedDirectChildren[1]._id.toString() : null;
 
       log(`\n🌳 BRANCH INFO:`);
       log(`  - Branch 1 root: ${branch1Root || "null"}`);
@@ -698,19 +736,29 @@ export const testCalculateDieTimeForTree = async (treeId) => {
 
         // Xác định nhánh của child
         let childBranch = null;
-        if (branch1Root && branch2Root) {
-          const branchRoot = getBranchRoot(child._id.toString(), tree._id.toString(), parentMap);
-          if (branchRoot === branch1Root) {
-            childBranch = 1;
-          } else if (branchRoot === branch2Root) {
-            childBranch = 2;
+        const childIdStr = child._id.toString();
+
+        // Kiểm tra trực tiếp xem child có phải là branch root không
+        if (branch1Root && childIdStr === branch1Root) {
+          childBranch = 1;
+        } else if (branch2Root && childIdStr === branch2Root) {
+          childBranch = 2;
+        } else {
+          // Nếu không phải branch root, tìm branch root thông qua getBranchRoot
+          const branchRoot = getBranchRoot(childIdStr, tree._id.toString(), parentMap);
+          if (branchRoot) {
+            if (branchRoot === branch1Root) {
+              childBranch = 1;
+            } else if (branchRoot === branch2Root) {
+              childBranch = 2;
+            }
           }
         }
 
         log(`\n  Child ${i + 1}:`);
         log(`    - Tree ID: ${child._id}`);
         log(`    - User Name: ${child.userName}`);
-        log(`    - dieTime: ${childDieTime ? childDieTime.toISOString() : "null"}`);
+        log(`    - dieTime: ${childDieTime ? childDieTime : "null"}`);
         log(`    - Is alive? ${isAlive ? "✅ YES" : "❌ NO"}`);
         log(`    - Branch: ${childBranch ? `Branch ${childBranch}` : "Unknown/No branch"}`);
 
@@ -734,161 +782,40 @@ export const testCalculateDieTimeForTree = async (treeId) => {
         }
       }
 
-      log(`\n📊 STEP 3: Count alive children by branch`);
+      log(`\n📊 STEP 3: Count alive children`);
       log(`  - Total children: ${children.length}`);
       log(`  - Total alive children: ${aliveCount} ✅`);
       log(`  - Total dead children: ${deadChildren.length} ❌`);
-      log(`  - Branch 1 alive: ${branch1AliveCount} ✅`);
-      log(`  - Branch 2 alive: ${branch2AliveCount} ✅`);
-      log(`  - Branch 1 dead: ${branch1Dead.length} ❌`);
-      log(`  - Branch 2 dead: ${branch2Dead.length} ❌`);
-      log(`  - Required: At least 1 alive in Branch 1 AND at least 1 alive in Branch 2`);
+      log(`  - Required: At least 2 alive refId`);
       log(
         `  - Status: ${
-          branch1AliveCount >= 1 && branch2AliveCount >= 1
-            ? "✅ ENOUGH (2 branches have alive refId)"
-            : "❌ NOT ENOUGH"
+          aliveCount >= 2 ? "✅ ENOUGH (has at least 2 alive refId)" : "❌ NOT ENOUGH"
         }`
       );
 
       log(`\n🎯 STEP 4: Calculate final dieTime`);
       let finalDieTime;
 
-      // Kiểm tra xem có đủ 2 refId sống ở 2 nhánh khác nhau không
-      if (branch1Root && branch2Root) {
-        if (branch1AliveCount >= 1 && branch2AliveCount >= 1) {
-          log(
-            `  - Enough alive refId in both branches (Branch 1: ${branch1AliveCount}, Branch 2: ${branch2AliveCount}) → dieTime = null`
-          );
-          finalDieTime = null;
-          log(`  - Final dieTime: null (alive)`);
-        } else {
-          // Không đủ điều kiện, kiểm tra deadline
-          const isDeadlinePassed = todayStart > deadlineStart;
-          if (isDeadlinePassed) {
-            log(
-              `  - Not enough alive refId in both branches AND deadline has passed → Cannot revive (no resurrection)`
-            );
-            finalDieTime = deadlineStart;
-            log(`  - Final dieTime: ${finalDieTime.toISOString()} (deadline)`);
-          } else {
-            log(
-              `  - Not enough alive refId in both branches BUT deadline not passed → dieTime = deadline`
-            );
-            finalDieTime = deadlineStart;
-            log(`  - Final dieTime: ${finalDieTime.toISOString()} (deadline)`);
-          }
-        }
+      // Kiểm tra xem có đủ 2 refId sống không
+      if (aliveCount >= 2) {
+        log(`  - Enough alive refId (${aliveCount} >= 2) → dieTime = null`);
+        finalDieTime = null;
+        log(`  - Final dieTime: null (alive)`);
       } else {
-        // Tree chưa có đủ 2 nhánh
-        log(`  - Tree does not have 2 branches yet`);
-        if (!branch1Root && !branch2Root) {
-          log(`  - No branches → dieTime = createdAt + 30 days`);
-          const deadlineMoment = moment
-            .tz(tree.createdAt, "Asia/Ho_Chi_Minh")
-            .add(30, "days")
-            .startOf("day");
-          finalDieTime = deadlineMoment.toDate();
+        // Không đủ điều kiện, kiểm tra deadline
+        const isDeadlinePassed = todayStart > deadlineStart;
+        if (isDeadlinePassed) {
+          log(
+            `  - Not enough alive refId (${aliveCount} < 2) AND deadline has passed → Cannot revive (no resurrection)`
+          );
+          finalDieTime = deadlineStart;
+          log(`  - Final dieTime: ${finalDieTime.toISOString()} (deadline)`);
         } else {
-          // Có 1 nhánh, xác định nhánh có refId sống và nhánh không có refId sống
-          let branchWithAliveRefId = null;
-          let branchWithoutAliveRefId = null;
-
-          for (const child of children) {
-            const childDieTime = child.dieTime
-              ? moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day").toDate()
-              : null;
-            const isAlive = !childDieTime || childDieTime > todayStart;
-
-            if (isAlive) {
-              const branchRoot = getBranchRoot(
-                child._id.toString(),
-                tree._id.toString(),
-                parentMap
-              );
-              if (branchRoot === branch1Root) {
-                branchWithAliveRefId = branch1Root;
-                branchWithoutAliveRefId = branch2Root;
-                break;
-              } else if (branchRoot === branch2Root) {
-                branchWithAliveRefId = branch2Root;
-                branchWithoutAliveRefId = branch1Root;
-                break;
-              }
-            }
-          }
-
-          // Nếu không tìm thấy nhánh có refId sống, xác định nhánh còn lại
-          if (!branchWithAliveRefId) {
-            branchWithoutAliveRefId = branch1Root ? branch2Root : branch1Root;
-          }
-
-          log(`  - Branch with alive refId: ${branchWithAliveRefId || "None"}`);
-          log(`  - Branch without alive refId: ${branchWithoutAliveRefId || "None"}`);
-
-          // Kiểm tra nhánh không có refId sống: tìm refId (bất kể sống hay chết) thuộc nhánh này
-          if (branchWithoutAliveRefId) {
-            let latestDeadDieTime = null;
-            let foundRefIdInBranch = false;
-
-            for (const child of children) {
-              const branchRoot = getBranchRoot(
-                child._id.toString(),
-                tree._id.toString(),
-                parentMap
-              );
-              if (branchRoot === branchWithoutAliveRefId) {
-                // Tìm thấy refId thuộc nhánh không có refId sống
-                foundRefIdInBranch = true;
-                const childDieTime = child.dieTime
-                  ? moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day").toDate()
-                  : null;
-                const isAlive = !childDieTime || childDieTime > todayStart;
-
-                if (!isAlive && childDieTime) {
-                  // RefId đã chết → lấy dieTime của refId chết gần nhất (chết sau nhất)
-                  if (!latestDeadDieTime || childDieTime > latestDeadDieTime) {
-                    latestDeadDieTime = childDieTime;
-                  }
-                }
-              }
-            }
-
-            if (latestDeadDieTime) {
-              log(
-                `  - Branch without alive refId has dead refId → dieTime = latest dead refId dieTime + 30 days`
-              );
-              const deadlineMoment = moment
-                .tz(latestDeadDieTime, "Asia/Ho_Chi_Minh")
-                .add(30, "days")
-                .startOf("day");
-              finalDieTime = deadlineMoment.toDate();
-            } else if (foundRefIdInBranch) {
-              log(
-                `  - Branch without alive refId has refId but all are alive → dieTime = createdAt + 30 days`
-              );
-              const deadlineMoment = moment
-                .tz(tree.createdAt, "Asia/Ho_Chi_Minh")
-                .add(30, "days")
-                .startOf("day");
-              finalDieTime = deadlineMoment.toDate();
-            } else {
-              log(`  - Branch without alive refId has no refId → dieTime = createdAt + 30 days`);
-              const deadlineMoment = moment
-                .tz(tree.createdAt, "Asia/Ho_Chi_Minh")
-                .add(30, "days")
-                .startOf("day");
-              finalDieTime = deadlineMoment.toDate();
-            }
-          } else {
-            log(`  - Cannot determine branch without alive refId → dieTime = createdAt + 30 days`);
-            const deadlineMoment = moment
-              .tz(tree.createdAt, "Asia/Ho_Chi_Minh")
-              .add(30, "days")
-              .startOf("day");
-            finalDieTime = deadlineMoment.toDate();
-          }
-          log(`  - Final dieTime: ${finalDieTime.toISOString()}`);
+          log(
+            `  - Not enough alive refId (${aliveCount} < 2) BUT deadline not passed → dieTime = deadline`
+          );
+          finalDieTime = deadlineStart;
+          log(`  - Final dieTime: ${finalDieTime.toISOString()} (deadline)`);
         }
       }
 
