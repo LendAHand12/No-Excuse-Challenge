@@ -967,6 +967,12 @@ export const getDescendantsAndGive7DaysBonus = async (treeId) => {
 
     // Lấy ngày hiện tại theo giờ Việt Nam, set về 00:00:00
     const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day").toDate();
+    // Ngày bắt đầu: 5/11/2025 (theo giờ Việt Nam, 00:00:00)
+    const startDate = moment.tz("2025-11-05", "Asia/Ho_Chi_Minh").startOf("day").toDate();
+
+    console.log(`\n📅 Khoảng thời gian kiểm tra:`);
+    console.log(`  - Từ: ${startDate.toISOString()} (5/11/2025)`);
+    console.log(`  - Đến: ${todayStart.toISOString()} (hiện tại)`);
 
     // Danh sách tất cả descendants
     const allDescendants = [];
@@ -1001,25 +1007,44 @@ export const getDescendantsAndGive7DaysBonus = async (treeId) => {
 
     console.log(`\n📊 Tổng số descendants: ${allDescendants.length}`);
 
-    // Tìm các tree có dieTime !== null
-    const treesWithDieTime = allDescendants.filter((tree) => tree.dieTime !== null);
-    // Tìm các tree có dieTime = null
-    const treesWithNullDieTime = allDescendants.filter((tree) => tree.dieTime === null);
+    // Lọc các tree có dieTime từ 5/11/2025 đến hiện tại
+    const treesEligibleForBonus = [];
+    const treesNotEligible = [];
 
-    console.log(`\n🎯 Số tree có dieTime !== null: ${treesWithDieTime.length}`);
-    console.log(`\n✅ Số tree có dieTime = null: ${treesWithNullDieTime.length}`);
+    for (const tree of allDescendants) {
+      if (!tree.dieTime) {
+        treesNotEligible.push(tree);
+        continue;
+      }
 
-    if (treesWithDieTime.length === 0) {
-      console.log(`\n✅ Không có tree nào cần tặng 7 ngày bonus`);
+      const treeDieTime = moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day").toDate();
+
+      // Kiểm tra xem dieTime có trong khoảng từ 5/11/2025 đến hiện tại không
+      if (treeDieTime >= startDate && treeDieTime <= todayStart) {
+        treesEligibleForBonus.push(tree);
+      } else {
+        treesNotEligible.push(tree);
+      }
+    }
+
+    console.log(
+      `\n🎯 Số tree có dieTime từ 5/11/2025 đến hiện tại: ${treesEligibleForBonus.length}`
+    );
+    console.log(`\n⏭️  Số tree không đủ điều kiện (giữ nguyên): ${treesNotEligible.length}`);
+
+    if (treesEligibleForBonus.length === 0) {
+      console.log(`\n✅ Không có tree nào đủ điều kiện để tặng 7 ngày bonus`);
       return;
     }
 
-    // Tặng 7 ngày bonus cho các tree có dieTime !== null
-    console.log(`\n🎁 Đang tặng 7 ngày bonus...`);
+    // Tặng 7 ngày bonus cho các tree có dieTime từ 5/11/2025 đến hiện tại
+    console.log(
+      `\n🎁 Đang tặng 7 ngày bonus cho ${treesEligibleForBonus.length} tree đủ điều kiện...`
+    );
     let successCount = 0;
     let failCount = 0;
 
-    for (const tree of treesWithDieTime) {
+    for (const tree of treesEligibleForBonus) {
       try {
         // Kiểm tra xem tree có userId không
         if (!tree.userId) {
@@ -1118,7 +1143,10 @@ export const getDescendantsAndGive7DaysBonus = async (treeId) => {
     console.log(`\n✅ Hoàn thành:`);
     console.log(`  - Thành công: ${successCount} user`);
     console.log(`  - Thất bại: ${failCount} user`);
-    console.log(`  - Tổng số tree có dieTime !== null: ${treesWithDieTime.length}`);
+    console.log(
+      `  - Tổng số tree đủ điều kiện (dieTime từ 5/11/2025 đến hiện tại): ${treesEligibleForBonus.length}`
+    );
+    console.log(`  - Tổng số tree không đủ điều kiện (giữ nguyên): ${treesNotEligible.length}`);
   } catch (err) {
     console.log(`\n❌ ERROR: ${err.message}`);
   }
