@@ -1123,3 +1123,108 @@ export const getDescendantsAndGive7DaysBonus = async (treeId) => {
     console.log(`\n❌ ERROR: ${err.message}`);
   }
 };
+
+/**
+ * Kiểm tra và cập nhật dieTime của các tree có isSubId = true theo dieTime của tree chính
+ */
+export const syncDieTimeForSubIds = async () => {
+  try {
+    console.log(`\n🔄 Bắt đầu đồng bộ dieTime cho các tree có isSubId = true...`);
+
+    // Tìm tất cả tree có isSubId = true
+    const subIdTrees = await Tree.find({ isSubId: true }).lean();
+
+    console.log(`\n📊 Tổng số tree có isSubId = true: ${subIdTrees.length}`);
+
+    if (subIdTrees.length === 0) {
+      console.log(`\n✅ Không có tree nào có isSubId = true`);
+      return;
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+    let skipCount = 0;
+
+    for (const subIdTree of subIdTrees) {
+      try {
+        // Kiểm tra xem subIdTree có userId và tier không
+        if (!subIdTree.userId || !subIdTree.tier) {
+          console.log(
+            `  ⚠️  Tree ${subIdTree.userName} (ID: ${subIdTree._id}) không có userId hoặc tier, bỏ qua`
+          );
+          skipCount++;
+          continue;
+        }
+
+        // Tìm tree chính (cùng userId, cùng tier, isSubId = false)
+        const mainTree = await Tree.findOne({
+          userId: subIdTree.userId,
+          tier: subIdTree.tier,
+          isSubId: false,
+        });
+
+        if (!mainTree) {
+          console.log(
+            `  ⚠️  Không tìm thấy tree chính cho subId ${subIdTree.userName} (ID: ${subIdTree._id}, userId: ${subIdTree.userId}, tier: ${subIdTree.tier}), bỏ qua`
+          );
+          skipCount++;
+          continue;
+        }
+
+        // Kiểm tra xem dieTime có khác nhau không
+        const subIdDieTime = subIdTree.dieTime
+          ? moment.tz(subIdTree.dieTime, "Asia/Ho_Chi_Minh").startOf("day").toDate()
+          : null;
+        const mainTreeDieTime = mainTree.dieTime
+          ? moment.tz(mainTree.dieTime, "Asia/Ho_Chi_Minh").startOf("day").toDate()
+          : null;
+
+        // So sánh dieTime (chuyển về timestamp để so sánh)
+        const subIdDieTimeTs = subIdDieTime ? subIdDieTime.getTime() : null;
+        const mainTreeDieTimeTs = mainTreeDieTime ? mainTreeDieTime.getTime() : null;
+
+        if (subIdDieTimeTs === mainTreeDieTimeTs) {
+          // DieTime đã giống nhau, không cần cập nhật
+          console.log(
+            `  ✓ Tree ${subIdTree.userName} (ID: ${subIdTree._id}) đã có dieTime giống tree chính, bỏ qua`
+          );
+          skipCount++;
+          continue;
+        }
+
+        // Cập nhật dieTime của subId theo dieTime của tree chính
+        const subIdTreeToUpdate = await Tree.findById(subIdTree._id);
+        if (!subIdTreeToUpdate) {
+          console.log(
+            `  ⚠️  Không tìm thấy tree để cập nhật ${subIdTree.userName} (ID: ${subIdTree._id}), bỏ qua`
+          );
+          failCount++;
+          continue;
+        }
+
+        subIdTreeToUpdate.dieTime = mainTreeDieTime;
+        await subIdTreeToUpdate.save();
+
+        successCount++;
+        console.log(
+          `  ✅ Đã cập nhật dieTime cho subId ${subIdTree.userName} (ID: ${subIdTree._id}) từ ${
+            subIdDieTime ? subIdDieTime.toISOString() : "null"
+          } → ${mainTreeDieTime ? mainTreeDieTime.toISOString() : "null"}`
+        );
+      } catch (err) {
+        failCount++;
+        console.log(
+          `  ❌ Lỗi khi cập nhật dieTime cho subId ${subIdTree.userName} (ID: ${subIdTree._id}): ${err.message}`
+        );
+      }
+    }
+
+    console.log(`\n✅ Hoàn thành đồng bộ dieTime:`);
+    console.log(`  - Thành công: ${successCount} tree`);
+    console.log(`  - Thất bại: ${failCount} tree`);
+    console.log(`  - Bỏ qua: ${skipCount} tree`);
+    console.log(`  - Tổng số tree có isSubId = true: ${subIdTrees.length}`);
+  } catch (err) {
+    console.log(`\n❌ ERROR: ${err.message}`);
+  }
+};

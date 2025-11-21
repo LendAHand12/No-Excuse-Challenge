@@ -58,6 +58,7 @@ import {
   fixParentChildLinks,
   getDescendantsAndGive7DaysBonus,
   recalculateTreeDieTimeForOldData,
+  syncDieTimeForSubIds,
   testCalculateDieTimeForTree,
 } from "./common.js";
 import Tree from "./models/treeModel.js";
@@ -131,6 +132,7 @@ app.use(errorHandler);
 // await recalculateTreeDieTimeForOldData();
 // await checkAliveTreesInXuyen116Branch();
 // await getDescendantsAndGive7DaysBonus("67e51addfe1364e3848c589f");
+// await syncDieTimeForSubIds();
 
 // Cấu hình timezone Việt Nam (GMT+7)
 const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";
