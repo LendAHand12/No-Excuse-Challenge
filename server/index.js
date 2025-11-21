@@ -54,6 +54,7 @@ import {
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 import {
+  checkAliveTreesInXuyen116Branch,
   fixParentChildLinks,
   recalculateTreeDieTimeForOldData,
   testCalculateDieTimeForTree,
@@ -127,6 +128,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 // await recalculateTreeDieTimeForOldData();
+// await checkAliveTreesInXuyen116Branch();
 
 // Cấu hình timezone Việt Nam (GMT+7)
 const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";

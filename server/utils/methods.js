@@ -781,100 +781,49 @@ export const calculateDieTimeForTier1 = async (tree) => {
     isSubId: false,
   }).lean();
 
-  // Tìm ngày chết của con dựa trên số lượng children:
-  // - Nếu children.length === 1 → không lấy ngày chết của refId, dùng createdAt + 30 ngày
-  // - Nếu children.length === 2 và cả 2 đều chết → lấy ngày chết của refId chết sớm nhất + 30 ngày
-  // - Nếu children.length > 2 → lấy ngày chết của refId chết trễ nhất (gần hiện tại nhất) + 30 ngày
-  let selectedChildDieTime = null;
+  // Logic mới:
+  // - Nếu có từ 2 refId trở lên (không quan tâm sống hay chết) → dieTime = null
+  // - Nếu có 1 refId:
+  //   - Nếu refId này chết → dieTime = ngày chết của refId + 30 ngày
+  //   - Nếu refId này còn sống → dieTime = createdAt + 30 ngày
+  // - Nếu có 0 refId → dieTime = createdAt + 30 ngày
 
-  if (children.length === 1) {
-    // Nếu có 1 refId → không lấy ngày chết của refId, dùng createdAt + 30 ngày
-    selectedChildDieTime = null;
-  } else if (children.length === 2) {
-    // Nếu có 2 refId và cả 2 đều chết → lấy ngày chết của refId chết sớm nhất
-    const deadChildren = [];
-    for (const child of children) {
-      if (child.dieTime) {
-        const childDieTimeMoment = moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
-        const childDieTimeStart = childDieTimeMoment.toDate();
-        // Chỉ tính con đã chết (dieTime <= today)
-        if (childDieTimeStart <= todayStart) {
-          deadChildren.push(childDieTimeStart);
-        }
-      }
-    }
-    // Nếu cả 2 đều chết, lấy ngày chết sớm nhất
-    if (deadChildren.length === 2) {
-      selectedChildDieTime = deadChildren[0] < deadChildren[1] ? deadChildren[0] : deadChildren[1];
-    }
-  } else if (children.length > 2) {
-    // Nếu có trên 3 refId → lấy ngày chết của refId chết trễ nhất (gần hiện tại nhất)
-    for (const child of children) {
-      if (child.dieTime) {
-        const childDieTimeMoment = moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
-        const childDieTimeStart = childDieTimeMoment.toDate();
-        // Chỉ tính con đã chết (dieTime <= today)
-        if (childDieTimeStart <= todayStart) {
-          if (!selectedChildDieTime || childDieTimeStart > selectedChildDieTime) {
-            selectedChildDieTime = childDieTimeStart;
-          }
-        }
-      }
-    }
+  if (children.length >= 2) {
+    // Nếu có từ 2 refId trở lên → dieTime = null (không quan tâm sống hay chết)
+    return null;
   }
 
-  // Tính deadline:
-  // - Nếu có 1 refId → deadline = createdAt + 30 ngày
-  // - Nếu có 2 refId và cả 2 đều chết → deadline = ngày chết của refId chết sớm nhất + 30 ngày
-  // - Nếu có trên 3 refId và có refId chết → deadline = ngày chết của refId chết trễ nhất + 30 ngày
-  // - Nếu không có refId nào chết → deadline = createdAt + 30 ngày
-  // Tất cả đều tính theo giờ Việt Nam và set về 00:00:00
-  let deadlineStart;
-  if (selectedChildDieTime) {
-    const deadlineMoment = moment
-      .tz(selectedChildDieTime, "Asia/Ho_Chi_Minh")
-      .add(30, "days")
-      .startOf("day");
-    deadlineStart = deadlineMoment.toDate();
-  } else {
+  if (children.length === 1) {
+    // Nếu có 1 refId
+    const child = children[0];
+    if (child.dieTime) {
+      const childDieTimeMoment = moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+      const childDieTimeStart = childDieTimeMoment.toDate();
+
+      // Kiểm tra xem refId này có chết không (dieTime <= today)
+      if (childDieTimeStart <= todayStart) {
+        // Nếu refId này chết → dieTime = ngày chết của refId + 30 ngày
+        const deadlineMoment = moment
+          .tz(childDieTimeStart, "Asia/Ho_Chi_Minh")
+          .add(30, "days")
+          .startOf("day");
+        return deadlineMoment.toDate();
+      }
+    }
+    // Nếu refId này còn sống → dieTime = createdAt + 30 ngày
     const deadlineMoment = moment
       .tz(tree.createdAt, "Asia/Ho_Chi_Minh")
       .add(30, "days")
       .startOf("day");
-    deadlineStart = deadlineMoment.toDate();
+    return deadlineMoment.toDate();
   }
 
-  // Đếm số refId còn sống
-  let aliveCount = 0;
-  for (const child of children) {
-    // Convert dieTime sang giờ Việt Nam và set về 00:00:00
-    const childDieTime = child.dieTime
-      ? moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day").toDate()
-      : null;
-    const isAlive = !childDieTime || childDieTime > todayStart;
-
-    if (isAlive) {
-      aliveCount++;
-    }
-  }
-
-  // Nếu có đủ 2 refId sống thì dieTime = null (đã đủ điều kiện)
-  if (aliveCount >= 2) {
-    return null;
-  }
-
-  // Nếu không đủ 2 children sống, kiểm tra deadline
-  // Kiểm tra xem đã quá hạn chưa (chỉ dùng >, không dùng >=, để nhất quán với hàm test)
-  const isDeadlinePassed = todayStart > deadlineStart;
-
-  // Nếu đã quá hạn và không đủ children sống thì không thể hồi sinh
-  if (isDeadlinePassed) {
-    // Nếu đã quá hạn và không đủ children sống thì không thể hồi sinh, trả về deadline
-    return deadlineStart;
-  }
-
-  // Chưa quá hạn nhưng chưa đủ children sống -> dieTime = deadline
-  return deadlineStart;
+  // Nếu có 0 refId → dieTime = createdAt + 30 ngày
+  const deadlineMoment = moment
+    .tz(tree.createdAt, "Asia/Ho_Chi_Minh")
+    .add(30, "days")
+    .startOf("day");
+  return deadlineMoment.toDate();
 };
 
 /**

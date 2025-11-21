@@ -1583,7 +1583,7 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
       const childTree = await Tree.findOne({
         _id: childId,
         tier: currentTier,
-      });
+      }).select("_id userId userName countChild income indexOnLevel isSubId disable dieTime tier");
 
       const child = await User.findById(childTree.userId).select(
         "tier userId buyPackage countPay fine status errLahCode"
@@ -1591,14 +1591,36 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
 
       const listRefOfChild = await Tree.find({ refId: childTree._id });
 
+      // Tính toán isYellow và isBlue dựa trên dieTime của Tree
+      let isYellow = false;
+      let isBlue = false;
+
+      if (childTree.dieTime) {
+        const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+        const dieTimeStart = moment.tz(childTree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+        const diffDays = dieTimeStart.diff(todayStart, "days");
+
+        // Nếu quá hạn (dieTime <= today) → isBlue = true
+        if (diffDays <= 0) {
+          isBlue = true;
+        } else {
+          // Nếu còn 10 ngày nữa đến hạn (tier 1) hoặc 5 ngày nữa đến hạn (tier 2) → isYellow = true
+          if (child.tier === 1 && diffDays <= 10) {
+            isYellow = true;
+          } else if (child.tier === 2 && diffDays <= 5) {
+            isYellow = true;
+          }
+        }
+      }
+
       tree.nodes.push({
         key: childTree._id,
         label: `${childTree.userName}`,
         totalChild: childTree.countChild,
         income: childTree.income,
         isRed: child.tier === 1 && child.countPay === 0 ? true : false,
-        isYellow: child.errLahCode === "OVER35",
-        isBlue: child.errLahCode === "OVER45",
+        isYellow: isYellow,
+        isBlue: isBlue,
         indexOnLevel: childTree.indexOnLevel,
         isSubId: childTree.isSubId,
         isPink: child.countPay === 13 && listRefOfChild.length < 2,
