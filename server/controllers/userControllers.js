@@ -37,6 +37,7 @@ import UserHistory from "../models/userHistoryModel.js";
 import MoveSystem from "../models/moveSystemModel.js";
 import { Types } from "mongoose";
 import moment from "moment";
+import "moment-timezone";
 import { getPriceHewe } from "../utils/getPriceHewe.js";
 import PreTier2 from "../models/preTier2Model.js";
 import Honor from "../models/honorModel.js";
@@ -1113,7 +1114,6 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     newStatus,
     newFine,
     isRegistered,
-    buyPackage,
     openLah,
     closeLah,
     idCode,
@@ -1139,20 +1139,15 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     bankCode,
     dateOfBirth,
     dieTime,
-    termDie,
+    dieTimeTier1,
+    dieTimeTier2,
     preTier2Status,
     enablePaymentCrypto,
     enablePaymentBank,
     enableWithdrawCrypto,
     enableWithdrawBank,
   } = req.body;
-  console.log({ totalHewe, availableHewe, hewePerDay });
-  console.log("Gateway settings:", {
-    enablePaymentCrypto,
-    enablePaymentBank,
-    enableWithdrawCrypto,
-    enableWithdrawBank,
-  });
+
   if (userId) {
     const userExistsUserId = await User.findOne({
       userId,
@@ -1259,54 +1254,83 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     if (newStatus === "LOCKED") {
       user.lockedTime = new Date();
     }
-    if (termDie) {
-      user.errLahCode = "OVER45";
-      user.dieTime = new Date();
-      user.adminChangeToDie = true;
-    }
-    if (dieTime) {
-      user.dieTime = new Date(dieTime).toISOString() || user.dieTime;
-      user.adminChangeToDie = true;
 
-      const diffDays = moment(new Date(dieTime)).diff(moment(), "days");
-      console.log({
-        diffDays,
-        current: moment(),
-        dieTime: moment(new Date(dieTime)),
+    // Update dieTime cho tier 1
+    if (dieTimeTier1 !== undefined) {
+      const treeTier1 = await Tree.findOne({
+        userId: user._id,
+        tier: 1,
+        isSubId: false,
       });
 
-      if (user.tier === 1) {
-        if (diffDays >= 1 && diffDays <= 10) {
-          user.errLahCode = "OVER35";
-        } else if (diffDays <= 0) {
-          user.errLahCode = "OVER45";
+      if (treeTier1) {
+        if (dieTimeTier1) {
+          // Convert dieTime sang giờ Việt Nam và set về 00:00:00
+          const dieTimeMoment = moment
+            .tz(new Date(dieTimeTier1), "Asia/Ho_Chi_Minh")
+            .startOf("day");
+          treeTier1.dieTime = dieTimeMoment.toDate();
         } else {
-          user.errLahCode = "";
+          treeTier1.dieTime = null;
         }
-      }
+        await treeTier1.save();
+        user.adminChangeToDie = true;
 
-      if (user.tier === 2) {
-        const treeTier2OfUser = await Tree.findOne({
-          userId: user.id,
-          tier: 2,
-        });
+        // Tính toán errLahCode dựa trên dieTime của Tree tier 1
+        if (treeTier1.dieTime) {
+          const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+          const dieTimeStart = moment.tz(treeTier1.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+          const diffDays = dieTimeStart.diff(todayStart, "days");
 
-        if (treeTier2OfUser) {
-          if (treeTier2OfUser.disable === false && diffDays <= 0) {
-            treeTier2OfUser.disable = true;
-            await treeTier2OfUser.save();
-          } else if (treeTier2OfUser.disable === true && diffDays > 0) {
-            treeTier2OfUser.disable = false;
-            await treeTier2OfUser.save();
-          }
-        } else {
-          if (diffDays >= 1 && diffDays <= 5) {
+          if (diffDays >= 1 && diffDays <= 10) {
             user.errLahCode = "OVER35";
           } else if (diffDays <= 0) {
             user.errLahCode = "OVER45";
           } else {
             user.errLahCode = "";
           }
+        } else {
+          user.errLahCode = "";
+        }
+      }
+    }
+
+    // Update dieTime cho tier 2
+    if (dieTimeTier2 !== undefined) {
+      const treeTier2 = await Tree.findOne({
+        userId: user._id,
+        tier: 2,
+        isSubId: false,
+      });
+
+      if (treeTier2) {
+        if (dieTimeTier2) {
+          // Convert dieTime sang giờ Việt Nam và set về 00:00:00
+          const dieTimeMoment = moment
+            .tz(new Date(dieTimeTier2), "Asia/Ho_Chi_Minh")
+            .startOf("day");
+          treeTier2.dieTime = dieTimeMoment.toDate();
+        } else {
+          treeTier2.dieTime = null;
+        }
+        await treeTier2.save();
+        user.adminChangeToDie = true;
+
+        // Update disable status cho tier 2 tree
+        if (treeTier2.dieTime) {
+          const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+          const dieTimeStart = moment.tz(treeTier2.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+          const diffDays = dieTimeStart.diff(todayStart, "days");
+
+          if (diffDays <= 0) {
+            treeTier2.disable = true;
+          } else {
+            treeTier2.disable = false;
+          }
+          await treeTier2.save();
+        } else {
+          treeTier2.disable = false;
+          await treeTier2.save();
         }
       }
     }

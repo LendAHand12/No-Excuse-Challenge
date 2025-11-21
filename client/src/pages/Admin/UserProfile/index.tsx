@@ -74,7 +74,6 @@ const UserProfile = () => {
             kycFee,
             changeCreatedAt,
             lockKyc,
-            dieTime,
             dieTimeTier1,
             dieTimeTier2,
             errLahCode,
@@ -95,14 +94,9 @@ const UserProfile = () => {
           setValue('tier', tier);
           setValue('walletAddress', walletAddress);
           setValue('changeCreatedAt', changeCreatedAt);
-          // Set dieTime theo tier hiện tại
-          const currentDieTime =
-            tier === 1
-              ? response.data.dieTimeTier1 || dieTime
-              : tier === 2
-              ? response.data.dieTimeTier2 || dieTime
-              : dieTime;
-          setValue('dieTime', currentDieTime);
+          // Set dieTimeTier1 và dieTimeTier2
+          setValue('dieTimeTier1', dieTimeTier1 || null);
+          setValue('dieTimeTier2', dieTimeTier2 || null);
           setValue('bankName', bankName);
           setValue('bankCode', bankCode);
           setValue('accountName', accountName);
@@ -269,7 +263,39 @@ const UserProfile = () => {
         formData.append('hold', values.hold);
       }
 
-      if (values.dieTime && values.dieTime !== data.dieTime) {
+      // Gửi dieTimeTier1 nếu có thay đổi
+      if (values.dieTimeTier1 !== undefined) {
+        const currentDieTimeTier1 = data.dieTimeTier1
+          ? new Date(data.dieTimeTier1).toISOString()
+          : null;
+        const newDieTimeTier1 = values.dieTimeTier1
+          ? new Date(values.dieTimeTier1).toISOString()
+          : null;
+        if (currentDieTimeTier1 !== newDieTimeTier1) {
+          formData.append('dieTimeTier1', newDieTimeTier1 || '');
+        }
+      }
+
+      // Gửi dieTimeTier2 nếu có thay đổi
+      if (values.dieTimeTier2 !== undefined) {
+        const currentDieTimeTier2 = data.dieTimeTier2
+          ? new Date(data.dieTimeTier2).toISOString()
+          : null;
+        const newDieTimeTier2 = values.dieTimeTier2
+          ? new Date(values.dieTimeTier2).toISOString()
+          : null;
+        if (currentDieTimeTier2 !== newDieTimeTier2) {
+          formData.append('dieTimeTier2', newDieTimeTier2 || '');
+        }
+      }
+
+      // Backward compatibility: nếu vẫn có dieTime (không có dieTimeTier1/dieTimeTier2)
+      if (
+        values.dieTime &&
+        values.dieTime !== data.dieTime &&
+        values.dieTimeTier1 === undefined &&
+        values.dieTimeTier2 === undefined
+      ) {
         formData.append('dieTime', values.dieTime);
       }
 
@@ -1132,7 +1158,7 @@ const UserProfile = () => {
                       {isEditting ? (
                         <Controller
                           control={control}
-                          name="dieTime"
+                          name="dieTimeTier1"
                           render={({ field }) => (
                             <DatePicker
                               placeholderText={t('fromDate')}
@@ -1161,7 +1187,7 @@ const UserProfile = () => {
                         {isEditting ? (
                           <Controller
                             control={control}
-                            name="dieTime"
+                            name="dieTimeTier2"
                             render={({ field }) => (
                               <DatePicker
                                 placeholderText={t('fromDate')}

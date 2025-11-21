@@ -562,8 +562,9 @@ export const testCalculateDieTimeForTree = async (treeId) => {
       log(`  - Created At: ${tree.createdAt}`);
 
       // Tìm ngày chết của con dựa trên số lượng children:
-      // - Nếu children.length <= 2 → lấy ngày chết của con sớm nhất
-      // - Nếu children.length > 2 → lấy ngày chết của con trễ nhất
+      // - Nếu children.length === 1 → không lấy ngày chết của refId, dùng createdAt + 30 ngày
+      // - Nếu children.length === 2 và cả 2 đều chết → lấy ngày chết của refId chết sớm nhất + 30 ngày
+      // - Nếu children.length > 2 → lấy ngày chết của refId chết trễ nhất (gần hiện tại nhất) + 30 ngày
       const children = await Tree.find({
         refId: tree._id.toString(),
         isSubId: false,
@@ -571,38 +572,58 @@ export const testCalculateDieTimeForTree = async (treeId) => {
         .lean()
         .sort({ createdAt: 1 });
 
-      const sortedChildren = [...children].sort(
-        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-      );
-
       let selectedChildDieTime = null;
       let selectedReason = "";
-      for (const child of sortedChildren) {
-        if (child.dieTime) {
-          // Convert dieTime sang giờ Việt Nam và set về 00:00:00
-          const childDieTimeMoment = moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
-          const childDieTimeStart = childDieTimeMoment.toDate();
-          // Chỉ tính con đã chết (dieTime <= today)
-          if (childDieTimeStart <= todayStart) {
-            if (children.length <= 2) {
-              // Nếu <= 2 children: Lấy con chết sớm nhất
-              if (!selectedChildDieTime || childDieTimeStart < selectedChildDieTime) {
-                selectedChildDieTime = childDieTimeStart;
-                selectedReason = `children.length (${children.length}) <= 2 → lấy con chết sớm nhất`;
-              }
-            } else {
-              // Nếu > 2 children: Lấy con chết trễ nhất
+
+      if (children.length === 1) {
+        // Nếu có 1 refId → không lấy ngày chết của refId, dùng createdAt + 30 ngày
+        selectedChildDieTime = null;
+        selectedReason = `children.length (${children.length}) === 1 → không lấy ngày chết của refId, dùng createdAt + 30 ngày`;
+      } else if (children.length === 2) {
+        // Nếu có 2 refId và cả 2 đều chết → lấy ngày chết của refId chết sớm nhất
+        const deadChildren = [];
+        for (const child of children) {
+          if (child.dieTime) {
+            const childDieTimeMoment = moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+            const childDieTimeStart = childDieTimeMoment.toDate();
+            // Chỉ tính con đã chết (dieTime <= today)
+            if (childDieTimeStart <= todayStart) {
+              deadChildren.push(childDieTimeStart);
+            }
+          }
+        }
+        // Nếu cả 2 đều chết, lấy ngày chết sớm nhất
+        if (deadChildren.length === 2) {
+          selectedChildDieTime = deadChildren[0] < deadChildren[1] ? deadChildren[0] : deadChildren[1];
+          selectedReason = `children.length (${children.length}) === 2 và cả 2 đều chết → lấy ngày chết của refId chết sớm nhất`;
+        } else {
+          selectedReason = `children.length (${children.length}) === 2 nhưng không phải cả 2 đều chết → dùng createdAt + 30 ngày`;
+        }
+      } else if (children.length > 2) {
+        // Nếu có trên 3 refId → lấy ngày chết của refId chết trễ nhất (gần hiện tại nhất)
+        for (const child of children) {
+          if (child.dieTime) {
+            const childDieTimeMoment = moment.tz(child.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+            const childDieTimeStart = childDieTimeMoment.toDate();
+            // Chỉ tính con đã chết (dieTime <= today)
+            if (childDieTimeStart <= todayStart) {
               if (!selectedChildDieTime || childDieTimeStart > selectedChildDieTime) {
                 selectedChildDieTime = childDieTimeStart;
-                selectedReason = `children.length (${children.length}) > 2 → lấy con chết trễ nhất`;
+                selectedReason = `children.length (${children.length}) > 2 → lấy ngày chết của refId chết trễ nhất (gần hiện tại nhất)`;
               }
             }
           }
         }
+        if (!selectedChildDieTime) {
+          selectedReason = `children.length (${children.length}) > 2 nhưng không có refId nào chết → dùng createdAt + 30 ngày`;
+        }
       }
 
-      // Tính deadline: nếu có con chết thì deadline = ngày chết của con (đã chọn) + 30 ngày
-      // Nếu không có con nào chết thì deadline = createdAt + 30 ngày
+      // Tính deadline:
+      // - Nếu có 1 refId → deadline = createdAt + 30 ngày
+      // - Nếu có 2 refId và cả 2 đều chết → deadline = ngày chết của refId chết sớm nhất + 30 ngày
+      // - Nếu có trên 3 refId và có refId chết → deadline = ngày chết của refId chết trễ nhất + 30 ngày
+      // - Nếu không có refId nào chết → deadline = createdAt + 30 ngày
       // Tất cả đều tính theo giờ Việt Nam và set về 00:00:00
       let deadlineStart;
       if (selectedChildDieTime) {
@@ -621,7 +642,7 @@ export const testCalculateDieTimeForTree = async (treeId) => {
           .add(30, "days")
           .startOf("day");
         deadlineStart = deadlineMoment.toDate();
-        log(`  - No child has died yet`);
+        log(`  - Reason: ${selectedReason || "No child has died yet"}`);
         log(`  - Deadline (createdAt + 30 days, Vietnam time, 00:00:00): ${deadlineStart}`);
       }
 
