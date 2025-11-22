@@ -1083,20 +1083,6 @@ const UserProfile = () => {
                             }
                           }
 
-                          // Kiểm tra tier 2
-                          let tier2DaysRemaining: number | null = null;
-                          if (data.dieTimeTier2) {
-                            const tier2DieTime = convertToVietnamDate(
-                              data.dieTimeTier2,
-                            );
-                            if (tier2DieTime) {
-                              tier2DaysRemaining = Math.ceil(
-                                (tier2DieTime.getTime() - today.getTime()) /
-                                  (1000 * 60 * 60 * 24),
-                              );
-                            }
-                          }
-
                           // Logic màu sắc mới
                           // Nếu user đã chết ở tier 1 (dieTime đã qua)
                           if (
@@ -1106,28 +1092,11 @@ const UserProfile = () => {
                             return 'bg-[#0033ff]'; // Màu xanh dương
                           }
 
-                          // Nếu user đã chết ở tier 2 (dieTime đã qua)
-                          if (
-                            tier2DaysRemaining !== null &&
-                            tier2DaysRemaining <= 0
-                          ) {
-                            return 'bg-[#663300]'; // Màu nâu
-                          }
-
                           // Nếu user tier 1 còn 10 ngày nữa chết
                           if (
                             tier1DaysRemaining !== null &&
                             tier1DaysRemaining > 0 &&
                             tier1DaysRemaining <= 10
-                          ) {
-                            return 'bg-[#ffcc00]'; // Màu vàng
-                          }
-
-                          // Nếu user tier 2 còn 5 ngày nữa chết
-                          if (
-                            tier2DaysRemaining !== null &&
-                            tier2DaysRemaining > 0 &&
-                            tier2DaysRemaining <= 5
                           ) {
                             return 'bg-[#ffcc00]'; // Màu vàng
                           }

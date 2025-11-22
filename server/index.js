@@ -132,7 +132,7 @@ app.use(errorHandler);
 
 // await recalculateTreeDieTimeForOldData();
 // await checkAliveTreesInXuyen116Branch();
-await syncDieTimeForSubIds();
+// await syncDieTimeForSubIds();
 // await getDescendantsAndGive7DaysBonus("67e51addfe1364e3848c589f");
 
 // await calculateDieTimeForAllTier2();
