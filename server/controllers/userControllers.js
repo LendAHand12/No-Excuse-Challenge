@@ -94,7 +94,7 @@ const getAllUsersOver45 = asyncHandler(async (req, res) => {
 
   const pageSize = 20;
 
-  const query = {
+  const matchQuery = {
     $and: [
       {
         $or: [
@@ -108,16 +108,63 @@ const getAllUsersOver45 = asyncHandler(async (req, res) => {
     ],
   };
 
-  const count = await User.countDocuments(query);
+  const count = await User.countDocuments(matchQuery);
 
-  // Ưu tiên doneChangeToDie = false lên trước, rồi mới sort theo createdAt giảm dần
-  let sortOption = { doneChangeToDie: 1, createdAt: -1 };
-
-  const allUsers = await User.find(query)
-    .limit(pageSize)
-    .skip(pageSize * (page - 1))
-    .sort(sortOption)
-    .select("-password");
+  // Sử dụng aggregation để join với Tree và lấy dieTime
+  const allUsers = await User.aggregate([
+    {
+      $match: matchQuery,
+    },
+    {
+      $lookup: {
+        from: "trees",
+        let: { userObjectId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$userId", { $toString: "$$userObjectId" }] },
+                  { $eq: ["$tier", 1] },
+                  { $eq: ["$isSubId", false] },
+                ],
+              },
+            },
+          },
+          {
+            $limit: 1,
+          },
+        ],
+        as: "tree",
+      },
+    },
+    {
+      $unwind: {
+        path: "$tree",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $addFields: {
+        dieTime: "$tree.dieTime",
+      },
+    },
+    {
+      $project: {
+        password: 0,
+        tree: 0,
+      },
+    },
+    {
+      $sort: { doneChangeToDie: 1, createdAt: -1 },
+    },
+    {
+      $skip: pageSize * (page - 1),
+    },
+    {
+      $limit: pageSize,
+    },
+  ]);
 
   res.json({
     users: allUsers,

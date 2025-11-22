@@ -828,7 +828,7 @@ export const calculateDieTimeForTier1 = async (tree) => {
 
 /**
  * Tính dieTime cho tree tier 2
- * Logic: Nếu không đủ 62 id sống ở tier 1 thì có 45 ngày kể từ ngày chạy cronjob phát hiện thiếu
+ * Logic: Nếu không đủ 62 id sống ở tier 1 thì có deadline tới ngày 30/11/2025
  * Nếu đủ 62 id sống (tổng >= 62, mỗi nhánh >= 20) thì dieTime = null
  * Lưu ý: Tính 62 id sống trong cây tier 1 của cùng user, không phải cây tier 2
  * @param {Object} tree - Tree object (tier = 2)
@@ -846,18 +846,18 @@ export const calculateDieTimeForTier2 = async (tree) => {
     isSubId: false,
   });
 
-  if (!treeTier1) {
-    // Nếu không tìm thấy tree tier 1, tính dieTime = today + 45 ngày (theo giờ Việt Nam, 00:00:00)
-    const deadline = moment.tz("Asia/Ho_Chi_Minh").add(45, "days").startOf("day");
-    return deadline.toDate();
-  }
+  // Deadline cố định: 30/11/2025 00:00:00 (theo giờ Việt Nam)
+  const fixedDeadline = moment.tz("2025-11-30", "Asia/Ho_Chi_Minh").startOf("day");
 
-  // Lấy ngày hiện tại theo giờ Việt Nam, set về 00:00:00
-  const today = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+  if (!treeTier1) {
+    // Nếu không tìm thấy tree tier 1, trả về deadline cố định 30/11/2025
+    return fixedDeadline.toDate();
+  }
 
   // Đếm id sống trong 2 nhánh của tree tier 1
   const branch1Count = await countAliveIdsInBranch(treeTier1.children[0]);
   const branch2Count = await countAliveIdsInBranch(treeTier1.children[1]);
+  console.log({name: tree.userName,branch1Count, branch2Count})
   const totalCount = branch1Count + branch2Count;
 
   // Kiểm tra điều kiện
@@ -867,20 +867,7 @@ export const calculateDieTimeForTier2 = async (tree) => {
     // Đã đủ điều kiện -> dieTime = null
     return null;
   } else {
-    // Chưa đủ -> dieTime = today + 45 ngày (45 ngày kể từ ngày phát hiện thiếu)
-    // Tất cả đều tính theo giờ Việt Nam và set về 00:00:00
-    // Nếu đã có dieTime và chưa quá hạn thì giữ nguyên, nếu quá hạn hoặc chưa có thì set mới
-    if (tree.dieTime) {
-      const currentDieTime = moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
-      // Nếu đã quá hạn thì không thể hồi sinh, giữ nguyên dieTime
-      if (today.isAfter(currentDieTime)) {
-        return currentDieTime.toDate();
-      }
-      // Nếu chưa quá hạn thì cập nhật lại = today + 45 ngày (theo giờ Việt Nam, 00:00:00)
-      return moment.tz("Asia/Ho_Chi_Minh").add(45, "days").startOf("day").toDate();
-    } else {
-      // Chưa có dieTime -> set = today + 45 ngày (theo giờ Việt Nam, 00:00:00)
-      return moment.tz("Asia/Ho_Chi_Minh").add(45, "days").startOf("day").toDate();
-    }
+    // Chưa đủ -> dieTime = 30/11/2025 (theo giờ Việt Nam, 00:00:00)
+    return fixedDeadline.toDate();
   }
 };

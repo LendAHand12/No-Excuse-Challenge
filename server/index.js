@@ -54,6 +54,7 @@ import {
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 import {
+  calculateDieTimeForAllTier2,
   checkAliveTreesInXuyen116Branch,
   fixParentChildLinks,
   getDescendantsAndGive7DaysBonus,
@@ -131,8 +132,10 @@ app.use(errorHandler);
 
 // await recalculateTreeDieTimeForOldData();
 // await checkAliveTreesInXuyen116Branch();
-// await syncDieTimeForSubIds();
+await syncDieTimeForSubIds();
 // await getDescendantsAndGive7DaysBonus("67e51addfe1364e3848c589f");
+
+// await calculateDieTimeForAllTier2();
 
 // Cấu hình timezone Việt Nam (GMT+7)
 const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";
@@ -250,21 +253,21 @@ const cronFetchVnUsdRates = new CronJob(
 //   VIETNAM_TIMEZONE
 // );
 
-const cronCalculateTreeDieTime = new CronJob(
-  "00 04 * * *", // 4h sáng giờ Việt Nam (sau khi delete user)
-  async () => {
-    try {
-      console.log("Calculate tree dieTime start");
-      await calculateTreeDieTime();
-      console.log("Calculate tree dieTime done");
-    } catch (e) {
-      console.error("Calculate tree dieTime error:", e?.message || e);
-    }
-  },
-  null,
-  true,
-  VIETNAM_TIMEZONE
-);
+// const cronCalculateTreeDieTime = new CronJob(
+//   "00 04 * * *", // 4h sáng giờ Việt Nam (sau khi delete user)
+//   async () => {
+//     try {
+//       console.log("Calculate tree dieTime start");
+//       await calculateTreeDieTime();
+//       console.log("Calculate tree dieTime done");
+//     } catch (e) {
+//       console.error("Calculate tree dieTime error:", e?.message || e);
+//     }
+//   },
+//   null,
+//   true,
+//   VIETNAM_TIMEZONE
+// );
 
 await fixParentChildLinks();
 
@@ -276,7 +279,7 @@ cron3.start();
 cron4.start();
 cron6.start();
 // cron7.start();
-cronCalculateTreeDieTime.start();
+// cronCalculateTreeDieTime.start();
 cronFetchVnUsdRates.start();
 
 const PORT = process.env.PORT || 5000;

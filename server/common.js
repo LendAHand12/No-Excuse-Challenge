@@ -1256,3 +1256,81 @@ export const syncDieTimeForSubIds = async () => {
     console.log(`\n❌ ERROR: ${err.message}`);
   }
 };
+
+/**
+ * Tính lại dieTime cho tất cả tree tier 2
+ * Sử dụng hàm calculateDieTimeForTier2 để tính dieTime dựa trên điều kiện hiện tại
+ * @returns {Object} - Kết quả với số lượng tree đã cập nhật và lỗi
+ */
+export const calculateDieTimeForAllTier2 = async () => {
+  try {
+    console.log(`\n🔄 Bắt đầu tính dieTime cho tất cả tree tier 2...`);
+
+    // Tìm tất cả tree tier 2
+    const treesTier2 = await Tree.find({ tier: 2 }).sort({ createdAt: -1 });
+    console.log(`\n📊 Tổng số tree tier 2: ${treesTier2.length}`);
+
+    if (treesTier2.length === 0) {
+      console.log(`\n✅ Không có tree tier 2 nào`);
+      return {
+        total: 0,
+        updated: 0,
+        errors: 0,
+      };
+    }
+
+    let updatedCount = 0;
+    let errorCount = 0;
+
+    for (const tree of treesTier2) {
+      try {
+        // Tính dieTime mới
+        const newDieTime = await calculateDieTimeForTier2(tree);
+
+        // Kiểm tra xem dieTime có thay đổi không
+        const currentDieTime = tree.dieTime
+          ? moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day").toDate()
+          : null;
+        const newDieTimeFormatted = newDieTime
+          ? moment.tz(newDieTime, "Asia/Ho_Chi_Minh").startOf("day").toDate()
+          : null;
+
+        const currentDieTimeTs = currentDieTime ? currentDieTime.getTime() : null;
+        const newDieTimeTs = newDieTimeFormatted ? newDieTimeFormatted.getTime() : null;
+
+        // Chỉ cập nhật nếu dieTime thay đổi
+        if (currentDieTimeTs !== newDieTimeTs) {
+          tree.dieTime = newDieTime;
+          await tree.save();
+          updatedCount++;
+        }
+
+        // Log tiến độ mỗi 100 tree
+        if ((updatedCount + errorCount) % 100 === 0) {
+          console.log(
+            `  📈 Đã xử lý ${updatedCount + errorCount}/${treesTier2.length} tree tier 2...`
+          );
+        }
+      } catch (err) {
+        errorCount++;
+        console.error(
+          `  ❌ Lỗi khi tính dieTime cho tree tier 2 ${tree._id} (${tree.userName}): ${err.message}`
+        );
+      }
+    }
+
+    console.log(`\n✅ Hoàn thành tính dieTime cho tree tier 2:`);
+    console.log(`  - Tổng số: ${treesTier2.length} tree`);
+    console.log(`  - Đã cập nhật: ${updatedCount} tree`);
+    console.log(`  - Lỗi: ${errorCount} tree`);
+
+    return {
+      total: treesTier2.length,
+      updated: updatedCount,
+      errors: errorCount,
+    };
+  } catch (err) {
+    console.error(`\n❌ ERROR trong calculateDieTimeForAllTier2: ${err.message}`);
+    throw err;
+  }
+};

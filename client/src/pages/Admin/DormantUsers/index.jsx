@@ -505,6 +505,9 @@ const DormantUserPages = () => {
                 Moved
               </th>
               <th scope="col" className="px-6 py-3">
+                Die Time
+              </th>
+              <th scope="col" className="px-6 py-3">
                 {t('userProfile.fields.status')}
               </th>
               <th scope="col" className="px-6 py-3">
@@ -537,6 +540,22 @@ const DormantUserPages = () => {
                         ele.doneChangeToDie ? 'bg-green-500' : 'bg-red-500'
                       }`}
                     ></div>
+                  </td>
+                  <td className="px-6 py-4">
+                    {ele.dieTime ? (
+                      <div className="text-gray-900">
+                        {new Date(ele.dieTime).toLocaleString('en-US', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-gray-400">-</div>
+                    )}
                   </td>
                   <td className="px-6 py-4">
                     <div
