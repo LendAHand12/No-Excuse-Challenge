@@ -247,11 +247,39 @@ const getUserById = asyncHandler(async (req, res) => {
     const listDirectUser = [];
     const listRefIdOfUser = await Tree.find({ refId: tree._id, tier: 1 });
     if (listRefIdOfUser && listRefIdOfUser.length > 0) {
+      // Lấy ngày hiện tại theo giờ Việt Nam, set về 00:00:00
+      const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+
       for (let refId of listRefIdOfUser) {
         const refedUser = await User.findById(refId.userId).select(
           "userId email walletAddress status countPay tier errLahCode buyPackage countChild"
         );
         const listRefOfRefUser = await Tree.find({ refId: refId._id });
+
+        // Tính toán isYellow và isBlue dựa trên dieTime của Tree
+        let isYellow = false;
+        let isBlue = false;
+
+        if (refId.dieTime) {
+          const dieTimeStart = moment
+            .tz(refId.dieTime, "Asia/Ho_Chi_Minh")
+            .startOf("day");
+          const diffDays = dieTimeStart.diff(todayStart, "days");
+
+          // Nếu quá hạn (dieTime <= today) → isBlue = true
+          if (diffDays <= 0) {
+            isBlue = true;
+          } else {
+            // Nếu còn 10 ngày nữa đến hạn (tier 1) → isYellow = true
+            if (refedUser.tier === 1 && diffDays <= 10) {
+              isYellow = true;
+            } else if (refedUser.tier === 2 && diffDays <= 5) {
+              // Nếu còn 5 ngày nữa đến hạn (tier 2) → isYellow = true
+              isYellow = true;
+            }
+          }
+        }
+
         listDirectUser.push({
           userId: refId.userName,
           isSubId: refId.isSubId,
@@ -263,8 +291,8 @@ const getUserById = asyncHandler(async (req, res) => {
                 refedUser.countPay < 13
               ? true
               : false,
-          isYellow: refedUser.errLahCode === "OVER35",
-          isBlue: refedUser.errLahCode === "OVER45",
+          isYellow: isYellow,
+          isBlue: isBlue,
           isPink: refedUser.countPay === 13 && listRefOfRefUser.length < 2,
         });
       }
