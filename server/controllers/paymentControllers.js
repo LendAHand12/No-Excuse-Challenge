@@ -259,6 +259,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
               refId,
               isSubId: false,
             });
+
             if (
               listRefOfReceiver.length === 0 ||
               (p.children.length === 2 && listRefOfReceiver.length < 2)
@@ -266,19 +267,20 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
               if (p.userId !== refUser.userId) {
                 haveParentNotPayEnough = true;
               }
-            } else {
-              let childrenWithCountPay13 = 0;
-              for (const childTree of listRefOfReceiver) {
-                const childUser = await User.findById(childTree.userId).select("countPay");
-                if (childUser && childUser.countPay === 13) {
-                  childrenWithCountPay13++;
-                }
-              }
-
-              if (childrenWithCountPay13 < 2) {
-                haveParentNotPayEnough = true;
-              }
             }
+            // else {
+            //   let childrenWithCountPay13 = 0;
+            //   for (const childTree of listRefOfReceiver) {
+            //     const childUser = await User.findById(childTree.userId).select("countPay");
+            //     if (childUser && childUser.countPay === 13) {
+            //       childrenWithCountPay13++;
+            //     }
+            //   }
+
+            //   if (childrenWithCountPay13 < 2) {
+            //     haveParentNotPayEnough = true;
+            //   }
+            // }
           }
 
           payments.push({
