@@ -524,17 +524,11 @@ export const sumLevels = (obj, fromLevel = 5, toLevel = 9) => {
 };
 
 export const checkUserCanNextTier = async (treeOfUser) => {
-  const { countChild1, countChild2 } = await getTotalLevel6ToLevel10OfUser(treeOfUser);
-  // console.log({ countChild1, countChild2 });
+  const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(treeOfUser, true);
+  console.log({ countChild: treeOfUser.countChild, countChild1, countChild2 });
 
   if (treeOfUser.countChild >= 62) {
-    // if (treeOfUser.countChild >= 126) {
-    if ((countChild1 >= 20 && countChild2 >= 42) || (countChild1 >= 42 && countChild2 >= 20)) {
-      // if (countChild1 >= 0 && countChild2 >= 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return true;
   } else {
     return false;
   }
@@ -656,6 +650,7 @@ export const getAllDescendantsTier2Users = async (userId) => {
   // hàm lấy tất cả tier2 userId trong 1 nhánh
   const collectTier2FromBranch = async (rootId) => {
     const resultSet = new Set();
+    const visited = new Set(); // Thêm Set để track visited nodes
     let queue = [rootId];
 
     while (queue.length > 0) {
@@ -666,9 +661,22 @@ export const getAllDescendantsTier2Users = async (userId) => {
       }).lean();
 
       for (const t of childTrees) {
-        // luôn gom children vào queue để duyệt tiếp
+        const nodeId = t._id.toString();
+
+        // Kiểm tra nếu node đã được visit thì bỏ qua để tránh cycle
+        if (visited.has(nodeId)) {
+          continue;
+        }
+        visited.add(nodeId);
+
+        // luôn gom children vào queue để duyệt tiếp (chỉ thêm những node chưa visit)
         if (t.children && t.children.length > 0) {
-          queue.push(...t.children);
+          for (const childId of t.children) {
+            const childIdStr = childId.toString();
+            if (!visited.has(childIdStr)) {
+              queue.push(childId);
+            }
+          }
         }
 
         // nếu node là subId thì bỏ qua, không lấy user tier2
@@ -857,7 +865,7 @@ export const calculateDieTimeForTier2 = async (tree) => {
   // Đếm id sống trong 2 nhánh của tree tier 1
   const branch1Count = await countAliveIdsInBranch(treeTier1.children[0]);
   const branch2Count = await countAliveIdsInBranch(treeTier1.children[1]);
-  console.log({name: tree.userName,branch1Count, branch2Count})
+  console.log({ name: tree.userName, branch1Count, branch2Count });
   const totalCount = branch1Count + branch2Count;
 
   // Kiểm tra điều kiện
