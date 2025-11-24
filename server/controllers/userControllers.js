@@ -392,8 +392,6 @@ const getUserById = asyncHandler(async (req, res) => {
       parentTree = await Tree.findById(tree.parentId);
     }
 
-    console.log({ parentTree });
-
     const tier2Users = await getAllDescendantsTier2Users(user.id);
 
     const hornor = await Honor.findOne({ userId: user.id });
@@ -1221,7 +1219,6 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     bankName,
     bankCode,
     dateOfBirth,
-    dieTime,
     dieTimeTier1,
     dieTimeTier2,
     preTier2Status,
@@ -1373,7 +1370,10 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
             user.errLahCode = "";
           }
         } else {
-          user.errLahCode = "";
+          // Khi dieTime = null, nếu errLahCode là OVER45 hoặc OVER35 thì update thành ""
+          if (user.errLahCode === "OVER45" || user.errLahCode === "OVER35") {
+            user.errLahCode = "";
+          }
         }
       }
     }
