@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 
 import User from '@/api/User';
 import KYC from '@/api/KYC';
+import WildCard from '@/api/WildCard';
 import Loading from '@/components/Loading';
+import CreateWildCardModal from '@/components/CreateWildCardModal';
 import USER_RANKINGS from '@/constants/userRankings';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
@@ -46,6 +48,12 @@ const UserProfile = () => {
   const [walletChange, setWalletChange] = useState('');
   const [loadingChangeWallet, setLoadingChangeWallet] = useState(false);
   const [loadingPushToPreTier2, setLoadingPushToPreTier2] = useState(false);
+  const createWildCardModal = CreateWildCardModal({
+    userId: id,
+    onSuccess: () => {
+      setRefresh(!refresh);
+    },
+  });
 
   const {
     register,
@@ -54,6 +62,10 @@ const UserProfile = () => {
     setValue,
     control,
   } = useForm();
+
+  const [wildCards, setWildCards] = useState([]);
+  const [loadingWildCards, setLoadingWildCards] = useState(false);
+  const [usingCardId, setUsingCardId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -573,28 +585,32 @@ const UserProfile = () => {
       });
   };
 
-  const handlePushToPreTier2 = async () => {
-    setLoadingPushToPreTier2(true);
+  // const handlePushToPreTier2 = async () => {
+  //   setLoadingPushToPreTier2(true);
 
-    var formData = new FormData();
+  //   var formData = new FormData();
 
-    formData.append('preTier2Status', 'PENDING');
+  //   formData.append('preTier2Status', 'PENDING');
 
-    await User.adminUpdateUser(id, formData)
-      .then((response) => {
-        setLoadingPushToPreTier2(false);
-        toast.success(t(response.data.message));
-        setRefresh(!refresh);
-      })
-      .catch((error) => {
-        let message =
-          error.response && error.response.data.message
-            ? error.response.data.message
-            : error.message;
-        toast.error(t(message));
-        setLoadingPushToPreTier2(false);
-      });
-  };
+  //   await User.adminUpdateUser(id, formData)
+  //     .then((response) => {
+  //       setLoadingPushToPreTier2(false);
+  //       toast.success(t(response.data.message));
+  //       setRefresh(!refresh);
+  //     })
+  //     .catch((error) => {
+  //       let message =
+  //         error.response && error.response.data.message
+  //           ? error.response.data.message
+  //           : error.message;
+  //       toast.error(t(message));
+  //       setLoadingPushToPreTier2(false);
+  //     });
+  // };
+
+  const handleOpenCreateWildCardModal = useCallback(() => {
+    createWildCardModal.openModal();
+  }, [createWildCardModal]);
 
   const renderRank = (level) => {
     return USER_RANKINGS.find((ele) => level <= ele.value)?.label;
@@ -1182,6 +1198,120 @@ const UserProfile = () => {
                     </li>
                   )}
 
+                  <li className="flex items-center py-3 border-t border-gray-200 mt-2">
+                    <span className="font-semibold text-gray-700">
+                      Wild Cards
+                    </span>
+                  </li>
+                  <li className="py-3">
+                    {loadingWildCards ? (
+                      <div className="text-center py-4">
+                        <Loading />
+                      </div>
+                    ) : wildCards.length === 0 ? (
+                      <div className="text-center py-4 text-gray-500">
+                        No wild cards available
+                      </div>
+                    ) : (
+                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                        {wildCards.map((card: any) => (
+                          <div
+                            key={card._id}
+                            className={`p-3 rounded-lg border ${
+                              card.status === 'ACTIVE'
+                                ? 'bg-green-50 border-green-200'
+                                : card.status === 'USED'
+                                ? 'bg-gray-50 border-gray-200'
+                                : 'bg-yellow-50 border-yellow-200'
+                            }`}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <p className="font-semibold text-sm">
+                                  {card.cardType}
+                                </p>
+                                <p className="text-xs text-gray-600 mt-1">
+                                  {card.sourceInfo || 'No description'}
+                                </p>
+                                <div className="flex gap-4 mt-1 text-xs text-gray-500">
+                                  <span>Days: {card.days}</span>
+                                  <span>Tier: {card.targetTier}</span>
+                                  {card.usedAt && (
+                                    <span>
+                                      Used:{' '}
+                                      {new Date(card.usedAt).toLocaleDateString(
+                                        'vi',
+                                      )}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex flex-col items-end gap-2">
+                                <span
+                                  className={`px-2 py-1 rounded text-xs font-medium ${
+                                    card.status === 'ACTIVE'
+                                      ? 'bg-green-500 text-white'
+                                      : card.status === 'USED'
+                                      ? 'bg-gray-500 text-white'
+                                      : 'bg-yellow-500 text-white'
+                                  }`}
+                                >
+                                  {card.status}
+                                </span>
+                                {card.status === 'ACTIVE' && (
+                                  <button
+                                    onClick={async () => {
+                                      if (
+                                        !confirm(
+                                          `Bạn có chắc chắn muốn sử dụng thẻ này cho user ${data.userId}? Thẻ sẽ cộng ${card.days} ngày vào dieTime của Tier ${card.targetTier}.`,
+                                        )
+                                      ) {
+                                        return;
+                                      }
+
+                                      setUsingCardId(card._id);
+                                      try {
+                                        const response =
+                                          await WildCard.useWildCard(
+                                            card._id,
+                                            id,
+                                          );
+                                        toast.success(
+                                          response.data.message ||
+                                            'Sử dụng Wild Card thành công!',
+                                        );
+                                        setRefresh(!refresh);
+                                      } catch (error: any) {
+                                        const message =
+                                          error.response &&
+                                          error.response.data.message
+                                            ? error.response.data.message
+                                            : error.message;
+                                        toast.error(
+                                          message ||
+                                            'Có lỗi xảy ra khi sử dụng Wild Card',
+                                        );
+                                      } finally {
+                                        setUsingCardId(null);
+                                      }
+                                    }}
+                                    disabled={usingCardId === card._id}
+                                    className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  >
+                                    {usingCardId === card._id ? (
+                                      <Loading />
+                                    ) : (
+                                      'Use'
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </li>
                   <li className="flex items-center py-3">
                     <span>{t('tier2Time')}</span>
                     <span className="ml-auto">
@@ -2217,6 +2347,16 @@ const UserProfile = () => {
                       Push to Pre Tier 2
                     </div>
                   )} */}
+                {userInfo?.permissions
+                  ?.find((p) => p.page.pageName === 'admin-users-details')
+                  ?.actions.includes('update') && (
+                  <div
+                    onClick={handleOpenCreateWildCardModal}
+                    className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-blue-500 text-white"
+                  >
+                    {t('userProfile.buttons.createWildCard')}
+                  </div>
+                )}
               </div>
             </div>
           </form>

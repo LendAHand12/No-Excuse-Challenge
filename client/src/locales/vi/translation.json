@@ -731,7 +731,8 @@
       "lockKyc": "Khóa KYC",
       "unlockKyc": "Mở khóa KYC",
       "pushToPreTier2": "Đẩy lên Pre-Tier 2",
-      "changeWallet": "Đổi ví"
+      "changeWallet": "Đổi ví",
+      "createWildCard": "Tạo Wild Card"
     },
     "switches": {
       "openLah": "Mở LAH",
@@ -763,6 +764,7 @@
     },
     "modals": {
       "deleteConfirm": "Bạn có chắc chắn muốn thực hiện điều này?",
+      "createWildCardTitle": "Tạo Wild Card cho {{userId}}",
       "changeWalletConfirm": "Bạn có chắc chắn muốn thực hiện điều này",
       "updating": "Đang cập nhật...",
       "deleting": "Đang xóa..."

@@ -9,7 +9,7 @@ const wildCardSchema = mongoose.Schema(
     },
     cardType: {
       type: String,
-      enum: ["TIER2_REWARD", "REFERRAL_REWARD"], // TIER2_REWARD: từ Tier 2, REFERRAL_REWARD: từ giới thiệu 5 người
+      enum: ["TIER2_REWARD", "REFERRAL_REWARD", "ADMIN_CREATED"], // TIER2_REWARD: từ Tier 2, REFERRAL_REWARD: từ giới thiệu 5 người, ADMIN_CREATED: do admin tạo
       required: true,
     },
     status: {
@@ -23,7 +23,7 @@ const wildCardSchema = mongoose.Schema(
     },
     usedBy: {
       type: String,
-      enum: ["USER", "ADMIN", "AUTO"], // AUTO: tự động thêm tay
+      enum: ["USER", "ADMIN", "AUTO", null], // AUTO: tự động thêm tay, null: chưa sử dụng
       default: null,
     },
     appliedToUserId: {
@@ -39,6 +39,17 @@ const wildCardSchema = mongoose.Schema(
     expiresAt: {
       type: Date,
       default: null, // Có thể set expiry nếu cần
+    },
+    days: {
+      type: Number,
+      required: true,
+      default: 15, // Số ngày được cộng vào dieTime khi sử dụng thẻ
+    },
+    targetTier: {
+      type: Number,
+      enum: [1, 2],
+      required: true,
+      default: 1, // Tier nào sẽ được áp dụng thẻ (1 hoặc 2)
     },
   },
   {

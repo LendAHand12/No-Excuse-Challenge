@@ -15,14 +15,13 @@ const WildCard = {
   adminGetUserWildCards: (userId) => {
     return API.get(`${URL_API_WILDCARD}/admin/${userId}`);
   },
-  adminCreateWildCard: (userId, cardType, sourceInfo) => {
+  adminCreateWildCard: (userId, days, targetTier) => {
     return API.post(URL_API_WILDCARD + '/admin/create', {
       userId,
-      cardType,
-      sourceInfo,
+      days,
+      targetTier,
     });
   },
 };
 
 export default WildCard;
-

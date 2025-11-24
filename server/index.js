@@ -38,6 +38,7 @@ import preTier2Routes from "./routes/preTier2Routes.js";
 import bankWebhookRoutes from "./routes/bankWebhookRoutes.js";
 import ticketRoutes from "./routes/ticketRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import wildCardRoutes from "./routes/wildCardRoutes.js";
 
 import {
   countChildToData,
@@ -56,6 +57,7 @@ import { sendTelegramMessage } from "./utils/sendTelegram.js";
 import {
   calculateDieTimeForAllTier2,
   checkAliveTreesInXuyen116Branch,
+  exportOver45UsersToTxt,
   fixParentChildLinks,
   getDescendantsAndGive7DaysBonus,
   recalculateTreeDieTimeForOldData,
@@ -118,6 +120,7 @@ app.use("/api/pre-tier-2", preTier2Routes);
 app.use("/api/bank-webhook", bankWebhookRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/wildcard", wildCardRoutes);
 
 app.get("/api/test-tele", async (req, res) => {
   await sendTelegramMessage({ userName: "kiet" });
@@ -136,6 +139,7 @@ app.use(errorHandler);
 // await getDescendantsAndGive7DaysBonus("67e51addfe1364e3848c589f");
 
 // await calculateDieTimeForAllTier2();
+// await exportOver45UsersToTxt();
 
 // Cấu hình timezone Việt Nam (GMT+7)
 const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";

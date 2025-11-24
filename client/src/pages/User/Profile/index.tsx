@@ -8,6 +8,7 @@ import { UPDATE_USER_INFO } from '@/slices/auth';
 import { useForm } from 'react-hook-form';
 import User from '@/api/User';
 import KYC from '@/api/KYC';
+import WildCard from '@/api/WildCard';
 import { useCallback, useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import USER_RANKINGS from '@/constants/userRankings';
@@ -91,6 +92,9 @@ const Profile = () => {
   // );
   const [showBankInfoModal, setShowBankInfoModal] = useState(false);
   const [showNextTier, setShowNextTier] = useState(false);
+  const [wildCards, setWildCards] = useState([]);
+  const [loadingWildCards, setLoadingWildCards] = useState(false);
+  const [usingCardId, setUsingCardId] = useState<string | null>(null);
 
   const {
     register,
@@ -181,6 +185,21 @@ const Profile = () => {
               : error.message;
           toast.error(t(message));
         });
+    })();
+  }, [refresh]);
+
+  // Fetch wild cards
+  useEffect(() => {
+    (async () => {
+      setLoadingWildCards(true);
+      try {
+        const response = await WildCard.getUserWildCards();
+        setWildCards(response.data.wildCards || []);
+      } catch (error: any) {
+        console.error('Error fetching wild cards:', error);
+      } finally {
+        setLoadingWildCards(false);
+      }
     })();
   }, [refresh]);
 
@@ -940,6 +959,117 @@ const Profile = () => {
                 </div>
               </div>
             )}
+            <div className="bg-[#FAFBFC] p-4 rounded-2xl">
+              <div className="py-2 px-4">
+                <p className="uppercase mt-2 font-bold">Wild Cards</p>
+                {loadingWildCards ? (
+                  <div className="py-4 text-center">
+                    <Loading />
+                  </div>
+                ) : wildCards.length === 0 ? (
+                  <div className="py-4 text-center text-gray-500">
+                    No wild cards available
+                  </div>
+                ) : (
+                  <div className="py-2">
+                    <div className="space-y-2">
+                      {wildCards.map((card: any) => (
+                        <div
+                          key={card._id}
+                          className={`p-3 rounded-lg border ${
+                            card.status === 'ACTIVE'
+                              ? 'bg-green-50 border-green-200'
+                              : card.status === 'USED'
+                              ? 'bg-gray-50 border-gray-200'
+                              : 'bg-yellow-50 border-yellow-200'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <p className="font-semibold text-sm">
+                                {card.cardType}
+                              </p>
+                              <p className="text-xs text-gray-600 mt-1">
+                                {card.sourceInfo || 'No description'}
+                              </p>
+                              <div className="flex gap-4 mt-1 text-xs text-gray-500">
+                                <span>Days: {card.days}</span>
+                                <span>Tier: {card.targetTier}</span>
+                                {card.usedAt && (
+                                  <span>
+                                    Used:{' '}
+                                    {new Date(card.usedAt).toLocaleDateString(
+                                      'vi',
+                                    )}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                              <span
+                                className={`px-2 py-1 rounded text-xs font-medium ${
+                                  card.status === 'ACTIVE'
+                                    ? 'bg-green-500 text-white'
+                                    : card.status === 'USED'
+                                    ? 'bg-gray-500 text-white'
+                                    : 'bg-yellow-500 text-white'
+                                }`}
+                              >
+                                {card.status}
+                              </span>
+                              {card.status === 'ACTIVE' && (
+                                <button
+                                  onClick={async () => {
+                                    if (
+                                      !confirm(
+                                        `Bạn có chắc chắn muốn sử dụng thẻ này? Thẻ sẽ cộng ${card.days} ngày vào dieTime của Tier ${card.targetTier}.`,
+                                      )
+                                    ) {
+                                      return;
+                                    }
+
+                                    setUsingCardId(card._id);
+                                    try {
+                                      const response =
+                                        await WildCard.useWildCard(card._id);
+                                      toast.success(
+                                        response.data.message ||
+                                          'Sử dụng Wild Card thành công!',
+                                      );
+                                      setRefresh(!refresh);
+                                    } catch (error: any) {
+                                      const message =
+                                        error.response &&
+                                        error.response.data.message
+                                          ? error.response.data.message
+                                          : error.message;
+                                      toast.error(
+                                        message ||
+                                          'Có lỗi xảy ra khi sử dụng Wild Card',
+                                      );
+                                    } finally {
+                                      setUsingCardId(null);
+                                    }
+                                  }}
+                                  disabled={usingCardId === card._id}
+                                  className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {usingCardId === card._id ? (
+                                    <Loading />
+                                  ) : (
+                                    'Use'
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
         <div className="flex justify-between">

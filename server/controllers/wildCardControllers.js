@@ -1,146 +1,10 @@
 import asyncHandler from "express-async-handler";
-import moment from "moment";
+import moment from "moment-timezone";
 import WildCard from "../models/wildCardModel.js";
 import User from "../models/userModel.js";
 import Tree from "../models/treeModel.js";
-import { getTotalLevel1ToLevel10OfUser } from "../utils/methods.js";
 
-/**
- * Count active IDs (not OVER45) for Tier 2 user
- * This function counts only IDs that don't have errLahCode = OVER45
- */
-const countActiveIdsForTier2 = async (user) => {
-  const treeOfUser = await Tree.findOne({
-    userId: user._id,
-    isSubId: false,
-    tier: 1,
-  });
-
-  if (!treeOfUser) return { total: 0, countChild1: 0, countChild2: 0 };
-
-  // Use getTotalLevel1ToLevel10OfUser with includesDieId = false to exclude OVER45 IDs
-  const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(treeOfUser, false);
-  const total = countChild1 + countChild2;
-
-  return { total, countChild1, countChild2 };
-};
-
-/**
- * Check and create Tier 2 reward cards (2 cards after 45 days without 62 active IDs)
- */
-const checkAndCreateTier2RewardCards = asyncHandler(async () => {
-  try {
-    const tier2Users = await User.find({
-      tier: 2,
-      isAdmin: false,
-      status: { $ne: "DELETED" },
-    });
-
-    for (const user of tier2Users) {
-      if (!user.tier2Time) continue;
-
-      const daysSinceTier2 = moment().diff(moment(user.tier2Time), "days");
-
-      // Check if 45 days have passed
-      if (daysSinceTier2 >= 45) {
-        const { total } = await countActiveIdsForTier2(user);
-
-        // If still don't have 62 active IDs
-        if (total < 62) {
-          // Check if user already has 2 TIER2_REWARD cards
-          const existingCards = await WildCard.countDocuments({
-            userId: user._id,
-            cardType: "TIER2_REWARD",
-            status: "ACTIVE",
-          });
-
-          // Create 2 cards if not already created
-          if (existingCards < 2) {
-            const cardsToCreate = 2 - existingCards;
-            for (let i = 0; i < cardsToCreate; i++) {
-              await WildCard.create({
-                userId: user._id,
-                cardType: "TIER2_REWARD",
-                status: "ACTIVE",
-                sourceInfo: `Tier 2 reward - After 45 days without 62 active IDs`,
-              });
-            }
-            console.log(`Created ${cardsToCreate} TIER2_REWARD cards for user ${user.userId}`);
-          }
-        }
-      }
-    }
-  } catch (error) {
-    console.error("Error in checkAndCreateTier2RewardCards:", error);
-  }
-});
-
-/**
- * Check and create referral reward cards (1 card per 5 direct referrals)
- */
-const checkAndCreateReferralRewardCards = asyncHandler(async () => {
-  try {
-    const allUsers = await User.find({
-      isAdmin: false,
-      status: { $ne: "DELETED" },
-    });
-
-    for (const user of allUsers) {
-      const treeOfUser = await Tree.findOne({
-        userId: user._id,
-        isSubId: false,
-        tier: 1,
-      });
-
-      if (!treeOfUser) continue;
-
-      // Get direct referrals (refId = treeOfUser._id, tier = 1)
-      const directReferrals = await Tree.find({
-        refId: treeOfUser._id,
-        tier: 1,
-      });
-
-      // Count active referrals (not OVER45)
-      const activeReferralIds = [];
-      for (const refTree of directReferrals) {
-        const refUser = await User.findById(refTree.userId);
-        if (refUser && refUser.errLahCode !== "OVER45") {
-          activeReferralIds.push(refTree._id.toString());
-        }
-      }
-
-      const activeCount = activeReferralIds.length;
-
-      // Calculate how many cards should exist (1 card per 5 referrals)
-      const expectedCards = Math.floor(activeCount / 5);
-
-      // Count existing active REFERRAL_REWARD cards
-      const existingCards = await WildCard.countDocuments({
-        userId: user._id,
-        cardType: "REFERRAL_REWARD",
-        status: "ACTIVE",
-      });
-
-      // Create missing cards
-      if (expectedCards > existingCards) {
-        const cardsToCreate = expectedCards - existingCards;
-        for (let i = 0; i < cardsToCreate; i++) {
-          await WildCard.create({
-            userId: user._id,
-            cardType: "REFERRAL_REWARD",
-            status: "ACTIVE",
-            sourceInfo: `Referral reward - ${activeCount} direct referrals`,
-          });
-        }
-        console.log(
-          `Created ${cardsToCreate} REFERRAL_REWARD cards for user ${user.userId} (${activeCount} referrals)`
-        );
-      }
-    }
-  } catch (error) {
-    console.error("Error in checkAndCreateReferralRewardCards:", error);
-  }
-});
+// Logic tự động tạo thẻ đã được bỏ - Admin sẽ tự tạo thẻ cho user
 
 /**
  * Get all wild cards for a user
@@ -159,7 +23,7 @@ const getUserWildCards = asyncHandler(async (req, res) => {
 });
 
 /**
- * Use a wild card (add 15 days to dieTime)
+ * Use a wild card (add days to Tree.dieTime of target tier)
  */
 const useWildCard = asyncHandler(async (req, res) => {
   const user = req.user;
@@ -197,20 +61,71 @@ const useWildCard = asyncHandler(async (req, res) => {
     targetUser = user;
   }
 
-  // Add 15 days to dieTime
-  const currentDieTime = targetUser.dieTime ? moment(targetUser.dieTime) : moment();
-  const newDieTime = currentDieTime.add(15, "days").toDate();
+  // Get target tier from card
+  const targetTier = card.targetTier || 1;
+  const daysToAdd = card.days || 15;
 
-  targetUser.dieTime = newDieTime;
+  // Find the tree of target user with target tier
+  const targetTree = await Tree.findOne({
+    userId: targetUser._id,
+    tier: targetTier,
+    isSubId: false,
+  });
 
-  // Update errLahCode if needed (if dieTime is in future, clear OVER45)
-  if (moment(newDieTime).isAfter(moment())) {
-    if (targetUser.errLahCode === "OVER45") {
-      targetUser.errLahCode = "";
-    }
+  if (!targetTree) {
+    res.status(404);
+    throw new Error(`Tree not found for user ${targetUser.userId} at tier ${targetTier}`);
   }
 
-  await targetUser.save();
+  // Calculate new dieTime: add days to current dieTime
+  const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+  let currentDieTime;
+
+  if (targetTree.dieTime) {
+    // If tree has dieTime, use it
+    currentDieTime = moment.tz(targetTree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+  } else {
+    // If tree doesn't have dieTime, use today as base
+    currentDieTime = todayStart;
+  }
+
+  // Add days to dieTime
+  const newDieTime = currentDieTime.add(daysToAdd, "days").startOf("day").toDate();
+
+  // Update tree dieTime
+  targetTree.dieTime = newDieTime;
+  await targetTree.save();
+
+  // Update User.errLahCode if tier 1
+  if (targetTier === 1) {
+    const newDieTimeMoment = moment.tz(newDieTime, "Asia/Ho_Chi_Minh").startOf("day");
+    const diffDays = newDieTimeMoment.diff(todayStart, "days");
+
+    if (diffDays <= 0) {
+      // User has died
+      targetUser.errLahCode = "OVER45";
+    } else if (diffDays >= 1 && diffDays <= 10) {
+      // User has 1-10 days remaining
+      targetUser.errLahCode = "OVER35";
+    } else {
+      // User has more than 10 days
+      targetUser.errLahCode = "";
+    }
+    await targetUser.save();
+  }
+
+  // Update disable status for tier 2 tree
+  if (targetTier === 2) {
+    const newDieTimeMoment = moment.tz(newDieTime, "Asia/Ho_Chi_Minh").startOf("day");
+    const diffDays = newDieTimeMoment.diff(todayStart, "days");
+
+    if (diffDays <= 0) {
+      targetTree.disable = true;
+    } else {
+      targetTree.disable = false;
+    }
+    await targetTree.save();
+  }
 
   // Mark card as used
   card.status = "USED";
@@ -224,7 +139,9 @@ const useWildCard = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     message: "Wild card used successfully",
-    newDieTime: targetUser.dieTime,
+    newDieTime: newDieTime,
+    targetTier: targetTier,
+    daysAdded: daysToAdd,
     card: card,
   });
 });
@@ -253,7 +170,7 @@ const adminGetUserWildCards = asyncHandler(async (req, res) => {
  */
 const adminCreateWildCard = asyncHandler(async (req, res) => {
   const admin = req.user;
-  const { userId, cardType, sourceInfo } = req.body;
+  const { userId, sourceInfo, days, targetTier } = req.body;
 
   if (!admin.isAdmin) {
     res.status(403);
@@ -263,9 +180,14 @@ const adminCreateWildCard = asyncHandler(async (req, res) => {
   // If userId is provided, create for that user, otherwise create for admin
   const targetUserId = userId || admin._id;
 
-  if (!cardType) {
+  if (!days || days <= 0) {
     res.status(400);
-    throw new Error("cardType is required");
+    throw new Error("days is required and must be greater than 0");
+  }
+
+  if (!targetTier || (targetTier !== 1 && targetTier !== 2)) {
+    res.status(400);
+    throw new Error("targetTier is required and must be 1 or 2");
   }
 
   const targetUser = await User.findById(targetUserId);
@@ -276,9 +198,11 @@ const adminCreateWildCard = asyncHandler(async (req, res) => {
 
   const card = await WildCard.create({
     userId: targetUserId,
-    cardType: cardType,
+    cardType: "ADMIN_CREATED", // Mặc định là ADMIN_CREATED khi admin tạo
     status: "ACTIVE",
     sourceInfo: sourceInfo || `Created by admin ${admin.userId}`,
+    days: days,
+    targetTier: targetTier,
   });
 
   res.json({
@@ -288,11 +212,4 @@ const adminCreateWildCard = asyncHandler(async (req, res) => {
   });
 });
 
-export {
-  checkAndCreateTier2RewardCards,
-  checkAndCreateReferralRewardCards,
-  getUserWildCards,
-  useWildCard,
-  adminGetUserWildCards,
-  adminCreateWildCard,
-};
+export { getUserWildCards, useWildCard, adminGetUserWildCards, adminCreateWildCard };

@@ -13,6 +13,8 @@ import {
   countAliveIdsInBranch,
 } from "./utils/methods.js";
 import moment from "moment-timezone";
+import fs from "fs";
+import path from "path";
 
 export const transferUserToTree = async () => {
   const listUser = await User.find({ isAdmin: false });
@@ -1331,6 +1333,132 @@ export const calculateDieTimeForAllTier2 = async () => {
     };
   } catch (err) {
     console.error(`\n❌ ERROR trong calculateDieTimeForAllTier2: ${err.message}`);
+    throw err;
+  }
+};
+
+/**
+ * Lấy danh sách user có trên 2 refId và errLahCode = "OVER45", xuất ra file .txt
+ */
+export const exportOver45UsersToTxt = async () => {
+  try {
+    console.log(
+      `\n📋 Bắt đầu xuất danh sách user có từ 2 refId trở lên và errLahCode = "OVER45"...`
+    );
+
+    // Lấy tất cả user có errLahCode = "OVER45"
+    const allOver45Users = await User.find({
+      errLahCode: "OVER45",
+    })
+      .select("userId createdAt")
+      .lean();
+
+    console.log(`\n📊 Tổng số user có errLahCode = "OVER45": ${allOver45Users.length}`);
+
+    // Lọc user có từ 2 refId trở lên (>= 2 refId)
+    console.log(`\n🔄 Đang kiểm tra số lượng refId cho từng user...`);
+    const usersWithMoreThan2RefIds = [];
+
+    for (const user of allOver45Users) {
+      // Tìm tree chính của user (userId = user._id, isSubId = false)
+      const mainTree = await Tree.findOne({
+        userId: user._id,
+        isSubId: false,
+      });
+
+      if (!mainTree) {
+        // Không có tree chính, bỏ qua
+        continue;
+      }
+
+      // Đếm số refId (tree có refId = mainTree._id, isSubId = false)
+      const refIdCount = await Tree.countDocuments({
+        refId: mainTree._id.toString(),
+        isSubId: false,
+      });
+
+      if (refIdCount >= 2) {
+        usersWithMoreThan2RefIds.push({
+          ...user,
+          refIdCount,
+        });
+      }
+    }
+
+    console.log(
+      `\n📊 Số user có trên 2 refId và errLahCode = "OVER45": ${usersWithMoreThan2RefIds.length}`
+    );
+
+    // Sắp xếp theo createdAt tăng dần
+    const sortedUsers = usersWithMoreThan2RefIds.sort((a, b) => {
+      const createdAtA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const createdAtB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return createdAtA - createdAtB;
+    });
+
+    // Tạo nội dung file
+    let fileContent = `DANH SÁCH USER CÓ TỪ 2 REFID TRỞ LÊN VÀ errLahCode = "OVER45"\n`;
+    fileContent += `Thời gian xuất: ${moment().format("YYYY-MM-DD HH:mm:ss")}\n`;
+    fileContent += `${"=".repeat(80)}\n`;
+    fileContent += `Tổng số: ${sortedUsers.length} user\n`;
+    fileContent += `${"=".repeat(80)}\n\n`;
+
+    if (sortedUsers.length === 0) {
+      fileContent += "Không có user nào.\n";
+    } else {
+      fileContent += `STT\t\tUser ID\t\t\tNgày tạo (createdAt)\n`;
+      fileContent += `${"-".repeat(80)}\n`;
+
+      sortedUsers.forEach((user, index) => {
+        const createdAtStr = user.createdAt
+          ? moment(user.createdAt).format("YYYY-MM-DD HH:mm:ss")
+          : "N/A";
+        fileContent += `${index + 1}\t\t${user.userId}\t\t${createdAtStr}\n`;
+      });
+    }
+
+    // Tạo thư mục exports nếu chưa có
+    const exportsDir = path.join(process.cwd(), "exports");
+    if (!fs.existsSync(exportsDir)) {
+      fs.mkdirSync(exportsDir, { recursive: true });
+    }
+
+    // Tạo tên file với timestamp
+    const timestamp = moment().format("YYYYMMDD_HHmmss");
+    const filename = `over45_users_${timestamp}.txt`;
+    const filepath = path.join(exportsDir, filename);
+
+    // Ghi file
+    fs.writeFileSync(filepath, fileContent, "utf8");
+
+    console.log(`\n✅ Đã xuất file thành công:`);
+    console.log(`  - File path: ${filepath}`);
+    console.log(`  - Tổng số user: ${sortedUsers.length}`);
+
+    // Hiển thị thông tin trong console
+    console.log(`\n📋 DANH SÁCH USER CÓ TỪ 2 REFID TRỞ LÊN VÀ errLahCode = "OVER45":`);
+    if (sortedUsers.length === 0) {
+      console.log(`  Không có user nào.`);
+    } else {
+      sortedUsers.forEach((user, index) => {
+        const createdAtStr = user.createdAt
+          ? moment(user.createdAt).format("YYYY-MM-DD HH:mm:ss")
+          : "N/A";
+        console.log(
+          `  ${index + 1}. ${user.userId} - Created: ${createdAtStr} - RefId Count: ${
+            user.refIdCount
+          }`
+        );
+      });
+    }
+
+    return {
+      filepath,
+      totalCount: sortedUsers.length,
+      users: sortedUsers,
+    };
+  } catch (err) {
+    console.log(`\n❌ ERROR: ${err.message}`);
     throw err;
   }
 };
