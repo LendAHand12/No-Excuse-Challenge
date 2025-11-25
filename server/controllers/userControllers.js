@@ -41,6 +41,7 @@ import "moment-timezone";
 import { getPriceHewe } from "../utils/getPriceHewe.js";
 import PreTier2 from "../models/preTier2Model.js";
 import Honor from "../models/honorModel.js";
+import WildCard from "../models/wildCardModel.js";
 
 dotenv.config();
 
@@ -290,6 +291,7 @@ const getUserById = asyncHandler(async (req, res) => {
           isYellow: isYellow,
           isBlue: isBlue,
           isPink: refedUser.countPay === 13 && listRefOfRefUser.length < 2,
+          dieTime: refId.dieTime,
         });
       }
     }
@@ -416,6 +418,11 @@ const getUserById = asyncHandler(async (req, res) => {
 
     const diffDaySinceCreate = moment().diff(moment(user.createdAt), "days");
 
+    // Lấy danh sách wild cards của user
+    const wildCards = await WildCard.find({
+      userId: user._id,
+    }).sort({ createdAt: -1 });
+
     res.json({
       id: user._id,
       email: user.email,
@@ -516,6 +523,7 @@ const getUserById = asyncHandler(async (req, res) => {
       enableWithdrawCrypto:
         user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
       enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
+      wildCards: wildCards, // Danh sách wild cards của user
     });
   } else {
     res.status(404);

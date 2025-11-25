@@ -1044,7 +1044,7 @@ const Profile = () => {
                                           ? error.response.data.message
                                           : error.message;
                                       toast.error(
-                                        message ||
+                                        t(message) ||
                                           'Có lỗi xảy ra khi sử dụng Wild Card',
                                       );
                                     } finally {

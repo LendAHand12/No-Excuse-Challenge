@@ -17,14 +17,24 @@ interface WildCardFormData {
   targetTier: number;
 }
 
-const CreateWildCardModal = ({ userId, onSuccess }: CreateWildCardModalProps) => {
+const CreateWildCardModal = ({
+  userId,
+  onSuccess,
+}: CreateWildCardModalProps) => {
   const { t } = useTranslation();
 
   const openModal = useCallback(() => {
     confirmAlert({
       closeOnClickOutside: true,
       customUI: ({ onClose }) => {
-        return <FormContent userId={userId} onClose={onClose} onSuccess={onSuccess} t={t} />;
+        return (
+          <FormContent
+            userId={userId}
+            onClose={onClose}
+            onSuccess={onSuccess}
+            t={t}
+          />
+        );
       },
     });
   }, [userId, onSuccess, t]);
@@ -54,7 +64,7 @@ const FormContent = ({ userId, onClose, onSuccess, t }: any) => {
       const response = await WildCard.adminCreateWildCard(
         userId,
         data.days,
-        data.targetTier,
+        parseInt(data.targetTier),
       );
 
       toast.success(
@@ -121,7 +131,9 @@ const FormContent = ({ userId, onClose, onSuccess, t }: any) => {
                   rules={{
                     required: t('userProfile.wildCard.errors.invalidTier'),
                     validate: (value) =>
-                      value === 1 || value === 2 || t('userProfile.wildCard.errors.invalidTier'),
+                      parseInt(value) === 1 ||
+                      parseInt(value) === 2 ||
+                      t('userProfile.wildCard.errors.invalidTier'),
                   }}
                   render={({ field }) => (
                     <select
@@ -166,4 +178,3 @@ const FormContent = ({ userId, onClose, onSuccess, t }: any) => {
 };
 
 export default CreateWildCardModal;
-

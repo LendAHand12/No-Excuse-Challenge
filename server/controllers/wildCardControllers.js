@@ -77,17 +77,16 @@ const useWildCard = asyncHandler(async (req, res) => {
     throw new Error(`Tree not found for user ${targetUser.userId} at tier ${targetTier}`);
   }
 
+  // Kiểm tra dieTime phải khác null mới cho phép sử dụng wild card
+  if (!targetTree.dieTime || targetTree.dieTime === null) {
+    res.status(400);
+    throw new Error("userProfile.wildCard.cannotUse");
+  }
+
   // Calculate new dieTime: add days to current dieTime
   const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
-  let currentDieTime;
-
-  if (targetTree.dieTime) {
-    // If tree has dieTime, use it
-    currentDieTime = moment.tz(targetTree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
-  } else {
-    // If tree doesn't have dieTime, use today as base
-    currentDieTime = todayStart;
-  }
+  // Nếu đã có dieTime, sử dụng nó
+  const currentDieTime = moment.tz(targetTree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
 
   // Add days to dieTime
   const newDieTime = currentDieTime.add(daysToAdd, "days").startOf("day").toDate();

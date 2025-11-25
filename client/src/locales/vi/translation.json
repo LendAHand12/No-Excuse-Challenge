@@ -762,6 +762,23 @@
       "totalChild": "Tổng số con",
       "subInfo": "Thông tin phụ"
     },
+    "wildCard": {
+      "cardType": "Loại thẻ",
+      "days": "Số ngày",
+      "daysPlaceholder": "Nhập số ngày",
+      "targetTier": "Tier áp dụng",
+      "sourceInfo": "Thông tin nguồn",
+      "sourceInfoPlaceholder": "Thông tin nguồn (tùy chọn)",
+      "createSuccess": "Tạo Wild Card thành công!",
+      "createError": "Tạo Wild Card thất bại!",
+      "useSuccess": "Sử dụng Wild Card thành công!",
+      "useError": "Sử dụng Wild Card thất bại!",
+      "cannotUse": "hiện tại chưa sử dụng được thẻ này",
+      "errors": {
+        "invalidDays": "Số ngày không hợp lệ. Phải lớn hơn 0.",
+        "invalidTier": "Tier áp dụng không hợp lệ. Phải là 1 hoặc 2."
+      }
+    },
     "modals": {
       "deleteConfirm": "Bạn có chắc chắn muốn thực hiện điều này?",
       "createWildCardTitle": "Tạo Wild Card cho {{userId}}",

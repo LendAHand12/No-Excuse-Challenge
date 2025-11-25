@@ -686,6 +686,9 @@
       "sourceInfoPlaceholder": "Enter source information (optional)",
       "createSuccess": "Wild Card created successfully!",
       "createError": "An error occurred while creating Wild Card",
+      "useSuccess": "Wild Card used successfully!",
+      "useError": "Failed to use Wild Card!",
+      "cannotUse": "Currently cannot use this card",
       "errors": {
         "invalidDays": "Please enter a valid number of days (greater than 0)",
         "invalidTier": "Please select a valid tier (1 or 2)"
