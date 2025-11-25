@@ -264,7 +264,7 @@ export const sendTicketResponseEmail = async (ticketInfo) => {
           <p style="margin: 0;"><strong>Your Ticket:</strong> ${ticketSubject}</p>
           <p style="margin: 10px 0 0 0;"><strong>Our Response:</strong></p>
           <div style="margin-top: 10px; padding: 10px; background-color: #f9f9f9; border-radius: 3px;">
-            ${adminResponse.replace(/\n/g, '<br>')}
+            ${adminResponse.replace(/\n/g, "<br>")}
           </div>
         </div>
         <p style="margin: 10px 0;">You can view your ticket and respond by visiting: <a href="${frontendURL}/user/tickets">${frontendURL}/user/tickets</a></p>
@@ -308,7 +308,7 @@ export const sendTicketResponseEmailToAdmin = async (ticketInfo) => {
           <p style="margin: 0;"><strong>Subject:</strong> ${ticketSubject}</p>
           <p style="margin: 10px 0 0 0;"><strong>Message:</strong></p>
           <div style="margin-top: 10px; padding: 10px; background-color: #f9f9f9; border-radius: 3px;">
-            ${message.replace(/\n/g, '<br>')}
+            ${message.replace(/\n/g, "<br>")}
           </div>
         </div>
         <p style="margin: 10px 0;">Please review and respond to this ticket in the admin panel.</p>
@@ -547,6 +547,49 @@ export const sendMailPaymentForAdmin = async ({ userId, uuid }) => {
       console.log(err);
     } else {
       console.log(info);
+    }
+  });
+
+  // send a promise since nodemailer is async
+  if (mailSent) return Promise.resolve(1);
+};
+
+export const sendMailErrorGetUserIpAndLocation = async (errorInfo) => {
+  const { clientIp, error } = errorInfo;
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: "letrananhkiet1010@gmail.com",
+    subject: "Lỗi trong getUserIpAndLocation API",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #d32f2f;">⚠️ Lỗi trong getUserIpAndLocation API</h2>
+        <div style="background-color: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0;">
+          <p style="margin: 10px 0;"><strong>Thông tin lỗi:</strong></p>
+          <ul style="margin: 10px 0; padding-left: 20px;">
+            <li><strong>IP của user:</strong> ${clientIp}</li>
+            <li><strong>Thời gian:</strong> ${new Date().toLocaleString("vi-VN", {
+              timeZone: "Asia/Ho_Chi_Minh",
+            })}</li>
+            <li><strong>Error message:</strong> ${error.message || "Unknown error"}</li>
+            <li><strong>Error stack:</strong></li>
+          </ul>
+          <div style="background-color: #fff; padding: 15px; border-left: 4px solid #d32f2f; margin: 20px 0; font-family: monospace; font-size: 12px; overflow-x: auto;">
+            <pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word;">${
+              error.stack || "No stack trace available"
+            }</pre>
+          </div>
+          <p style="margin: 10px 0; color: #666;">Hệ thống đã tự động fallback về Vietnam để tiếp tục hoạt động.</p>
+        </div>
+      </div>
+    `,
+  };
+
+  const mailSent = await transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.error("Error sending error notification email to admin:", err);
+    } else {
+      console.log("Error notification email sent to admin:", info.messageId);
     }
   });
 
