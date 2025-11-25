@@ -21,6 +21,7 @@ import Honor from "../models/honorModel.js";
 import mongoose from "mongoose";
 import moment from "moment";
 import { getClientIp, detectCountryFromIp, isVietnam } from "../utils/getIpLocation.js";
+import { sendMailErrorGetUserIpAndLocation } from "../utils/sendMailCustom.js";
 
 const checkLinkRef = asyncHandler(async (req, res) => {
   const { ref, receiveId } = req.body;
@@ -658,6 +659,16 @@ const getUserIpAndLocation = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Error in getUserIpAndLocation:", error);
+
+    // Gửi email lỗi cho admin
+    try {
+      const clientIp = getClientIp(req);
+      await sendMailErrorGetUserIpAndLocation({ clientIp, error });
+    } catch (emailError) {
+      console.error("Error sending error email:", emailError);
+      // Không throw error để không ảnh hưởng đến response
+    }
+
     // Fallback to Vietnam on error
     res.status(200).json({
       success: false,

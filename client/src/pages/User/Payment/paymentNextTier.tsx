@@ -12,6 +12,8 @@ import { transfer } from '../../../utils/smartContract';
 import { useSelector } from 'react-redux';
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
+import PaymentModal from '@/components/PaymentModal';
+import '@/components/PaymentModal/index.css';
 
 Modal.setAppElement('#root');
 
@@ -34,6 +36,8 @@ const PaymentNextTierPage = () => {
   const [showCommit, setShowCommit] = useState(false);
   const [notEnoughtChild1, setNotEnoughtChild1] = useState(0);
   const [notEnoughtChild2, setNotEnoughtChild2] = useState(0);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [exchangeRate, setExchangeRate] = useState(0);
 
   const topRef = useRef(null);
 
@@ -57,6 +61,7 @@ const PaymentNextTierPage = () => {
           userStepPayment,
           holdForNotEnoughLevel,
           notEnoughtChild,
+          exchangeRate,
         } = response.data;
         setResMessage(message);
         if (userStepPayment === 0 && holdForNotEnoughLevel) {
@@ -71,10 +76,11 @@ const PaymentNextTierPage = () => {
             (accumulator, currentValue) => accumulator + currentValue.amount,
             0,
           );
-          setTotal(totalPayment + 2);
+          setTotal(totalPayment);
           setPaymentIdsList(paymentIds);
           setPaymentsList(payments);
           setStep(userStepPayment);
+          setExchangeRate(exchangeRate || 0);
         }
 
         setLoadingPaymentInfo(false);
@@ -110,6 +116,10 @@ const PaymentNextTierPage = () => {
     })();
   }, []);
 
+  const handleOpenPaymentModal = () => {
+    setShowPaymentModal(true);
+  };
+
   const paymentMetamask = useCallback(async () => {
     setLoadingPayment(true);
     try {
@@ -119,10 +129,7 @@ const PaymentNextTierPage = () => {
       );
       if (referralTransaction) {
         const { transactionHash } = referralTransaction;
-        await doneNextTierPayment({
-          transactionHash: transactionHash,
-          childId,
-        });
+        await doneNextTierPayment(transactionHash);
         setLoadingPayment(false);
         setStep(step + 1);
       } else {
@@ -136,7 +143,7 @@ const PaymentNextTierPage = () => {
   }, [paymentsList, total, childId, step]);
 
   const doneNextTierPayment = useCallback(
-    async ({ transactionHash, childId }) => {
+    async (transactionHash: string) => {
       await Payment.onDoneNextTierPayment({
         transIds: paymentIdsList,
         transactionHash,
@@ -146,6 +153,7 @@ const PaymentNextTierPage = () => {
           toast.success(t(response.data.message));
           if (response.data.message === 'Payment successful') {
             setResStatus('DONE');
+            setStep(step + 1);
           }
         })
         .catch((error) => {
@@ -156,7 +164,7 @@ const PaymentNextTierPage = () => {
           toast.error(t(message));
         });
     },
-    [paymentIdsList],
+    [paymentIdsList, childId, step, t],
   );
 
   return (
@@ -196,29 +204,51 @@ const PaymentNextTierPage = () => {
                         Please check the number of IDs in Tier 1 that need to be
                         fulfilled within <b>45 days</b>. <br></br>
                         <ul className="my-1 list-disc">
-                          <li className="font-medium ml-4">
-                            Branch 1 to fulfill :{' '}
-                            {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                              notEnoughtChild1 >
-                            0
-                              ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                                notEnoughtChild1
-                              : 0}{' '}
-                            IDs
-                          </li>
-                          <li className="font-medium ml-4">
-                            Branch 2 to fulfill :{' '}
-                            {import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                              notEnoughtChild2 >
-                            0
-                              ? import.meta.env.VITE_MAX_IDS_OF_BRANCH -
-                                notEnoughtChild2
-                              : 0}{' '}
-                            IDs
-                          </li>
+                          {(() => {
+                            // Xác định nhánh nào nhiều hơn, nhánh nào ít hơn
+                            const isBranch1Larger =
+                              notEnoughtChild1 >= notEnoughtChild2;
+                            const largerBranchCount = isBranch1Larger
+                              ? notEnoughtChild1
+                              : notEnoughtChild2;
+                            const smallerBranchCount = isBranch1Larger
+                              ? notEnoughtChild2
+                              : notEnoughtChild1;
+
+                            // Tính số ID còn thiếu cho nhánh nhiều hơn (cần 42)
+                            const largerBranchNeeded =
+                              largerBranchCount >= 42
+                                ? 0
+                                : 42 - largerBranchCount;
+
+                            // Tính số ID còn thiếu cho nhánh ít hơn (cần 20)
+                            const smallerBranchNeeded =
+                              smallerBranchCount >= 20
+                                ? 0
+                                : 20 - smallerBranchCount;
+
+                            // Gán lại cho branch1 và branch2
+                            const branch1Needed = isBranch1Larger
+                              ? largerBranchNeeded
+                              : smallerBranchNeeded;
+                            const branch2Needed = isBranch1Larger
+                              ? smallerBranchNeeded
+                              : largerBranchNeeded;
+
+                            return (
+                              <>
+                                <li className="font-medium ml-4">
+                                  Branch 1 to fulfill : {branch1Needed} IDs
+                                </li>
+                                <li className="font-medium ml-4">
+                                  Branch 2 to fulfill : {branch2Needed} IDs
+                                </li>
+                              </>
+                            );
+                          })()}
                         </ul>
                         By clicking <b>"Yes"</b>, the member agrees to complete
-                        <b> 128 active IDs</b> in both <b> Branch 1</b> and{' '}
+                        <b> 62 active IDs</b> in both <b> Branch 1</b> and{' '}
                         <b> Branch 2</b>.
                       </div>
                       <div className="w-full flex justify-around items-center">
@@ -361,12 +391,12 @@ const PaymentNextTierPage = () => {
                           ))}
                           <button
                             type="submit"
-                            onClick={paymentMetamask}
+                            onClick={handleOpenPaymentModal}
                             disabled={loadingPayment}
                             className="w-2xl mx-auto flex justify-center border border-black items-center hover:underline  font-medium rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
                           >
                             {loadingPayment && <Loading />}
-                            {t('payment')}
+                            {t('paymentTerms.confirm')}
                           </button>
                         </>
                       )}
@@ -408,6 +438,18 @@ const PaymentNextTierPage = () => {
           </>
         )}
       </div>
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        totalAmount={total}
+        changeRate={exchangeRate}
+        paymentIdsList={paymentIdsList}
+        onDonePayment={doneNextTierPayment}
+        onWalletPayment={() => {
+          setShowPaymentModal(false);
+          paymentMetamask();
+        }}
+      />
     </DefaultLayout>
   );
 };

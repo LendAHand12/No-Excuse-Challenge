@@ -284,6 +284,7 @@ const UserProfile = () => {
           ? new Date(values.dieTimeTier1).toISOString()
           : null;
         if (currentDieTimeTier1 !== newDieTimeTier1) {
+          // Gửi chuỗi rỗng nếu muốn set null, backend sẽ xử lý
           formData.append('dieTimeTier1', newDieTimeTier1 || '');
         }
       }
@@ -297,6 +298,7 @@ const UserProfile = () => {
           ? new Date(values.dieTimeTier2).toISOString()
           : null;
         if (currentDieTimeTier2 !== newDieTimeTier2) {
+          // Gửi chuỗi rỗng nếu muốn set null, backend sẽ xử lý
           formData.append('dieTimeTier2', newDieTimeTier2 || '');
         }
       }
@@ -1141,19 +1143,22 @@ const UserProfile = () => {
                     <span>Die Time (Tier 1)</span>
                     <span className="ml-auto">
                       {isEditting ? (
-                        <Controller
-                          control={control}
-                          name="dieTimeTier1"
-                          render={({ field }) => (
-                            <DatePicker
-                              placeholderText={t('fromDate')}
-                              onChange={(date) => field.onChange(date)}
-                              selected={field.value}
-                              dateFormat="dd/MM/yyyy"
-                              className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                            />
-                          )}
-                        />
+                        <div className="flex items-center gap-2">
+                          <Controller
+                            control={control}
+                            name="dieTimeTier1"
+                            render={({ field }) => (
+                              <DatePicker
+                                placeholderText={t('fromDate')}
+                                onChange={(date) => field.onChange(date)}
+                                selected={field.value}
+                                dateFormat="dd/MM/yyyy"
+                                isClearable
+                                className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                              />
+                            )}
+                          />
+                        </div>
                       ) : (
                         (() => {
                           // Hiển thị dieTime theo tier
@@ -1170,19 +1175,22 @@ const UserProfile = () => {
                       <span>Die Time (Tier 2)</span>
                       <span className="ml-auto">
                         {isEditting ? (
-                          <Controller
-                            control={control}
-                            name="dieTimeTier2"
-                            render={({ field }) => (
-                              <DatePicker
-                                placeholderText={t('fromDate')}
-                                onChange={(date) => field.onChange(date)}
-                                selected={field.value}
-                                dateFormat="dd/MM/yyyy"
-                                className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                              />
-                            )}
-                          />
+                          <div className="flex items-center gap-2">
+                            <Controller
+                              control={control}
+                              name="dieTimeTier2"
+                              render={({ field }) => (
+                                <DatePicker
+                                  placeholderText={t('fromDate')}
+                                  onChange={(date) => field.onChange(date)}
+                                  selected={field.value}
+                                  dateFormat="dd/MM/yyyy"
+                                  isClearable
+                                  className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                />
+                              )}
+                            />
+                          </div>
                         ) : (
                           (() => {
                             // Hiển thị dieTime theo tier

@@ -21,6 +21,7 @@ import {
   checkUserCanNextTier,
   getTotalLevel6ToLevel10OfUser,
   hasTwoBranches,
+  getTotalLevel1ToLevel10OfUser,
 } from "../utils/methods.js";
 import Wallet from "../models/walletModel.js";
 import Tree from "../models/treeModel.js";
@@ -790,6 +791,9 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           indexFor++;
         }
       }
+
+      const exchangeRate = await Config.findOne({ label: "USD_TO_VND_SELL" });
+
       res.json({
         status: "OK",
         message: `You're all set for the Tier ${user.tier + 1}. Let's move up!`,
@@ -798,8 +802,9 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
         userStepPayment: user.paymentStep,
         holdForNotEnoughLevel,
         notEnoughtChild: holdForNotEnoughLevel
-          ? await getTotalLevel6ToLevel10OfUser(treeOfUser)
+          ? await getTotalLevel1ToLevel10OfUser(treeOfUser, false)
           : {},
+        exchangeRate: exchangeRate?.value || 0,
       });
     }
   }
@@ -1002,22 +1007,10 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
         user.currentLayer = [...user.currentLayer, 0];
         user[`tier${user.tier + 1}Time`] = new Date();
         user.adminChangeTier = true;
-        if (user.currentLayer[0] === 5) {
-          user.tryToTier2 = "YES";
-          user.timeToTry = new Date();
-        }
 
         const newChildParent = await Tree.findById(childId);
         const mainTree = await Tree.findOne({ tier: 1, userId: user._id, isSubId: false });
         let childsOfChild = [...newChildParent.children];
-
-        // Tính dieTime ban đầu: tier 1 = +30 ngày, tier 2 = +45 ngày
-        const initialDieTimeSub =
-          user.tier === 1
-            ? moment().add(30, "days").toDate()
-            : user.tier === 2
-            ? moment().add(45, "days").toDate()
-            : null;
 
         const newTreeTier1 = await Tree.create({
           userName: user.userId + "1-1",
@@ -1028,7 +1021,6 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
           buyPackage: "A",
           children: [],
           isSubId: true,
-          dieTime: initialDieTimeSub,
         });
 
         newChildParent.children = [...childsOfChild, newTreeTier1._id];
@@ -1043,12 +1035,11 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
         const highestIndexOfLevel = await findHighestIndexOfLevel(user.tier + 1);
         // Tính dieTime ban đầu: tier 1 = +30 ngày, tier 2 = +45 ngày
         const nextTier = user.tier + 1;
+        const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(mainTree, false);
         const initialDieTimeTier2 =
-          nextTier === 1
-            ? moment().add(30, "days").toDate()
-            : nextTier === 2
-            ? moment().add(45, "days").toDate()
-            : null;
+          countChild1 + countChild2 >= 60 && countChild1 >= 19 && countChild2 >= 19
+            ? null
+            : moment().add(45, "days").toDate();
 
         const treeOfUserTier2 = await Tree.create({
           userName: user.userId,
@@ -1068,7 +1059,6 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
         user.tier = user.tier + 1;
         user.paymentStep = 0;
 
-        await Pre;
         message = "Payment successful";
       }
 
