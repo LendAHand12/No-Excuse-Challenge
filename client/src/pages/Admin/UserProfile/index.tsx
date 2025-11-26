@@ -146,6 +146,7 @@ const UserProfile = () => {
 
   const onSubmit = useCallback(
     async (values) => {
+      console.log({ values });
       if (phone === '') {
         setErrPhone(true);
         return;
@@ -222,36 +223,18 @@ const UserProfile = () => {
         enablePaymentCrypto !== currentEnablePaymentCrypto
       ) {
         formData.append('enablePaymentCrypto', String(enablePaymentCrypto));
-        console.log(
-          'Sending enablePaymentCrypto:',
-          enablePaymentCrypto,
-          'current:',
-          currentEnablePaymentCrypto,
-        );
       }
       if (
         enablePaymentBank !== undefined &&
         enablePaymentBank !== currentEnablePaymentBank
       ) {
         formData.append('enablePaymentBank', String(enablePaymentBank));
-        console.log(
-          'Sending enablePaymentBank:',
-          enablePaymentBank,
-          'current:',
-          currentEnablePaymentBank,
-        );
       }
       if (
         enableWithdrawCrypto !== undefined &&
         enableWithdrawCrypto !== currentEnableWithdrawCrypto
       ) {
         formData.append('enableWithdrawCrypto', String(enableWithdrawCrypto));
-        console.log(
-          'Sending enableWithdrawCrypto:',
-          enableWithdrawCrypto,
-          'current:',
-          currentEnableWithdrawCrypto,
-        );
       }
       if (
         enableWithdrawBank !== undefined &&
@@ -1327,53 +1310,95 @@ const UserProfile = () => {
                                 >
                                   {card.status}
                                 </span>
-                                {card.status === 'ACTIVE' && (
-                                  <button
-                                    onClick={async () => {
-                                      if (
-                                        !confirm(
-                                          `Bạn có chắc chắn muốn sử dụng thẻ này cho user ${data.userId}? Thẻ sẽ cộng ${card.days} ngày vào dieTime của Tier ${card.targetTier}.`,
-                                        )
-                                      ) {
-                                        return;
-                                      }
+                                <div className="flex gap-2">
+                                  {card.status === 'ACTIVE' && (
+                                    <>
+                                      <button
+                                        type="button"
+                                        onClick={async () => {
+                                          if (
+                                            !confirm(
+                                              `Bạn có chắc chắn muốn sử dụng thẻ này cho user ${data.userId}? Thẻ sẽ cộng ${card.days} ngày vào dieTime của Tier ${card.targetTier}.`,
+                                            )
+                                          ) {
+                                            return;
+                                          }
 
-                                      setUsingCardId(card._id);
-                                      try {
-                                        const response =
-                                          await WildCard.useWildCard(
-                                            card._id,
-                                            id,
-                                          );
-                                        toast.success(
-                                          response.data.message ||
-                                            'Sử dụng Wild Card thành công!',
-                                        );
-                                        setRefresh(!refresh);
-                                      } catch (error: any) {
-                                        const message =
-                                          error.response &&
-                                          error.response.data.message
-                                            ? error.response.data.message
-                                            : error.message;
-                                        toast.error(
-                                          t(message) ||
-                                            'Có lỗi xảy ra khi sử dụng Wild Card',
-                                        );
-                                      } finally {
-                                        setUsingCardId(null);
-                                      }
-                                    }}
-                                    disabled={usingCardId === card._id}
-                                    className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                                  >
-                                    {usingCardId === card._id ? (
-                                      <Loading />
-                                    ) : (
-                                      'Use'
-                                    )}
-                                  </button>
-                                )}
+                                          setUsingCardId(card._id);
+                                          try {
+                                            const response =
+                                              await WildCard.useWildCard(
+                                                card._id,
+                                                id,
+                                              );
+                                            toast.success(
+                                              response.data.message ||
+                                                'Sử dụng Wild Card thành công!',
+                                            );
+                                            setRefresh(!refresh);
+                                          } catch (error: any) {
+                                            const message =
+                                              error.response &&
+                                              error.response.data.message
+                                                ? error.response.data.message
+                                                : error.message;
+                                            toast.error(
+                                              t(message) ||
+                                                'Có lỗi xảy ra khi sử dụng Wild Card',
+                                            );
+                                          } finally {
+                                            setUsingCardId(null);
+                                          }
+                                        }}
+                                        disabled={usingCardId === card._id}
+                                        className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      >
+                                        {usingCardId === card._id ? (
+                                          <Loading />
+                                        ) : (
+                                          'Use'
+                                        )}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={async () => {
+                                          if (
+                                            !confirm(
+                                              `Bạn có chắc chắn muốn xóa thẻ này?`,
+                                            )
+                                          ) {
+                                            return;
+                                          }
+
+                                          try {
+                                            const response =
+                                              await WildCard.adminDeleteWildCard(
+                                                card._id,
+                                              );
+                                            toast.success(
+                                              response.data.message ||
+                                                'Xóa Wild Card thành công!',
+                                            );
+                                            setRefresh(!refresh);
+                                          } catch (error: any) {
+                                            const message =
+                                              error.response &&
+                                              error.response.data.message
+                                                ? error.response.data.message
+                                                : error.message;
+                                            toast.error(
+                                              t(message) ||
+                                                'Có lỗi xảy ra khi xóa Wild Card',
+                                            );
+                                          }
+                                        }}
+                                        className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
+                                      >
+                                        {t('Delete')}
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>

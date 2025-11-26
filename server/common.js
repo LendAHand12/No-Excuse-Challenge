@@ -2,6 +2,7 @@ import Transaction from "./models/transactionModel.js";
 import Tree from "./models/treeModel.js";
 import User from "./models/userModel.js";
 import UserOld from "./models/userOldModel.js";
+import WildCard from "./models/wildCardModel.js";
 import { getParentWithCountPay } from "./utils/getParentWithCountPay.js";
 import {
   findNextUser,
@@ -1456,6 +1457,118 @@ export const exportOver45UsersToTxt = async () => {
       filepath,
       totalCount: sortedUsers.length,
       users: sortedUsers,
+    };
+  } catch (err) {
+    console.log(`\n❌ ERROR: ${err.message}`);
+    throw err;
+  }
+};
+
+/**
+ * Quét tất cả user đã lên tier 2 và có dieTime !== null ở cây tier 2
+ * Tặng 2 wild card cho mỗi user (chương trình khuyến mãi lên tier 2)
+ * Chỉ tặng 1 lần duy nhất, không tặng lại nếu đã nhận
+ */
+export const giveTier2PromotionWildCards = async () => {
+  try {
+    console.log("\n🎁 Bắt đầu phát wild card khuyến mãi lên tier 2...");
+
+    // Tìm tất cả user có tier = 2, không phải admin, status không phải DELETED
+    // và chưa nhận wild card khuyến mãi (receivedTier2PromotionWildCard = false)
+    const tier2Users = await User.find({
+      tier: 2,
+      isAdmin: false,
+      status: { $ne: "DELETED" },
+      receivedTier2PromotionWildCard: false, // Chỉ lấy user chưa nhận
+    }).select("userId _id");
+
+    console.log(`📊 Tìm thấy ${tier2Users.length} user tier 2 chưa nhận wild card khuyến mãi`);
+
+    let createdCards = 0;
+    let eligibleUsers = 0;
+    let skippedUsers = 0;
+    const errors = [];
+
+    // Duyệt qua từng user
+    for (const user of tier2Users) {
+      try {
+        // Tìm cây tier 2 của user
+        const treeTier2 = await Tree.findOne({
+          userId: user._id,
+          tier: 2,
+          isSubId: false,
+        });
+
+        if (!treeTier2) {
+          skippedUsers++;
+          console.log(`  ⚠️  User ${user.userId}: Không tìm thấy cây tier 2`);
+          continue;
+        }
+
+        // Kiểm tra dieTime !== null
+        if (!treeTier2.dieTime || treeTier2.dieTime === null) {
+          skippedUsers++;
+          console.log(`  ⚠️  User ${user.userId}: dieTime = null, không đủ điều kiện`);
+          continue;
+        }
+
+        // User đủ điều kiện, tạo 2 wild card
+        await WildCard.create({
+          userId: user._id,
+          cardType: "PROMO_TIER_2",
+          status: "ACTIVE",
+          sourceInfo: "Khuyến mãi lên tier 2 - Wild card 1",
+          days: 15,
+          targetTier: 2,
+          usedBy: null,
+        });
+
+        await WildCard.create({
+          userId: user._id,
+          cardType: "PROMO_TIER_2",
+          status: "ACTIVE",
+          sourceInfo: "Khuyến mãi lên tier 2 - Wild card 2",
+          days: 15,
+          targetTier: 2,
+          usedBy: null,
+        });
+
+        // Đánh dấu user đã nhận wild card khuyến mãi
+        user.receivedTier2PromotionWildCard = true;
+        await user.save();
+
+        createdCards += 2; // Tạo 2 thẻ
+        eligibleUsers++;
+        console.log(`  ✅ Đã tạo 2 wild card cho user: ${user.userId}`);
+      } catch (err) {
+        skippedUsers++;
+        errors.push({
+          userId: user.userId,
+          error: err.message,
+        });
+        console.error(`  ❌ Lỗi khi tạo wild card cho user ${user.userId}:`, err.message);
+      }
+    }
+
+    console.log(`\n📈 KẾT QUẢ:`);
+    console.log(`  - Tổng số user tier 2 chưa nhận: ${tier2Users.length}`);
+    console.log(`  - User đủ điều kiện và đã nhận: ${eligibleUsers}`);
+    console.log(`  - Tổng số wild card đã tạo: ${createdCards}`);
+    console.log(`  - User bỏ qua/Lỗi: ${skippedUsers}`);
+
+    if (errors.length > 0) {
+      console.log(`\n⚠️  Các lỗi xảy ra:`);
+      errors.forEach((err) => {
+        console.log(`  - ${err.userId}: ${err.error}`);
+      });
+    }
+
+    return {
+      totalUsers: tier2Users.length,
+      eligibleUsers,
+      createdCards,
+      skippedUsers,
+      errors,
     };
   } catch (err) {
     console.log(`\n❌ ERROR: ${err.message}`);

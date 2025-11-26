@@ -52,6 +52,8 @@ import {
   checkRefAndTotalChildOfUser,
   fetchVnUsdRates,
   calculateTreeDieTime,
+  createWildCardForTier2Users,
+  giveTier2PromotionWildCardsCronjob,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 import {
@@ -216,6 +218,18 @@ const cron4 = new CronJob(
   VIETNAM_TIMEZONE
 );
 
+// const cron5 = new CronJob(
+//   "00 05 * * *", // 5h sáng giờ Việt Nam
+//   async () => {
+//     console.log("Calculate Tree DieTime start");
+//     await calculateTreeDieTime();
+//     console.log("Calculate Tree DieTime done");
+//   },
+//   null,
+//   true,
+//   VIETNAM_TIMEZONE
+// );
+
 const cron6 = new CronJob(
   "0 * * * *", // Mỗi giờ theo giờ Việt Nam
   async () => {
@@ -228,22 +242,27 @@ const cron6 = new CronJob(
   VIETNAM_TIMEZONE
 );
 
-// Chạy mỗi giờ vào phút thứ 10: lấy tỷ giá VN từ phobitcoin
-// const cronFetchVnUsdRates = new CronJob(
-//   "10 * * * *", // phút 10 mỗi giờ
-//   async () => {
-//     try {
-//       console.log("Fetch VN USD rates start");
-//       await fetchVnUsdRates();
-//       console.log("Fetch VN USD rates done");
-//     } catch (e) {
-//       console.error("Fetch VN USD rates error:", e?.message || e);
-//     }
-//   },
-//   null,
-//   true,
-//   VIETNAM_TIMEZONE
-// );
+const cron7 = new CronJob(
+  "00 05 * * *", // 5h sáng giờ Việt Nam
+  async () => {
+    await createWildCardForTier2Users();
+  },
+  null,
+  true,
+  VIETNAM_TIMEZONE
+);
+
+const cron8 = new CronJob(
+  "30 05 * * *", // 7h sáng giờ Việt Nam
+  async () => {
+    console.log("Give tier 2 promotion wild cards start");
+    await giveTier2PromotionWildCardsCronjob();
+    console.log("Give tier 2 promotion wild cards done");
+  },
+  null,
+  true,
+  VIETNAM_TIMEZONE
+);
 
 await fixParentChildLinks();
 
@@ -253,8 +272,10 @@ cron12.start();
 cron2.start();
 cron3.start();
 cron4.start();
+// cron5.start();
 cron6.start();
-// cronFetchVnUsdRates.start();
+// cron7.start();
+cron8.start();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
