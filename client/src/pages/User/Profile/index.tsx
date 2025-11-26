@@ -95,6 +95,11 @@ const Profile = () => {
   const [wildCards, setWildCards] = useState([]);
   const [loadingWildCards, setLoadingWildCards] = useState(false);
   const [usingCardId, setUsingCardId] = useState<string | null>(null);
+  const [imgFrontFile, setImgFrontFile] = useState<File | null>(null);
+  const [imgBackFile, setImgBackFile] = useState<File | null>(null);
+  const [imgFrontPreview, setImgFrontPreview] = useState<string | null>(null);
+  const [imgBackPreview, setImgBackPreview] = useState<string | null>(null);
+  const [uploadingImages, setUploadingImages] = useState(false);
 
   const {
     register,
@@ -202,6 +207,116 @@ const Profile = () => {
       }
     })();
   }, [refresh]);
+
+  // Load existing images from userInfo
+  useEffect(() => {
+    if (userInfo.imgFront) {
+      setImgFrontPreview(
+        `${import.meta.env.VITE_API_URL}/uploads/CCCD/${userInfo.imgFront}`,
+      );
+    }
+    if (userInfo.imgBack) {
+      setImgBackPreview(
+        `${import.meta.env.VITE_API_URL}/uploads/CCCD/${userInfo.imgBack}`,
+      );
+    }
+  }, [userInfo.imgFront, userInfo.imgBack]);
+
+  // Handle image file selection - chỉ cho phép nếu chưa có ảnh
+  const handleImgFrontChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Kiểm tra nếu đã có ảnh thì không cho upload
+    if (userInfo.imgFront) {
+      toast.warning(
+        t('You can only upload once. Please contact admin to update.'),
+      );
+      e.target.value = ''; // Reset input
+      return;
+    }
+    const file = e.target.files?.[0];
+    if (file) {
+      setImgFrontFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImgFrontPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImgBackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Kiểm tra nếu đã có ảnh thì không cho upload
+    if (userInfo.imgBack) {
+      toast.warning(
+        t('You can only upload once. Please contact admin to update.'),
+      );
+      e.target.value = ''; // Reset input
+      return;
+    }
+    const file = e.target.files?.[0];
+    if (file) {
+      setImgBackFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImgBackPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Submit images - chỉ cho phép nếu chưa có ảnh
+  const handleSubmitImages = useCallback(async () => {
+    // Kiểm tra nếu đã có ảnh thì không cho upload
+    if (userInfo.imgFront && imgFrontFile) {
+      toast.warning(
+        t('Front image already uploaded. You can only upload once.'),
+      );
+      return;
+    }
+    if (userInfo.imgBack && imgBackFile) {
+      toast.warning(
+        t('Back image already uploaded. You can only upload once.'),
+      );
+      return;
+    }
+
+    if (!imgFrontFile && !imgBackFile) {
+      toast.info(t('Please select at least one image to upload'));
+      return;
+    }
+
+    setUploadingImages(true);
+    try {
+      const formData = new FormData();
+      if (imgFrontFile && !userInfo.imgFront) {
+        formData.append('imgFront', imgFrontFile);
+      }
+      if (imgBackFile && !userInfo.imgBack) {
+        formData.append('imgBack', imgBackFile);
+      }
+
+      const response = await User.update(id, formData);
+      toast.success(t(response.data.message || 'Images uploaded successfully'));
+      setRefresh((prev) => !prev);
+      setImgFrontFile(null);
+      setImgBackFile(null);
+    } catch (error: any) {
+      const message =
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message;
+      toast.error(t(message));
+    } finally {
+      setUploadingImages(false);
+    }
+  }, [
+    imgFrontFile,
+    imgBackFile,
+    id,
+    t,
+    userInfo.imgFront,
+    userInfo.imgBack,
+    setRefresh,
+  ]);
 
   // Initialize selectedBank when modal opens or bankName changes
   useEffect(() => {
@@ -1066,6 +1181,128 @@ const Profile = () => {
                         </div>
                       ))}
                     </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ID Card Images Upload Section */}
+            <div className="bg-[#FAFBFC] p-4 rounded-2xl">
+              <div className="py-2 px-4">
+                <p className="uppercase mt-2 font-bold mb-4">
+                  {t('ID Card Images')}
+                </p>
+                <p className="text-sm text-gray-600 mb-4">
+                  {t(
+                    'Upload front and back images of your ID card for admin verification',
+                  )}
+                </p>
+                <div className="grid lg:grid-cols-2 gap-4">
+                  {/* Front Image */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      {t('Front of ID Card')}
+                    </label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                      {imgFrontPreview ? (
+                        <div className="relative">
+                          <img
+                            src={imgFrontPreview}
+                            alt="Front of ID Card"
+                            className="max-w-full h-auto max-h-64 mx-auto rounded"
+                          />
+                          {userInfo.imgFront && (
+                            <p className="mt-2 text-sm text-gray-600 italic">
+                              {t('Image uploaded. Contact admin to update.')}
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          <p className="text-gray-500 mb-2">
+                            {t('No image uploaded')}
+                          </p>
+                        </div>
+                      )}
+                      {!userInfo.imgFront && (
+                        <>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImgFrontChange}
+                            className="hidden"
+                            id="imgFrontInput"
+                            disabled={!!userInfo.imgFront}
+                          />
+                          <label
+                            htmlFor="imgFrontInput"
+                            className="mt-2 inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer text-sm"
+                          >
+                            {t('Upload Image')}
+                          </label>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Back Image */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      {t('Back of ID Card')}
+                    </label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                      {imgBackPreview ? (
+                        <div className="relative">
+                          <img
+                            src={imgBackPreview}
+                            alt="Back of ID Card"
+                            className="max-w-full h-auto max-h-64 mx-auto rounded"
+                          />
+                          {userInfo.imgBack && (
+                            <p className="mt-2 text-sm text-gray-600 italic">
+                              {t('Image uploaded. Contact admin to update.')}
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          <p className="text-gray-500 mb-2">
+                            {t('No image uploaded')}
+                          </p>
+                        </div>
+                      )}
+                      {!userInfo.imgBack && (
+                        <>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImgBackChange}
+                            className="hidden"
+                            id="imgBackInput"
+                            disabled={!!userInfo.imgBack}
+                          />
+                          <label
+                            htmlFor="imgBackInput"
+                            className="mt-2 inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer text-sm"
+                          >
+                            {t('Upload Image')}
+                          </label>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {(imgFrontFile || imgBackFile) && (
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleSubmitImages}
+                      disabled={uploadingImages}
+                      className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {uploadingImages && <Loading />}
+                      {t('Upload Images')}
+                    </button>
                   </div>
                 )}
               </div>

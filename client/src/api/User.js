@@ -139,6 +139,9 @@ const User = {
   getSubInfo: () => {
     return API.post(`${URL_API_USER}/sub-info`);
   },
+  deleteIdImage: (userId, imageType) => {
+    return API.delete(`${URL_API_USER}/${userId}/id-image/${imageType}`);
+  },
 };
 
 export default User;

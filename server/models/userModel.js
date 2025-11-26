@@ -242,6 +242,14 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    contractCreated: {
+      type: Boolean,
+      default: false,
+    },
+    contractCreatedAt: {
+      type: Date,
+      default: null,
+    },
     preTier2Status: {
       type: String,
       enum: ["", "ACHIEVED", "PENDING", "APPROVED", "PASSED"],

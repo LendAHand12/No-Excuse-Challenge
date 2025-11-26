@@ -868,6 +868,8 @@ const updateUser = asyncHandler(async (req, res) => {
     accountName,
     accountNumber,
     dateOfBirth,
+    filesFront: req.files.imgFront[0]?.filename || "",
+    filesBack: req.files.imgBack[0]?.filename || "",
   });
 
   if (!user) {
@@ -899,12 +901,6 @@ const updateUser = asyncHandler(async (req, res) => {
       { isAdmin: false },
       { status: { $ne: "DELETED" } },
     ],
-  });
-
-  console.log({
-    userHavePhone: userHavePhone[0],
-    userHaveWalletAddress: userHaveWalletAddress[0],
-    userHaveEmail: userHaveEmail[0],
   });
 
   if (userHavePhone.length >= 1 || userHaveWalletAddress.length >= 1 || userHaveEmail.length >= 1) {
@@ -1008,7 +1004,7 @@ const updateUser = asyncHandler(async (req, res) => {
         const currentDateStr = currentValue ? new Date(currentValue).getTime() : null;
         const newDateStr = parsedDate ? parsedDate.getTime() : null;
 
-        if (currentDateStr !== newDateStr) {
+        if (parsedDate && currentDateStr !== newDateStr) {
           const historyEntry = {
             userId: user._id,
             field,
@@ -1080,6 +1076,53 @@ const updateUser = asyncHandler(async (req, res) => {
       }
     }
 
+    // Handle image uploads (imgFront and imgBack)
+    // User chỉ được upload 1 lần, admin có thể update
+    const currentUser = req.user;
+    if (req.files && req.files.imgFront && req.files.imgFront[0]) {
+      // Kiểm tra nếu user đã có ảnh và không phải admin thì không cho update
+      if (user.imgFront && !currentUser.isAdmin) {
+        res.status(400);
+        throw new Error("You can only upload once. Please contact admin to update.");
+      }
+      const oldImgFront = user.imgFront || "";
+      user.imgFront = req.files.imgFront[0].filename || user.imgFront;
+      // Add to history if changed (bao gồm cả upload lần đầu)
+      if (oldImgFront !== user.imgFront) {
+        changes.push({
+          userId: user._id,
+          field: "imgFront",
+          oldValue: oldImgFront,
+          newValue: user.imgFront,
+          status: kycConfig.value === true ? "approved" : "pending",
+          reviewedBy:
+            kycConfig.value === true ? "AUTO" : currentUser.isAdmin ? currentUser.userId : "",
+        });
+      }
+    }
+    if (req.files && req.files.imgBack && req.files?.imgBack[0]) {
+      // Kiểm tra nếu user đã có ảnh và không phải admin thì không cho update
+      if (user.imgBack && !currentUser.isAdmin) {
+        res.status(400);
+        throw new Error("You can only upload once. Please contact admin to update.");
+      }
+      const oldImgBack = user.imgBack || "";
+      user.imgBack = req.files.imgBack[0].filename || user.imgBack;
+      // Add to history if changed (bao gồm cả upload lần đầu)
+      if (oldImgBack !== user.imgBack) {
+        changes.push({
+          userId: user._id,
+          field: "imgBack",
+          oldValue: oldImgBack,
+          newValue: user.imgBack,
+          status: kycConfig.value === true ? "approved" : "pending",
+          reviewedBy:
+            kycConfig.value === true ? "AUTO" : currentUser.isAdmin ? currentUser.userId : "",
+        });
+      }
+    }
+
+    console.log({ changes });
     // Save all changes to history
     if (changes.length > 0) {
       await UserHistory.insertMany(changes);
@@ -1234,6 +1277,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     enablePaymentBank,
     enableWithdrawCrypto,
     enableWithdrawBank,
+    contractCreated,
   } = req.body;
 
   if (userId) {
@@ -1484,6 +1528,78 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     }
     if (req.files && req.files.imgBack && req.files?.imgBack[0]) {
       user.imgBack = req.files.imgBack[0].filename || user.imgBack;
+    }
+
+    // Xử lý contractCreated: khi đánh dấu đã làm hợp đồng thì tự động xóa 2 ảnh CCCD
+    if (contractCreated !== undefined && contractCreated !== null && contractCreated !== "") {
+      const contractCreatedValue =
+        contractCreated === true ||
+        contractCreated === "true" ||
+        String(contractCreated).toLowerCase() === "true";
+
+      if (contractCreatedValue && !user.contractCreated) {
+        // Chỉ xóa khi chuyển từ false sang true
+        user.contractCreated = true;
+        user.contractCreatedAt = new Date();
+
+        const fs = await import("fs");
+        const path = await import("path");
+        const admin = req.user;
+        const changes = [];
+
+        // Xóa imgFront nếu có
+        if (user.imgFront && user.imgFront !== "") {
+          const oldImgFront = user.imgFront;
+          const filePathFront = path.join(process.cwd(), "public", "uploads", "CCCD", oldImgFront);
+          try {
+            if (fs.existsSync(filePathFront)) {
+              fs.unlinkSync(filePathFront);
+            }
+          } catch (error) {
+            console.error("Error deleting imgFront file:", error);
+          }
+          user.imgFront = "";
+          changes.push({
+            userId: user._id,
+            field: "imgFront",
+            oldValue: oldImgFront,
+            newValue: "",
+            status: "approved",
+            reviewedBy: admin.isAdmin ? admin.userId : "AUTO",
+          });
+        }
+
+        // Xóa imgBack nếu có
+        if (user.imgBack && user.imgBack !== "") {
+          const oldImgBack = user.imgBack;
+          const filePathBack = path.join(process.cwd(), "public", "uploads", "CCCD", oldImgBack);
+          try {
+            if (fs.existsSync(filePathBack)) {
+              fs.unlinkSync(filePathBack);
+            }
+          } catch (error) {
+            console.error("Error deleting imgBack file:", error);
+          }
+          user.imgBack = "";
+          changes.push({
+            userId: user._id,
+            field: "imgBack",
+            oldValue: oldImgBack,
+            newValue: "",
+            status: "approved",
+            reviewedBy: admin.isAdmin ? admin.userId : "AUTO",
+          });
+        }
+
+        // Lưu vào UserHistory
+        if (changes.length > 0) {
+          await UserHistory.insertMany(changes);
+        }
+      } else if (!contractCreatedValue) {
+        // Nếu set về false thì chỉ update field, không xóa ảnh
+        user.contractCreated = false;
+        user.contractCreatedAt = null;
+      }
     }
     const listTransSuccess = await Transaction.find({
       $and: [{ userId: user._id }, { status: "SUCCESS" }, { type: { $ne: "REGISTER" } }],
@@ -3415,6 +3531,69 @@ const getTreesByUserName = asyncHandler(async (req, res) => {
   });
 });
 
+const deleteIdImage = asyncHandler(async (req, res) => {
+  const { id, imageType } = req.params;
+
+  if (!id || !imageType) {
+    res.status(400);
+    throw new Error("User ID and image type are required");
+  }
+
+  if (imageType !== "imgFront" && imageType !== "imgBack") {
+    res.status(400);
+    throw new Error("Invalid image type. Must be 'imgFront' or 'imgBack'");
+  }
+
+  const user = await User.findById(id);
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  const imageFileName = user[imageType];
+  if (!imageFileName || imageFileName === "") {
+    res.status(404);
+    throw new Error("Image not found");
+  }
+
+  // Lưu oldValue trước khi xóa
+  const oldValue = imageFileName;
+
+  // Xóa file từ folder
+  const fs = await import("fs");
+  const path = await import("path");
+  const filePath = path.join(process.cwd(), "public", "uploads", "CCCD", imageFileName);
+
+  try {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch (error) {
+    console.error("Error deleting file:", error);
+    // Tiếp tục xóa field trong database dù file không tồn tại
+  }
+
+  // Xóa field trong database
+  user[imageType] = "";
+  await user.save();
+
+  // Lưu vào UserHistory
+  const admin = req.user;
+  await UserHistory.create({
+    userId: user._id,
+    field: imageType,
+    oldValue: oldValue,
+    newValue: "",
+    status: "approved",
+    reviewedBy: admin.isAdmin ? admin.userId : "AUTO",
+  });
+
+  res.json({
+    success: true,
+    message: "Image deleted successfully",
+  });
+});
+
 export {
   getUserProfile,
   getAllUsers,
@@ -3461,4 +3640,5 @@ export {
   getAllUsersOver45,
   getAllUsersPreTier2,
   getTreesByUserName,
+  deleteIdImage,
 };

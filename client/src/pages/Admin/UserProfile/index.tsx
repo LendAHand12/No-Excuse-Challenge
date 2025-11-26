@@ -65,6 +65,54 @@ const UserProfile = () => {
   const [wildCards, setWildCards] = useState([]);
   const [loadingWildCards, setLoadingWildCards] = useState(false);
   const [usingCardId, setUsingCardId] = useState<string | null>(null);
+  const [downloadingImage, setDownloadingImage] = useState<string | null>(null);
+
+  // Function to download image
+  const handleDownloadImage = async (
+    imageType: 'imgFront' | 'imgBack',
+    fileName: string,
+  ) => {
+    if (!fileName || fileName === '') {
+      toast.error(t('No image to download'));
+      return;
+    }
+
+    setDownloadingImage(imageType);
+    try {
+      const imageUrl = `${
+        import.meta.env.VITE_API_URL
+      }/uploads/CCCD/${fileName}`;
+
+      // Fetch the image as blob
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error('Failed to fetch image');
+      }
+
+      const blob = await response.blob();
+
+      // Create a temporary URL for the blob
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      // Create a temporary anchor element and trigger download
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+
+      toast.success(t('Image downloaded successfully'));
+    } catch (error: any) {
+      console.error('Error downloading image:', error);
+      toast.error(t('Failed to download image'));
+    } finally {
+      setDownloadingImage(null);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -2258,39 +2306,163 @@ const UserProfile = () => {
                         <div className="px-4 py-2">{data.note}</div>
                       )}
                     </div>
-                    {/* <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        ID Image Front
-                      </div>
+                    {/* ID Card Images Section */}
+                    <div className="grid lg:grid-cols-2 grid-cols-1 gap-4 my-4">
+                      {/* Front Image */}
                       <div className="px-4 py-2">
-                        {data.imgFront !== '' ? (
-                          <img
-                            src={`${
-                              import.meta.env.VITE_API_URL
-                            }/uploads/CCCD/${data.imgFront}`}
-                          />
-                        ) : (
-                          'No data'
-                        )}
+                        <div className="font-semibold mb-2">
+                          {t('Front of ID Card')}
+                        </div>
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                          {data.imgFront && data.imgFront !== '' ? (
+                            <div className="space-y-2">
+                              <img
+                                src={`${
+                                  import.meta.env.VITE_API_URL
+                                }/uploads/CCCD/${data.imgFront}`}
+                                alt="Front of ID Card"
+                                className="max-w-full h-auto max-h-64 mx-auto rounded"
+                              />
+                              <div className="flex gap-2 justify-center">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleDownloadImage(
+                                      'imgFront',
+                                      data.imgFront,
+                                    )
+                                  }
+                                  disabled={downloadingImage === 'imgFront'}
+                                  className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                                >
+                                  {downloadingImage === 'imgFront' && (
+                                    <Loading />
+                                  )}
+                                  {t('download')}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    if (
+                                      !confirm(
+                                        t(
+                                          'Are you sure you want to delete this image?',
+                                        ),
+                                      )
+                                    ) {
+                                      return;
+                                    }
+                                    try {
+                                      const response = await User.deleteIdImage(
+                                        id,
+                                        'imgFront',
+                                      );
+                                      toast.success(
+                                        t(
+                                          response.data.message ||
+                                            'Image deleted successfully',
+                                        ),
+                                      );
+                                      setRefresh(!refresh);
+                                    } catch (error: any) {
+                                      const message =
+                                        error.response &&
+                                        error.response.data.message
+                                          ? error.response.data.message
+                                          : error.message;
+                                      toast.error(t(message));
+                                    }
+                                  }}
+                                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                                >
+                                  {t('Delete')}
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-gray-500">
+                              {t('No image uploaded')}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      {/* Back Image */}
+                      <div className="px-4 py-2">
+                        <div className="font-semibold mb-2">
+                          {t('Back of ID Card')}
+                        </div>
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                          {data.imgBack && data.imgBack !== '' ? (
+                            <div className="space-y-2">
+                              <img
+                                src={`${
+                                  import.meta.env.VITE_API_URL
+                                }/uploads/CCCD/${data.imgBack}`}
+                                alt="Back of ID Card"
+                                className="max-w-full h-auto max-h-64 mx-auto rounded"
+                              />
+                              <div className="flex gap-2 justify-center">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleDownloadImage('imgBack', data.imgBack)
+                                  }
+                                  disabled={downloadingImage === 'imgBack'}
+                                  className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                                >
+                                  {downloadingImage === 'imgBack' && (
+                                    <Loading />
+                                  )}
+                                  {t('download')}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    if (
+                                      !confirm(
+                                        t(
+                                          'Are you sure you want to delete this image?',
+                                        ),
+                                      )
+                                    ) {
+                                      return;
+                                    }
+                                    try {
+                                      const response = await User.deleteIdImage(
+                                        id,
+                                        'imgBack',
+                                      );
+                                      toast.success(
+                                        t(
+                                          response.data.message ||
+                                            'Image deleted successfully',
+                                        ),
+                                      );
+                                      setRefresh(!refresh);
+                                    } catch (error: any) {
+                                      const message =
+                                        error.response &&
+                                        error.response.data.message
+                                          ? error.response.data.message
+                                          : error.message;
+                                      toast.error(t(message));
+                                    }
+                                  }}
+                                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                                >
+                                  {t('Delete')}
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-gray-500">
+                              {t('No image uploaded')}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        ID Image Back
-                      </div>
-                      <div className="px-4 py-2">
-                        {data.imgBack !== '' ? (
-                          <img
-                            src={`${
-                              import.meta.env.VITE_API_URL
-                            }/uploads/CCCD/${data.imgBack}`}
-                          />
-                        ) : (
-                          'No data'
-                        )}
-                      </div>
-                    </div> */}
-                    <div className="w-full flex justify-center">
+                    {/* <div className="w-full flex justify-center">
                       <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
                         <p className="font-semibold"> FaceTec Image :</p>
                         <div className="flex flex-col items-center justify-center w-full">
@@ -2305,7 +2477,7 @@ const UserProfile = () => {
                           )}
                         </div>
                       </div>
-                    </div>
+                    </div> */}
                     <div className="w-full flex justify-center">
                       <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
                         <p className="font-semibold"> FaceTec Url :</p>
