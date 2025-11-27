@@ -9,7 +9,7 @@ const wildCardSchema = mongoose.Schema(
     },
     cardType: {
       type: String,
-      enum: ["TIER2_REWARD", "REFERRAL_REWARD", "ADMIN_CREATED"], // TIER2_REWARD: từ Tier 2, REFERRAL_REWARD: từ giới thiệu 5 người, ADMIN_CREATED: do admin tạo
+      enum: ["TIER2_REWARD", "REFERRAL_REWARD", "ADMIN_CREATED", "PROMO_TIER_2"], // TIER2_REWARD: từ Tier 2, REFERRAL_REWARD: từ giới thiệu 5 người, ADMIN_CREATED: do admin tạo
       required: true,
     },
     status: {
