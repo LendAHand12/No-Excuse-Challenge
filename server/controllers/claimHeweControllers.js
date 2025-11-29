@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import axios from "axios";
 import Claim from "../models/claimModel.js";
 import User from "../models/userModel.js";
+import Tree from "../models/treeModel.js";
 import Config from "../models/configModel.js";
 import sendHewe from "../services/sendHewe.js";
 import sendUsdt from "../services/sendUsdt.js";
@@ -11,6 +12,7 @@ import { decodeCallbackToken, removeAccents } from "../utils/methods.js";
 import mongoose from "mongoose";
 import { getPriceHewe } from "../utils/getPriceHewe.js";
 import { getPriceAmc } from "../utils/getPriceAmc.js";
+import moment from "moment-timezone";
 
 const claimHewe = asyncHandler(async (req, res) => {
   const { user } = req;
@@ -104,8 +106,22 @@ const claimUsdt = asyncHandler(async (req, res) => {
     if (user.status !== "APPROVED" || user.facetecTid === "") {
       throw new Error("Please verify your account");
     }
-    if (user.errLahCode === "OVER45") {
-      throw new Error("Request denied");
+
+    // Kiểm tra dieTime từ Tree tier 1 - nếu đã chết thì không cho rút
+    const treeTier1 = await Tree.findOne({
+      userId: user._id,
+      tier: 1,
+      isSubId: false,
+    });
+
+    if (treeTier1 && treeTier1.dieTime) {
+      const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+      const dieTimeStart = moment.tz(treeTier1.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+      
+      // Nếu dieTime đã quá hạn (today >= dieTime) thì không cho rút
+      if (todayStart.isSameOrAfter(dieTimeStart)) {
+        throw new Error("Request denied");
+      }
     }
 
     // Bước 3: Check balance
