@@ -76,6 +76,7 @@ const claimHewe = asyncHandler(async (req, res) => {
 
 const claimUsdt = asyncHandler(async (req, res) => {
   const { token, amount, withdrawalType, exchangeRate } = req.body;
+  console.log({ withdrawalType });
   const decode = decodeCallbackToken(token);
   console.log({ decode });
 
@@ -109,17 +110,17 @@ const claimUsdt = asyncHandler(async (req, res) => {
 
     // Bước 3: Check balance
     if (user.availableUsdt > 0 && user.availableUsdt >= parseInt(amount)) {
-      const withdrawType = withdrawalType || "BANK"; // Mặc định là BANK, không cho phép CRYPTO
-
-      // Chặn CRYPTO withdrawal - chỉ cho phép BANK withdrawal
-      if (withdrawType === "CRYPTO") {
-        throw new Error("Crypto withdrawal is currently disabled. Please use bank transfer.");
-      }
+      const withdrawType = withdrawalType || "BANK"; // Mặc định là BANK
 
       // BANK withdrawal: Always create withdraw request
       if (withdrawType === "BANK") {
         // Validate bank information
-        if (!user.accountName || !user.accountNumber || !user.bankName || !user.bankCode) {
+        if (
+          !user.accountName ||
+          !user.accountNumber ||
+          !user.bankName ||
+          !user.bankCode
+        ) {
           throw new Error("Please update your bank information in Profile");
         }
 
@@ -157,10 +158,53 @@ const claimUsdt = asyncHandler(async (req, res) => {
         res.status(200).json({
           message: "Withdrawal request has been sent to Admin. Please wait!",
         });
+      } else if (withdrawType === "CRYPTO") {
+        // CRYPTO withdrawal: Send USDT directly via blockchain
+        // Validate wallet address
+        if (!user.walletAddress) {
+          throw new Error("Please update your wallet address in Profile");
+        }
+
+        // Calculate amounts - Tất cả tính bằng USDT
+        const amountUsdt = parseFloat(amount);
+        const tax = amountUsdt * 0.1; // 10% tax (USDT)
+        const fee = 1; // Transaction fee 1 USDT
+        const receivedAmount = amountUsdt - tax - fee; // Số tiền thực tế nhận được (USDT)
+
+        if (receivedAmount <= 0) {
+          throw new Error("Amount is too small after fees");
+        }
+
+        // Send USDT via blockchain
+        const receipt = await sendUsdt({
+          amount: receivedAmount,
+          receiverAddress: user.walletAddress,
+        });
+
+        // Create Claim record
+        await Claim.create({
+          userId: user.id,
+          amount: amountUsdt, // Số tiền user yêu cầu (USDT)
+          hash: receipt.hash,
+          coin: "USDT",
+          withdrawalType: "CRYPTO",
+          tax: tax, // Thuế (USDT)
+          fee: fee, // Phí giao dịch (USDT)
+          receivedAmount: receivedAmount, // Số tiền thực tế nhận được (USDT)
+          availableUsdtAfter: user.availableUsdt - parseInt(amount), // Số dư còn lại
+        });
+
+        // Update user balance
+        user.claimedUsdt += parseInt(amount);
+        user.availableUsdt -= parseInt(amount);
+        await user.save();
+
+        res.status(200).json({
+          message: "Claim USDT successful",
+          hash: receipt.hash,
+        });
       } else {
-        // CRYPTO withdrawal đã bị chặn ở trên - không bao giờ đến đây
-        // Giữ lại code này để đảm bảo không có lỗi logic, nhưng sẽ không bao giờ chạy
-        throw new Error("Crypto withdrawal is currently disabled. Please use bank transfer.");
+        throw new Error("Invalid withdrawal type");
       }
     } else {
       throw new Error("Insufficient balance in account");
@@ -321,7 +365,9 @@ const getAllClaims = asyncHandler(async (req, res) => {
     matchStage.coin = coin;
   }
 
-  const keywordRegex = keyword ? { $regex: removeAccents(keyword), $options: "i" } : null;
+  const keywordRegex = keyword
+    ? { $regex: removeAccents(keyword), $options: "i" }
+    : null;
 
   const aggregationPipeline = [
     { $match: matchStage },
@@ -345,7 +391,10 @@ const getAllClaims = asyncHandler(async (req, res) => {
   }
 
   // Đếm số bản ghi sau khi lọc
-  const countAggregation = await Claim.aggregate([...aggregationPipeline, { $count: "total" }]);
+  const countAggregation = await Claim.aggregate([
+    ...aggregationPipeline,
+    { $count: "total" },
+  ]);
   const count = countAggregation[0]?.total || 0;
 
   // Thêm phân trang và sắp xếp
@@ -432,7 +481,10 @@ const getAllClaimsForExport = asyncHandler(async (req, res) => {
       createdAt: claim.createdAt,
       tax: claim.tax || 0,
       fee: claim.fee || 0,
-      receivedAmount: claim.receivedAmount !== undefined ? claim.receivedAmount : (claim.amount - (claim.tax || 0) - (claim.fee || 0)),
+      receivedAmount:
+        claim.receivedAmount !== undefined
+          ? claim.receivedAmount
+          : claim.amount - (claim.tax || 0) - (claim.fee || 0),
       withdrawalType: claim.withdrawalType,
       exchangeRate: claim.exchangeRate || 0,
     });
@@ -474,7 +526,10 @@ const getAllClaimsOfUser = asyncHandler(async (req, res) => {
   ];
 
   // Đếm số bản ghi sau khi lọc
-  const countAggregation = await Claim.aggregate([...aggregationPipeline, { $count: "total" }]);
+  const countAggregation = await Claim.aggregate([
+    ...aggregationPipeline,
+    { $count: "total" },
+  ]);
   const count = countAggregation[0]?.total || 0;
 
   // Thêm phân trang và sắp xếp
