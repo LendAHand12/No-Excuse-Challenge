@@ -509,8 +509,36 @@ const getUserById = asyncHandler(async (req, res) => {
           : user.tier === 1 && user.countPay < 13
           ? true
           : false,
-      isYellow: user.errLahCode === "OVER35",
-      isBlue: user.errLahCode === "OVER45",
+      // Tính toán isYellow và isBlue dựa trên dieTime của Tree tier 1
+      isYellow: (() => {
+        if (tree && tree.dieTime) {
+          const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+          const dieTimeStart = moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+          const diffDays = dieTimeStart.diff(todayStart, "days");
+          
+          // Nếu còn 10 ngày nữa đến hạn (tier 1) hoặc 5 ngày (tier 2) → isYellow = true
+          if (diffDays > 0) {
+            if (user.tier === 1 && diffDays <= 10) {
+              return true;
+            } else if (user.tier === 2 && diffDays <= 5) {
+              return true;
+            }
+          }
+        }
+        return false;
+      })(),
+      isBlue: (() => {
+        if (tree && tree.dieTime) {
+          const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+          const dieTimeStart = moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+          
+          // Nếu quá hạn (dieTime <= today) → isBlue = true
+          if (todayStart.isSameOrAfter(dieTimeStart)) {
+            return true;
+          }
+        }
+        return false;
+      })(),
       isPink: user.countPay === 13 && listDirectUser.length < 2,
       isDisableTier2: treeTier2OfUser ? treeTier2OfUser.disable : false,
       timeToTry: user.timeToTry,
@@ -711,6 +739,18 @@ const getUserInfo = asyncHandler(async (req, res) => {
       countdown = moment(new Date(currentDieTime)).diff(currentDay, "days"); // số ngày còn lại
     }
 
+    // Tính toán errLahCode dựa trên dieTime của Tree tier 1
+    let errLahCode = "";
+    if (treeTier1 && treeTier1.dieTime) {
+      const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+      const dieTimeStart = moment.tz(treeTier1.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+      
+      // Nếu dieTime đã quá hạn (today >= dieTime) thì errLahCode = "OVER45"
+      if (todayStart.isSameOrAfter(dieTimeStart)) {
+        errLahCode = "OVER45";
+      }
+    }
+
     const isMoveSystem = await MoveSystem.find({
       userId: user._id,
     });
@@ -806,7 +846,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       income: tree.income,
       facetecTid: user.facetecTid,
       kycFee: user.kycFee,
-      errLahCode: user.errLahCode,
+      errLahCode: errLahCode,
       pendingUpdateInfo: pendingUpdateInfo.length > 0 ? true : false,
       notEnoughtChild,
       countdown,

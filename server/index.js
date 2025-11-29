@@ -53,7 +53,6 @@ import {
   fetchVnUsdRates,
   calculateTreeDieTime,
   createWildCardForTier2Users,
-  giveTier2PromotionWildCardsCronjob,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 import {
@@ -65,6 +64,7 @@ import {
   recalculateTreeDieTimeForOldData,
   syncDieTimeForSubIds,
   testCalculateDieTimeForTree,
+  giveTier2PromotionWildCards
 } from "./common.js";
 import Tree from "./models/treeModel.js";
 import { getTotalLevel1ToLevel10OfUser, getTotalLevel6ToLevel10OfUser } from "./utils/methods.js";
@@ -142,6 +142,7 @@ app.use(errorHandler);
 
 // await calculateDieTimeForAllTier2();
 // await exportOver45UsersToTxt();
+// await giveTier2PromotionWildCards();
 
 // Cấu hình timezone Việt Nam (GMT+7)
 const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";
@@ -252,18 +253,6 @@ const cron7 = new CronJob(
   VIETNAM_TIMEZONE
 );
 
-const cron8 = new CronJob(
-  "30 05 * * *", // 7h sáng giờ Việt Nam
-  async () => {
-    console.log("Give tier 2 promotion wild cards start");
-    await giveTier2PromotionWildCardsCronjob();
-    console.log("Give tier 2 promotion wild cards done");
-  },
-  null,
-  true,
-  VIETNAM_TIMEZONE
-);
-
 await fixParentChildLinks();
 
 cron0.start();
@@ -275,7 +264,6 @@ cron4.start();
 // cron5.start();
 cron6.start();
 cron7.start();
-cron8.start();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>

@@ -1040,145 +1040,36 @@ const UserProfile = () => {
                     <div className="flex items-center justify-between">
                       <div>Tier 1 :</div>
                       <div
-                        className={`w-10 h-5 rounded-md ${(() => {
-                          // Hàm helper để chuyển đổi date sang giờ Việt Nam và set về 00:00:00
-                          const convertToVietnamDate = (
-                            dateString: string | Date | null | undefined,
-                          ): Date | null => {
-                            if (!dateString) return null;
-                            const date = new Date(dateString);
-                            if (isNaN(date.getTime())) return null;
-
-                            // Lấy UTC time (milliseconds)
-                            const utcTime =
-                              date.getTime() + date.getTimezoneOffset() * 60000;
-                            // Chuyển sang giờ Việt Nam (UTC+7 = 7 * 60 * 60 * 1000 ms)
-                            const vietnamOffset = 7 * 60 * 60 * 1000; // 7 giờ tính bằng milliseconds
-                            const vietnamTime = new Date(
-                              utcTime + vietnamOffset,
-                            );
-
-                            // Set về 00:00:00 của ngày đó
-                            return new Date(
-                              vietnamTime.getFullYear(),
-                              vietnamTime.getMonth(),
-                              vietnamTime.getDate(),
-                            );
-                          };
-
-                          // Lấy ngày hiện tại theo giờ Việt Nam, set về 00:00:00
-                          const now = new Date();
-                          const today = convertToVietnamDate(now);
-                          if (!today) return 'bg-[#009933]'; // Fallback nếu không tính được
-
-                          // Kiểm tra tier 1
-                          let tier1DaysRemaining: number | null = null;
-                          if (data.dieTimeTier1) {
-                            const tier1DieTime = convertToVietnamDate(
-                              data.dieTimeTier1,
-                            );
-                            if (tier1DieTime) {
-                              tier1DaysRemaining = Math.ceil(
-                                (tier1DieTime.getTime() - today.getTime()) /
-                                  (1000 * 60 * 60 * 24),
-                              );
-                            }
-                          }
-
-                          // Logic màu sắc mới
-                          // Nếu user đã chết ở tier 1 (dieTime đã qua)
-                          if (
-                            tier1DaysRemaining !== null &&
-                            tier1DaysRemaining <= 0
-                          ) {
-                            return 'bg-[#0033ff]'; // Màu xanh dương
-                          }
-
-                          // Nếu user tier 1 còn 10 ngày nữa chết
-                          if (
-                            tier1DaysRemaining !== null &&
-                            tier1DaysRemaining > 0 &&
-                            tier1DaysRemaining <= 10
-                          ) {
-                            return 'bg-[#ffcc00]'; // Màu vàng
-                          }
-
-                          // Còn lại màu xanh lá
-                          return 'bg-[#009933]';
-                        })()}`}
+                        className={`w-10 h-5 rounded-md ${
+                          data.isRed
+                            ? 'bg-[#ee0000]' // Màu đỏ
+                            : data.isBlue
+                            ? 'bg-[#0033ff]' // Màu xanh dương
+                            : data.isYellow
+                            ? 'bg-[#ffcc00]' // Màu vàng
+                            : data.isPink
+                            ? 'bg-[#ff3399]' // Màu hồng
+                            : 'bg-[#009933]' // Màu xanh lá (mặc định)
+                        }`}
                       ></div>
                     </div>
                     {data.tier === 2 && (
                       <div className="flex items-center justify-between">
                         <div>Tier 2 :</div>
                         <div
-                          className={`w-10 h-5 rounded-md ${(() => {
-                            // Hàm helper để chuyển đổi date sang giờ Việt Nam và set về 00:00:00
-                            const convertToVietnamDate = (
-                              dateString: string | Date | null | undefined,
-                            ): Date | null => {
-                              if (!dateString) return null;
-                              const date = new Date(dateString);
-                              if (isNaN(date.getTime())) return null;
-
-                              // Lấy UTC time (milliseconds)
-                              const utcTime =
-                                date.getTime() +
-                                date.getTimezoneOffset() * 60000;
-                              // Chuyển sang giờ Việt Nam (UTC+7 = 7 * 60 * 60 * 1000 ms)
-                              const vietnamOffset = 7 * 60 * 60 * 1000; // 7 giờ tính bằng milliseconds
-                              const vietnamTime = new Date(
-                                utcTime + vietnamOffset,
-                              );
-
-                              // Set về 00:00:00 của ngày đó
-                              return new Date(
-                                vietnamTime.getFullYear(),
-                                vietnamTime.getMonth(),
-                                vietnamTime.getDate(),
-                              );
-                            };
-
-                            // Lấy ngày hiện tại theo giờ Việt Nam, set về 00:00:00
-                            const now = new Date();
-                            const today = convertToVietnamDate(now);
-                            if (!today) return 'bg-[#009933]'; // Fallback nếu không tính được
-
-                            // Kiểm tra tier 2
-                            let tier2DaysRemaining: number | null = null;
-                            if (data.dieTimeTier2) {
-                              const tier2DieTime = convertToVietnamDate(
-                                data.dieTimeTier2,
-                              );
-                              if (tier2DieTime) {
-                                tier2DaysRemaining = Math.ceil(
-                                  (tier2DieTime.getTime() - today.getTime()) /
-                                    (1000 * 60 * 60 * 24),
-                                );
-                              }
-                            }
-
-                            // Logic màu sắc cho tier 2
-                            // Nếu user đã chết ở tier 2 (dieTime đã qua)
-                            if (
-                              tier2DaysRemaining !== null &&
-                              tier2DaysRemaining <= 0
-                            ) {
-                              return 'bg-[#663300]'; // Màu nâu
-                            }
-
-                            // Nếu user tier 2 còn 1-5 ngày nữa chết
-                            if (
-                              tier2DaysRemaining !== null &&
-                              tier2DaysRemaining > 0 &&
-                              tier2DaysRemaining <= 5
-                            ) {
-                              return 'bg-[#ffcc00]'; // Màu vàng
-                            }
-
-                            // Còn lại màu xanh lá
-                            return 'bg-[#009933]';
-                          })()}`}
+                          className={`w-10 h-5 rounded-md ${
+                            data.isDisableTier2
+                              ? 'bg-[#663300]' // Màu nâu (disable)
+                              : data.isRed
+                              ? 'bg-[#ee0000]' // Màu đỏ
+                              : data.isBlue
+                              ? 'bg-[#0033ff]' // Màu xanh dương
+                              : data.isYellow
+                              ? 'bg-[#ffcc00]' // Màu vàng
+                              : data.isPink
+                              ? 'bg-[#ff3399]' // Màu hồng
+                              : 'bg-[#009933]' // Màu xanh lá (mặc định)
+                          }`}
                         ></div>
                       </div>
                     )}

@@ -664,6 +664,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
         let payOutForPool = false;
         let rePaymentForPool = 0;
         if (
+          user.paymentStep === 0 &&
           directCommissionUser.shortfallAmount > 0 &&
           directCommissionUser.shortfallAmount >= directCommissionFee
         ) {
@@ -755,6 +756,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           }
           let rePayForPoolRef = false;
           if (
+            user.paymentStep === 0 &&
             receiveUser.shortfallAmount > 0 &&
             receiveUser.shortfallAmount >= referralCommissionFee + rePaymentForPool
           ) {

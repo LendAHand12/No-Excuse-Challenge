@@ -783,14 +783,3 @@ export const createWildCardForTier2Users = asyncHandler(async () => {
     console.error("Error in createWildCardForTier2Users:", err);
   }
 });
-
-// Cronjob phát wild card khuyến mãi lên tier 2
-export const giveTier2PromotionWildCardsCronjob = asyncHandler(async () => {
-  try {
-    console.log("Give tier 2 promotion wild cards start");
-    await giveTier2PromotionWildCards();
-    console.log("Give tier 2 promotion wild cards done");
-  } catch (err) {
-    console.error("Error in giveTier2PromotionWildCardsCronjob:", err);
-  }
-});

@@ -1465,7 +1465,7 @@ export const exportOver45UsersToTxt = async () => {
 };
 
 /**
- * Quét tất cả user đã lên tier 2 và có dieTime !== null ở cây tier 2
+ * Quét tất cả user đã lên tier 2
  * Tặng 2 wild card cho mỗi user (chương trình khuyến mãi lên tier 2)
  * Chỉ tặng 1 lần duy nhất, không tặng lại nếu đã nhận
  */
@@ -1492,27 +1492,7 @@ export const giveTier2PromotionWildCards = async () => {
     // Duyệt qua từng user
     for (const user of tier2Users) {
       try {
-        // Tìm cây tier 2 của user
-        const treeTier2 = await Tree.findOne({
-          userId: user._id,
-          tier: 2,
-          isSubId: false,
-        });
-
-        if (!treeTier2) {
-          skippedUsers++;
-          console.log(`  ⚠️  User ${user.userId}: Không tìm thấy cây tier 2`);
-          continue;
-        }
-
-        // Kiểm tra dieTime !== null
-        if (!treeTier2.dieTime || treeTier2.dieTime === null) {
-          skippedUsers++;
-          console.log(`  ⚠️  User ${user.userId}: dieTime = null, không đủ điều kiện`);
-          continue;
-        }
-
-        // User đủ điều kiện, tạo 2 wild card
+        // User đạt tier 2, tạo 2 wild card
         await WildCard.create({
           userId: user._id,
           cardType: "PROMO_TIER_2",
@@ -1533,9 +1513,10 @@ export const giveTier2PromotionWildCards = async () => {
           usedBy: null,
         });
 
-        // Đánh dấu user đã nhận wild card khuyến mãi
-        user.receivedTier2PromotionWildCard = true;
-        await user.save();
+        // Đánh dấu user đã nhận wild card khuyến mãi để không tặng lại lần 2
+        await User.findByIdAndUpdate(user._id, {
+          receivedTier2PromotionWildCard: true,
+        });
 
         createdCards += 2; // Tạo 2 thẻ
         eligibleUsers++;
@@ -1552,7 +1533,7 @@ export const giveTier2PromotionWildCards = async () => {
 
     console.log(`\n📈 KẾT QUẢ:`);
     console.log(`  - Tổng số user tier 2 chưa nhận: ${tier2Users.length}`);
-    console.log(`  - User đủ điều kiện và đã nhận: ${eligibleUsers}`);
+    console.log(`  - User đã nhận wild card: ${eligibleUsers}`);
     console.log(`  - Tổng số wild card đã tạo: ${createdCards}`);
     console.log(`  - User bỏ qua/Lỗi: ${skippedUsers}`);
 
