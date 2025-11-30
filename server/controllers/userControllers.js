@@ -245,6 +245,18 @@ const getUserById = asyncHandler(async (req, res) => {
       isSubId: false,
     });
 
+    // Tìm cây quay lại (isSubId = true) nếu có
+    const subTree = await Tree.findOne({
+      userId: user._id,
+      tier: 1,
+      isSubId: true,
+    });
+
+    let parentSubTree;
+    if(subTree) {
+      parentSubTree = await Tree.findById(subTree.parentId);
+    }
+
     const listDirectUser = [];
     const listRefIdOfUser = await Tree.find({ refId: tree._id, tier: 1 });
     if (listRefIdOfUser && listRefIdOfUser.length > 0) {
@@ -302,8 +314,9 @@ const getUserById = asyncHandler(async (req, res) => {
     }).select("oldUserName oldEmail updatedAt");
 
     let refUser;
+    let refTree;
     if (tree && tree.refId) {
-      const refTree = await Tree.findById(tree.refId);
+      refTree = await Tree.findById(tree.refId);
       refUser = await User.findById(refTree.userId);
     }
 
@@ -497,7 +510,19 @@ const getUserById = asyncHandler(async (req, res) => {
       availableAmc: user.availableAmc,
       claimedAmc: user.claimedAmc,
       subInfo,
-      currentParent: parentTree ? parentTree.userName : null,
+      currentParent: parentTree,
+      // Thông tin về cây chính và cây quay lại
+      hasSubTree: !!subTree,
+      mainTree: tree ? {
+        treeId: tree._id,
+        parentName: parentTree.userName,
+        refUserName: refTree.userName,
+      } : null,
+      subTree: subTree ? {
+        treeId: subTree._id,
+        parentName: parentSubTree.userName,
+        refUserName: refTree.userName,
+      } : null,
       preTier2Status: user.preTier2Status,
       shortfallAmount: user.shortfallAmount,
       tier2ChildUsers: tier2Users,
@@ -2143,16 +2168,27 @@ async function getAllDescendants(targetUserTreeId, currentTier) {
 }
 
 const changeSystem = asyncHandler(async (req, res) => {
-  const { moveId, parentId, refId, withChild } = req.body;
+  const { moveId, parentId, refId, withChild, treeId } = req.body;
 
   const moveUser = await User.findById(moveId);
 
-  const movePersonTree = await Tree.findOne({
-    userId: moveId,
-    tier: 1,
-    isSubId: false,
-    disable: false,
-  });
+  // Nếu có treeId được chọn, sử dụng tree đó, nếu không thì tìm tree chính (isSubId = false)
+  let movePersonTree;
+  if (treeId) {
+    movePersonTree = await Tree.findOne({
+      _id: treeId,
+      userId: moveId,
+      tier: 1,
+      disable: false,
+    });
+  } else {
+    movePersonTree = await Tree.findOne({
+      userId: moveId,
+      tier: 1,
+      isSubId: false,
+      disable: false,
+    });
+  }
   const receivePerson = await Tree.findById(parentId);
 
   if (!moveUser || !movePersonTree || !receivePerson) {

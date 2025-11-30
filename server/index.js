@@ -66,6 +66,7 @@ import {
   testCalculateDieTimeForTree,
   giveTier2PromotionWildCards,
   recalculateDieTimeDaily,
+  exportUsersWithAdminChangeButNoDieTime,
 } from "./common.js";
 import Tree from "./models/treeModel.js";
 import {
@@ -139,14 +140,7 @@ app.use(notFound);
 // configure a custome error handler middleware
 app.use(errorHandler);
 
-// await recalculateTreeDieTimeForOldData();
-// await checkAliveTreesInXuyen116Branch();
-// await syncDieTimeForSubIds();
-// await getDescendantsAndGive7DaysBonus("67e51addfe1364e3848c589f");
-
-// await calculateDieTimeForAllTier2();
-// await exportOver45UsersToTxt();
-// await giveTier2PromotionWildCards();
+// await exportUsersWithAdminChangeButNoDieTime();
 
 // Cấu hình timezone Việt Nam (GMT+7)
 const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";

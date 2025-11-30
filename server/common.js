@@ -2074,3 +2074,146 @@ export const recalculateDieTimeDaily = async () => {
     throw err;
   }
 };
+
+/**
+ * Lấy danh sách user có adminChangeToDie = true nhưng dieTime tier 1 = null
+ * và không có đủ tối thiểu 2 refId trải đều 2 bên nhánh
+ * Xuất ra file .txt
+ */
+export const exportUsersWithAdminChangeButNoDieTime = async () => {
+  try {
+    console.log(
+      `\n📋 Bắt đầu xuất danh sách user có adminChangeToDie = true nhưng dieTime tier 1 = null và không đủ 2 refId...`
+    );
+
+    // Lấy tất cả user có adminChangeToDie = true
+    const usersWithAdminChange = await User.find({
+      adminChangeToDie: true,
+      isAdmin: false,
+      status: { $ne: "DELETED" },
+    })
+      .select("userId createdAt")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    console.log(
+      `\n📊 Tổng số user có adminChangeToDie = true: ${usersWithAdminChange.length}`
+    );
+
+    const eligibleUsers = [];
+
+    // Lấy ngày hiện tại theo giờ Việt Nam
+    const today = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+
+    for (const user of usersWithAdminChange) {
+      try {
+        // Tìm tree tier 1 của user
+        const treeTier1 = await Tree.findOne({
+          userId: user._id,
+          tier: 1,
+          isSubId: false,
+        });
+
+        if (!treeTier1) {
+          // Không có tree tier 1, bỏ qua
+          continue;
+        }
+
+        // Kiểm tra dieTime tier 1 = null
+        if (treeTier1.dieTime !== null) {
+          // dieTime không phải null, bỏ qua
+          continue;
+        }
+
+        // Kiểm tra có đủ 2 refId còn sống ở 2 nhánh khác nhau không
+        const hasTwoAliveRefId = await hasTwoAliveRefIdInDifferentBranches(
+          treeTier1._id.toString()
+        );
+
+        if (!hasTwoAliveRefId) {
+          // Không đủ 2 refId còn sống ở 2 nhánh → thêm vào danh sách
+          eligibleUsers.push({
+            userId: user.userId,
+            createdAt: user.createdAt,
+          });
+        }
+      } catch (err) {
+        console.error(
+          `  ❌ Lỗi khi xử lý user ${user.userId}:`,
+          err.message
+        );
+      }
+    }
+
+    console.log(
+      `\n📊 Số user đủ điều kiện: ${eligibleUsers.length}`
+    );
+
+    // Tạo nội dung file
+    let fileContent = `DANH SÁCH USER CÓ adminChangeToDie = true NHƯNG dieTime TIER 1 = null VÀ KHÔNG ĐỦ 2 REFID CÒN SỐNG Ở 2 NHÁNH\n`;
+    fileContent += `Thời gian xuất: ${moment().format(
+      "YYYY-MM-DD HH:mm:ss"
+    )}\n`;
+    fileContent += `${"=".repeat(80)}\n`;
+    fileContent += `Tổng số: ${eligibleUsers.length} user\n`;
+    fileContent += `${"=".repeat(80)}\n\n`;
+
+    if (eligibleUsers.length === 0) {
+      fileContent += "Không có user nào.\n";
+    } else {
+      fileContent += `STT\t\tUser ID\t\t\tNgày tạo (createdAt)\n`;
+      fileContent += `${"-".repeat(80)}\n`;
+
+      eligibleUsers.forEach((user, index) => {
+        const createdAtStr = user.createdAt
+          ? moment(user.createdAt).format("YYYY-MM-DD HH:mm:ss")
+          : "N/A";
+        fileContent += `${index + 1}\t\t${user.userId}\t\t${createdAtStr}\n`;
+      });
+    }
+
+    // Tạo thư mục exports nếu chưa có
+    const exportsDir = path.join(process.cwd(), "exports");
+    if (!fs.existsSync(exportsDir)) {
+      fs.mkdirSync(exportsDir, { recursive: true });
+    }
+
+    // Tạo tên file với timestamp
+    const timestamp = moment().format("YYYYMMDD_HHmmss");
+    const filename = `admin_change_no_die_time_${timestamp}.txt`;
+    const filepath = path.join(exportsDir, filename);
+
+    // Ghi file
+    fs.writeFileSync(filepath, fileContent, "utf8");
+
+    console.log(`\n✅ Đã xuất file thành công:`);
+    console.log(`  - File path: ${filepath}`);
+    console.log(`  - Tổng số user: ${eligibleUsers.length}`);
+
+    // Hiển thị thông tin trong console
+    console.log(
+      `\n📋 DANH SÁCH USER CÓ adminChangeToDie = true NHƯNG dieTime TIER 1 = null VÀ KHÔNG ĐỦ 2 REFID:`
+    );
+    if (eligibleUsers.length === 0) {
+      console.log(`  Không có user nào.`);
+    } else {
+      eligibleUsers.forEach((user, index) => {
+        const createdAtStr = user.createdAt
+          ? moment(user.createdAt).format("YYYY-MM-DD HH:mm:ss")
+          : "N/A";
+        console.log(
+          `  ${index + 1}. ${user.userId} - Created: ${createdAtStr}`
+        );
+      });
+    }
+
+    return {
+      filepath,
+      totalCount: eligibleUsers.length,
+      users: eligibleUsers,
+    };
+  } catch (err) {
+    console.log(`\n❌ ERROR: ${err.message}`);
+    throw err;
+  }
+};
