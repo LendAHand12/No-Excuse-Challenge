@@ -12,6 +12,7 @@ import {
   calculateDieTimeForTier1,
   calculateDieTimeForTier2,
   countAliveIdsInBranch,
+  hasTwoBranches,
 } from "./utils/methods.js";
 import moment from "moment-timezone";
 import fs from "fs";
@@ -1553,6 +1554,209 @@ export const giveTier2PromotionWildCards = async () => {
     };
   } catch (err) {
     console.log(`\n❌ ERROR: ${err.message}`);
+    throw err;
+  }
+};
+
+/**
+ * Cronjob chạy mỗi ngày để tính lại dieTime của user
+ * - Bỏ qua user có adminChangeToDie = true (admin đã thay đổi ngày chết)
+ * - Tính lại dieTime cho tier 1 và tier 2
+ */
+export const recalculateDieTimeDaily = async () => {
+  try {
+    console.log("\n🔄 Bắt đầu tính lại dieTime cho tất cả user...");
+
+    // Lấy tất cả user không có adminChangeToDie = true
+    const users = await User.find({
+      adminChangeToDie: { $ne: true },
+      isAdmin: false,
+      status: { $ne: "DELETED" },
+    }).select("_id userId tier");
+
+    console.log(`📊 Tìm thấy ${users.length} user cần tính lại dieTime`);
+
+    let processedCount = 0;
+    let tier1Updated = 0;
+    let tier2Updated = 0;
+    let tier1Skipped = 0;
+    let tier2Skipped = 0;
+    const errors = [];
+
+    // Lấy ngày hiện tại theo giờ Việt Nam
+    const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+
+    for (const user of users) {
+      try {
+        // Xử lý Tier 1
+        const treeTier1 = await Tree.findOne({
+          userId: user._id,
+          tier: 1,
+          isSubId: false,
+        });
+
+        if (treeTier1) {
+          // Kiểm tra có ít nhất 2 refId ở 2 nhánh khác nhau
+          const hasTwoRefIdInDifferentBranches = await hasTwoBranches(
+            treeTier1._id.toString()
+          );
+
+          if (treeTier1.dieTime !== null) {
+            // Nếu dieTime != null
+            if (hasTwoRefIdInDifferentBranches) {
+              // Đủ điều kiện → dieTime = null
+              treeTier1.dieTime = null;
+              await treeTier1.save();
+              tier1Updated++;
+              console.log(
+                `  ✅ User ${user.userId} (Tier 1): Đủ 2 refId ở 2 nhánh → dieTime = null`
+              );
+            } else {
+              // Không đủ → giữ nguyên dieTime
+              tier1Skipped++;
+            }
+          } else {
+            // Nếu dieTime = null
+            if (!hasTwoRefIdInDifferentBranches) {
+              // Không đủ → dieTime = ngày hiện tại + 30 ngày
+              const newDieTime = todayStart.clone().add(30, "days").toDate();
+              treeTier1.dieTime = newDieTime;
+              await treeTier1.save();
+              tier1Updated++;
+              console.log(
+                `  ✅ User ${user.userId} (Tier 1): Không đủ 2 refId → dieTime = ${moment(
+                  newDieTime
+                ).format("DD/MM/YYYY")}`
+              );
+            } else {
+              // Đủ → giữ nguyên dieTime = null
+              tier1Skipped++;
+            }
+          }
+        }
+
+        // Xử lý Tier 2 (chỉ nếu user có tier >= 2)
+        if (user.tier >= 2) {
+          const treeTier2 = await Tree.findOne({
+            userId: user._id,
+            tier: 2,
+            isSubId: false,
+          });
+
+          if (treeTier2) {
+            // Tìm tree tier 1 của cùng user
+            const treeTier1ForTier2 = await Tree.findOne({
+              userId: user._id,
+              tier: 1,
+              isSubId: false,
+            });
+
+            if (treeTier1ForTier2 && treeTier1ForTier2.children.length >= 2) {
+              // Đếm id sống trong 2 nhánh của tree tier 1
+              const branch1Count = await countAliveIdsInBranch(
+                treeTier1ForTier2.children[0]
+              );
+              const branch2Count = await countAliveIdsInBranch(
+                treeTier1ForTier2.children[1]
+              );
+              const totalCount = branch1Count + branch2Count;
+
+              // Kiểm tra điều kiện: tổng >= 62 và mỗi nhánh >= 20
+              const hasEnough =
+                totalCount >= 62 && branch1Count >= 20 && branch2Count >= 20;
+
+              if (treeTier2.dieTime !== null) {
+                // Nếu dieTime != null
+                if (hasEnough) {
+                  // Đủ điều kiện → dieTime = null
+                  treeTier2.dieTime = null;
+                  await treeTier2.save();
+                  tier2Updated++;
+                  console.log(
+                    `  ✅ User ${user.userId} (Tier 2): Đủ 62 id sống → dieTime = null`
+                  );
+                } else {
+                  // Không đủ → giữ nguyên dieTime
+                  tier2Skipped++;
+                }
+              } else {
+                // Nếu dieTime = null
+                if (!hasEnough) {
+                  // Không đủ → dieTime = ngày hiện tại + 45 ngày
+                  const newDieTime = todayStart.clone().add(45, "days").toDate();
+                  treeTier2.dieTime = newDieTime;
+                  await treeTier2.save();
+                  tier2Updated++;
+                  console.log(
+                    `  ✅ User ${user.userId} (Tier 2): Không đủ 62 id sống → dieTime = ${moment(
+                      newDieTime
+                    ).format("DD/MM/YYYY")}`
+                  );
+                } else {
+                  // Đủ → giữ nguyên dieTime = null
+                  tier2Skipped++;
+                }
+              }
+            } else {
+              // Không tìm thấy tree tier 1 hoặc chưa có đủ 2 children
+              if (treeTier2.dieTime === null) {
+                // Nếu dieTime = null và không đủ điều kiện → set dieTime = ngày hiện tại + 45 ngày
+                const newDieTime = todayStart.clone().add(45, "days").toDate();
+                treeTier2.dieTime = newDieTime;
+                await treeTier2.save();
+                tier2Updated++;
+                console.log(
+                  `  ✅ User ${user.userId} (Tier 2): Chưa có tree tier 1 đủ điều kiện → dieTime = ${moment(
+                    newDieTime
+                  ).format("DD/MM/YYYY")}`
+                );
+              }
+            }
+          }
+        }
+
+        processedCount++;
+
+        // Log tiến độ mỗi 100 user
+        if (processedCount % 100 === 0) {
+          console.log(`  📈 Đã xử lý ${processedCount}/${users.length} user...`);
+        }
+      } catch (err) {
+        errors.push({
+          userId: user.userId,
+          error: err.message,
+        });
+        console.error(`  ❌ Lỗi khi xử lý user ${user.userId}:`, err.message);
+      }
+    }
+
+    console.log(`\n📈 KẾT QUẢ:`);
+    console.log(`  - Tổng số user: ${users.length}`);
+    console.log(`  - Đã xử lý: ${processedCount}`);
+    console.log(`  - Tier 1 đã cập nhật: ${tier1Updated}`);
+    console.log(`  - Tier 1 giữ nguyên: ${tier1Skipped}`);
+    console.log(`  - Tier 2 đã cập nhật: ${tier2Updated}`);
+    console.log(`  - Tier 2 giữ nguyên: ${tier2Skipped}`);
+    console.log(`  - Lỗi: ${errors.length}`);
+
+    if (errors.length > 0) {
+      console.log(`\n⚠️  Các lỗi xảy ra:`);
+      errors.forEach((err) => {
+        console.log(`  - ${err.userId}: ${err.error}`);
+      });
+    }
+
+    return {
+      totalUsers: users.length,
+      processedCount,
+      tier1Updated,
+      tier1Skipped,
+      tier2Updated,
+      tier2Skipped,
+      errors,
+    };
+  } catch (err) {
+    console.log(`\n❌ ERROR trong recalculateDieTimeDaily: ${err.message}`);
     throw err;
   }
 };
