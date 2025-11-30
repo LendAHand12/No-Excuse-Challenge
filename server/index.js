@@ -68,7 +68,10 @@ import {
   recalculateDieTimeDaily,
 } from "./common.js";
 import Tree from "./models/treeModel.js";
-import { getTotalLevel1ToLevel10OfUser, getTotalLevel6ToLevel10OfUser } from "./utils/methods.js";
+import {
+  getTotalLevel1ToLevel10OfUser,
+  getTotalLevel6ToLevel10OfUser,
+} from "./utils/methods.js";
 
 const app = express();
 
