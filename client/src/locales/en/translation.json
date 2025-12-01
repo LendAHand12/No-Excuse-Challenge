@@ -858,7 +858,9 @@
     "walletAddress": "Wallet Address",
     "payoutDisplayName": "Payout Display Name",
     "payoutEmailOrPhone": "Payout Email or Phone Number",
-    "payoutDestination": "This is where your payout will be sent."
+    "payoutDestination": "This is where your payout will be sent.",
+    "paymentInformation": "Payment Information",
+    "qrCodeNotAvailable": "QR Code not available"
   },
 
   "approvePayment": {
