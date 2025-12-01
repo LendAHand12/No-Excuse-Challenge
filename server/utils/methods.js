@@ -879,3 +879,27 @@ export const calculateDieTimeForTier2 = async (tree) => {
     return fixedDeadline.toDate();
   }
 };
+
+/**
+ * Kiểm tra xem user có quá hạn (dieTime) hay chưa dựa trên Tree của tier tương ứng
+ * @param {string|Object} userId - ID của user cần kiểm tra
+ * @param {number} tier - Tier cần kiểm tra (1 hoặc 2)
+ * @returns {boolean} - true nếu user đã quá hạn, false nếu chưa quá hạn hoặc không có dieTime
+ */
+export const isUserExpired = async (userId, tier) => {
+  const tree = await Tree.findOne({
+    userId: userId,
+    tier: tier,
+    isSubId: false,
+  });
+
+  if (!tree || !tree.dieTime) {
+    return false;
+  }
+
+  const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+  const dieTimeStart = moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+
+  // Nếu dieTime đã quá hạn (today >= dieTime) thì trả về true
+  return todayStart.isSameOrAfter(dieTimeStart);
+};

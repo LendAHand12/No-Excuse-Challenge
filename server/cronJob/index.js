@@ -163,7 +163,7 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
 });
 
 export const countChildToData = asyncHandler(async () => {
-  const listTrees = await Tree.find({}).select("tier countChild userId userName");
+  const listTrees = await Tree.find({}).select("tier countChild userId userName dieTime");
 
   for (let t of listTrees) {
     // const t = await Tree.findById("68176977299e3ad047c0368e").select(
@@ -249,36 +249,62 @@ export const areArraysEqual = (arr1, arr2) => {
 };
 
 export const distributionHewe = asyncHandler(async () => {
+  // Lấy giá hewe từ config
+  const hewePriceConfig = await Config.findOne({ label: "HEWE_PRICE" });
+  const hewePrice = hewePriceConfig ? Number(hewePriceConfig.value) : 0;
+
   const listUser = await User.find({
     $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }, { countPay: 13 }],
   }).select("userId totalHewe availableHewe hewePerDay claimedHewe currentLayer");
 
   for (let u of listUser) {
     try {
-      if (u.currentLayer[0] >= 4 && u.totalHewe > 0) {
-        u.availableHewe = u.availableHewe + u.totalHewe;
-        u.totalHewe = 0;
-        const newIncome = new Income({
-          userId: u._id,
-          amount: u.totalHewe,
-          coin: "HEWE",
-          from: "Daily HEWE all",
-          type: "",
-        });
+      // Tính số hewe còn lại user sẽ được nhận
+      const remainingHewe = u.totalHewe - u.claimedHewe;
 
-        await newIncome.save();
-      } else if (u.totalHewe > u.claimedHewe) {
-        u.availableHewe = u.availableHewe + u.hewePerDay;
+      // Nếu không còn hewe để nhận thì bỏ qua
+      if (remainingHewe <= 0) {
+        continue;
+      }
+
+      let heweToAdd = 0;
+      let incomeFrom = "";
+
+      if (u.currentLayer[0] === 4) {
+        // Nếu currentLayer[0] = 4: nhận số hewe = 100 / giá của hewe (làm tròn thành số nguyên)
+        heweToAdd = hewePrice > 0 ? Math.round(100 / hewePrice) : 0;
+        incomeFrom = "Daily HEWE level 4";
+      } else if (u.currentLayer[0] === 8) {
+        // Nếu currentLayer[0] = 8: nhận toàn bộ hewe còn lại (làm tròn thành số nguyên)
+        heweToAdd = Math.round(remainingHewe);
+        incomeFrom = "Daily HEWE all";
+      } else {
+        // Các trường hợp khác: nhận hewePerDay mỗi ngày (làm tròn thành số nguyên)
+        // Chỉ nhận khi remainingHewe > 0
+        if (remainingHewe > 0) {
+          heweToAdd = Math.round(u.hewePerDay);
+          incomeFrom = "Daily HEWE";
+        }
+      }
+
+      // Chỉ cộng vào availableHewe nếu heweToAdd > 0
+      if (heweToAdd > 0) {
+        // Đảm bảo không vượt quá số hewe còn lại và làm tròn thành số nguyên
+        const actualHeweToAdd = Math.round(Math.min(heweToAdd, remainingHewe));
+        u.availableHewe = u.availableHewe + actualHeweToAdd;
+        u.claimedHewe = u.claimedHewe + actualHeweToAdd;
+
         const newIncome = new Income({
           userId: u._id,
-          amount: u.hewePerDay,
+          amount: actualHeweToAdd,
           coin: "HEWE",
-          from: "Daily HEWE",
+          from: incomeFrom,
           type: "",
         });
 
         await newIncome.save();
       }
+
       await u.save();
     } catch (error) {
       console.log({ error });

@@ -42,6 +42,14 @@ const claimHewe = asyncHandler(async (req, res) => {
       );
     }
 
+    // Giới hạn tối đa số hewe có thể rút là 700000
+    const MAX_WITHDRAWAL_AMOUNT = 700000;
+    if (lockedUser.availableHewe > MAX_WITHDRAWAL_AMOUNT) {
+      throw new Error(
+        `Maximum withdrawal amount is ${MAX_WITHDRAWAL_AMOUNT} HEWE. Your available balance is ${lockedUser.availableHewe} HEWE.`
+      );
+    }
+
     if (lockedUser.availableHewe > 0) {
       // Gửi token HEWE
       const receipt = await sendHewe({
@@ -56,7 +64,6 @@ const claimHewe = asyncHandler(async (req, res) => {
         coin: "HEWE",
       });
 
-      lockedUser.claimedHewe += lockedUser.availableHewe;
       lockedUser.availableHewe = 0;
       await lockedUser.save();
 
@@ -117,7 +124,7 @@ const claimUsdt = asyncHandler(async (req, res) => {
     if (treeTier1 && treeTier1.dieTime) {
       const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
       const dieTimeStart = moment.tz(treeTier1.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
-      
+
       // Nếu dieTime đã quá hạn (today >= dieTime) thì không cho rút
       if (todayStart.isSameOrAfter(dieTimeStart)) {
         throw new Error("Request denied");
@@ -131,12 +138,7 @@ const claimUsdt = asyncHandler(async (req, res) => {
       // BANK withdrawal: Always create withdraw request
       if (withdrawType === "BANK") {
         // Validate bank information
-        if (
-          !user.accountName ||
-          !user.accountNumber ||
-          !user.bankName ||
-          !user.bankCode
-        ) {
+        if (!user.accountName || !user.accountNumber || !user.bankName || !user.bankCode) {
           throw new Error("Please update your bank information in Profile");
         }
 
@@ -381,9 +383,7 @@ const getAllClaims = asyncHandler(async (req, res) => {
     matchStage.coin = coin;
   }
 
-  const keywordRegex = keyword
-    ? { $regex: removeAccents(keyword), $options: "i" }
-    : null;
+  const keywordRegex = keyword ? { $regex: removeAccents(keyword), $options: "i" } : null;
 
   const aggregationPipeline = [
     { $match: matchStage },
@@ -407,10 +407,7 @@ const getAllClaims = asyncHandler(async (req, res) => {
   }
 
   // Đếm số bản ghi sau khi lọc
-  const countAggregation = await Claim.aggregate([
-    ...aggregationPipeline,
-    { $count: "total" },
-  ]);
+  const countAggregation = await Claim.aggregate([...aggregationPipeline, { $count: "total" }]);
   const count = countAggregation[0]?.total || 0;
 
   // Thêm phân trang và sắp xếp
@@ -542,10 +539,7 @@ const getAllClaimsOfUser = asyncHandler(async (req, res) => {
   ];
 
   // Đếm số bản ghi sau khi lọc
-  const countAggregation = await Claim.aggregate([
-    ...aggregationPipeline,
-    { $count: "total" },
-  ]);
+  const countAggregation = await Claim.aggregate([...aggregationPipeline, { $count: "total" }]);
   const count = countAggregation[0]?.total || 0;
 
   // Thêm phân trang và sắp xếp

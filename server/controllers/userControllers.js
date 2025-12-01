@@ -22,6 +22,7 @@ import {
   checkUserCanNextTier,
   getTotalLevel1ToLevel10OfUser,
   getAllDescendantsTier2Users,
+  isUserExpired,
 } from "../utils/methods.js";
 import { areArraysEqual } from "../cronJob/index.js";
 import {
@@ -253,7 +254,7 @@ const getUserById = asyncHandler(async (req, res) => {
     });
 
     let parentSubTree;
-    if(subTree) {
+    if (subTree) {
       parentSubTree = await Tree.findById(subTree.parentId);
     }
 
@@ -513,16 +514,20 @@ const getUserById = asyncHandler(async (req, res) => {
       currentParent: parentTree,
       // Thông tin về cây chính và cây quay lại
       hasSubTree: !!subTree,
-      mainTree: tree ? {
-        treeId: tree._id,
-        parentName: parentTree.userName,
-        refUserName: refTree.userName,
-      } : null,
-      subTree: subTree ? {
-        treeId: subTree._id,
-        parentName: parentSubTree.userName,
-        refUserName: refTree.userName,
-      } : null,
+      mainTree: tree
+        ? {
+            treeId: tree._id,
+            parentName: parentTree.userName,
+            refUserName: refTree.userName,
+          }
+        : null,
+      subTree: subTree
+        ? {
+            treeId: subTree._id,
+            parentName: parentSubTree.userName,
+            refUserName: refTree.userName,
+          }
+        : null,
       preTier2Status: user.preTier2Status,
       shortfallAmount: user.shortfallAmount,
       tier2ChildUsers: tier2Users,
@@ -540,7 +545,7 @@ const getUserById = asyncHandler(async (req, res) => {
           const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
           const dieTimeStart = moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
           const diffDays = dieTimeStart.diff(todayStart, "days");
-          
+
           // Nếu còn 10 ngày nữa đến hạn (tier 1) hoặc 5 ngày (tier 2) → isYellow = true
           if (diffDays > 0) {
             if (user.tier === 1 && diffDays <= 10) {
@@ -556,7 +561,7 @@ const getUserById = asyncHandler(async (req, res) => {
         if (tree && tree.dieTime) {
           const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
           const dieTimeStart = moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
-          
+
           // Nếu quá hạn (dieTime <= today) → isBlue = true
           if (todayStart.isSameOrAfter(dieTimeStart)) {
             return true;
@@ -769,7 +774,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
     if (treeTier1 && treeTier1.dieTime) {
       const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
       const dieTimeStart = moment.tz(treeTier1.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
-      
+
       // Nếu dieTime đã quá hạn (today >= dieTime) thì errLahCode = "OVER45"
       if (todayStart.isSameOrAfter(dieTimeStart)) {
         errLahCode = "OVER45";
@@ -1913,8 +1918,18 @@ const getCountIncome = async (treeId, tier) => {
       if (child && child.countPay === 0) {
         result = result - 1;
       }
-      const count = await countRecursive(treeOfChild._id);
-      result += count;
+
+      // Kiểm tra dieTime: chỉ đếm những user chưa quá hạn
+      const isExpired = await isUserExpired(treeOfChild.userId, tier);
+      if (isExpired) {
+        result = result - 1;
+      }
+
+      // Chỉ đệ quy đếm children của những user chưa quá hạn
+      if (!isExpired) {
+        const count = await countRecursive(treeOfChild._id);
+        result += count;
+      }
     }
 
     return result;
