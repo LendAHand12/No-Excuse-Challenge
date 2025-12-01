@@ -251,17 +251,17 @@ const cron7 = new CronJob(
   VIETNAM_TIMEZONE
 );
 
-const cron8 = new CronJob(
-  "00 06 * * *", // 6h sáng giờ Việt Nam
-  async () => {
-    console.log("Recalculate dieTime daily start");
-    await recalculateDieTimeDaily();
-    console.log("Recalculate dieTime daily done");
-  },
-  null,
-  true,
-  VIETNAM_TIMEZONE
-);
+// const cron8 = new CronJob(
+//   "00 06 * * *", // 6h sáng giờ Việt Nam
+//   async () => {
+//     console.log("Recalculate dieTime daily start");
+//     await recalculateDieTimeDaily();
+//     console.log("Recalculate dieTime daily done");
+//   },
+//   null,
+//   true,
+//   VIETNAM_TIMEZONE
+// );
 
 await fixParentChildLinks();
 
@@ -274,7 +274,7 @@ cron4.start();
 // cron5.start();
 cron6.start();
 cron7.start();
-cron8.start();
+// cron8.start();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
