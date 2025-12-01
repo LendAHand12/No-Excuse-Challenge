@@ -483,7 +483,7 @@ const getUserById = asyncHandler(async (req, res) => {
       hewePerDay: user.hewePerDay,
       availableHewe: user.availableHewe,
       availableUsdt: user.availableUsdt,
-      claimedHewe: user.hewePerDay > 0 ? diffDaySinceCreate * user.hewePerDay : 0,
+      claimedHewe: user.claimedHewe,
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
@@ -605,9 +605,7 @@ const getUserAssets = asyncHandler(async (req, res) => {
     .filter((ele) => ele.status === "PENDING")
     .reduce((sum, withdraw) => sum + withdraw.amount, 0);
 
-  // Calculate claimedHewe (same logic as getUserInfo)
-  const diffDaySinceCreate = moment().diff(moment(user.createdAt), "days");
-  const claimedHewe = user.hewePerDay > 0 ? diffDaySinceCreate * user.hewePerDay : 0;
+  const claimedHewe = user.claimedHewe;
 
   res.json({
     availableHewe: user.availableHewe || 0,
@@ -862,7 +860,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       hewePerDay: user.hewePerDay,
       availableHewe: user.availableHewe,
       availableUsdt: user.availableUsdt,
-      claimedHewe: user.hewePerDay > 0 ? diffDaySinceCreate * user.hewePerDay : 0,
+      claimedHewe: user.claimedHewe,
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
