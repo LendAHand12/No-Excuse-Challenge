@@ -756,6 +756,52 @@ const getUserInfo = asyncHandler(async (req, res) => {
       });
     }
 
+    // Tính toán isRed, isYellow, isBlue, isPink cho Tier 1
+    let isRed = false;
+    let isYellow = false;
+    let isBlue = false;
+    let isPink = false;
+    let isDisableTier2 = false;
+
+    if (treeTier1) {
+      // Tính toán isRed
+      isRed =
+        user.tier === 1 && user.countPay === 0
+          ? true
+          : user.tier === 1 && user.buyPackage === "B" && user.countPay < 7
+          ? true
+          : user.tier === 1 && user.buyPackage === "A" && user.countPay < 13
+          ? true
+          : false;
+
+      // Tính toán isYellow và isBlue dựa trên dieTime của Tree tier 1
+      if (treeTier1.dieTime) {
+        const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+        const dieTimeStart = moment.tz(treeTier1.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+        const diffDays = dieTimeStart.diff(todayStart, "days");
+
+        // Nếu quá hạn (dieTime <= today) → isBlue = true
+        if (diffDays <= 0) {
+          isBlue = true;
+        } else {
+          // Nếu còn 10 ngày nữa đến hạn (tier 1) hoặc 5 ngày (tier 2) → isYellow = true
+          if (user.tier === 1 && diffDays <= 10) {
+            isYellow = true;
+          } else if (user.tier === 2 && diffDays <= 5) {
+            isYellow = true;
+          }
+        }
+      }
+
+      // Tính toán isPink
+      isPink = user.countPay === 13 && listDirectUser.length < 2;
+    }
+
+    // Tính toán isDisableTier2
+    if (treeTier2) {
+      isDisableTier2 = treeTier2.disable || false;
+    }
+
     // Tính countdown dựa trên dieTime của tier hiện tại
     let countdown = 0;
     const currentDieTime =
@@ -922,6 +968,12 @@ const getUserInfo = asyncHandler(async (req, res) => {
       enableWithdrawCrypto:
         user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
       enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
+      // Tier status colors
+      isRed,
+      isYellow,
+      isBlue,
+      isPink,
+      isDisableTier2,
     });
   } else {
     res.status(404);

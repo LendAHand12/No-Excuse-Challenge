@@ -68,6 +68,11 @@ const Profile = () => {
     dieTime,
     dieTimeTier1,
     dieTimeTier2,
+    isRed,
+    isYellow,
+    isBlue,
+    isPink,
+    isDisableTier2,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -751,6 +756,62 @@ const Profile = () => {
                   {userInfo[`tier${ranking}Time`]}
                 </p>
               </div>
+              <div className="flex flex-col justify-between py-3 px-4">
+                <div className="flex items-center justify-between">
+                  <div>Tier 1 :</div>
+                  <div
+                    className={`w-10 h-5 rounded-md ${
+                      isRed
+                        ? 'bg-[#ee0000]' // Màu đỏ
+                        : isBlue
+                        ? 'bg-[#0033ff]' // Màu xanh dương
+                        : isYellow
+                        ? 'bg-[#ffcc00]' // Màu vàng
+                        : isPink
+                        ? 'bg-[#ff3399]' // Màu hồng
+                        : 'bg-[#009933]' // Màu xanh lá (mặc định)
+                    }`}
+                  ></div>
+                </div>
+                {tier === 2 && (
+                  <div className="flex items-center justify-between mt-2">
+                    <div>Tier 2 :</div>
+                    <div
+                      className={`w-10 h-5 rounded-md ${
+                        isDisableTier2
+                          ? 'bg-[#663300]' // Màu nâu (disable)
+                          : isRed
+                          ? 'bg-[#ee0000]' // Màu đỏ
+                          : isBlue
+                          ? 'bg-[#0033ff]' // Màu xanh dương
+                          : isYellow
+                          ? 'bg-[#ffcc00]' // Màu vàng
+                          : isPink
+                          ? 'bg-[#ff3399]' // Màu hồng
+                          : 'bg-[#009933]' // Màu xanh lá (mặc định)
+                      }`}
+                    ></div>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-between py-2 px-4">
+                <span>Disqualified (Tier 1)</span>
+                <span className="ml-auto">
+                  {dieTimeTier1
+                    ? new Date(dieTimeTier1).toLocaleDateString('vi')
+                    : '-'}
+                </span>
+              </div>
+              {tier === 2 && (
+                <div className="flex items-center justify-between py-2 px-4 bg-[#E5E9EE] rounded-lg">
+                  <span>Disqualified (Tier 2)</span>
+                  <span className="ml-auto">
+                    {dieTimeTier2
+                      ? new Date(dieTimeTier2).toLocaleDateString('vi')
+                      : '-'}
+                  </span>
+                </div>
+              )}
             </div>
             <div className="bg-[#FAFBFC] p-4 rounded-2xl">
               <div className="flex justify-between items-center py-2 px-4">

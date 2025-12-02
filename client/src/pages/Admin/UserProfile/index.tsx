@@ -1075,7 +1075,7 @@ const UserProfile = () => {
                     )}
                   </li>
                   <li className="flex items-center py-3">
-                    <span>Die Time (Tier 1)</span>
+                    <span>Disqualified (Tier 1)</span>
                     <span className="ml-auto">
                       {isEditting ? (
                         <div className="flex items-center gap-2">
@@ -1107,7 +1107,7 @@ const UserProfile = () => {
                   </li>
                   {data.tier === 2 && (
                     <li className="flex items-center py-3">
-                      <span>Die Time (Tier 2)</span>
+                      <span>Disqualified (Tier 2)</span>
                       <span className="ml-auto">
                         {isEditting ? (
                           <div className="flex items-center gap-2">
