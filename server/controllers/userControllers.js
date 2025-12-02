@@ -437,6 +437,13 @@ const getUserById = asyncHandler(async (req, res) => {
       userId: user._id,
     }).sort({ createdAt: -1 });
 
+    // Tính tổng claimedHewe từ model Claim
+    const claimedHeweResult = await Claim.aggregate([
+      { $match: { userId: user._id, coin: "HEWE" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    const claimedHewe = claimedHeweResult[0]?.total || 0;
+
     res.json({
       id: user._id,
       email: user.email,
@@ -483,7 +490,7 @@ const getUserById = asyncHandler(async (req, res) => {
       hewePerDay: user.hewePerDay,
       availableHewe: user.availableHewe,
       availableUsdt: user.availableUsdt,
-      claimedHewe: user.claimedHewe,
+      claimedHewe: Math.max(claimedHewe - user.availableHewe, 0),
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
@@ -517,8 +524,8 @@ const getUserById = asyncHandler(async (req, res) => {
       mainTree: tree
         ? {
             treeId: tree._id,
-            parentName: parentTree.userName,
-            refUserName: refTree.userName,
+            parentName: parentTree?.userName || "",
+            refUserName: refTree?.userName || "",
           }
         : null,
       subTree: subTree
@@ -813,6 +820,13 @@ const getUserInfo = asyncHandler(async (req, res) => {
 
     const diffDaySinceCreate = moment().diff(moment(user.createdAt), "days");
 
+    // Tính tổng claimedHewe từ model Claim
+    const claimedHeweResult = await Claim.aggregate([
+      { $match: { userId: user._id, coin: "HEWE" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    const claimedHewe = claimedHeweResult[0]?.total || 0;
+
     res.json({
       id: user._id,
       email: user.email,
@@ -860,7 +874,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       hewePerDay: user.hewePerDay,
       availableHewe: user.availableHewe,
       availableUsdt: user.availableUsdt,
-      claimedHewe: user.claimedHewe,
+      claimedHewe: Math.max(claimedHewe - user.availableHewe, 0),
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,

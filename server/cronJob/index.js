@@ -28,6 +28,7 @@ import Income from "../models/incomeModel.js";
 import PreTier2 from "../models/preTier2Model.js";
 import mongoose from "mongoose";
 import WildCard from "../models/wildCardModel.js";
+import Claim from "../models/claimModel.js";
 import { giveTier2PromotionWildCards } from "../common.js";
 
 // Fetch VN rates from phobitcoin.com
@@ -259,8 +260,15 @@ export const distributionHewe = asyncHandler(async () => {
 
   for (let u of listUser) {
     try {
+      // Tính tổng claimedHewe từ model Claim
+      const claimedHeweResult = await Claim.aggregate([
+        { $match: { userId: u._id, coin: "HEWE" } },
+        { $group: { _id: null, total: { $sum: "$amount" } } },
+      ]);
+      const claimedHewe = claimedHeweResult[0]?.total || 0;
+
       // Tính số hewe còn lại user sẽ được nhận
-      const remainingHewe = u.totalHewe - u.claimedHewe;
+      const remainingHewe = u.totalHewe - claimedHewe - u.availableHewe;
 
       // Nếu không còn hewe để nhận thì bỏ qua
       if (remainingHewe <= 0) {
@@ -292,7 +300,6 @@ export const distributionHewe = asyncHandler(async () => {
         // Đảm bảo không vượt quá số hewe còn lại và làm tròn thành số nguyên
         const actualHeweToAdd = Math.round(Math.min(heweToAdd, remainingHewe));
         u.availableHewe = u.availableHewe + actualHeweToAdd;
-        u.claimedHewe = u.claimedHewe + actualHeweToAdd;
 
         const newIncome = new Income({
           userId: u._id,
