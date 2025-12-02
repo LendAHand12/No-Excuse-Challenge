@@ -69,10 +69,7 @@ import {
   exportUsersWithAdminChangeButNoDieTime,
 } from "./common.js";
 import Tree from "./models/treeModel.js";
-import {
-  getTotalLevel1ToLevel10OfUser,
-  getTotalLevel6ToLevel10OfUser,
-} from "./utils/methods.js";
+import { getTotalLevel1ToLevel10OfUser, getTotalLevel6ToLevel10OfUser } from "./utils/methods.js";
 
 const app = express();
 
@@ -254,9 +251,9 @@ const cron7 = new CronJob(
 // const cron8 = new CronJob(
 //   "00 06 * * *", // 6h sáng giờ Việt Nam
 //   async () => {
-//     console.log("Recalculate dieTime daily start");
-//     await recalculateDieTimeDaily();
-//     console.log("Recalculate dieTime daily done");
+// console.log("Recalculate dieTime daily start");
+// await recalculateDieTimeDaily();
+// console.log("Recalculate dieTime daily done");
 //   },
 //   null,
 //   true,

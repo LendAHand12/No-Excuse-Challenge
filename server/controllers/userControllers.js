@@ -1918,16 +1918,14 @@ const getCountIncome = async (treeId, tier) => {
       }
 
       // Kiểm tra dieTime: chỉ đếm những user chưa quá hạn
-      const isExpired = await isUserExpired(treeOfChild.userId, tier);
+      const isExpired = await isUserExpired(treeOfChild._id);
       if (isExpired) {
         result = result - 1;
       }
 
-      // Chỉ đệ quy đếm children của những user chưa quá hạn
-      if (!isExpired) {
-        const count = await countRecursive(treeOfChild._id);
-        result += count;
-      }
+      // Đệ quy đếm children của tất cả user (kể cả user quá hạn)
+      const count = await countRecursive(treeOfChild._id);
+      result += count;
     }
 
     return result;

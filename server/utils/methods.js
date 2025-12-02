@@ -881,19 +881,20 @@ export const calculateDieTimeForTier2 = async (tree) => {
 };
 
 /**
- * Kiểm tra xem user có quá hạn (dieTime) hay chưa dựa trên Tree của tier tương ứng
- * @param {string|Object} userId - ID của user cần kiểm tra
- * @param {number} tier - Tier cần kiểm tra (1 hoặc 2)
+ * Kiểm tra xem user có quá hạn (dieTime) hay chưa dựa trên Tree
+ * @param {string|Object} treeId - ID của tree cần kiểm tra
  * @returns {boolean} - true nếu user đã quá hạn, false nếu chưa quá hạn hoặc không có dieTime
  */
-export const isUserExpired = async (userId, tier) => {
-  const tree = await Tree.findOne({
-    userId: userId,
-    tier: tier,
-    isSubId: false,
-  });
+export const isUserExpired = async (treeId) => {
+  const tree = await Tree.findById(treeId);
 
-  if (!tree || !tree.dieTime) {
+  // Nếu không tìm thấy tree, coi như chưa hết hạn
+  if (!tree) {
+    return false;
+  }
+
+  // User chỉ hết hạn khi dieTime !== null và dieTime đã quá hạn ngày hiện tại
+  if (tree.dieTime === null || tree.dieTime === undefined) {
     return false;
   }
 

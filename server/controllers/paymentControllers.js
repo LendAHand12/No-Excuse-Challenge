@@ -161,7 +161,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         const refUserData = await User.findById(refUser.userId);
 
         // Kiểm tra dieTime có quá hạn hay chưa
-        const isRefUserExpired = await isUserExpired(refUser.userId, 1);
+        const isRefUserExpired = await isUserExpired(refUser._id);
 
         if (refUserData.closeLah) {
           haveRefNotPayEnough = true;
@@ -227,7 +227,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         for (let p of ancestors) {
           let haveParentNotPayEnough;
           const receiveUser = await User.findById(p ? p.userId : admin._id);
-          const isReceiveUserExpired = await isUserExpired(p.userId, 1);
+          const isReceiveUserExpired = await isUserExpired(p._id);
           if (receiveUser.closeLah) {
             haveParentNotPayEnough = true;
           } else if (
@@ -643,7 +643,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
         //   refUser: treeOfRefUser.userName,
         //   directCommissionUser: directCommissionUser.userId,
         // });
-        const isRefUserExpired = await isUserExpired(refUser.userId, 1);
+        const isRefUserExpired = await isUserExpired(refUser._id);
 
         // giao dich hoa hong truc tiep
         if (refUser.closeLah) {
@@ -730,7 +730,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
         for (let p of ancestors) {
           let haveParentNotPayEnough;
           const receiveUser = await User.findById(p ? p.userId : admin._id);
-          const isReceiveUserExpired = await isUserExpired(p.userId, 1);
+          const isReceiveUserExpired = await isUserExpired(p._id);
           if (receiveUser.closeLah) {
             haveParentNotPayEnough = true;
           } else if (
