@@ -211,4 +211,36 @@ const adminCreateWildCard = asyncHandler(async (req, res) => {
   });
 });
 
-export { getUserWildCards, useWildCard, adminGetUserWildCards, adminCreateWildCard };
+/**
+ * Admin: Delete a wild card
+ */
+const adminDeleteWildCard = asyncHandler(async (req, res) => {
+  const admin = req.user;
+  const { cardId } = req.params;
+
+  if (!admin.isAdmin) {
+    res.status(403);
+    throw new Error("Only admins can delete wild cards");
+  }
+
+  const card = await WildCard.findById(cardId);
+  if (!card) {
+    res.status(404);
+    throw new Error("Wild card not found");
+  }
+
+  // Only allow deleting ACTIVE cards
+  if (card.status !== "ACTIVE") {
+    res.status(400);
+    throw new Error("Only active wild cards can be deleted");
+  }
+
+  await WildCard.findByIdAndDelete(cardId);
+
+  res.json({
+    success: true,
+    message: "Wild card deleted successfully",
+  });
+});
+
+export { getUserWildCards, useWildCard, adminGetUserWildCards, adminCreateWildCard, adminDeleteWildCard };

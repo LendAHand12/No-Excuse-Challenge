@@ -27,6 +27,9 @@ import Config from "../models/configModel.js";
 import Income from "../models/incomeModel.js";
 import PreTier2 from "../models/preTier2Model.js";
 import mongoose from "mongoose";
+import WildCard from "../models/wildCardModel.js";
+import Claim from "../models/claimModel.js";
+import { giveTier2PromotionWildCards } from "../common.js";
 
 // Fetch VN rates from phobitcoin.com
 export const fetchVnUsdRates = asyncHandler(async () => {
@@ -161,7 +164,7 @@ export const deleteUser24hUnPay = asyncHandler(async () => {
 });
 
 export const countChildToData = asyncHandler(async () => {
-  const listTrees = await Tree.find({}).select("tier countChild userId userName");
+  const listTrees = await Tree.find({}).select("tier countChild userId userName dieTime");
 
   for (let t of listTrees) {
     // const t = await Tree.findById("68176977299e3ad047c0368e").select(
@@ -247,36 +250,68 @@ export const areArraysEqual = (arr1, arr2) => {
 };
 
 export const distributionHewe = asyncHandler(async () => {
+  // Lấy giá hewe từ config
+  const hewePriceConfig = await Config.findOne({ label: "HEWE_PRICE" });
+  const hewePrice = hewePriceConfig ? Number(hewePriceConfig.value) : 0;
+
   const listUser = await User.find({
     $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }, { countPay: 13 }],
   }).select("userId totalHewe availableHewe hewePerDay claimedHewe currentLayer");
 
   for (let u of listUser) {
     try {
-      if (u.currentLayer[0] >= 4 && u.totalHewe > 0) {
-        u.availableHewe = u.availableHewe + u.totalHewe;
-        u.totalHewe = 0;
-        const newIncome = new Income({
-          userId: u._id,
-          amount: u.totalHewe,
-          coin: "HEWE",
-          from: "Daily HEWE all",
-          type: "",
-        });
+      // Tính tổng claimedHewe từ model Claim
+      const claimedHeweResult = await Claim.aggregate([
+        { $match: { userId: u._id, coin: "HEWE" } },
+        { $group: { _id: null, total: { $sum: "$amount" } } },
+      ]);
+      const claimedHewe = claimedHeweResult[0]?.total || 0;
 
-        await newIncome.save();
-      } else if (u.totalHewe > u.claimedHewe) {
-        u.availableHewe = u.availableHewe + u.hewePerDay;
+      // Tính số hewe còn lại user sẽ được nhận
+      const remainingHewe = u.totalHewe - claimedHewe - u.availableHewe;
+
+      // Nếu không còn hewe để nhận thì bỏ qua
+      if (remainingHewe <= 0) {
+        continue;
+      }
+
+      let heweToAdd = 0;
+      let incomeFrom = "";
+
+      if (u.currentLayer[0] === 4) {
+        // Nếu currentLayer[0] = 4: nhận số hewe = 100 / giá của hewe (làm tròn thành số nguyên)
+        heweToAdd = hewePrice > 0 ? Math.round(100 / hewePrice) : 0;
+        incomeFrom = "Daily HEWE level 4";
+      } else if (u.currentLayer[0] === 8) {
+        // Nếu currentLayer[0] = 8: nhận toàn bộ hewe còn lại (làm tròn thành số nguyên)
+        heweToAdd = Math.round(remainingHewe);
+        incomeFrom = "Daily HEWE all";
+      } else {
+        // Các trường hợp khác: nhận hewePerDay mỗi ngày (làm tròn thành số nguyên)
+        // Chỉ nhận khi remainingHewe > 0
+        if (remainingHewe > 0) {
+          heweToAdd = Math.round(u.hewePerDay);
+          incomeFrom = "Daily HEWE";
+        }
+      }
+
+      // Chỉ cộng vào availableHewe nếu heweToAdd > 0
+      if (heweToAdd > 0) {
+        // Đảm bảo không vượt quá số hewe còn lại và làm tròn thành số nguyên
+        const actualHeweToAdd = Math.round(Math.min(heweToAdd, remainingHewe));
+        u.availableHewe = u.availableHewe + actualHeweToAdd;
+
         const newIncome = new Income({
           userId: u._id,
-          amount: u.hewePerDay,
+          amount: actualHeweToAdd,
           coin: "HEWE",
-          from: "Daily HEWE",
+          from: incomeFrom,
           type: "",
         });
 
         await newIncome.save();
       }
+
       await u.save();
     } catch (error) {
       console.log({ error });
@@ -633,8 +668,7 @@ export const calculateTreeDieTime = asyncHandler(async () => {
 
               // Nếu dieTime đã quá hạn (today > dieTime) thì errLahCode = "OVER45"
               // Nếu dieTime = null hoặc chưa quá hạn thì errLahCode = ""
-              const newErrLahCode =
-                treeDieTime && today.isAfter(treeDieTime) ? "OVER45" : "";
+              const newErrLahCode = treeDieTime && today.isAfter(treeDieTime) ? "OVER45" : "";
 
               // Chỉ cập nhật nếu thay đổi
               if (user.errLahCode !== newErrLahCode) {
@@ -660,5 +694,125 @@ export const calculateTreeDieTime = asyncHandler(async () => {
     console.log("Calculate tree dieTime done");
   } catch (err) {
     console.error("Error in calculateTreeDieTime:", err);
+  }
+});
+
+/**
+ * Cronjob: Tự động tạo wild card cho user tier 2 khi có 5 refId mới
+ * Logic:
+ * - Quét tất cả user có tier = 2
+ * - Tìm tree tier 1 của user đó
+ * - Đếm số refId mới (có createdAt > lastWildCardRewardAt hoặc chưa có wild card nào)
+ * - Nếu >= 5 refId mới, tạo wild card (target tier 1, 15 ngày) và cập nhật lastWildCardRewardAt
+ */
+export const createWildCardForTier2Users = asyncHandler(async () => {
+  try {
+    console.log("Create wild card for tier 2 users start");
+
+    // Lấy tất cả user có tier = 2
+    const tier2Users = await User.find({
+      tier: 2,
+      isAdmin: false,
+      status: { $ne: "DELETED" },
+    });
+
+    console.log(`Found ${tier2Users.length} tier 2 users`);
+
+    let createdCards = 0;
+    let processedUsers = 0;
+
+    for (const user of tier2Users) {
+      try {
+        // Tìm tree tier 1 của user (isSubId = false)
+        const treeTier1 = await Tree.findOne({
+          userId: user._id,
+          tier: 1,
+          isSubId: false,
+        });
+
+        if (!treeTier1) {
+          continue; // Bỏ qua nếu không có tree tier 1
+        }
+
+        // Xác định thời điểm bắt đầu đếm refId mới
+        // Nếu chưa có lastWildCardRewardAt, đếm từ khi user lên tier 2 (tier2Time)
+        // Nếu có lastWildCardRewardAt, đếm từ thời điểm đó
+        const startDate = user.lastWildCardRewardAt || user.tier2Time || user.createdAt;
+
+        // Lấy tất cả refId mới (có createdAt > startDate)
+        const allNewRefIds = await Tree.find({
+          refId: treeTier1._id,
+          tier: 1,
+          isSubId: false,
+          createdAt: { $gt: startDate },
+        }).sort({ createdAt: 1 }); // Sắp xếp theo createdAt tăng dần
+
+        // Lọc các refId thỏa mãn điều kiện: status = APPROVED, countPay = 13, errLahCode !== OVER45
+        const validRefIds = [];
+        for (const refIdTree of allNewRefIds) {
+          const refIdUser = await User.findById(refIdTree.userId).select(
+            "status countPay errLahCode"
+          );
+          if (
+            refIdUser &&
+            refIdUser.status === "APPROVED" &&
+            refIdUser.countPay === 13 &&
+            refIdUser.errLahCode !== "OVER45"
+          ) {
+            validRefIds.push(refIdTree);
+          }
+        }
+
+        const newRefIdCount = validRefIds.length;
+
+        // Nếu có >= 5 refId mới hợp lệ, tạo wild card
+        // Tính số wild card cần tạo: mỗi 5 refId mới = 1 card
+        if (newRefIdCount >= 5) {
+          // Tính số wild card cần tạo (mỗi 5 refId = 1 card)
+          const cardsToCreate = Math.floor(newRefIdCount / 5);
+
+          // Tạo tất cả các wild card cần thiết
+          for (let i = 0; i < cardsToCreate; i++) {
+            await WildCard.create({
+              userId: user._id,
+              cardType: "REFERRAL_REWARD",
+              status: "ACTIVE",
+              sourceInfo: `Auto created: ${(i + 1) * 5} new referrals`,
+              days: 15,
+              targetTier: 1, // Target tier 1 như user yêu cầu
+              usedBy: null,
+            });
+            createdCards++;
+          }
+
+          // Cập nhật lastWildCardRewardAt = createdAt của refId thứ (cardsToCreate * 5)
+          // Ví dụ: 24 refId → 4 cards → cập nhật = refId thứ 20
+          // Điều này đảm bảo lần chạy tiếp theo chỉ tính các refId sau refId đã được tính
+          const lastRefIdIndex = cardsToCreate * 5 - 1; // Index của refId cuối cùng được tính (0-based)
+          if (lastRefIdIndex < validRefIds.length) {
+            const lastRefId = validRefIds[lastRefIdIndex];
+            user.lastWildCardRewardAt = lastRefId.createdAt;
+            await user.save();
+
+            console.log({
+              user: user.userId,
+              newRefIdCount,
+              cardsToCreate,
+              lastRefIdAt: lastRefId.createdAt,
+            });
+          }
+
+          processedUsers++;
+        }
+      } catch (err) {
+        console.error(`Error processing user ${user.userId}:`, err);
+      }
+    }
+
+    console.log(`Processed ${processedUsers} users`);
+    console.log(`Created ${createdCards} wild cards`);
+    console.log("Create wild card for tier 2 users done");
+  } catch (err) {
+    console.error("Error in createWildCardForTier2Users:", err);
   }
 });

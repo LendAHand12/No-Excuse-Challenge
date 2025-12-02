@@ -42,6 +42,8 @@ const AdminWithdrawPages = () => {
   const [transferContent, setTransferContent] = useState('');
   const [cancelReason, setCancelReason] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [showViewPaymentInfo, setShowViewPaymentInfo] = useState(false);
+  const [viewPaymentRequest, setViewPaymentRequest] = useState(null);
 
   const onSearch = (e) => {
     setKeyword(e.target.value);
@@ -181,25 +183,28 @@ const AdminWithdrawPages = () => {
   );
 
   // Generate QR Code URL for bank transfer
-  const generateQRUrl = () => {
-    if (
-      !currentApproveRequest ||
-      currentApproveRequest?.withdrawalType !== 'BANK'
-    ) {
+  const generateQRUrl = (request = null, transferContentData = null) => {
+    const targetRequest = request || currentApproveRequest;
+    if (!targetRequest || targetRequest?.withdrawalType !== 'BANK') {
       return null;
     }
 
     // Lấy thông tin ngân hàng từ userInfo
-    const acc = currentApproveRequest?.userInfo?.accountNumber;
-    const bank = currentApproveRequest?.userInfo?.bankCode;
+    const acc = targetRequest?.userInfo?.accountNumber;
+    const bank = targetRequest?.userInfo?.bankCode;
 
-    // Tính số tiền VND cần chuyển: receivedAmount (USDT) * exchangeRate
-    const receivedAmountUsdt = currentApproveRequest?.receivedAmount || 0;
-    const exchangeRate = currentApproveRequest?.exchangeRate || 0;
-    const amount = Math.floor(receivedAmountUsdt * exchangeRate); // VND (làm tròn xuống)
+    // receivedAmount trong dữ liệu là USDT, cần nhân với exchangeRate để có VND
+    const receivedAmountUsdt = targetRequest?.receivedAmount || 0;
+    const exchangeRate = targetRequest?.exchangeRate || 0;
+    const amount =
+      receivedAmountUsdt && exchangeRate
+        ? Math.floor(receivedAmountUsdt * exchangeRate)
+        : 0;
 
-    // Use transferContent if available, otherwise generate new orderId
+    // Use transferContent if available, otherwise use from request or generate new orderId
     const des =
+      transferContentData ||
+      targetRequest?.transferContent ||
       transferContent ||
       (() => {
         const timestamp = Date.now();
@@ -215,6 +220,12 @@ const AdminWithdrawPages = () => {
     )}&bank=${encodeURIComponent(
       bank,
     )}&amount=${amount}&des=${encodeURIComponent(des)}`;
+  };
+
+  // Handle view payment info for approved withdrawals
+  const handleViewPaymentInfo = (request) => {
+    setViewPaymentRequest(request);
+    setShowViewPaymentInfo(true);
   };
 
   // Generate transfer content (orderId) when modal opens for BANK withdrawal
@@ -517,43 +528,48 @@ const AdminWithdrawPages = () => {
                             {t('adminWithdraw.totalAmountVND')}:
                           </span>
                           <span className="font-semibold text-gray-800">
-                            {Math.floor(
-                              currentApproveRequest.amount *
-                                currentApproveRequest.exchangeRate,
-                            ).toLocaleString('vi-VN')}{' '}
+                            {currentApproveRequest?.amount &&
+                            currentApproveRequest?.exchangeRate
+                              ? Math.floor(
+                                  currentApproveRequest.amount *
+                                    currentApproveRequest.exchangeRate,
+                                ).toLocaleString('vi-VN')
+                              : '-'}{' '}
                             VND
                           </span>
                         </div>
-                        {currentApproveRequest?.tax && (
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-600">
-                              {t('adminWithdraw.tax')} (10%):
-                            </span>
-                            <span className="text-red-600 font-medium">
-                              -
-                              {Math.floor(
-                                currentApproveRequest.tax *
-                                  currentApproveRequest.exchangeRate,
-                              ).toLocaleString('vi-VN')}{' '}
-                              VND
-                            </span>
-                          </div>
-                        )}
-                        {currentApproveRequest?.fee && (
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-600">
-                              {t('adminWithdraw.transactionFee')} (1 USDT):
-                            </span>
-                            <span className="text-red-600 font-medium">
-                              -
-                              {Math.floor(
-                                currentApproveRequest.fee *
-                                  currentApproveRequest.exchangeRate,
-                              ).toLocaleString('vi-VN')}{' '}
-                              VND
-                            </span>
-                          </div>
-                        )}
+                        {currentApproveRequest?.tax &&
+                          currentApproveRequest?.exchangeRate && (
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">
+                                {t('adminWithdraw.tax')}:
+                              </span>
+                              <span className="text-red-600 font-medium">
+                                -
+                                {Math.floor(
+                                  currentApproveRequest.tax *
+                                    currentApproveRequest.exchangeRate,
+                                ).toLocaleString('vi-VN')}{' '}
+                                VND
+                              </span>
+                            </div>
+                          )}
+                        {currentApproveRequest?.fee &&
+                          currentApproveRequest?.exchangeRate && (
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">
+                                {t('adminWithdraw.transactionFee')} (1 USDT):
+                              </span>
+                              <span className="text-red-600 font-medium">
+                                -
+                                {Math.floor(
+                                  currentApproveRequest.fee *
+                                    currentApproveRequest.exchangeRate,
+                                ).toLocaleString('vi-VN')}{' '}
+                                VND
+                              </span>
+                            </div>
+                          )}
                         <div className="border-t border-gray-300 pt-2 mt-2">
                           <div className="flex justify-between items-center">
                             <span className="font-semibold text-gray-800">
@@ -736,6 +752,284 @@ const AdminWithdrawPages = () => {
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
               )}
               Confirm and Submit
+            </button>
+          </div>
+        </div>
+      </Modal>
+      {/* Modal hiển thị lại QR code và thông tin thanh toán cho withdraw đã APPROVED */}
+      <Modal
+        isOpen={showViewPaymentInfo}
+        onRequestClose={() => {
+          setShowViewPaymentInfo(false);
+          setViewPaymentRequest(null);
+        }}
+        style={{
+          content: {
+            top: isMobile ? '80px' : '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: isMobile ? 'translateX(-50%)' : 'translate(-50%, -50%)',
+            padding: 0,
+            border: 'none',
+            background: 'transparent',
+            maxWidth: '900px',
+            width: '90%',
+            maxHeight: isMobile ? 'calc(100vh - 100px)' : '90vh',
+            overflow: 'hidden',
+          },
+          overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1000,
+          },
+        }}
+      >
+        <div className="bg-white rounded-xl p-6 w-full relative max-w-4xl shadow-xl max-h-[90vh] flex flex-col">
+          {/* Close button */}
+          <button
+            onClick={() => {
+              setShowViewPaymentInfo(false);
+              setViewPaymentRequest(null);
+            }}
+            className="absolute top-3 right-3 z-10 text-gray-400 hover:text-gray-700 bg-white rounded-full p-1 shadow-md"
+            aria-label="Close"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          <h2 className="text-xl font-semibold text-gray-800 text-center mb-4 pr-8">
+            {t('adminWithdraw.paymentInformation')}
+          </h2>
+
+          {/* Scrollable content */}
+          <div
+            className="overflow-y-auto flex-1 pr-2 -mr-2 min-h-0"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            {viewPaymentRequest?.withdrawalType === 'BANK' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left column: Information */}
+                <div className="space-y-4">
+                  {/* Withdrawal Type */}
+                  <div>
+                    <label className="block mb-1 font-medium text-gray-700">
+                      {t('adminWithdraw.withdrawalType')}: <br></br>
+                      <span className="text-blue-600 font-bold">
+                        {t('adminWithdraw.bankTransfer')}
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Amount */}
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <label className="block mb-3 font-semibold text-gray-800">
+                      {t('adminWithdraw.amount')}:{' '}
+                      <span className="text-blue-600">
+                        {viewPaymentRequest?.amount} USDT
+                      </span>
+                    </label>
+                    {viewPaymentRequest?.exchangeRate && (
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">
+                            {t('adminWithdraw.exchangeRate')}:
+                          </span>
+                          <span className="font-medium">
+                            1 USDT ={' '}
+                            {viewPaymentRequest.exchangeRate.toLocaleString(
+                              'vi-VN',
+                            )}{' '}
+                            VND
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">
+                            {t('adminWithdraw.totalAmountVND')}:
+                          </span>
+                          <span className="font-semibold text-gray-800">
+                            {viewPaymentRequest?.amount &&
+                            viewPaymentRequest?.exchangeRate
+                              ? Math.floor(
+                                  viewPaymentRequest.amount *
+                                    viewPaymentRequest.exchangeRate,
+                                ).toLocaleString('vi-VN')
+                              : '-'}{' '}
+                            VND
+                          </span>
+                        </div>
+                        {viewPaymentRequest?.tax &&
+                          viewPaymentRequest?.exchangeRate && (
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">
+                                {t('adminWithdraw.tax')}:
+                              </span>
+                              <span className="text-red-600 font-medium">
+                                -
+                                {Math.floor(
+                                  viewPaymentRequest.tax *
+                                    viewPaymentRequest.exchangeRate,
+                                ).toLocaleString('vi-VN')}{' '}
+                                VND
+                              </span>
+                            </div>
+                          )}
+                        {viewPaymentRequest?.fee &&
+                          viewPaymentRequest?.exchangeRate && (
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">
+                                {t('adminWithdraw.transactionFee')} (1 USDT):
+                              </span>
+                              <span className="text-red-600 font-medium">
+                                -
+                                {Math.floor(
+                                  viewPaymentRequest.fee *
+                                    viewPaymentRequest.exchangeRate,
+                                ).toLocaleString('vi-VN')}{' '}
+                                VND
+                              </span>
+                            </div>
+                          )}
+                        <div className="border-t border-gray-300 pt-2 mt-2">
+                          <div className="flex justify-between items-center">
+                            <span className="font-semibold text-gray-800">
+                              {t('adminWithdraw.totalReceived')}:
+                            </span>
+                            <span className="text-green-600 font-bold text-lg">
+                              {viewPaymentRequest?.receivedAmount &&
+                              viewPaymentRequest?.exchangeRate
+                                ? Math.floor(
+                                    viewPaymentRequest.receivedAmount *
+                                      viewPaymentRequest.exchangeRate,
+                                  ).toLocaleString('vi-VN')
+                                : '-'}{' '}
+                              VND
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bank Information */}
+                  <div>
+                    <label className="block mb-1 font-medium text-gray-700">
+                      {t('adminWithdraw.bankName')}: <br></br>
+                      <span className="font-semibold">
+                        {viewPaymentRequest?.userInfo?.bankName || 'N/A'}
+                      </span>
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block mb-1 font-medium text-gray-700">
+                      {t('adminWithdraw.accountName')}: <br></br>
+                      <span className="font-semibold">
+                        {viewPaymentRequest?.userInfo?.accountName || 'N/A'}
+                      </span>
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block mb-1 font-medium text-gray-700">
+                      {t('adminWithdraw.accountNumber')}: <br></br>
+                      <span className="font-semibold">
+                        {viewPaymentRequest?.userInfo?.accountNumber || 'N/A'}
+                      </span>
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block mb-1 font-medium text-gray-700">
+                      {t('adminWithdraw.transferContent')}: <br></br>
+                      <span className="font-semibold text-blue-600">
+                        {viewPaymentRequest?.transferContent || 'N/A'}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Right column: QR Code */}
+                <div className="flex flex-col items-center justify-center space-y-4">
+                  <div>
+                    <label className="block mb-2 font-medium text-gray-700 text-center">
+                      {t('adminWithdraw.qrCodeForTransfer')}
+                    </label>
+                    {generateQRUrl(viewPaymentRequest) ? (
+                      <div className="bg-white p-4 rounded-lg border-2 border-gray-300 shadow-lg">
+                        <img
+                          src={generateQRUrl(viewPaymentRequest)}
+                          alt={t('adminWithdraw.qrCodeForBankTransfer')}
+                          className="w-64 h-64 mx-auto"
+                        />
+                        <p className="text-xs text-gray-500 mt-2 text-center">
+                          {t('adminWithdraw.scanQRCodeToTransfer')}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-100 p-8 rounded-lg text-center text-gray-500">
+                        {t('adminWithdraw.qrCodeNotAvailable')}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="block mb-1 font-medium text-gray-700">
+                    {t('adminWithdraw.withdrawalType')}: <br></br>
+                    <span className="text-blue-600 font-bold">
+                      {t('adminWithdraw.cryptoWallet')}
+                    </span>
+                  </label>
+                </div>
+                <div>
+                  <label className="block mb-1 font-medium text-gray-700">
+                    {t('adminWithdraw.amount')}: <br></br>
+                    <span className="font-semibold">
+                      {viewPaymentRequest?.amount} USDT
+                    </span>
+                  </label>
+                </div>
+                {viewPaymentRequest?.hash && (
+                  <div>
+                    <label className="block mb-1 font-medium text-gray-700">
+                      Transaction Hash: <br></br>
+                      <a
+                        href={`https://bscscan.com/tx/${viewPaymentRequest.hash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-blue-600 hover:underline"
+                      >
+                        {viewPaymentRequest.hash}
+                      </a>
+                    </label>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Close button */}
+          <div className="pt-6 mt-6 border-t border-gray-200 flex-shrink-0 bg-white">
+            <button
+              onClick={() => {
+                setShowViewPaymentInfo(false);
+                setViewPaymentRequest(null);
+              }}
+              className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+            >
+              Close
             </button>
           </div>
         </div>
@@ -946,6 +1240,29 @@ const AdminWithdrawPages = () => {
                               />
                             </svg>
                             Cancel
+                          </button>
+                        )}
+                      {ele.status === 'APPROVED' &&
+                        ele.withdrawalType === 'BANK' &&
+                        ele.transferContent && (
+                          <button
+                            onClick={() => handleViewPaymentInfo(ele)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-blue-600 text-white"
+                            title="View Payment Info"
+                          >
+                            <svg
+                              width="20"
+                              height="20"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+                                fill="currentColor"
+                              />
+                            </svg>
+                            View Info
                           </button>
                         )}
                     </div>

@@ -964,7 +964,9 @@
     "walletAddress": "Địa chỉ ví",
     "payoutDisplayName": "Tên hiển thị thanh toán",
     "payoutEmailOrPhone": "Email hoặc số điện thoại thanh toán",
-    "payoutDestination": "Đây là nơi khoản thanh toán của bạn sẽ được gửi đến."
+    "payoutDestination": "Đây là nơi khoản thanh toán của bạn sẽ được gửi đến.",
+    "paymentInformation": "Thông tin thanh toán",
+    "qrCodeNotAvailable": "Mã QR không khả dụng"
   },
 
   "approvePayment": {

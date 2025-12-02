@@ -250,6 +250,14 @@ const userSchema = mongoose.Schema(
       type: Date,
       default: null,
     },
+    lastWildCardRewardAt: {
+      type: Date,
+      default: null, // Thời điểm tạo wild card cuối cùng từ referral reward (5 refId mới)
+    },
+    receivedTier2PromotionWildCard: {
+      type: Boolean,
+      default: false, // Đánh dấu đã nhận wild card khuyến mãi lên tier 2
+    },
     preTier2Status: {
       type: String,
       enum: ["", "ACHIEVED", "PENDING", "APPROVED", "PASSED"],

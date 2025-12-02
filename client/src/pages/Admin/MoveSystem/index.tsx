@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
 import Loading from '@/components/Loading';
 import { ToastContainer, toast } from 'react-toastify';
@@ -14,22 +13,30 @@ const MoveSystem = () => {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const id = pathname.split('/')[3];
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [loadingInfoUser, setLoadingInfoUser] = useState(true);
   const [parentId, setParentId] = useState('');
   const [refId, setRefId] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [withChild, setWithChild] = useState('');
+  const [withChild, setWithChild] = useState(false);
+  const [selectedTreeType, setSelectedTreeType] = useState<'main' | 'sub'>('main');
+  const [currentParentName, setCurrentParentName] = useState('');
+  const [currentReferralName, setCurrentReferralName] = useState('');
 
   useEffect(() => {
     (async () => {
       await User.getUserById(id)
-        .then((response) => {
+        .then((response: any) => {
           setData(response.data);
+          // Mặc định chọn cây chính
+          if (response.data.mainTree) {
+            setCurrentParentName(response.data.mainTree.parentName || '');
+            setCurrentReferralName(response.data.mainTree.refUserName || '');
+          }
           setLoadingInfoUser(false);
         })
-        .catch((error) => {
+        .catch((error: any) => {
           let message =
             error.response && error.response.data.message
               ? error.response.data.message
@@ -37,9 +44,22 @@ const MoveSystem = () => {
           toast.error(t(message));
         });
     })();
-  }, [id]);
+  }, [id, t]);
 
-  const loadOptions = debounce((inputValue, callback) => {
+  // Cập nhật Current Parent Name và Current Referral Name khi chọn tree type
+  useEffect(() => {
+    if (data) {
+      if (selectedTreeType === 'main' && data.mainTree) {
+        setCurrentParentName(data.mainTree.parentName || '');
+        setCurrentReferralName(data.mainTree.refUserName || '');
+      } else if (selectedTreeType === 'sub' && data.subTree) {
+        setCurrentParentName(data.subTree.parentName || '');
+        setCurrentReferralName(data.subTree.refUserName || '');
+      }
+    }
+  }, [selectedTreeType, data]);
+
+  const loadOptions = debounce((inputValue: string, callback: (options: any[]) => void) => {
     if (!inputValue.trim()) {
       callback([]);
       return;
@@ -47,8 +67,8 @@ const MoveSystem = () => {
 
     (async () => {
       await User.getAllUsersWithKeyword({ keyword: inputValue })
-        .then((response) => {
-          const options = response.data.users.map((user) => ({
+        .then((response: any) => {
+          const options = response.data.users.map((user: any) => ({
             value: user._id,
             label: user.userName,
           }));
@@ -65,8 +85,17 @@ const MoveSystem = () => {
       toast.error("Please select at least 1 parent or referral value");
       return;
     } else {
-      await User.changeSystem({ moveId: id, parentId, refId, withChild })
-        .then((response) => {
+      setLoading(true);
+      // Lấy treeId dựa trên tree type được chọn
+      let treeId = null;
+      if (selectedTreeType === 'main' && data?.mainTree) {
+        treeId = data.mainTree.treeId;
+      } else if (selectedTreeType === 'sub' && data?.subTree) {
+        treeId = data.subTree.treeId;
+      }
+
+      await User.changeSystem({ moveId: id, parentId, refId, withChild: withChild ? 'on' : '', treeId })
+        .then((response: any) => {
           const { success, message } = response.data;
           if (!success) {
             setErrorMessage(message);
@@ -76,7 +105,7 @@ const MoveSystem = () => {
           }
           setLoading(false);
         })
-        .catch((error) => {
+        .catch((error: any) => {
           let message =
             error.response && error.response.data.message
               ? error.response.data.message
@@ -87,7 +116,7 @@ const MoveSystem = () => {
           setLoading(false);
         });
     }
-  }, [refId, parentId, id, withChild]);
+  }, [refId, parentId, id, withChild, selectedTreeType, data, t]);
 
   return (
     <DefaultLayout>
@@ -110,13 +139,45 @@ const MoveSystem = () => {
                 <p className="text-sm">Move User Name : </p>
                 <p className="text-lg font-semibold">{data?.userId}</p>
               </div>
+              
+              {/* Chọn ID chính hoặc ID quay lại */}
+              {data?.hasSubTree && (
+                <div className="space-y-2">
+                  <p className="text-sm">Select Tree ID to Move : </p>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="treeType"
+                        value="main"
+                        checked={selectedTreeType === 'main'}
+                        onChange={(e) => setSelectedTreeType(e.target.value as 'main' | 'sub')}
+                        className="cursor-pointer"
+                      />
+                      <span className="text-sm">Main ID (ID chính)</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="treeType"
+                        value="sub"
+                        checked={selectedTreeType === 'sub'}
+                        onChange={(e) => setSelectedTreeType(e.target.value as 'main' | 'sub')}
+                        className="cursor-pointer"
+                      />
+                      <span className="text-sm">Sub ID (ID quay lại)</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <p className="text-sm">Current Parent Name : </p>
-                <p className="text-lg font-semibold">{data?.currentParent}</p>
+                <p className="text-lg font-semibold">{currentParentName || '-'}</p>
               </div>
               <div className="space-y-2">
-                <p className="text-sm">Current Referral  Name : </p>
-                <p className="text-lg font-semibold">{data?.refUserName}</p>
+                <p className="text-sm">Current Referral Name : </p>
+                <p className="text-lg font-semibold">{currentReferralName || '-'}</p>
               </div>
               <div className="space-y-2">
                 <p className="text-sm">
@@ -126,7 +187,7 @@ const MoveSystem = () => {
                   cacheOptions
                   defaultOptions
                   loadOptions={loadOptions}
-                  onChange={(option) => setParentId(option.value)}
+                  onChange={(option: any) => setParentId(option?.value || '')}
                   placeholder="Search user name…"
                   className="w-full mb-1 border text-black border-black rounded-md focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
                 />
@@ -137,7 +198,7 @@ const MoveSystem = () => {
                   cacheOptions
                   defaultOptions
                   loadOptions={loadOptions}
-                  onChange={(option) => setRefId(option.value)}
+                  onChange={(option: any) => setRefId(option?.value || '')}
                   placeholder="Search user name..."
                   className="w-full mb-1 border text-black border-black rounded-md focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
                 />
@@ -149,7 +210,7 @@ const MoveSystem = () => {
               <div className="space-y-2">
                 <div className="text flex items-center gap-2">
                   <input
-                    onChange={(e) => setWithChild(e.target.value)}
+                    onChange={(e) => setWithChild(e.target.checked)}
                     type="checkbox"
                     id="withChild"
                     checked={withChild}

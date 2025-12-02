@@ -22,6 +22,9 @@ const WildCard = {
       targetTier,
     });
   },
+  adminDeleteWildCard: (cardId) => {
+    return API.delete(`${URL_API_WILDCARD}/admin/delete/${cardId}`);
+  },
 };
 
 export default WildCard;

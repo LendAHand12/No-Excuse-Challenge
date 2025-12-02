@@ -52,6 +52,7 @@ import {
   checkRefAndTotalChildOfUser,
   fetchVnUsdRates,
   calculateTreeDieTime,
+  createWildCardForTier2Users,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 import {
@@ -63,6 +64,9 @@ import {
   recalculateTreeDieTimeForOldData,
   syncDieTimeForSubIds,
   testCalculateDieTimeForTree,
+  giveTier2PromotionWildCards,
+  recalculateDieTimeDaily,
+  exportUsersWithAdminChangeButNoDieTime,
 } from "./common.js";
 import Tree from "./models/treeModel.js";
 import { getTotalLevel1ToLevel10OfUser, getTotalLevel6ToLevel10OfUser } from "./utils/methods.js";
@@ -133,13 +137,7 @@ app.use(notFound);
 // configure a custome error handler middleware
 app.use(errorHandler);
 
-// await recalculateTreeDieTimeForOldData();
-// await checkAliveTreesInXuyen116Branch();
-// await syncDieTimeForSubIds();
-// await getDescendantsAndGive7DaysBonus("67e51addfe1364e3848c589f");
-
-// await calculateDieTimeForAllTier2();
-// await exportOver45UsersToTxt();
+// await exportUsersWithAdminChangeButNoDieTime();
 
 // Cấu hình timezone Việt Nam (GMT+7)
 const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";
@@ -216,6 +214,18 @@ const cron4 = new CronJob(
   VIETNAM_TIMEZONE
 );
 
+// const cron5 = new CronJob(
+//   "00 05 * * *", // 5h sáng giờ Việt Nam
+//   async () => {
+//     console.log("Calculate Tree DieTime start");
+//     await calculateTreeDieTime();
+//     console.log("Calculate Tree DieTime done");
+//   },
+//   null,
+//   true,
+//   VIETNAM_TIMEZONE
+// );
+
 const cron6 = new CronJob(
   "0 * * * *", // Mỗi giờ theo giờ Việt Nam
   async () => {
@@ -228,17 +238,22 @@ const cron6 = new CronJob(
   VIETNAM_TIMEZONE
 );
 
-// Chạy mỗi giờ vào phút thứ 10: lấy tỷ giá VN từ phobitcoin
-// const cronFetchVnUsdRates = new CronJob(
-//   "10 * * * *", // phút 10 mỗi giờ
+const cron7 = new CronJob(
+  "00 05 * * *", // 5h sáng giờ Việt Nam
+  async () => {
+    await createWildCardForTier2Users();
+  },
+  null,
+  true,
+  VIETNAM_TIMEZONE
+);
+
+// const cron8 = new CronJob(
+//   "00 06 * * *", // 6h sáng giờ Việt Nam
 //   async () => {
-//     try {
-//       console.log("Fetch VN USD rates start");
-//       await fetchVnUsdRates();
-//       console.log("Fetch VN USD rates done");
-//     } catch (e) {
-//       console.error("Fetch VN USD rates error:", e?.message || e);
-//     }
+// console.log("Recalculate dieTime daily start");
+// await recalculateDieTimeDaily();
+// console.log("Recalculate dieTime daily done");
 //   },
 //   null,
 //   true,
@@ -253,8 +268,10 @@ cron12.start();
 cron2.start();
 cron3.start();
 cron4.start();
+// cron5.start();
 cron6.start();
-// cronFetchVnUsdRates.start();
+cron7.start();
+// cron8.start();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>

@@ -22,6 +22,7 @@ import {
   checkUserCanNextTier,
   getTotalLevel1ToLevel10OfUser,
   getAllDescendantsTier2Users,
+  isUserExpired,
 } from "../utils/methods.js";
 import { areArraysEqual } from "../cronJob/index.js";
 import {
@@ -245,6 +246,18 @@ const getUserById = asyncHandler(async (req, res) => {
       isSubId: false,
     });
 
+    // Tìm cây quay lại (isSubId = true) nếu có
+    const subTree = await Tree.findOne({
+      userId: user._id,
+      tier: 1,
+      isSubId: true,
+    });
+
+    let parentSubTree;
+    if (subTree) {
+      parentSubTree = await Tree.findById(subTree.parentId);
+    }
+
     const listDirectUser = [];
     const listRefIdOfUser = await Tree.find({ refId: tree._id, tier: 1 });
     if (listRefIdOfUser && listRefIdOfUser.length > 0) {
@@ -302,8 +315,9 @@ const getUserById = asyncHandler(async (req, res) => {
     }).select("oldUserName oldEmail updatedAt");
 
     let refUser;
+    let refTree;
     if (tree && tree.refId) {
-      const refTree = await Tree.findById(tree.refId);
+      refTree = await Tree.findById(tree.refId);
       refUser = await User.findById(refTree.userId);
     }
 
@@ -423,6 +437,13 @@ const getUserById = asyncHandler(async (req, res) => {
       userId: user._id,
     }).sort({ createdAt: -1 });
 
+    // Tính tổng claimedHewe từ model Claim
+    const claimedHeweResult = await Claim.aggregate([
+      { $match: { userId: user._id, coin: "HEWE" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    const claimedHewe = claimedHeweResult[0]?.total || 0;
+
     res.json({
       id: user._id,
       email: user.email,
@@ -469,7 +490,7 @@ const getUserById = asyncHandler(async (req, res) => {
       hewePerDay: user.hewePerDay,
       availableHewe: user.availableHewe,
       availableUsdt: user.availableUsdt,
-      claimedHewe: user.hewePerDay > 0 ? diffDaySinceCreate * user.hewePerDay : 0,
+      claimedHewe: claimedHewe + user.availableHewe,
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
@@ -497,7 +518,23 @@ const getUserById = asyncHandler(async (req, res) => {
       availableAmc: user.availableAmc,
       claimedAmc: user.claimedAmc,
       subInfo,
-      currentParent: parentTree ? parentTree.userName : null,
+      currentParent: parentTree,
+      // Thông tin về cây chính và cây quay lại
+      hasSubTree: !!subTree,
+      mainTree: tree
+        ? {
+            treeId: tree._id,
+            parentName: parentTree?.userName || "",
+            refUserName: refTree?.userName || "",
+          }
+        : null,
+      subTree: subTree
+        ? {
+            treeId: subTree._id,
+            parentName: parentSubTree.userName,
+            refUserName: refTree.userName,
+          }
+        : null,
       preTier2Status: user.preTier2Status,
       shortfallAmount: user.shortfallAmount,
       tier2ChildUsers: tier2Users,
@@ -509,8 +546,36 @@ const getUserById = asyncHandler(async (req, res) => {
           : user.tier === 1 && user.countPay < 13
           ? true
           : false,
-      isYellow: user.errLahCode === "OVER35",
-      isBlue: user.errLahCode === "OVER45",
+      // Tính toán isYellow và isBlue dựa trên dieTime của Tree tier 1
+      isYellow: (() => {
+        if (tree && tree.dieTime) {
+          const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+          const dieTimeStart = moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+          const diffDays = dieTimeStart.diff(todayStart, "days");
+
+          // Nếu còn 10 ngày nữa đến hạn (tier 1) hoặc 5 ngày (tier 2) → isYellow = true
+          if (diffDays > 0) {
+            if (user.tier === 1 && diffDays <= 10) {
+              return true;
+            } else if (user.tier === 2 && diffDays <= 5) {
+              return true;
+            }
+          }
+        }
+        return false;
+      })(),
+      isBlue: (() => {
+        if (tree && tree.dieTime) {
+          const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+          const dieTimeStart = moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+
+          // Nếu quá hạn (dieTime <= today) → isBlue = true
+          if (todayStart.isSameOrAfter(dieTimeStart)) {
+            return true;
+          }
+        }
+        return false;
+      })(),
       isPink: user.countPay === 13 && listDirectUser.length < 2,
       isDisableTier2: treeTier2OfUser ? treeTier2OfUser.disable : false,
       timeToTry: user.timeToTry,
@@ -547,9 +612,7 @@ const getUserAssets = asyncHandler(async (req, res) => {
     .filter((ele) => ele.status === "PENDING")
     .reduce((sum, withdraw) => sum + withdraw.amount, 0);
 
-  // Calculate claimedHewe (same logic as getUserInfo)
-  const diffDaySinceCreate = moment().diff(moment(user.createdAt), "days");
-  const claimedHewe = user.hewePerDay > 0 ? diffDaySinceCreate * user.hewePerDay : 0;
+  const claimedHewe = user.claimedHewe;
 
   res.json({
     availableHewe: user.availableHewe || 0,
@@ -711,6 +774,18 @@ const getUserInfo = asyncHandler(async (req, res) => {
       countdown = moment(new Date(currentDieTime)).diff(currentDay, "days"); // số ngày còn lại
     }
 
+    // Tính toán errLahCode dựa trên dieTime của Tree tier 1
+    let errLahCode = "";
+    if (treeTier1 && treeTier1.dieTime) {
+      const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+      const dieTimeStart = moment.tz(treeTier1.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+
+      // Nếu dieTime đã quá hạn (today >= dieTime) thì errLahCode = "OVER45"
+      if (todayStart.isSameOrAfter(dieTimeStart)) {
+        errLahCode = "OVER45";
+      }
+    }
+
     const isMoveSystem = await MoveSystem.find({
       userId: user._id,
     });
@@ -744,6 +819,13 @@ const getUserInfo = asyncHandler(async (req, res) => {
     const hornor = await Honor.findOne({ userId: user.id });
 
     const diffDaySinceCreate = moment().diff(moment(user.createdAt), "days");
+
+    // Tính tổng claimedHewe từ model Claim
+    const claimedHeweResult = await Claim.aggregate([
+      { $match: { userId: user._id, coin: "HEWE" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    const claimedHewe = claimedHeweResult[0]?.total || 0;
 
     res.json({
       id: user._id,
@@ -792,7 +874,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       hewePerDay: user.hewePerDay,
       availableHewe: user.availableHewe,
       availableUsdt: user.availableUsdt,
-      claimedHewe: user.hewePerDay > 0 ? diffDaySinceCreate * user.hewePerDay : 0,
+      claimedHewe: claimedHewe + user.availableHewe,
       claimedUsdt: user.claimedUsdt,
       heweWallet: user.heweWallet,
       ranking: user.ranking,
@@ -806,7 +888,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       income: tree.income,
       facetecTid: user.facetecTid,
       kycFee: user.kycFee,
-      errLahCode: user.errLahCode,
+      errLahCode: errLahCode,
       pendingUpdateInfo: pendingUpdateInfo.length > 0 ? true : false,
       notEnoughtChild,
       countdown,
@@ -1964,6 +2046,14 @@ const getCountIncome = async (treeId, tier) => {
       if (child && child.countPay === 0) {
         result = result - 1;
       }
+
+      // Kiểm tra dieTime: chỉ đếm những user chưa quá hạn
+      const isExpired = await isUserExpired(treeOfChild._id);
+      if (isExpired) {
+        result = result - 1;
+      }
+
+      // Đệ quy đếm children của tất cả user (kể cả user quá hạn)
       const count = await countRecursive(treeOfChild._id);
       result += count;
     }
@@ -2219,16 +2309,27 @@ async function getAllDescendants(targetUserTreeId, currentTier) {
 }
 
 const changeSystem = asyncHandler(async (req, res) => {
-  const { moveId, parentId, refId, withChild } = req.body;
+  const { moveId, parentId, refId, withChild, treeId } = req.body;
 
   const moveUser = await User.findById(moveId);
 
-  const movePersonTree = await Tree.findOne({
-    userId: moveId,
-    tier: 1,
-    isSubId: false,
-    disable: false,
-  });
+  // Nếu có treeId được chọn, sử dụng tree đó, nếu không thì tìm tree chính (isSubId = false)
+  let movePersonTree;
+  if (treeId) {
+    movePersonTree = await Tree.findOne({
+      _id: treeId,
+      userId: moveId,
+      tier: 1,
+      disable: false,
+    });
+  } else {
+    movePersonTree = await Tree.findOne({
+      userId: moveId,
+      tier: 1,
+      isSubId: false,
+      disable: false,
+    });
+  }
   const receivePerson = await Tree.findById(parentId);
 
   if (!moveUser || !movePersonTree || !receivePerson) {

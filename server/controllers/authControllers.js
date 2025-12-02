@@ -20,6 +20,7 @@ import axios from "axios";
 import Honor from "../models/honorModel.js";
 import mongoose from "mongoose";
 import moment from "moment";
+import "moment-timezone";
 import { getClientIp, detectCountryFromIp, isVietnam } from "../utils/getIpLocation.js";
 import { sendMailErrorGetUserIpAndLocation } from "../utils/sendMailCustom.js";
 
@@ -407,6 +408,18 @@ const authUser = asyncHandler(async (req, res) => {
 
     const diffDaySinceCreate = moment().diff(moment(user.createdAt), "days");
 
+    // Tính toán errLahCode dựa trên dieTime của Tree tier 1
+    let errLahCode = "";
+    if (tree && tree.dieTime) {
+      const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+      const dieTimeStart = moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+      
+      // Nếu dieTime đã quá hạn (today >= dieTime) thì errLahCode = "OVER45"
+      if (todayStart.isSameOrAfter(dieTimeStart)) {
+        errLahCode = "OVER45";
+      }
+    }
+
     res.status(200).json({
       userInfo: {
         id: user._id,
@@ -454,7 +467,7 @@ const authUser = asyncHandler(async (req, res) => {
         income: tree ? tree.income : 0,
         facetecTid: user.facetecTid,
         kycFee: user.kycFee,
-        errLahCode: user.errLahCode,
+        errLahCode: errLahCode,
         isMoveSystem: isMoveSystem.length > 0 ? true : false,
         changeCreatedAt: user.changeCreatedAt,
         lockKyc: user.lockKyc,

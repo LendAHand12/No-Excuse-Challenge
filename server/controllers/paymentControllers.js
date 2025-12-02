@@ -22,6 +22,7 @@ import {
   getTotalLevel6ToLevel10OfUser,
   hasTwoBranches,
   getTotalLevel1ToLevel10OfUser,
+  isUserExpired,
 } from "../utils/methods.js";
 import Wallet from "../models/walletModel.js";
 import Tree from "../models/treeModel.js";
@@ -159,6 +160,9 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         // giao dich hoa hong truc tiep
         const refUserData = await User.findById(refUser.userId);
 
+        // Kiểm tra dieTime có quá hạn hay chưa
+        const isRefUserExpired = await isUserExpired(refUser._id);
+
         if (refUserData.closeLah) {
           haveRefNotPayEnough = true;
         } else if (
@@ -172,7 +176,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
             refUserData.status === "LOCKED" ||
             refUserData.tier < user.tier ||
             (refUserData.tier === user.tier && refUserData.countPay < 13) ||
-            refUserData.errLahCode === "OVER45"
+            isRefUserExpired
           ) {
             haveRefNotPayEnough = true;
           } else {
@@ -223,6 +227,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         for (let p of ancestors) {
           let haveParentNotPayEnough;
           const receiveUser = await User.findById(p ? p.userId : admin._id);
+          const isReceiveUserExpired = await isUserExpired(p._id);
           if (receiveUser.closeLah) {
             haveParentNotPayEnough = true;
           } else if (
@@ -234,7 +239,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
           } else {
             if (
               receiveUser.status === "LOCKED" ||
-              receiveUser.errLahCode === "OVER45" ||
+              isReceiveUserExpired ||
               receiveUser.tier < user.tier ||
               (receiveUser.tier === user.tier && receiveUser.countPay < user.countPay + 1)
             ) {
@@ -638,6 +643,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
         //   refUser: treeOfRefUser.userName,
         //   directCommissionUser: directCommissionUser.userId,
         // });
+        const isRefUserExpired = await isUserExpired(refUser._id);
 
         // giao dich hoa hong truc tiep
         if (refUser.closeLah) {
@@ -648,7 +654,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           if (
             refUser.status === "LOCKED" ||
             refUser.tier < user.tier ||
-            refUser.errLahCode === "OVER45" ||
+            isRefUserExpired ||
             (refUser.tier === user.tier && refUser.countPay < 13)
           ) {
             haveRefNotPayEnough = true;
@@ -664,6 +670,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
         let payOutForPool = false;
         let rePaymentForPool = 0;
         if (
+          user.paymentStep === 0 &&
           directCommissionUser.shortfallAmount > 0 &&
           directCommissionUser.shortfallAmount >= directCommissionFee
         ) {
@@ -723,6 +730,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
         for (let p of ancestors) {
           let haveParentNotPayEnough;
           const receiveUser = await User.findById(p ? p.userId : admin._id);
+          const isReceiveUserExpired = await isUserExpired(p._id);
           if (receiveUser.closeLah) {
             haveParentNotPayEnough = true;
           } else if (
@@ -734,7 +742,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           } else {
             if (
               receiveUser.status === "LOCKED" ||
-              receiveUser.errLahCode === "OVER45" ||
+              isReceiveUserExpired ||
               receiveUser.tier < user.tier
             ) {
               haveParentNotPayEnough = true;
@@ -755,6 +763,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           }
           let rePayForPoolRef = false;
           if (
+            user.paymentStep === 0 &&
             receiveUser.shortfallAmount > 0 &&
             receiveUser.shortfallAmount >= referralCommissionFee + rePaymentForPool
           ) {
