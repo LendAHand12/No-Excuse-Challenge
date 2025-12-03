@@ -39,6 +39,7 @@ import bankWebhookRoutes from "./routes/bankWebhookRoutes.js";
 import ticketRoutes from "./routes/ticketRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import wildCardRoutes from "./routes/wildCardRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 import {
   countChildToData,
@@ -48,28 +49,10 @@ import {
   rankingCalc,
   blockUserNotKYC,
   updateHewePrice,
-  checkUserPreTier2,
-  checkRefAndTotalChildOfUser,
-  fetchVnUsdRates,
-  calculateTreeDieTime,
   createWildCardForTier2Users,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
-import {
-  calculateDieTimeForAllTier2,
-  checkAliveTreesInXuyen116Branch,
-  exportOver45UsersToTxt,
-  fixParentChildLinks,
-  getDescendantsAndGive7DaysBonus,
-  recalculateTreeDieTimeForOldData,
-  syncDieTimeForSubIds,
-  testCalculateDieTimeForTree,
-  giveTier2PromotionWildCards,
-  recalculateDieTimeDaily,
-  exportUsersWithAdminChangeButNoDieTime,
-} from "./common.js";
-import Tree from "./models/treeModel.js";
-import { getTotalLevel1ToLevel10OfUser, getTotalLevel6ToLevel10OfUser } from "./utils/methods.js";
+import { fixParentChildLinks, recalculateDieTimeDaily } from "./common.js";
 
 const app = express();
 
@@ -125,6 +108,7 @@ app.use("/api/bank-webhook", bankWebhookRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/wildcard", wildCardRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/api/test-tele", async (req, res) => {
   await sendTelegramMessage({ userName: "kiet" });
@@ -136,8 +120,6 @@ app.use(notFound);
 
 // configure a custome error handler middleware
 app.use(errorHandler);
-
-// await exportUsersWithAdminChangeButNoDieTime();
 
 // Cấu hình timezone Việt Nam (GMT+7)
 const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";

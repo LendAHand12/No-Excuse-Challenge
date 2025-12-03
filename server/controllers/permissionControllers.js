@@ -10,11 +10,37 @@ const getAllPermissions = asyncHandler(async (req, res) => {
 });
 
 const getPermissions = asyncHandler(async (req, res) => {
-  const { role } = req.user;
-  const permissions = await Permission.findOne({ role });
+  // Check if it's an admin from Admin model or User model
+  let role;
+  if (req.admin) {
+    role = "admin";
+  } else if (req.user && req.user.role) {
+    role = req.user.role;
+  } else {
+    res.status(401);
+    throw new Error("Not authorised");
+  }
+
+  const permission = await Permission.findOne({ role }).populate(
+    "pagePermissions.page"
+  );
+
+  if (!permission) {
+    return res.json({
+      permissions: [],
+    });
+  }
+
+  // Format permissions to match frontend expectations
+  const formattedPermissions = permission.pagePermissions
+    ? permission.pagePermissions.map((pp) => ({
+        page: pp.page,
+        actions: pp.actions || [],
+      }))
+    : [];
 
   res.json({
-    permissions,
+    permissions: formattedPermissions,
   });
 });
 

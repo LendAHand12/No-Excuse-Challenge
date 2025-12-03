@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
+import Admin from "../models/adminModel.js";
 import Permission from "../models/permissionModel.js";
 
 const protectRoute = asyncHandler(async (req, res, next) => {
@@ -21,64 +22,119 @@ const protectRoute = asyncHandler(async (req, res, next) => {
         process.env.JWT_ACCESS_TOKEN_SECRET
       );
 
-      // fetch that user from db, but not get the user's password and set this fetched user to the req.user
+      // Try to find as User first, then as Admin
       req.user = await User.findById(decodedToken.id).select("-password");
+      if (!req.user) {
+        // If not found as User, try Admin
+        req.admin = await Admin.findById(decodedToken.id).select("-password -googleAuthenticatorSecret");
+        if (!req.admin || !req.admin.isActive) {
+          res.status(401);
+          throw new Error("Not authorised. User/Admin not found or inactive");
+        }
+        // Set user object for compatibility with existing code
+        req.user = {
+          _id: req.admin._id,
+          email: req.admin.email,
+          isAdmin: true,
+          role: "admin",
+          isRootAdmin: req.admin.isRootAdmin,
+        };
+      }
       next();
     } catch (error) {
       res.status(401);
       throw new Error("Not authorised. Token failed");
     }
+  } else {
+    res.status(401);
+    throw new Error("Not authorised. No token provided");
   }
 });
 
 const isAdmin = asyncHandler((req, res, next) => {
-  if (req.user.isAdmin || (req.user && req.user.role !== "user")) next();
-  else {
+  // Check if it's an admin (either from User model with isAdmin=true or from Admin model)
+  if (req.admin || req.user?.isAdmin || (req.user && req.user.role !== "user")) {
+    next();
+  } else {
     res.status(401);
     throw new Error("Not authorised admin");
   }
 });
 
 const isSuperAdmin = asyncHandler((req, res, next) => {
-  if (req.user.isAdmin || (req.user && req.user.role === "admin")) next();
-  else {
+  // Check if it's a root admin (from Admin model) or super admin (from User model)
+  if (req.admin?.isRootAdmin || (req.user && req.user.role === "admin")) {
+    next();
+  } else {
     res.status(401);
-    throw new Error("Not authorised admin");
+    throw new Error("Not authorised. Super admin access required");
   }
 });
 
 const checkPermission = asyncHandler(async (req, res, next) => {
   const method = req.method;
-  const pageNameHeader = req.headers["page-path"];
-  if (req.user && req.user.role) {
-    const userRole = req.user.role;
-    if (userRole === "admin") {
-      next();
-    } else {
-      const permission = pagePermissions.find(
-        (ele) => ele.pageName === pageNameHeader && ele.method === method
-      );
-      console.log({ permission });
-      const permissions = await Permission.findOne({ role: userRole }).populate(
-        "pagePermissions.page"
-      );
-      for (let page of permissions.pagePermissions) {
-        console.log({ page });
-      }
-      const page = permissions.pagePermissions.find(
-        (ele) => ele.page.pageName === pageNameHeader
-      );
-      if (page) {
-      } else {
-        res.status(401);
-        throw new Error("Access denied");
-      }
-      console.log({ page });
-    }
+  const pagePathHeader = req.headers["page-path"];
+  
+  if (!pagePathHeader) {
+    res.status(400);
+    throw new Error("Page path header is required");
+  }
+
+  // Determine role - check if it's an admin from Admin model or User model
+  let userRole;
+  if (req.admin) {
+    // Admin from Admin model - use "admin" role
+    userRole = "admin";
+  } else if (req.user && req.user.role) {
+    userRole = req.user.role;
   } else {
     res.status(401);
     throw new Error("Not authorised");
   }
+
+  // Root admin or role "admin" has full access
+  if (req.admin?.isRootAdmin || userRole === "admin") {
+    return next();
+  }
+
+  // Check permissions for other roles
+  const permissions = await Permission.findOne({ role: userRole }).populate(
+    "pagePermissions.page"
+  );
+
+  if (!permissions) {
+    res.status(403);
+    throw new Error("No permissions found for this role");
+  }
+
+  // Find the page permission that matches the requested path
+  const pagePermission = permissions.pagePermissions.find(
+    (pp) => pp.page && pp.page.path === pagePathHeader
+  );
+
+  if (!pagePermission) {
+    res.status(403);
+    throw new Error("Access denied - Page not found in permissions");
+  }
+
+  // Map HTTP methods to actions
+  const methodToAction = {
+    GET: "read",
+    POST: "update",
+    PUT: "update",
+    PATCH: "update",
+    DELETE: "delete",
+  };
+
+  const requiredAction = methodToAction[method] || "read";
+
+  // Check if the required action is allowed
+  if (!pagePermission.actions || !pagePermission.actions.includes(requiredAction)) {
+    res.status(403);
+    throw new Error(`Access denied - ${requiredAction} action not allowed for this page`);
+  }
+
+  next();
 });
 
 export { protectRoute, isAdmin, checkPermission, isSuperAdmin };

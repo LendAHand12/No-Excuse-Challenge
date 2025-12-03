@@ -384,9 +384,17 @@ const authUser = asyncHandler(async (req, res) => {
 
     const packages = await getActivePackages();
 
-    const permissions = await Permission.findOne({ role: user.role }).populate(
+    const permission = await Permission.findOne({ role: user.role }).populate(
       "pagePermissions.page"
     );
+
+    // Format permissions to match frontend expectations
+    const formattedPermissions = permission && permission.pagePermissions
+      ? permission.pagePermissions.map((pp) => ({
+          page: pp.page,
+          actions: pp.actions || [],
+        }))
+      : [];
 
     const isMoveSystem = await MoveSystem.find({
       userId: user._id,
@@ -451,7 +459,7 @@ const authUser = asyncHandler(async (req, res) => {
         role: user.role,
         // isSerepayWallet: await checkSerepayWallet(user.walletAddress1),
         isSerepayWallet: true,
-        permissions: permissions ? permissions.pagePermissions : [],
+        permissions: formattedPermissions,
         totalHewe: user.totalHewe,
         hewePerDay: user.hewePerDay,
         availableHewe: user.availableHewe,
