@@ -51,6 +51,7 @@ const PaymentModal = ({
     'idle' | 'checking' | 'processing' | 'success' | 'pending'
   >('idle');
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { connectors, connectAsync } = useConnect();
   const { address, isConnected } = useAccount();
 
@@ -72,6 +73,7 @@ const PaymentModal = ({
       setPaymentMethod(getDefaultPaymentMethod());
       setPaymentStatus('idle');
       setIsCheckingPayment(false);
+      setIsSubmitting(false);
     }
   }, [isOpen]);
   
@@ -140,6 +142,7 @@ const PaymentModal = ({
               } catch (error: any) {
                 console.error('Error calling donePayment:', error);
                 setPaymentStatus('idle');
+                setIsSubmitting(false);
                 toast.error(
                   error.response?.data?.message ||
                     t(
@@ -157,6 +160,7 @@ const PaymentModal = ({
             stopPolling();
             setPaymentStatus('idle');
             setIsCheckingPayment(false);
+            setIsSubmitting(false);
             toast.error(t('Payment failed'));
           }
           // Nếu PENDING, tiếp tục polling
@@ -178,6 +182,7 @@ const PaymentModal = ({
       if (isMounted) {
         stopPolling();
         setIsCheckingPayment(false);
+        setIsSubmitting(false);
         toast.info(t('Payment checking timeout. Please check manually later.'));
       }
     }, 300000); // 5 phút
@@ -374,15 +379,23 @@ const PaymentModal = ({
 
             <button
               onClick={() => {
+                // Prevent multiple clicks
+                if (isSubmitting || isCheckingPayment || paymentStatus === 'checking') {
+                  return;
+                }
+                
+                setIsSubmitting(true);
                 setIsCheckingPayment(true);
                 setPaymentStatus('checking');
                 toast.info(t('Checking payment status...'));
               }}
-              disabled={isCheckingPayment || paymentStatus === 'checking'}
+              disabled={isSubmitting || isCheckingPayment || paymentStatus === 'checking' || paymentStatus === 'processing' || paymentStatus === 'success'}
               className="payment-button secondary"
             >
-              {isCheckingPayment || paymentStatus === 'checking'
+              {isSubmitting || isCheckingPayment || paymentStatus === 'checking' || paymentStatus === 'processing'
                 ? t('Checking payment...')
+                : paymentStatus === 'success'
+                ? t('Payment successful!')
                 : t('I have transferred')}
             </button>
 
