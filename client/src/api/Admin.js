@@ -1,7 +1,33 @@
 import API from './API';
-import { URL_API_USER, URL_API_WITHDRAW } from './URL';
+import { URL_API_USER, URL_API_WITHDRAW, URL_API_ADMIN } from './URL';
 
 const Admin = {
+  // Admin authentication
+  login: (body) => {
+    return API.post(`${URL_API_ADMIN}/login`, body);
+  },
+  startFaceVerification: (body) => {
+    return API.post(`${URL_API_ADMIN}/start-face-verification`, body);
+  },
+  verifyLogin: (body) => {
+    return API.post(`${URL_API_ADMIN}/verify-login`, body);
+  },
+  startFaceEnrollment: (body) => {
+    return API.post(`${URL_API_ADMIN}/start-face-enrollment`, body);
+  },
+  registerFace: (body) => {
+    return API.post(`${URL_API_ADMIN}/register-face`, body);
+  },
+  setup2FA: (body) => {
+    return API.post(`${URL_API_ADMIN}/setup-2fa`, body);
+  },
+  verifyAndEnable2FA: (body) => {
+    return API.post(`${URL_API_ADMIN}/verify-enable-2fa`, body);
+  },
+  getAdminInfo: () => {
+    return API.get(`${URL_API_ADMIN}/me`);
+  },
+  // Admin management (old routes, keep for compatibility)
   createAdmin: (body) => {
     return API.post(`${URL_API_USER}/admin`, body);
   },

@@ -8,6 +8,9 @@ import PolicyPage from './pages/Policy';
 import ContactPage from './pages/Contact';
 import { PrivateRoute, PublicRoute } from './helpers/router';
 import SignInPage from './pages/SignIn';
+import AdminLoginPage from './pages/Admin/Login';
+import FaceEnrollCallbackPage from './pages/Admin/FaceEnrollCallback';
+import FaceVerifyCallbackPage from './pages/Admin/FaceVerifyCallback';
 import Profile from './pages/User/Profile';
 import DashboardPage from './pages/Admin/Dashboard';
 import SignUpPage from './pages/SignUp';
@@ -188,6 +191,9 @@ function App() {
           }
         />
         <Route path="/signin" element={<SignInPage />} />
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin/face-enroll-callback" element={<FaceEnrollCallbackPage />} />
+        <Route path="/admin/face-verify-callback" element={<FaceVerifyCallbackPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/confirm" element={<ConfirmPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
