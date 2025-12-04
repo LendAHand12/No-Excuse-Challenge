@@ -1171,11 +1171,11 @@ const UserProfile = () => {
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
                                 <p className="font-semibold text-sm">
-                                  {card.cardType}
+                                  {t('Wild Card')}
                                 </p>
-                                <p className="text-xs text-gray-600 mt-1">
+                                {/* <p className="text-xs text-gray-600 mt-1">
                                   {card.sourceInfo || 'No description'}
-                                </p>
+                                </p> */}
                                 <div className="flex gap-4 mt-1 text-xs text-gray-500">
                                   <span>Days: {card.days}</span>
                                   <span>Tier: {card.targetTier}</span>

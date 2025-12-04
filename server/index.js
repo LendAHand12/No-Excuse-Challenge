@@ -48,10 +48,6 @@ import {
   rankingCalc,
   blockUserNotKYC,
   updateHewePrice,
-  checkUserPreTier2,
-  checkRefAndTotalChildOfUser,
-  fetchVnUsdRates,
-  calculateTreeDieTime,
   createWildCardForTier2Users,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
