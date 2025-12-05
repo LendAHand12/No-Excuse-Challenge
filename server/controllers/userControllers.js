@@ -1904,14 +1904,16 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
         }
       }
 
+      console.log({ child });
+
       tree.nodes.push({
         key: childTree._id,
         label: `${childTree.userName}`,
         totalChild: childTree.countChild,
         income: childTree.income,
-        isRed: child.tier === 1 && child.countPay === 0 ? true : false,
+        isRed: currentTier === 1 && child.countPay === 0 ? true : false,
         isYellow: isYellow,
-        isBlue: child.tier === 1 ? isBlue : false,
+        isBlue: currentTier === 1 ? isBlue : false,
         indexOnLevel: childTree.indexOnLevel,
         isSubId: childTree.isSubId,
         isPink: child.countPay === 13 && listRefOfChild.length < 2,
