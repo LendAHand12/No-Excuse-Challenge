@@ -23,6 +23,7 @@ import {
   getTotalLevel1ToLevel10OfUser,
   getAllDescendantsTier2Users,
   isUserExpired,
+  countAliveIdsInBranch,
 } from "../utils/methods.js";
 import { areArraysEqual } from "../cronJob/index.js";
 import {
@@ -339,7 +340,10 @@ const getUserById = asyncHandler(async (req, res) => {
 
     let notEnoughtChild = { countChild1: 0, countChild2: 0 };
     if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 3 || user.tier > 1) {
-      notEnoughtChild = await getTotalLevel1ToLevel10OfUser(tree);
+      const branch1Count = await countAliveIdsInBranch(tree.children[0]);
+      const branch2Count = await countAliveIdsInBranch(tree.children[1]);
+      notEnoughtChild = { countChild1: branch1Count + 1, countChild2: branch2Count + 1 };
+      console.log({ notEnoughtChild });
     }
 
     const isMoveSystem = await MoveSystem.find({
@@ -774,7 +778,9 @@ const getUserInfo = asyncHandler(async (req, res) => {
 
     let notEnoughtChild = { countChild1: 0, countChild2: 0 };
     if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 3 || user.tier > 1) {
-      notEnoughtChild = await getTotalLevel1ToLevel10OfUser(tree);
+      const branch1Count = await countAliveIdsInBranch(tree.children[0]);
+      const branch2Count = await countAliveIdsInBranch(tree.children[1]);
+      notEnoughtChild = { countChild1: branch1Count + 1, countChild2: branch2Count + 1 };
     }
 
     // Lấy dieTime từ Tree model thay vì User model
@@ -1903,8 +1909,6 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
           }
         }
       }
-
-      console.log({ child });
 
       tree.nodes.push({
         key: childTree._id,

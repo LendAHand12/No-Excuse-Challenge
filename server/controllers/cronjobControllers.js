@@ -7,7 +7,6 @@ import {
   distributionHewe,
   rankingCalc,
   checkUserPreTier2,
-  calculateTreeDieTime,
 } from "../cronJob/index.js";
 import { recalculateTreeDieTimeForOldData, testCalculateDieTimeForTree } from "../common.js";
 
@@ -35,10 +34,6 @@ const cronjobs = [
   {
     title: "Check Pre Tier 2 Pending List",
     func: checkUserPreTier2,
-  },
-  {
-    title: "Calculate Tree DieTime",
-    func: calculateTreeDieTime,
   },
   {
     title: "Recalculate Tree DieTime For Old Data",

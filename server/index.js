@@ -51,20 +51,7 @@ import {
   createWildCardForTier2Users,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
-import {
-  calculateDieTimeForAllTier2,
-  checkAliveTreesInXuyen116Branch,
-  exportOver45UsersToTxt,
-  fixParentChildLinks,
-  getDescendantsAndGive7DaysBonus,
-  recalculateTreeDieTimeForOldData,
-  syncDieTimeForSubIds,
-  testCalculateDieTimeForTree,
-  giveTier2PromotionWildCards,
-  recalculateDieTimeDaily,
-  exportUsersWithAdminChangeButNoDieTime,
-  checkAbnormalIncome,
-} from "./common.js";
+import { fixParentChildLinks, recalculateDieTimeDaily } from "./common.js";
 import Tree from "./models/treeModel.js";
 import { getTotalLevel1ToLevel10OfUser, getTotalLevel6ToLevel10OfUser } from "./utils/methods.js";
 
@@ -268,7 +255,7 @@ cron4.start();
 // cron5.start();
 cron6.start();
 cron7.start();
-cron8.start();
+// cron8.start();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
