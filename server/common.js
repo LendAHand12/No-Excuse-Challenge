@@ -3,6 +3,7 @@ import Tree from "./models/treeModel.js";
 import User from "./models/userModel.js";
 import UserOld from "./models/userOldModel.js";
 import WildCard from "./models/wildCardModel.js";
+import Claim from "./models/claimModel.js";
 import { getParentWithCountPay } from "./utils/getParentWithCountPay.js";
 import {
   findNextUser,
@@ -2054,6 +2055,164 @@ export const exportUsersWithAdminChangeButNoDieTime = async () => {
     };
   } catch (err) {
     console.log(`\n❌ ERROR: ${err.message}`);
+    throw err;
+  }
+};
+
+/**
+ * Kiểm tra thu nhập bất thường của user
+ * Logic:
+ * - Lấy danh sách user từ 01/11/2025 tới nay
+ * - Với mỗi user:
+ *   - X = tổng amount từ Transaction có userId_to = user._id
+ *   - Y = tổng amount từ Claim có userId = user._id
+ *   - So sánh: X = Y + user.availableUsdt
+ *   - Nếu không bằng nhau thì ghi vào danh sách
+ * - Xuất kết quả ra file txt
+ */
+export const checkAbnormalIncome = async () => {
+  try {
+    console.log("\n🔍 Bắt đầu kiểm tra thu nhập bất thường...");
+
+    // Lấy danh sách user từ 01/11/2025 tới nay
+    const startDate = moment.tz("2025-11-01", "Asia/Ho_Chi_Minh").startOf("day").toDate();
+    const endDate = moment.tz("Asia/Ho_Chi_Minh").endOf("day").toDate();
+
+    const users = await User.find({
+      createdAt: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+      isAdmin: false,
+    }).select("_id userId email availableUsdt createdAt");
+
+    console.log(`📊 Tìm thấy ${users.length} user từ 01/11/2025 tới nay`);
+
+    const abnormalUsers = [];
+
+    for (const user of users) {
+      try {
+        // Tính X = tổng amount từ Transaction có userId_to = user._id
+        const transactionResult = await Transaction.aggregate([
+          {
+            $match: {
+              userId_to: user._id.toString(),
+              status: "SUCCESS",
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              totalAmount: { $sum: "$amount" },
+            },
+          },
+        ]);
+
+        const X = transactionResult[0]?.totalAmount || 0;
+
+        // Tính Y = tổng amount từ Claim có userId = user._id
+        const claimResult = await Claim.aggregate([
+          {
+            $match: {
+              userId: user._id,
+              coin: "USDT",
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              totalAmount: { $sum: "$amount" },
+            },
+          },
+        ]);
+
+        const Y = claimResult[0]?.totalAmount || 0;
+
+        // So sánh: X = Y + user.availableUsdt
+        const expectedTotal = Y + (user.availableUsdt || 0);
+        const difference = Math.abs(expectedTotal - X);
+
+        // Tính số tiền đúng cần sửa lại: availableUsdt = Y + availableUsdt + 10 - X
+        const correctAvailableUsdt = Y + (user.availableUsdt || 0) - 10 - X;
+
+        // Nếu không bằng nhau (cho phép sai số nhỏ do làm tròn)
+        if (difference > 30) {
+          abnormalUsers.push({
+            userId: user.userId,
+            email: user.email,
+            _id: user._id.toString(),
+            createdAt: user.createdAt,
+            X: X,
+            Y: Y,
+            availableUsdt: user.availableUsdt || 0,
+            expectedTotal: expectedTotal,
+            difference: difference,
+            correctAvailableUsdt: correctAvailableUsdt,
+          });
+        }
+      } catch (err) {
+        console.error(`❌ Lỗi khi kiểm tra user ${user.userId}:`, err.message);
+      }
+    }
+
+    console.log(`\n⚠️  Tìm thấy ${abnormalUsers.length} user có thu nhập bất thường`);
+
+    // Xuất kết quả ra file txt
+    if (abnormalUsers.length > 0) {
+      const timestamp = moment.tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD_HH-mm-ss");
+      const filename = `abnormal_income_${timestamp}.txt`;
+      const filepath = path.join(process.cwd(), "public", "uploads", filename);
+
+      // Đảm bảo thư mục tồn tại
+      const dir = path.dirname(filepath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+
+      let content = `KIỂM TRA THU NHẬP BẤT THƯỜNG\n`;
+      content += `Thời gian kiểm tra: ${moment
+        .tz("Asia/Ho_Chi_Minh")
+        .format("YYYY-MM-DD HH:mm:ss")}\n`;
+      content += `Tổng số user kiểm tra: ${users.length}\n`;
+      content += `Số user có thu nhập bất thường: ${abnormalUsers.length}\n\n`;
+      content += `${"=".repeat(80)}\n\n`;
+
+      abnormalUsers.forEach((user, index) => {
+        content += `${index + 1}. User ID: ${user.userId}\n`;
+        content += `   Email: ${user.email}\n`;
+        content += `   _id: ${user._id}\n`;
+        content += `   Created At: ${moment(user.createdAt).format("YYYY-MM-DD HH:mm:ss")}\n`;
+        content += `   X (Tổng Transaction): ${user.X.toFixed(2)}\n`;
+        content += `   Y (Tổng Claim): ${user.Y.toFixed(2)}\n`;
+        content += `   Available USDT (hiện tại): ${user.availableUsdt.toFixed(2)}\n`;
+        content += `   Expected Total (Y + availableUsdt): ${user.expectedTotal.toFixed(2)}\n`;
+        content += `   Difference: ${user.difference.toFixed(2)}\n`;
+        content += `   Available USDT (cần sửa lại): ${user.correctAvailableUsdt.toFixed(2)}\n`;
+        content += `\n`;
+      });
+
+      fs.writeFileSync(filepath, content, "utf8");
+
+      console.log(`\n✅ Đã xuất kết quả ra file: ${filepath}`);
+      console.log(`📄 Tổng số user bất thường: ${abnormalUsers.length}`);
+
+      return {
+        filepath,
+        totalChecked: users.length,
+        abnormalCount: abnormalUsers.length,
+        abnormalUsers,
+      };
+    } else {
+      console.log(`\n✅ Không có user nào có thu nhập bất thường`);
+      return {
+        filepath: null,
+        totalChecked: users.length,
+        abnormalCount: 0,
+        abnormalUsers: [],
+      };
+    }
+  } catch (err) {
+    console.error(`\n❌ ERROR: ${err.message}`);
     throw err;
   }
 };

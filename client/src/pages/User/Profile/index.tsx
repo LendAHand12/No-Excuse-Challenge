@@ -68,10 +68,8 @@ const Profile = () => {
     dieTime,
     dieTimeTier1,
     dieTimeTier2,
-    isRed,
-    isYellow,
-    isBlue,
-    isPink,
+    tier1,
+    tier2,
     isDisableTier2,
   } = userInfo;
 
@@ -761,13 +759,13 @@ const Profile = () => {
                   <div>Tier 1 :</div>
                   <div
                     className={`w-10 h-5 rounded-md ${
-                      isRed
+                      tier1?.isRed
                         ? 'bg-[#ee0000]' // Màu đỏ
-                        : isBlue
+                        : tier1?.isBlue
                         ? 'bg-[#0033ff]' // Màu xanh dương
-                        : isYellow
+                        : tier1?.isYellow
                         ? 'bg-[#ffcc00]' // Màu vàng
-                        : isPink
+                        : tier1?.isPink
                         ? 'bg-[#ff3399]' // Màu hồng
                         : 'bg-[#009933]' // Màu xanh lá (mặc định)
                     }`}
@@ -780,14 +778,8 @@ const Profile = () => {
                       className={`w-10 h-5 rounded-md ${
                         isDisableTier2
                           ? 'bg-[#663300]' // Màu nâu (disable)
-                          : isRed
-                          ? 'bg-[#ee0000]' // Màu đỏ
-                          : isBlue
-                          ? 'bg-[#0033ff]' // Màu xanh dương
-                          : isYellow
+                          : tier2?.isYellow
                           ? 'bg-[#ffcc00]' // Màu vàng
-                          : isPink
-                          ? 'bg-[#ff3399]' // Màu hồng
                           : 'bg-[#009933]' // Màu xanh lá (mặc định)
                       }`}
                     ></div>

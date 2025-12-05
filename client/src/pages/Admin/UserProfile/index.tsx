@@ -1041,13 +1041,13 @@ const UserProfile = () => {
                       <div>Tier 1 :</div>
                       <div
                         className={`w-10 h-5 rounded-md ${
-                          data.isRed
+                          data.tier1.isRed
                             ? 'bg-[#ee0000]' // Màu đỏ
-                            : data.isBlue
+                            : data.tier1.isBlue
                             ? 'bg-[#0033ff]' // Màu xanh dương
-                            : data.isYellow
+                            : data.tier1.isYellow
                             ? 'bg-[#ffcc00]' // Màu vàng
-                            : data.isPink
+                            : data.tier1.isPink
                             ? 'bg-[#ff3399]' // Màu hồng
                             : 'bg-[#009933]' // Màu xanh lá (mặc định)
                         }`}
@@ -1060,14 +1060,8 @@ const UserProfile = () => {
                           className={`w-10 h-5 rounded-md ${
                             data.isDisableTier2
                               ? 'bg-[#663300]' // Màu nâu (disable)
-                              : data.isRed
-                              ? 'bg-[#ee0000]' // Màu đỏ
-                              : data.isBlue
-                              ? 'bg-[#0033ff]' // Màu xanh dương
-                              : data.isYellow
+                              : data.tier2.isYellow
                               ? 'bg-[#ffcc00]' // Màu vàng
-                              : data.isPink
-                              ? 'bg-[#ff3399]' // Màu hồng
                               : 'bg-[#009933]' // Màu xanh lá (mặc định)
                           }`}
                         ></div>
