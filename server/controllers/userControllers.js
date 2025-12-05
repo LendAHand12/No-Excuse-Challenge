@@ -343,7 +343,6 @@ const getUserById = asyncHandler(async (req, res) => {
       const branch1Count = await countAliveIdsInBranch(tree.children[0]);
       const branch2Count = await countAliveIdsInBranch(tree.children[1]);
       notEnoughtChild = { countChild1: branch1Count + 1, countChild2: branch2Count + 1 };
-      console.log({ notEnoughtChild });
     }
 
     const isMoveSystem = await MoveSystem.find({
@@ -1849,7 +1848,6 @@ const getTreeOfUser = asyncHandler(async (req, res) => {
 
 const getChildsOfUserForTree = asyncHandler(async (req, res) => {
   const { id, currentTier } = req.body;
-  const userRequest = req.user;
   let treeOfUser;
   let user;
   treeOfUser = await Tree.findById(id).select(
@@ -1902,9 +1900,9 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
           isBlue = true;
         } else {
           // Nếu còn 10 ngày nữa đến hạn (tier 1) hoặc 5 ngày nữa đến hạn (tier 2) → isYellow = true
-          if (child.tier === 1 && diffDays <= 10) {
+          if (currentTier === 1 && diffDays <= 10) {
             isYellow = true;
-          } else if (child.tier === 2 && diffDays <= 5) {
+          } else if (currentTier === 2 && diffDays <= 5) {
             isYellow = true;
           }
         }

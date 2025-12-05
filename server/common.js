@@ -1693,7 +1693,7 @@ export const recalculateDieTimeDaily = async () => {
         });
 
         if (treeTier1) {
-          if (user.adminChangeToDie === true) {
+          if (user.adminChangeToDie === true && treeTier1.dieTime !== null) {
             // Trường hợp admin đã thay đổi ngày chết
             if (treeTier1.dieTime) {
               const dieTimeStart = moment.tz(treeTier1.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
