@@ -668,7 +668,7 @@ const UserProfile = () => {
             </div>
           )}
 
-          {isBonusRef && (
+          {isBonusRef && currentTier === 1 && (
             <div
               className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-5"
               role="alert"
@@ -733,8 +733,8 @@ const UserProfile = () => {
 
             const alerts = [];
 
-            // Tính countdown cho tier 2 (nếu có dieTimeTier2)
-            if (data.dieTimeTier2) {
+            // Tính countdown cho tier 2 (nếu có dieTimeTier2) - chỉ hiển thị khi currentTier === 2
+            if (currentTier === 2 && data.dieTimeTier2) {
               const tier2DieTime = convertToVietnamDate(data.dieTimeTier2);
               if (tier2DieTime) {
                 const countdown = Math.ceil(
@@ -767,8 +767,8 @@ const UserProfile = () => {
               }
             }
 
-            // Tính countdown cho tier 1 (nếu có dieTimeTier1)
-            if (data.dieTimeTier1) {
+            // Tính countdown cho tier 1 (nếu có dieTimeTier1) - chỉ hiển thị khi currentTier === 1
+            if (currentTier === 1 && data.dieTimeTier1) {
               const tier1DieTime = convertToVietnamDate(data.dieTimeTier1);
               if (tier1DieTime) {
                 const countdown = Math.ceil(
@@ -1181,39 +1181,6 @@ const UserProfile = () => {
                       </li>
                     </>
                   )}
-
-                  <li className="flex items-center py-3">
-                    <span>{t('tier2Time')}</span>
-                    <span className="ml-auto">
-                      {data.tier2Time
-                        ? new Date(data.tier2Time).toLocaleDateString('vi')
-                        : ''}
-                    </span>
-                  </li>
-                  <li className="flex items-center py-3">
-                    <span>{t('tier3Time')}</span>
-                    <span className="ml-auto">
-                      {data.tier3Time
-                        ? new Date(data.tier3Time).toLocaleDateString('vi')
-                        : ''}
-                    </span>
-                  </li>
-                  <li className="flex items-center py-3">
-                    <span>{t('tier4Time')}</span>
-                    <span className="ml-auto">
-                      {data.tier4Time
-                        ? new Date(data.tier4Time).toLocaleDateString('vi')
-                        : ''}
-                    </span>
-                  </li>
-                  <li className="flex items-center py-3">
-                    <span>{t('tier5Time')}</span>
-                    <span className="ml-auto">
-                      {data.tier5Time
-                        ? new Date(data.tier5Time).toLocaleDateString('vi')
-                        : ''}
-                    </span>
-                  </li>
                   {data.changeUser && (
                     <>
                       <li className="flex items-center py-3">
