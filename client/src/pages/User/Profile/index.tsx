@@ -1216,9 +1216,13 @@ const Profile = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
 
+        {currentTier === 1 && (
+          <>
             {/* Tier 2: SubId Info */}
-            {currentTier === 2 && tier >= 2 && subUser && (
+            {tier >= 2 && subUser && (
               <div className="bg-[#FAFBFC] p-4 rounded-2xl">
                 <div className="py-2 px-4">
                   <p className="uppercase mt-2 font-bold">Sub ID Information</p>
@@ -1239,232 +1243,221 @@ const Profile = () => {
                 </div>
               </div>
             )}
-          </div>
-        </div>
+            <div className="flex justify-between">
+              {tier >= 2 && subUser && (
+                <button
+                  className={`bg-blue-600 text-white px-6 py-2 rounded-lg`}
+                  onClick={() => navigate(`/user/sub/${subUser._id}`)}
+                >
+                  Profile {subUser.userName}
+                </button>
+              )}
 
-        <div className="flex justify-between">
-          {/* <button
-            className={`bg-blue-900 text-white px-6 py-2 rounded-lg ${
-              isMoveSystem ? 'opacity-40' : ''
-            }`}
-            onClick={() => setShowMoveSystem(true)}
-            disabled={isMoveSystem}
-          >
-            Migrate ID to dreamchain
-          </button> */}
-          {tier >= 2 && subUser && (
-            <button
-              className={`bg-blue-600 text-white px-6 py-2 rounded-lg`}
-              onClick={() => navigate(`/user/sub/${subUser._id}`)}
+              {errLahCode !== 'OVER45' && !isEdit && status === 'APPROVED' && (
+                <button
+                  onClick={() => setIsEdit(true)}
+                  className="flex gap-2 font-semibold py-2 px-4 rounded-lg"
+                >
+                  Update{' '}
+                  <svg
+                    width="18"
+                    height="21"
+                    viewBox="0 0 18 21"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M15.675 1.63718C15.3938 1.35583 15.0599 1.13267 14.6924 0.980441C14.325 0.828213 13.9311 0.749907 13.5333 0.75C13.1355 0.750093 12.7417 0.828583 12.3743 0.980982C12.0068 1.13338 11.6731 1.3567 11.392 1.63818L1.885 11.1582C1.31853 11.7259 1.00028 12.4951 1 13.2972V16.5002C1 16.9142 1.336 17.2502 1.75 17.2502H4.973C5.776 17.2502 6.546 16.9302 7.113 16.3632L16.613 6.85718C17.1797 6.28915 17.4979 5.51954 17.4979 4.71718C17.4979 3.91481 17.1797 3.1452 16.613 2.57718L15.675 1.63718ZM0.75 18.7502C0.551088 18.7502 0.360322 18.8292 0.21967 18.9698C0.0790175 19.1105 0 19.3013 0 19.5002C0 19.6991 0.0790175 19.8899 0.21967 20.0305C0.360322 20.1712 0.551088 20.2502 0.75 20.2502H16.75C16.9489 20.2502 17.1397 20.1712 17.2803 20.0305C17.421 19.8899 17.5 19.6991 17.5 19.5002C17.5 19.3013 17.421 19.1105 17.2803 18.9698C17.1397 18.8292 16.9489 18.7502 16.75 18.7502H0.75Z"
+                      fill="#02071B"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
+            {isEdit && (
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setIsEdit(false)}
+                  className="flex gap-2 font-semibold py-2 px-4 rounded-lg"
+                >
+                  Cancel
+                  <svg
+                    fill="currentColor"
+                    width="24"
+                    height="24"
+                    viewBox="-28 0 512 512"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <title>cancel</title>
+                    <path d="M64 388L196 256 64 124 96 92 228 224 360 92 392 124 260 256 392 388 360 420 228 288 96 420 64 388Z" />
+                  </svg>
+                </button>
+              </div>
+            )}
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              encType="multipart/form-data"
+              className="grid gap-10 font-semibold"
             >
-              Profile {subUser.userName}
-            </button>
-          )}
-
-          {errLahCode !== 'OVER45' && !isEdit && status === 'APPROVED' && (
-            <button
-              onClick={() => setIsEdit(true)}
-              className="flex gap-2 font-semibold py-2 px-4 rounded-lg"
-            >
-              Update{' '}
-              <svg
-                width="18"
-                height="21"
-                viewBox="0 0 18 21"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M15.675 1.63718C15.3938 1.35583 15.0599 1.13267 14.6924 0.980441C14.325 0.828213 13.9311 0.749907 13.5333 0.75C13.1355 0.750093 12.7417 0.828583 12.3743 0.980982C12.0068 1.13338 11.6731 1.3567 11.392 1.63818L1.885 11.1582C1.31853 11.7259 1.00028 12.4951 1 13.2972V16.5002C1 16.9142 1.336 17.2502 1.75 17.2502H4.973C5.776 17.2502 6.546 16.9302 7.113 16.3632L16.613 6.85718C17.1797 6.28915 17.4979 5.51954 17.4979 4.71718C17.4979 3.91481 17.1797 3.1452 16.613 2.57718L15.675 1.63718ZM0.75 18.7502C0.551088 18.7502 0.360322 18.8292 0.21967 18.9698C0.0790175 19.1105 0 19.3013 0 19.5002C0 19.6991 0.0790175 19.8899 0.21967 20.0305C0.360322 20.1712 0.551088 20.2502 0.75 20.2502H16.75C16.9489 20.2502 17.1397 20.1712 17.2803 20.0305C17.421 19.8899 17.5 19.6991 17.5 19.5002C17.5 19.3013 17.421 19.1105 17.2803 18.9698C17.1397 18.8292 16.9489 18.7502 16.75 18.7502H0.75Z"
-                  fill="#02071B"
-                />
-              </svg>
-            </button>
-          )}
-        </div>
-        {isEdit && (
-          <div className="flex justify-end">
-            <button
-              onClick={() => setIsEdit(false)}
-              className="flex gap-2 font-semibold py-2 px-4 rounded-lg"
-            >
-              Cancel
-              <svg
-                fill="currentColor"
-                width="24"
-                height="24"
-                viewBox="-28 0 512 512"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <title>cancel</title>
-                <path d="M64 388L196 256 64 124 96 92 228 224 360 92 392 124 260 256 392 388 360 420 228 288 96 420 64 388Z" />
-              </svg>
-            </button>
-          </div>
+              <div className="bg-[#FAFBFC] p-4 rounded-2xl ">
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+                  <p>Referral code : </p>
+                  <p>{id}</p>
+                </div>
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                  <p>Name :</p>
+                  <p>{userId}</p>
+                </div>
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+                  <p>Email :</p>
+                  {isEdit ? (
+                    <div className="">
+                      <input
+                        className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                        {...register('email', {
+                          required: t('email is required'),
+                        })}
+                        autoComplete="off"
+                      />
+                      <p className="text-sm text-red-500">
+                        {errors.email?.message}
+                      </p>
+                    </div>
+                  ) : (
+                    <p>{email}</p>
+                  )}
+                </div>
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                  <p>Phone number :</p>
+                  {isEdit ? (
+                    <div className="">
+                      <PhoneInput
+                        defaultCountry="VN"
+                        placeholder={t('phone')}
+                        value={phoneNumber}
+                        onChange={setPhoneNumber}
+                        className="-my-1 ml-4 w-full"
+                      />
+                      <p className="text-red-500 text-sm">
+                        {errorPhone && t('Phone is required')}
+                      </p>
+                    </div>
+                  ) : (
+                    <p>{phone}</p>
+                  )}
+                </div>
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+                  <p>ID/DL/Passport number :</p>
+                  {isEdit && status !== 'APPROVED' ? (
+                    <div className="">
+                      <input
+                        className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                        {...register('idCode', {
+                          required: t('id code is required'),
+                        })}
+                        autoComplete="off"
+                      />
+                      <p className="text-sm text-red-500">
+                        {errors.idCode?.message}
+                      </p>
+                    </div>
+                  ) : (
+                    <p>{status !== 'REJECTED' && idCode}</p>
+                  )}
+                </div>
+                <div className="grid lg:grid-cols-2 gap-2 bg-[#E5E9EE] lg:gap-0 items-center py-2 px-4 rounded-lg">
+                  <p>Wallet Address :</p>
+                  {isEdit ? (
+                    <div className="">
+                      <input
+                        className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                        {...register('walletAddress', {
+                          required: t('walletAddress is required'),
+                        })}
+                        autoComplete="off"
+                      />
+                      <p className="text-sm text-red-500">
+                        {errors.walletAddress?.message}
+                      </p>
+                    </div>
+                  ) : (
+                    <p>{shortenWalletAddress(walletAddress, 14)}</p>
+                  )}
+                </div>
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0  py-2 px-4 rounded-lg">
+                  <p>Completed Registration :</p>
+                  <p>{countPay === 13 ? 'Finished' : 'Unfinished'}</p>
+                </div>
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE]  py-2 px-4 rounded-lg">
+                  <p>Number of contribution :</p>
+                  <p>{countPay === 13 ? 10 : 0}</p>
+                </div>
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
+                  <p>Package :</p>
+                  <p>{buyPackage}</p>
+                </div>
+                <div className="grid lg:grid-cols-2 bg-[#E5E9EE] gap-2 lg:gap-0 rounded-lg py-2 px-4">
+                  <p>Fine :</p>
+                  <p>{fine} USDT</p>
+                </div>
+                {city === 'US' && (
+                  <>
+                    <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
+                      <p>Payout Display Name :</p>
+                      <p>{accountName}</p>
+                    </div>
+                    <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                      <p>Payout Email or Phone Number :</p>
+                      <p>{accountNumber}</p>
+                    </div>
+                  </>
+                )}
+                {city !== 'US' && (
+                  <>
+                    <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
+                      <p>{t('bank name')} :</p>
+                      <p>{bankName}</p>
+                    </div>
+                    <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                      <p>{t('bankCode')} :</p>
+                      <p>{bankCode || '-'}</p>
+                    </div>
+                    <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
+                      <p>{t('accountName')} :</p>
+                      <p>{accountName || '-'}</p>
+                    </div>
+                    <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                      <p>{t('accountNumber')} :</p>
+                      <p>{accountNumber || '-'}</p>
+                    </div>
+                    <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
+                      <p>{t('date of birth')} :</p>
+                      <p>
+                        {dateOfBirth
+                          ? new Date(dateOfBirth).toLocaleDateString('vi-Vn', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                            })
+                          : '-'}
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+              {isEdit && (
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex items-center justify-center w-full px-8 py-3 my-6 font-medium border border-black transition duration-300 ease-in-out transform rounded-full shadow-lg hover:underline gradient focus:outline-none focus:shadow-outline hover:scale-105"
+                >
+                  {loading && <Loading />}
+                  {t('update')}
+                </button>
+              )}
+            </form>
+          </>
         )}
-
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          encType="multipart/form-data"
-          className="grid gap-10 font-semibold"
-        >
-          <div className="bg-[#FAFBFC] p-4 rounded-2xl ">
-            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
-              <p>Referral code : </p>
-              <p>{id}</p>
-            </div>
-            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
-              <p>Name :</p>
-              <p>{userId}</p>
-            </div>
-            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
-              <p>Email :</p>
-              {isEdit ? (
-                <div className="">
-                  <input
-                    className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                    {...register('email', {
-                      required: t('email is required'),
-                    })}
-                    autoComplete="off"
-                  />
-                  <p className="text-sm text-red-500">
-                    {errors.email?.message}
-                  </p>
-                </div>
-              ) : (
-                <p>{email}</p>
-              )}
-            </div>
-            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
-              <p>Phone number :</p>
-              {isEdit ? (
-                <div className="">
-                  <PhoneInput
-                    defaultCountry="VN"
-                    placeholder={t('phone')}
-                    value={phoneNumber}
-                    onChange={setPhoneNumber}
-                    className="-my-1 ml-4 w-full"
-                  />
-                  <p className="text-red-500 text-sm">
-                    {errorPhone && t('Phone is required')}
-                  </p>
-                </div>
-              ) : (
-                <p>{phone}</p>
-              )}
-            </div>
-            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
-              <p>ID/DL/Passport number :</p>
-              {isEdit && status !== 'APPROVED' ? (
-                <div className="">
-                  <input
-                    className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                    {...register('idCode', {
-                      required: t('id code is required'),
-                    })}
-                    autoComplete="off"
-                  />
-                  <p className="text-sm text-red-500">
-                    {errors.idCode?.message}
-                  </p>
-                </div>
-              ) : (
-                <p>{status !== 'REJECTED' && idCode}</p>
-              )}
-            </div>
-            <div className="grid lg:grid-cols-2 gap-2 bg-[#E5E9EE] lg:gap-0 items-center py-2 px-4 rounded-lg">
-              <p>Wallet Address :</p>
-              {isEdit ? (
-                <div className="">
-                  <input
-                    className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                    {...register('walletAddress', {
-                      required: t('walletAddress is required'),
-                    })}
-                    autoComplete="off"
-                  />
-                  <p className="text-sm text-red-500">
-                    {errors.walletAddress?.message}
-                  </p>
-                </div>
-              ) : (
-                <p>{shortenWalletAddress(walletAddress, 14)}</p>
-              )}
-            </div>
-            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0  py-2 px-4 rounded-lg">
-              <p>Completed Registration :</p>
-              <p>{countPay === 13 ? 'Finished' : 'Unfinished'}</p>
-            </div>
-            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE]  py-2 px-4 rounded-lg">
-              <p>Number of contribution :</p>
-              <p>{countPay === 13 ? 10 : 0}</p>
-            </div>
-            <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
-              <p>Package :</p>
-              <p>{buyPackage}</p>
-            </div>
-            <div className="grid lg:grid-cols-2 bg-[#E5E9EE] gap-2 lg:gap-0 rounded-lg py-2 px-4">
-              <p>Fine :</p>
-              <p>{fine} USDT</p>
-            </div>
-            {city === 'US' && (
-              <>
-                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
-                  <p>Payout Display Name :</p>
-                  <p>{accountName}</p>
-                </div>
-                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
-                  <p>Payout Email or Phone Number :</p>
-                  <p>{accountNumber}</p>
-                </div>
-              </>
-            )}
-            {city !== 'US' && (
-              <>
-                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
-                  <p>{t('bank name')} :</p>
-                  <p>{bankName}</p>
-                </div>
-                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
-                  <p>{t('bankCode')} :</p>
-                  <p>{bankCode || '-'}</p>
-                </div>
-                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
-                  <p>{t('accountName')} :</p>
-                  <p>{accountName || '-'}</p>
-                </div>
-                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
-                  <p>{t('accountNumber')} :</p>
-                  <p>{accountNumber || '-'}</p>
-                </div>
-                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
-                  <p>{t('date of birth')} :</p>
-                  <p>
-                    {dateOfBirth
-                      ? new Date(dateOfBirth).toLocaleDateString('vi-Vn', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                        })
-                      : '-'}
-                  </p>
-                </div>
-              </>
-            )}
-          </div>
-          {isEdit && (
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex items-center justify-center w-full px-8 py-3 my-6 font-medium border border-black transition duration-300 ease-in-out transform rounded-full shadow-lg hover:underline gradient focus:outline-none focus:shadow-outline hover:scale-105"
-            >
-              {loading && <Loading />}
-              {t('update')}
-            </button>
-          )}
-        </form>
 
         {/* Bank Info Modal */}
         <Modal

@@ -338,6 +338,7 @@ const getUserById = asyncHandler(async (req, res) => {
       type: { $regex: "HOLD", $options: "i" },
       status: "SUCCESS",
       isHoldRefund: false,
+      tier,
     });
 
     const totalHold = listTransHold.reduce((sum, ele) => sum + ele.amount, 0);
@@ -403,8 +404,20 @@ const getUserById = asyncHandler(async (req, res) => {
       }
     }
 
+    // Tính totalEarning theo tier được yêu cầu
+    // Nếu tier === 1, lấy cả transaction không có tier (null/undefined) và tier === 1
+    // Nếu tier > 1, chỉ lấy transaction có tier === tier được yêu cầu
+    const matchCondition =
+      tier === 1
+        ? {
+            userId_to: user.id,
+            status: "SUCCESS",
+            $or: [{ tier: 1 }, { tier: null }, { tier: { $exists: false } }],
+          }
+        : { userId_to: user.id, status: "SUCCESS", tier: tier };
+
     const result = await Transaction.aggregate([
-      { $match: { userId_to: user.id, status: "SUCCESS" } },
+      { $match: matchCondition },
       { $group: { _id: null, totalAmount: { $sum: "$amount" } } },
     ]);
 
@@ -514,8 +527,8 @@ const getUserById = asyncHandler(async (req, res) => {
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
       bonusRef: user.bonusRef,
       totalHold,
-      totalChild: treeForTier ? treeForTier.countChild : (tree ? tree.countChild : 0),
-      income: treeForTier ? treeForTier.income : (tree ? tree.income : 0),
+      totalChild: treeForTier ? treeForTier.countChild : tree ? tree.countChild : 0,
+      income: treeForTier ? treeForTier.income : tree ? tree.income : 0,
       facetecTid: user.facetecTid,
       kycFee: user.kycFee,
       errLahCode: user.errLahCode,
@@ -556,12 +569,14 @@ const getUserById = asyncHandler(async (req, res) => {
       dieTimeTier2: dieTimeTier2, // dieTime của tier 2
       // Add dieTime for the requested tier
       dieTimeForTier: treeForTier ? treeForTier.dieTime : null,
-      currentTierData: treeForTier ? {
-        countChild: treeForTier.countChild,
-        income: treeForTier.income,
-        dieTime: treeForTier.dieTime,
-        disable: treeForTier.disable,
-      } : null,
+      currentTierData: treeForTier
+        ? {
+            countChild: treeForTier.countChild,
+            income: treeForTier.income,
+            dieTime: treeForTier.dieTime,
+            disable: treeForTier.disable,
+          }
+        : null,
       // Tính toán các field theo tier
       tier1: (() => {
         const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
@@ -800,6 +815,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       type: { $regex: "HOLD", $options: "i" },
       status: "SUCCESS",
       isHoldRefund: false,
+      tier,
     });
 
     const totalHold = listTransHold.reduce((sum, ele) => sum + ele.amount, 0);
@@ -888,8 +904,20 @@ const getUserInfo = asyncHandler(async (req, res) => {
       });
     }
 
+    // Tính totalEarning theo tier được yêu cầu
+    // Nếu tier === 1, lấy cả transaction không có tier (null/undefined) và tier === 1
+    // Nếu tier > 1, chỉ lấy transaction có tier === tier được yêu cầu
+    const matchCondition =
+      tier === 1
+        ? {
+            userId_to: user.id,
+            status: "SUCCESS",
+            $or: [{ tier: 1 }, { tier: null }, { tier: { $exists: false } }],
+          }
+        : { userId_to: user.id, status: "SUCCESS", tier: tier };
+
     const result = await Transaction.aggregate([
-      { $match: { userId_to: user.id, status: "SUCCESS" } },
+      { $match: matchCondition },
       { $group: { _id: null, totalAmount: { $sum: "$amount" } } },
     ]);
 
@@ -973,8 +1001,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
       bonusRef: user.bonusRef,
       totalHold,
-      totalChild: treeForTier ? treeForTier.countChild : (tree ? tree.countChild : 0),
-      income: treeForTier ? treeForTier.income : (tree ? tree.income : 0),
+      totalChild: treeForTier ? treeForTier.countChild : tree ? tree.countChild : 0,
+      income: treeForTier ? treeForTier.income : tree ? tree.income : 0,
       facetecTid: user.facetecTid,
       kycFee: user.kycFee,
       errLahCode: errLahCode,
@@ -1003,12 +1031,14 @@ const getUserInfo = asyncHandler(async (req, res) => {
       dieTimeTier2: treeTier2 ? treeTier2.dieTime : null,
       // Add dieTime for the requested tier
       dieTimeForTier: treeForTier ? treeForTier.dieTime : null,
-      currentTierData: treeForTier ? {
-        countChild: treeForTier.countChild,
-        income: treeForTier.income,
-        dieTime: treeForTier.dieTime,
-        disable: treeForTier.disable,
-      } : null,
+      currentTierData: treeForTier
+        ? {
+            countChild: treeForTier.countChild,
+            income: treeForTier.income,
+            dieTime: treeForTier.dieTime,
+            disable: treeForTier.disable,
+          }
+        : null,
       timeToTry: user.timeToTry,
       bankName: user.bankName,
       bankCode: user.bankCode,
@@ -1029,7 +1059,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
 
         // Use treeForTier if available, otherwise fall back to treeTier1
         const treeToUse = tier === 1 ? treeTier1 : treeForTier;
-        
+
         if (treeToUse) {
           // Tính isRed cho tier
           if (tier === 1) {
