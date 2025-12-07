@@ -18,6 +18,7 @@ import DatePicker from 'react-datepicker';
 import Switch from 'react-switch';
 import PhoneInput from 'react-phone-number-input';
 import banks from '@/lib/banks.json';
+import wildCardTopImage from '@/images/cover/wildcard.png';
 
 const UserProfile = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -65,10 +66,11 @@ const UserProfile = () => {
   const [wildCards, setWildCards] = useState([]);
   const [loadingWildCards, setLoadingWildCards] = useState(false);
   const [usingCardId, setUsingCardId] = useState<string | null>(null);
+  const [currentTier, setCurrentTier] = useState(1);
 
   useEffect(() => {
     (async () => {
-      await User.getUserById(id)
+      await User.getUserById(id, currentTier)
         .then((response) => {
           setLoading(false);
           setData(response.data);
@@ -142,7 +144,7 @@ const UserProfile = () => {
           toast.error(t(message));
         });
     })();
-  }, [id, refresh]);
+  }, [id, refresh, currentTier]);
 
   const onSubmit = useCallback(
     async (values) => {
@@ -647,6 +649,25 @@ const UserProfile = () => {
       <ToastContainer />
       {!loading && (
         <div className="container mx-10 my-24">
+          {/* Tier Selector */}
+          {data && data.tier && (
+            <div className="flex items-center gap-4 mb-6">
+              {[...Array(Math.min(data.tier || 1, 5))].map((item, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentTier(i + 1)}
+                  className={`flex justify-center items-center hover:underline font-medium ${
+                    currentTier === i + 1
+                      ? 'bg-black text-NoExcuseChallenge'
+                      : ''
+                  } rounded-full py-4 px-8 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
+                >
+                  {t('tier')} {i + 1}
+                </button>
+              ))}
+            </div>
+          )}
+
           {isBonusRef && (
             <div
               className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-5"
@@ -782,7 +803,7 @@ const UserProfile = () => {
           })()}
 
           <form onSubmit={handleSubmit(onSubmit)} className="md:flex no-wrap">
-            <div className="w-full lg:w-3/12 lg:mx-2 mb-4 lg:mb-0">
+            <div className="w-full lg:w-4/12 lg:mx-2 mb-4 lg:mb-0">
               <div className="bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                 <ul className=" text-gray-600 py-2 px-3 mt-3 divide-y rounded">
                   <li className="flex items-center py-3">
@@ -1014,283 +1035,153 @@ const UserProfile = () => {
                       </span>
                     </li>
                   )}
-                  <li className="flex items-center py-3">
-                    <span>{t('memberSince')}</span>
-                    <span className="ml-auto">
-                      {isEditting ? (
-                        <Controller
-                          control={control}
-                          name="changeCreatedAt"
-                          render={({ field }) => (
-                            <DatePicker
-                              placeholderText={t('fromDate')}
-                              onChange={(date) => field.onChange(date)}
-                              selected={field.value}
-                              dateFormat="dd/MM/yyyy"
-                              className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                            />
-                          )}
-                        />
-                      ) : (
-                        new Date(data.changeCreatedAt).toLocaleDateString('vi')
-                      )}
-                    </span>
-                  </li>
-                  <li className="flex flex-col justify-between py-3">
-                    <div className="flex items-center justify-between">
-                      <div>Tier 1 :</div>
-                      <div
-                        className={`w-10 h-5 rounded-md ${
-                          data.tier1.isRed
-                            ? 'bg-[#ee0000]' // Màu đỏ
-                            : data.tier1.isBlue
-                            ? 'bg-[#0033ff]' // Màu xanh dương
-                            : data.tier1.isYellow
-                            ? 'bg-[#ffcc00]' // Màu vàng
-                            : data.tier1.isPink
-                            ? 'bg-[#ff3399]' // Màu hồng
-                            : 'bg-[#009933]' // Màu xanh lá (mặc định)
-                        }`}
-                      ></div>
-                    </div>
-                    {data.tier === 2 && (
-                      <div className="flex items-center justify-between">
-                        <div>Tier 2 :</div>
-                        <div
-                          className={`w-10 h-5 rounded-md ${
-                            data.isDisableTier2
-                              ? 'bg-[#663300]' // Màu nâu (disable)
-                              : data.tier2.isYellow
-                              ? 'bg-[#ffcc00]' // Màu vàng
-                              : 'bg-[#009933]' // Màu xanh lá (mặc định)
-                          }`}
-                        ></div>
-                      </div>
-                    )}
-                  </li>
-                  <li className="flex items-center py-3">
-                    <span>Disqualified (Tier 1)</span>
-                    <span className="ml-auto">
-                      {isEditting ? (
-                        <div className="flex items-center gap-2">
+                  {/* Tier 1: Member Since */}
+                  {currentTier === 1 && (
+                    <li className="flex items-center py-3">
+                      <span>{t('memberSince')}</span>
+                      <span className="ml-auto">
+                        {isEditting ? (
                           <Controller
                             control={control}
-                            name="dieTimeTier1"
+                            name="changeCreatedAt"
                             render={({ field }) => (
                               <DatePicker
                                 placeholderText={t('fromDate')}
                                 onChange={(date) => field.onChange(date)}
                                 selected={field.value}
                                 dateFormat="dd/MM/yyyy"
-                                isClearable
                                 className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                               />
                             )}
                           />
-                        </div>
-                      ) : (
-                        (() => {
-                          // Hiển thị dieTime theo tier
-                          const currentDieTime = data.dieTimeTier1;
-                          return currentDieTime
-                            ? new Date(currentDieTime).toLocaleDateString('vi')
-                            : '';
-                        })()
-                      )}
-                    </span>
-                  </li>
-                  {data.tier === 2 && (
-                    <li className="flex items-center py-3">
-                      <span>Disqualified (Tier 2)</span>
-                      <span className="ml-auto">
-                        {isEditting ? (
-                          <div className="flex items-center gap-2">
-                            <Controller
-                              control={control}
-                              name="dieTimeTier2"
-                              render={({ field }) => (
-                                <DatePicker
-                                  placeholderText={t('fromDate')}
-                                  onChange={(date) => field.onChange(date)}
-                                  selected={field.value}
-                                  dateFormat="dd/MM/yyyy"
-                                  isClearable
-                                  className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                                />
-                              )}
-                            />
-                          </div>
                         ) : (
-                          (() => {
-                            // Hiển thị dieTime theo tier
-                            const currentDieTime = data.dieTimeTier2;
-                            return currentDieTime
-                              ? new Date(currentDieTime).toLocaleDateString(
-                                  'vi',
-                                )
-                              : '';
-                          })()
+                          new Date(data.changeCreatedAt).toLocaleDateString(
+                            'vi',
+                          )
                         )}
                       </span>
                     </li>
                   )}
-
-                  <li className="flex items-center py-3 border-t border-gray-200 mt-2">
-                    <span className="font-semibold text-gray-700">
-                      Wild Cards
-                    </span>
-                  </li>
-                  <li className="py-3">
-                    {loadingWildCards ? (
-                      <div className="text-center py-4">
-                        <Loading />
-                      </div>
-                    ) : wildCards.length === 0 ? (
-                      <div className="text-center py-4 text-gray-500">
-                        No wild cards available
-                      </div>
-                    ) : (
-                      <div className="space-y-2 max-h-60 overflow-y-auto">
-                        {wildCards.map((card: any) => (
+                  {/* Tier 2: Tier 2 Entered */}
+                  {currentTier === 2 && data.tier >= 2 && data.tier2Time && (
+                    <li className="flex items-center py-3">
+                      <span>Tier 2 entered</span>
+                      <span className="ml-auto">
+                        {new Date(data.tier2Time).toLocaleDateString('vi')}
+                      </span>
+                    </li>
+                  )}
+                  {/* Tier 1: Màu tier 1 */}
+                  {currentTier === 1 && (
+                    <>
+                      <li className="flex flex-col justify-between py-3">
+                        <div className="flex items-center justify-between">
+                          <div>Tier 1 :</div>
                           <div
-                            key={card._id}
-                            className={`p-3 rounded-lg border ${
-                              card.status === 'ACTIVE'
-                                ? 'bg-green-50 border-green-200'
-                                : card.status === 'USED'
-                                ? 'bg-gray-50 border-gray-200'
-                                : 'bg-yellow-50 border-yellow-200'
+                            className={`w-10 h-5 rounded-md ${
+                              data.tier1?.isRed
+                                ? 'bg-[#ee0000]' // Màu đỏ
+                                : data.tier1?.isBlue
+                                ? 'bg-[#0033ff]' // Màu xanh dương
+                                : data.tier1?.isYellow
+                                ? 'bg-[#ffcc00]' // Màu vàng
+                                : data.tier1?.isPink
+                                ? 'bg-[#ff3399]' // Màu hồng
+                                : 'bg-[#009933]' // Màu xanh lá (mặc định)
                             }`}
-                          >
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <p className="font-semibold text-sm">
-                                  {t('Wild Card')}
-                                </p>
-                                {/* <p className="text-xs text-gray-600 mt-1">
-                                  {card.sourceInfo || 'No description'}
-                                </p> */}
-                                <div className="flex gap-4 mt-1 text-xs text-gray-500">
-                                  <span>Days: {card.days}</span>
-                                  <span>Tier: {card.targetTier}</span>
-                                  {card.usedAt && (
-                                    <span>
-                                      Used:{' '}
-                                      {new Date(card.usedAt).toLocaleDateString(
-                                        'vi',
-                                      )}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex flex-col items-end gap-2">
-                                <span
-                                  className={`px-2 py-1 rounded text-xs font-medium ${
-                                    card.status === 'ACTIVE'
-                                      ? 'bg-green-500 text-white'
-                                      : card.status === 'USED'
-                                      ? 'bg-gray-500 text-white'
-                                      : 'bg-yellow-500 text-white'
-                                  }`}
-                                >
-                                  {card.status}
-                                </span>
-                                <div className="flex gap-2">
-                                  {card.status === 'ACTIVE' && (
-                                    <>
-                                      <button
-                                        type="button"
-                                        onClick={async () => {
-                                          if (
-                                            !confirm(
-                                              `Bạn có chắc chắn muốn sử dụng thẻ này cho user ${data.userId}? Thẻ sẽ cộng ${card.days} ngày vào dieTime của Tier ${card.targetTier}.`,
-                                            )
-                                          ) {
-                                            return;
-                                          }
-
-                                          setUsingCardId(card._id);
-                                          try {
-                                            const response =
-                                              await WildCard.useWildCard(
-                                                card._id,
-                                                id,
-                                              );
-                                            toast.success(
-                                              response.data.message ||
-                                                'Sử dụng Wild Card thành công!',
-                                            );
-                                            setRefresh(!refresh);
-                                          } catch (error: any) {
-                                            const message =
-                                              error.response &&
-                                              error.response.data.message
-                                                ? error.response.data.message
-                                                : error.message;
-                                            toast.error(
-                                              t(message) ||
-                                                'Có lỗi xảy ra khi sử dụng Wild Card',
-                                            );
-                                          } finally {
-                                            setUsingCardId(null);
-                                          }
-                                        }}
-                                        disabled={usingCardId === card._id}
-                                        className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                                      >
-                                        {usingCardId === card._id ? (
-                                          <Loading />
-                                        ) : (
-                                          'Use'
-                                        )}
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={async () => {
-                                          if (
-                                            !confirm(
-                                              `Bạn có chắc chắn muốn xóa thẻ này?`,
-                                            )
-                                          ) {
-                                            return;
-                                          }
-
-                                          try {
-                                            const response =
-                                              await WildCard.adminDeleteWildCard(
-                                                card._id,
-                                              );
-                                            toast.success(
-                                              response.data.message ||
-                                                'Xóa Wild Card thành công!',
-                                            );
-                                            setRefresh(!refresh);
-                                          } catch (error: any) {
-                                            const message =
-                                              error.response &&
-                                              error.response.data.message
-                                                ? error.response.data.message
-                                                : error.message;
-                                            toast.error(
-                                              t(message) ||
-                                                'Có lỗi xảy ra khi xóa Wild Card',
-                                            );
-                                          }
-                                        }}
-                                        className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
-                                      >
-                                        {t('Delete')}
-                                      </button>
-                                    </>
-                                  )}
-                                </div>
-                              </div>
+                          ></div>
+                        </div>
+                      </li>
+                      <li className="flex items-center py-3">
+                        <span>Disqualified (Tier 1)</span>
+                        <span className="ml-auto">
+                          {isEditting ? (
+                            <div className="flex items-center gap-2">
+                              <Controller
+                                control={control}
+                                name="dieTimeTier1"
+                                render={({ field }) => (
+                                  <DatePicker
+                                    placeholderText={t('fromDate')}
+                                    onChange={(date) => field.onChange(date)}
+                                    selected={field.value}
+                                    dateFormat="dd/MM/yyyy"
+                                    isClearable
+                                    className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                  />
+                                )}
+                              />
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </li>
+                          ) : (
+                            (() => {
+                              // Hiển thị dieTime theo tier
+                              const currentDieTime = data.dieTimeTier1;
+                              return currentDieTime
+                                ? new Date(currentDieTime).toLocaleDateString(
+                                    'vi',
+                                  )
+                                : '';
+                            })()
+                          )}
+                        </span>
+                      </li>
+                    </>
+                  )}
+                  {/* Tier 2: Màu tier 2 */}
+                  {currentTier === 2 && data.tier >= 2 && (
+                    <>
+                      <li className="flex flex-col justify-between py-3">
+                        <div className="flex items-center justify-between">
+                          <div>Tier 2 :</div>
+                          <div
+                            className={`w-10 h-5 rounded-md ${
+                              data.isDisableTier2
+                                ? 'bg-[#663300]' // Màu nâu (disable)
+                                : data.tier2?.isYellow
+                                ? 'bg-[#ffcc00]' // Màu vàng
+                                : data.tier2?.isBlue
+                                ? 'bg-[#0033ff]' // Màu xanh dương
+                                : 'bg-[#009933]' // Màu xanh lá (mặc định)
+                            }`}
+                          ></div>
+                        </div>
+                      </li>
+                      <li className="flex items-center py-3">
+                        <span>Disqualified (Tier 2)</span>
+                        <span className="ml-auto">
+                          {isEditting ? (
+                            <div className="flex items-center gap-2">
+                              <Controller
+                                control={control}
+                                name="dieTimeTier2"
+                                render={({ field }) => (
+                                  <DatePicker
+                                    placeholderText={t('fromDate')}
+                                    onChange={(date) => field.onChange(date)}
+                                    selected={field.value}
+                                    dateFormat="dd/MM/yyyy"
+                                    isClearable
+                                    className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                  />
+                                )}
+                              />
+                            </div>
+                          ) : (
+                            (() => {
+                              // Hiển thị dieTime theo tier
+                              const currentDieTime = data.dieTimeTier2;
+                              return currentDieTime
+                                ? new Date(currentDieTime).toLocaleDateString(
+                                    'vi',
+                                  )
+                                : '';
+                            })()
+                          )}
+                        </span>
+                      </li>
+                    </>
+                  )}
+
                   <li className="flex items-center py-3">
                     <span>{t('tier2Time')}</span>
                     <span className="ml-auto">
@@ -1349,16 +1240,103 @@ const UserProfile = () => {
                   )}
                 </ul>
               </div>
-              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
-                <p className="uppercase mt-2 font-bold">{t('children')}</p>
-                <div className="py-2">
-                  <ul>
-                    {data.listDirectUser
-                      .filter((ele) => !ele.isSubId)
-                      .map((ele) => (
+              {/* Tier 1: Danh sách user trực tiếp */}
+              {currentTier === 1 && (
+                <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                  <p className="uppercase mt-2 font-bold">{t('children')}</p>
+                  <div className="py-2">
+                    <ul>
+                      {data.listDirectUser
+                        .filter((ele) => !ele.isSubId)
+                        .map((ele) => (
+                          <li
+                            className="bg-white border-b hover:bg-gray-50"
+                            key={ele.userId}
+                          >
+                            <div className="py-2">
+                              <div className="text-base">
+                                <span
+                                  className={`${
+                                    ele.isRed
+                                      ? 'bg-[#b91c1c]'
+                                      : ele.isBlue
+                                      ? 'bg-[#0000ff]'
+                                      : ele.isYellow
+                                      ? 'bg-[#F4B400]'
+                                      : ele.isPink
+                                      ? 'bg-[#e600769c]'
+                                      : 'bg-[#16a34a]'
+                                  } py-1 px-2 rounded text-white text-sm`}
+                                >
+                                  {ele.userId}{' '}
+                                  {ele.dieTime
+                                    ? ' - ' +
+                                      new Date(ele.dieTime).toLocaleDateString(
+                                        'vi',
+                                      )
+                                    : ''}
+                                </span>
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* Tier 2: Sub Referral Members */}
+              {currentTier === 2 && (
+                <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                  <p className="uppercase mt-2 font-bold">
+                    direct referral sub member{' '}
+                  </p>
+                  <div className="py-2">
+                    <ul>
+                      {data.listDirectUser
+                        .filter((ele) => ele.isSubId)
+                        .map((ele) => (
+                          <li
+                            className="bg-white border-b hover:bg-gray-50"
+                            key={ele.userId}
+                          >
+                            <div className="py-2">
+                              <div className="text-base">
+                                <span
+                                  className={`${
+                                    ele.isRed
+                                      ? 'bg-[#b91c1c]'
+                                      : ele.isBlue
+                                      ? 'bg-[#0000ff]'
+                                      : ele.isYellow
+                                      ? 'bg-[#F4B400]'
+                                      : ele.isPink
+                                      ? 'bg-[#e600769c]'
+                                      : 'bg-[#16a34a]'
+                                  } py-1 px-2 rounded text-white text-sm`}
+                                >
+                                  {ele.userId}
+                                </span>
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* Tier 2: Tier 2 Users */}
+              {currentTier === 2 && data.tier >= 2 && (
+                <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                  <p className="uppercase mt-2 font-bold">Tier 2 Users</p>
+                  <div className="py-2">
+                    <p className="font-medium">Branch 1 :</p>
+                    <ul className="flex flex-wrap gap-2">
+                      {data?.tier2ChildUsers?.branch1?.map((ele) => (
                         <li
                           className="bg-white border-b hover:bg-gray-50"
-                          key={ele.userId}
+                          key={ele}
                         >
                           <div className="py-2">
                             <div className="text-base">
@@ -1375,33 +1353,21 @@ const UserProfile = () => {
                                     : 'bg-[#16a34a]'
                                 } py-1 px-2 rounded text-white text-sm`}
                               >
-                                {ele.userId}{' '}
-                                {ele.dieTime
-                                  ? ' - ' +
-                                    new Date(ele.dieTime).toLocaleDateString(
-                                      'vi',
-                                    )
-                                  : ''}
+                                {ele}
                               </span>
                             </div>
                           </div>
                         </li>
                       ))}
-                  </ul>
-                </div>
-              </div>
-              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
-                <p className="uppercase mt-2 font-bold">
-                  direct referral sub member{' '}
-                </p>
-                <div className="py-2">
-                  <ul>
-                    {data.listDirectUser
-                      .filter((ele) => ele.isSubId)
-                      .map((ele) => (
+                    </ul>
+                  </div>
+                  <div className="py-2">
+                    <p className="font-medium">Branch 2 :</p>
+                    <ul className="flex flex-wrap gap-2">
+                      {data?.tier2ChildUsers?.branch2?.map((ele) => (
                         <li
                           className="bg-white border-b hover:bg-gray-50"
-                          key={ele.userId}
+                          key={ele}
                         >
                           <div className="py-2">
                             <div className="text-base">
@@ -1418,81 +1384,19 @@ const UserProfile = () => {
                                     : 'bg-[#16a34a]'
                                 } py-1 px-2 rounded text-white text-sm`}
                               >
-                                {ele.userId}
+                                {ele}
                               </span>
                             </div>
                           </div>
                         </li>
                       ))}
-                  </ul>
+                    </ul>
+                  </div>
                 </div>
-              </div>
-              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
-                <p className="uppercase mt-2 font-bold">Tier 2 Users</p>
-                <div className="py-2">
-                  <p className="font-medium">Branch 1 :</p>
-                  <ul className="flex flex-wrap gap-2">
-                    {data?.tier2ChildUsers?.branch1?.map((ele) => (
-                      <li
-                        className="bg-white border-b hover:bg-gray-50"
-                        key={ele}
-                      >
-                        <div className="py-2">
-                          <div className="text-base">
-                            <span
-                              className={`${
-                                ele.isRed
-                                  ? 'bg-[#b91c1c]'
-                                  : ele.isBlue
-                                  ? 'bg-[#0000ff]'
-                                  : ele.isYellow
-                                  ? 'bg-[#F4B400]'
-                                  : ele.isPink
-                                  ? 'bg-[#e600769c]'
-                                  : 'bg-[#16a34a]'
-                              } py-1 px-2 rounded text-white text-sm`}
-                            >
-                              {ele}
-                            </span>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="py-2">
-                  <p className="font-medium">Branch 2 :</p>
-                  <ul className="flex flex-wrap gap-2">
-                    {data?.tier2ChildUsers?.branch2?.map((ele) => (
-                      <li
-                        className="bg-white border-b hover:bg-gray-50"
-                        key={ele}
-                      >
-                        <div className="py-2">
-                          <div className="text-base">
-                            <span
-                              className={`${
-                                ele.isRed
-                                  ? 'bg-[#b91c1c]'
-                                  : ele.isBlue
-                                  ? 'bg-[#0000ff]'
-                                  : ele.isYellow
-                                  ? 'bg-[#F4B400]'
-                                  : ele.isPink
-                                  ? 'bg-[#e600769c]'
-                                  : 'bg-[#16a34a]'
-                              } py-1 px-2 rounded text-white text-sm`}
-                            >
-                              {ele}
-                            </span>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-              {data.tier === 2 && (
+              )}
+
+              {/* Tier 2: Active ID */}
+              {currentTier === 2 && data.tier >= 2 && (
                 <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                   <p className="uppercase mt-2 font-bold">{t('ACTIVE ID')}</p>
                   <div className="lg:py-2">
@@ -1565,10 +1469,11 @@ const UserProfile = () => {
                   </ul>
                 </div>
               </div>
-              {data.tier > 1 && (
+              {/* Tier 2: SubId Info */}
+              {currentTier === 2 && data.tier >= 2 && data.subInfo && (
                 <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                   <p className="uppercase mt-2 font-bold">
-                    {data.subInfo?.subName}
+                    {data.subInfo?.subName || 'Sub ID Information'}
                   </p>
                   <div className="py-2">
                     <ul className="flex flex-col list-disc">
@@ -1689,7 +1594,7 @@ const UserProfile = () => {
                 </div>
               </div> */}
             </div>
-            <div className="w-full lg:w-2/3 lg:mx-2">
+            <div className="w-full lg:w-4/12 lg:mx-2">
               <div className="bg-white p-6 shadow-md rounded-sm border-t-4 border-NoExcuseChallenge">
                 <div className="text-gray-700">
                   <div className="grid grid-cols-1 text-sm">
@@ -2330,6 +2235,168 @@ const UserProfile = () => {
                 )}
               </div>
             </div>
+
+            {/* Cột 3: Wild Cards - Chỉ hiển thị ở Tier 2 */}
+            {currentTier === 2 && (
+              <div className="w-full lg:w-4/12 lg:mx-2 mb-4 lg:mb-0">
+                <div className="bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                  <div className="py-2 px-4">
+                    <p className="uppercase mt-2 font-bold">Wild Cards</p>
+                    {loadingWildCards ? (
+                      <div className="py-4 text-center">
+                        <Loading />
+                      </div>
+                    ) : wildCards.length === 0 ? (
+                      <div className="py-4 text-center text-gray-500">
+                        No wild cards available
+                      </div>
+                    ) : (
+                      <div className="py-2">
+                        <div className="space-y-4">
+                          {wildCards.map((card: any) => (
+                            <div
+                              key={card._id}
+                              className="rounded-lg overflow-hidden shadow-lg border-2 border-gray-200 max-w-[250px] mx-auto"
+                            >
+                              {/* Top Section - Image */}
+                              <div className="w-full">
+                                <img
+                                  src={wildCardTopImage}
+                                  alt="Wild Card Top"
+                                  className="w-full h-auto object-cover"
+                                />
+                              </div>
+
+                              {/* Bottom Section - Green Background */}
+                              <div
+                                className={`${
+                                  card.status === 'ACTIVE'
+                                    ? 'bg-green-600'
+                                    : card.status === 'USED'
+                                    ? 'bg-gray-500'
+                                    : 'bg-yellow-500'
+                                } p-4 text-white`}
+                              >
+                                <div className="flex flex-col items-center space-y-2">
+                                  {/* WILDCARD Text */}
+                                  <p className="text-2xl font-black uppercase tracking-wider">
+                                    WILDCARD
+                                  </p>
+
+                                  {/* Days */}
+                                  <p className="text-xl font-bold uppercase">
+                                    {card.days} DAYS
+                                  </p>
+
+                                  {/* CLAIM Button */}
+                                  {card.status === 'ACTIVE' && (
+                                    <div className="flex flex-col gap-2 w-full max-w-xs">
+                                      <button
+                                        type="button"
+                                        onClick={async () => {
+                                          if (
+                                            !confirm(
+                                              `Bạn có chắc chắn muốn sử dụng thẻ này cho user ${data.userId}? Thẻ sẽ cộng ${card.days} ngày vào dieTime của Tier ${card.targetTier}.`,
+                                            )
+                                          ) {
+                                            return;
+                                          }
+
+                                          setUsingCardId(card._id);
+                                          try {
+                                            const response =
+                                              await WildCard.useWildCard(
+                                                card._id,
+                                                id,
+                                              );
+                                            toast.success(
+                                              response.data.message ||
+                                                'Sử dụng Wild Card thành công!',
+                                            );
+                                            setRefresh(!refresh);
+                                          } catch (error: any) {
+                                            const message =
+                                              error.response &&
+                                              error.response.data.message
+                                                ? error.response.data.message
+                                                : error.message;
+                                            toast.error(
+                                              t(message) ||
+                                                'Có lỗi xảy ra khi sử dụng Wild Card',
+                                            );
+                                          } finally {
+                                            setUsingCardId(null);
+                                          }
+                                        }}
+                                        disabled={usingCardId === card._id}
+                                        className="w-full bg-black text-white uppercase font-bold py-2 px-6 rounded-full hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                      >
+                                        {usingCardId === card._id ? (
+                                          <Loading />
+                                        ) : (
+                                          'CLAIM'
+                                        )}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={async () => {
+                                          if (
+                                            !confirm(
+                                              `Bạn có chắc chắn muốn xóa thẻ này?`,
+                                            )
+                                          ) {
+                                            return;
+                                          }
+
+                                          try {
+                                            const response =
+                                              await WildCard.adminDeleteWildCard(
+                                                card._id,
+                                              );
+                                            toast.success(
+                                              response.data.message ||
+                                                'Xóa Wild Card thành công!',
+                                            );
+                                            setRefresh(!refresh);
+                                          } catch (error: any) {
+                                            const message =
+                                              error.response &&
+                                              error.response.data.message
+                                                ? error.response.data.message
+                                                : error.message;
+                                            toast.error(
+                                              t(message) ||
+                                                'Có lỗi xảy ra khi xóa Wild Card',
+                                            );
+                                          }
+                                        }}
+                                        className="w-full bg-red-600 text-white uppercase font-bold py-2 px-6 rounded-full hover:bg-red-700 transition-colors"
+                                      >
+                                        {t('Delete')}
+                                      </button>
+                                    </div>
+                                  )}
+
+                                  {/* Status for USED cards */}
+                                  {card.status === 'USED' && card.usedAt && (
+                                    <p className="text-sm opacity-75">
+                                      Used:{' '}
+                                      {new Date(card.usedAt).toLocaleDateString(
+                                        'vi',
+                                      )}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </form>
         </div>
       )}

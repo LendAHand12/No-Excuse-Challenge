@@ -18,6 +18,7 @@ import PhoneInput from 'react-phone-number-input';
 import './index.css';
 import { Link, useNavigate } from 'react-router-dom';
 import banks from '@/lib/banks.json';
+import wildCardTopImage from '@/images/cover/wildcard.png';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -98,6 +99,7 @@ const Profile = () => {
   const [wildCards, setWildCards] = useState([]);
   const [loadingWildCards, setLoadingWildCards] = useState(false);
   const [usingCardId, setUsingCardId] = useState<string | null>(null);
+  const [currentTier, setCurrentTier] = useState(1);
 
   const {
     register,
@@ -169,7 +171,7 @@ const Profile = () => {
 
   useEffect(() => {
     (async () => {
-      await User.getUserInfo()
+      await User.getUserInfo(currentTier)
         .then((response) => {
           dispatch(UPDATE_USER_INFO(response.data));
           if (response.data.checkCanNextTier) {
@@ -189,7 +191,7 @@ const Profile = () => {
           toast.error(t(message));
         });
     })();
-  }, [refresh]);
+  }, [refresh, currentTier]);
 
   // Fetch wild cards
   useEffect(() => {
@@ -519,6 +521,23 @@ const Profile = () => {
       </Modal>
 
       <div className="px-2 lg:px-24 py-24 space-y-6 lg:space-y-8">
+        {/* Tier Selector */}
+        {userInfo && (
+          <div className="flex items-center gap-4 mb-6">
+            {[...Array(Math.min(tier || 1, 5))].map((item, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentTier(i + 1)}
+                className={`flex justify-center items-center hover:underline font-medium ${
+                  currentTier === i + 1 ? 'bg-black text-NoExcuseChallenge' : ''
+                } rounded-full py-4 px-8 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
+              >
+                {t('tier')} {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
+
         {tier === 1 && preTier2Status === 'PASSED' && !preTier2User && (
           <div
             className="bg-blue-100 border w-fit border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-5 font-medium"
@@ -722,7 +741,7 @@ const Profile = () => {
           )}
 
         <div className={`grid gap-10 font-semibold`}>
-          <div className={`grid lg:grid-cols-2 gap-2`}>
+          <div className="grid lg:grid-cols-3 gap-2">
             <div className="bg-[#FAFBFC] p-4 rounded-2xl">
               <div className="flex justify-between items-center py-2 px-4">
                 <p>Status</p>
@@ -744,65 +763,88 @@ const Profile = () => {
                   {status}
                 </div>
               </div>
-              <div className="flex justify-between bg-[#E5E9EE] py-2 px-4 rounded-lg">
-                <p>Member since</p>
-                <p> {new Date(changeCreatedAt).toLocaleDateString('vi')}</p>
-              </div>
+              {/* Tier 1: Member Since */}
+              {currentTier === 1 && (
+                <div className="flex justify-between bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                  <p>Member since</p>
+                  <p> {new Date(changeCreatedAt).toLocaleDateString('vi')}</p>
+                </div>
+              )}
+              {/* Tier 2: Tier 2 Entered */}
+              {currentTier === 2 && tier >= 2 && userInfo.tier2Time && (
+                <div className="flex justify-between bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                  <p>Tier 2 entered</p>
+                  <p>
+                    {' '}
+                    {new Date(userInfo.tier2Time).toLocaleDateString('vi')}
+                  </p>
+                </div>
+              )}
               <div className="flex justify-between py-2 px-4">
                 <p>Completed ranking time</p>
                 <p className="whitespace-nowrap">
                   {userInfo[`tier${ranking}Time`]}
                 </p>
               </div>
-              <div className="flex flex-col justify-between py-3 px-4">
-                <div className="flex items-center justify-between">
-                  <div>Tier 1 :</div>
-                  <div
-                    className={`w-10 h-5 rounded-md ${
-                      tier1?.isRed
-                        ? 'bg-[#ee0000]' // Màu đỏ
-                        : tier1?.isBlue
-                        ? 'bg-[#0033ff]' // Màu xanh dương
-                        : tier1?.isYellow
-                        ? 'bg-[#ffcc00]' // Màu vàng
-                        : tier1?.isPink
-                        ? 'bg-[#ff3399]' // Màu hồng
-                        : 'bg-[#009933]' // Màu xanh lá (mặc định)
-                    }`}
-                  ></div>
-                </div>
-                {tier === 2 && (
-                  <div className="flex items-center justify-between mt-2">
-                    <div>Tier 2 :</div>
-                    <div
-                      className={`w-10 h-5 rounded-md ${
-                        isDisableTier2
-                          ? 'bg-[#663300]' // Màu nâu (disable)
-                          : tier2?.isYellow
-                          ? 'bg-[#ffcc00]' // Màu vàng
-                          : 'bg-[#009933]' // Màu xanh lá (mặc định)
-                      }`}
-                    ></div>
+              {/* Tier 1: Màu tier 1 */}
+              {currentTier === 1 && (
+                <>
+                  <div className="flex flex-col justify-between py-3 px-4">
+                    <div className="flex items-center justify-between">
+                      <div>Tier 1 :</div>
+                      <div
+                        className={`w-10 h-5 rounded-md ${
+                          tier1?.isRed
+                            ? 'bg-[#ee0000]' // Màu đỏ
+                            : tier1?.isBlue
+                            ? 'bg-[#0033ff]' // Màu xanh dương
+                            : tier1?.isYellow
+                            ? 'bg-[#ffcc00]' // Màu vàng
+                            : tier1?.isPink
+                            ? 'bg-[#ff3399]' // Màu hồng
+                            : 'bg-[#009933]' // Màu xanh lá (mặc định)
+                        }`}
+                      ></div>
+                    </div>
                   </div>
-                )}
-              </div>
-              <div className="flex items-center justify-between py-2 px-4">
-                <span>Disqualified (Tier 1)</span>
-                <span className="ml-auto">
-                  {dieTimeTier1
-                    ? new Date(dieTimeTier1).toLocaleDateString('vi')
-                    : '-'}
-                </span>
-              </div>
-              {tier === 2 && (
-                <div className="flex items-center justify-between py-2 px-4 bg-[#E5E9EE] rounded-lg">
-                  <span>Disqualified (Tier 2)</span>
-                  <span className="ml-auto">
-                    {dieTimeTier2
-                      ? new Date(dieTimeTier2).toLocaleDateString('vi')
-                      : '-'}
-                  </span>
-                </div>
+                  <div className="flex items-center justify-between py-2 px-4">
+                    <span>Disqualified (Tier 1)</span>
+                    <span className="ml-auto">
+                      {dieTimeTier1
+                        ? new Date(dieTimeTier1).toLocaleDateString('vi')
+                        : '-'}
+                    </span>
+                  </div>
+                </>
+              )}
+              {/* Tier 2: Màu tier 2 */}
+              {currentTier === 2 && tier >= 2 && (
+                <>
+                  <div className="flex flex-col justify-between py-3 px-4">
+                    <div className="flex items-center justify-between">
+                      <div>Tier 2 :</div>
+                      <div
+                        className={`w-10 h-5 rounded-md ${
+                          isDisableTier2
+                            ? 'bg-[#663300]' // Màu nâu (disable)
+                            : tier2?.isYellow
+                            ? 'bg-[#ffcc00]' // Màu vàng
+                            : tier2?.isBlue
+                            ? 'bg-[#0033ff]' // Màu xanh dương
+                            : 'bg-[#009933]' // Màu xanh lá (mặc định)
+                        }`}
+                      ></div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between py-2 px-4 bg-[#E5E9EE] rounded-lg">
+                    <span>Disqualified (Tier 2)</span>
+                    <span className="ml-auto">
+                      {dieTimeTier2
+                        ? new Date(dieTimeTier2).toLocaleDateString('vi')
+                        : '-'}
+                    </span>
+                  </div>
+                </>
               )}
             </div>
             <div className="bg-[#FAFBFC] p-4 rounded-2xl">
@@ -854,47 +896,172 @@ const Profile = () => {
               }
             </div>
 
-            <div className="bg-[#FAFBFC] p-4 rounded-2xl">
-              <div className="py-2 px-4">
-                <p className="uppercase mt-2 font-bold">{t('children')}</p>
-                <div className="lg:py-2">
-                  <ul className="flex flex-row flex-wrap gap-2">
-                    {listDirectUser.map((ele) => (
-                      <li className="" key={ele.userId}>
-                        <div className="py-2">
-                          <div className="text-base w-full">
-                            <span
+            {/* Cột 3: Wild Cards - Chỉ hiển thị ở Tier 2 */}
+            {currentTier === 2 && (
+              <div className="bg-[#FAFBFC] p-4 rounded-2xl">
+                <div className="py-2 px-4">
+                  <p className="uppercase mt-2 font-bold">Wild Cards</p>
+                  {loadingWildCards ? (
+                    <div className="py-4 text-center">
+                      <Loading />
+                    </div>
+                  ) : wildCards.length === 0 ? (
+                    <div className="py-4 text-center text-gray-500">
+                      No wild cards available
+                    </div>
+                  ) : (
+                    <div className="py-2">
+                      <div className="space-y-4">
+                        {wildCards.map((card: any) => (
+                          <div
+                            key={card._id}
+                            className="rounded-lg overflow-hidden shadow-lg border-2 border-gray-200 max-w-[250px] mx-auto"
+                          >
+                            {/* Top Section - Image */}
+                            <div className="w-full">
+                              <img
+                                src={wildCardTopImage}
+                                alt="Wild Card Top"
+                                className="w-full h-auto object-cover"
+                              />
+                            </div>
+
+                            {/* Bottom Section - Green Background */}
+                            <div
                               className={`${
-                                ele.isRed
-                                  ? 'bg-[#b91c1c]'
-                                  : ele.isBlue
-                                  ? 'bg-[#0000ff]'
-                                  : ele.isYellow
-                                  ? 'bg-[#F4B400]'
-                                  : ele.isPink
-                                  ? 'bg-[#e600769c]'
-                                  : 'bg-[#16a34a]'
-                              } py-1 px-2 rounded text-white text-sm min-w-fit`}
+                                card.status === 'ACTIVE'
+                                  ? 'bg-green-600'
+                                  : card.status === 'USED'
+                                  ? 'bg-gray-500'
+                                  : 'bg-yellow-500'
+                              } p-4 text-white`}
                             >
-                              {ele.userId}
-                            </span>
+                              <div className="flex flex-col items-center space-y-2">
+                                {/* WILDCARD Text */}
+                                <p className="text-2xl font-black uppercase tracking-wider">
+                                  WILDCARD
+                                </p>
+
+                                {/* Days */}
+                                <p className="text-xl font-bold uppercase">
+                                  {card.days} DAYS
+                                </p>
+
+                                {/* CLAIM Button */}
+                                {card.status === 'ACTIVE' && (
+                                  <button
+                                    onClick={async () => {
+                                      if (
+                                        !confirm(
+                                          `Bạn có chắc chắn muốn sử dụng thẻ này? Thẻ sẽ cộng ${card.days} ngày vào dieTime của Tier ${card.targetTier}.`,
+                                        )
+                                      ) {
+                                        return;
+                                      }
+
+                                      setUsingCardId(card._id);
+                                      try {
+                                        const response =
+                                          await WildCard.useWildCard(card._id);
+                                        toast.success(
+                                          response.data.message ||
+                                            'Sử dụng Wild Card thành công!',
+                                        );
+                                        setRefresh(!refresh);
+                                      } catch (error: any) {
+                                        const message =
+                                          error.response &&
+                                          error.response.data.message
+                                            ? error.response.data.message
+                                            : error.message;
+                                        toast.error(
+                                          t(message) ||
+                                            'Có lỗi xảy ra khi sử dụng Wild Card',
+                                        );
+                                      } finally {
+                                        setUsingCardId(null);
+                                      }
+                                    }}
+                                    disabled={usingCardId === card._id}
+                                    className="w-full max-w-xs bg-black text-white uppercase font-bold py-2 px-6 rounded-full hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                  >
+                                    {usingCardId === card._id ? (
+                                      <Loading />
+                                    ) : (
+                                      'CLAIM'
+                                    )}
+                                  </button>
+                                )}
+
+                                {/* Status for USED cards */}
+                                {card.status === 'USED' && card.usedAt && (
+                                  <p className="text-sm opacity-75">
+                                    Used:{' '}
+                                    {new Date(card.usedAt).toLocaleDateString(
+                                      'vi',
+                                    )}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-            <div className="bg-[#FAFBFC] p-4 rounded-2xl">
-              <div className="py-2 px-4">
-                <p className="uppercase mt-2 font-bold">Tier 2 Users</p>
-                <div className="py-2">
-                  <p className="font-medium">Branch 1 :</p>
-                  <ul className="flex flex-row flex-wrap gap-2">
-                    {tier2ChildUsers
-                      ? tier2ChildUsers?.branch1?.map((ele) => (
-                          <li className="" key={ele}>
+            )}
+
+            {/* Tier 1: Danh sách user trực tiếp */}
+            {currentTier === 1 && (
+              <div className="bg-[#FAFBFC] p-4 rounded-2xl">
+                <div className="py-2 px-4">
+                  <p className="uppercase mt-2 font-bold">{t('children')}</p>
+                  <div className="lg:py-2">
+                    <ul className="flex flex-row flex-wrap gap-2">
+                      {listDirectUser.map((ele) => (
+                        <li className="" key={ele.userId}>
+                          <div className="py-2">
+                            <div className="text-base w-full">
+                              <span
+                                className={`${
+                                  ele.isRed
+                                    ? 'bg-[#b91c1c]'
+                                    : ele.isBlue
+                                    ? 'bg-[#0000ff]'
+                                    : ele.isYellow
+                                    ? 'bg-[#F4B400]'
+                                    : ele.isPink
+                                    ? 'bg-[#e600769c]'
+                                    : 'bg-[#16a34a]'
+                                } py-1 px-2 rounded text-white text-sm min-w-fit`}
+                              >
+                                {ele.userId}
+                              </span>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tier 2: Sub Referral Members */}
+            {currentTier === 2 && (
+              <div className="bg-[#FAFBFC] p-4 rounded-2xl">
+                <div className="py-2 px-4">
+                  <p className="uppercase mt-2 font-bold">
+                    Sub Referral Members
+                  </p>
+                  <div className="lg:py-2">
+                    <ul className="flex flex-row flex-wrap gap-2">
+                      {listDirectUser
+                        .filter((ele) => ele.isSubId)
+                        .map((ele) => (
+                          <li className="" key={ele.userId}>
                             <div className="py-2">
                               <div className="text-base w-full">
                                 <span
@@ -910,48 +1077,89 @@ const Profile = () => {
                                       : 'bg-[#16a34a]'
                                   } py-1 px-2 rounded text-white text-sm min-w-fit`}
                                 >
-                                  {ele}
+                                  {ele.userId}
                                 </span>
                               </div>
                             </div>
                           </li>
-                        ))
-                      : ''}
-                  </ul>
-                </div>
-                <div className="py-2">
-                  <p className="font-medium">Branch 2 :</p>
-                  <ul className="flex flex-row flex-wrap gap-2">
-                    {tier2ChildUsers
-                      ? tier2ChildUsers?.branch2?.map((ele) => (
-                          <li className="" key={ele}>
-                            <div className="py-2">
-                              <div className="text-base w-full">
-                                <span
-                                  className={`${
-                                    ele.isRed
-                                      ? 'bg-[#b91c1c]'
-                                      : ele.isBlue
-                                      ? 'bg-[#0000ff]'
-                                      : ele.isYellow
-                                      ? 'bg-[#F4B400]'
-                                      : ele.isPink
-                                      ? 'bg-[#e600769c]'
-                                      : 'bg-[#16a34a]'
-                                  } py-1 px-2 rounded text-white text-sm min-w-fit`}
-                                >
-                                  {ele}
-                                </span>
-                              </div>
-                            </div>
-                          </li>
-                        ))
-                      : ''}
-                  </ul>
+                        ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
-            </div>
-            {tier === 2 && (
+            )}
+
+            {/* Tier 2: Tier 2 Users */}
+            {currentTier === 2 && tier >= 2 && (
+              <div className="bg-[#FAFBFC] p-4 rounded-2xl">
+                <div className="py-2 px-4">
+                  <p className="uppercase mt-2 font-bold">Tier 2 Users</p>
+                  <div className="py-2">
+                    <p className="font-medium">Branch 1 :</p>
+                    <ul className="flex flex-row flex-wrap gap-2">
+                      {tier2ChildUsers
+                        ? tier2ChildUsers?.branch1?.map((ele) => (
+                            <li className="" key={ele}>
+                              <div className="py-2">
+                                <div className="text-base w-full">
+                                  <span
+                                    className={`${
+                                      ele.isRed
+                                        ? 'bg-[#b91c1c]'
+                                        : ele.isBlue
+                                        ? 'bg-[#0000ff]'
+                                        : ele.isYellow
+                                        ? 'bg-[#F4B400]'
+                                        : ele.isPink
+                                        ? 'bg-[#e600769c]'
+                                        : 'bg-[#16a34a]'
+                                    } py-1 px-2 rounded text-white text-sm min-w-fit`}
+                                  >
+                                    {ele}
+                                  </span>
+                                </div>
+                              </div>
+                            </li>
+                          ))
+                        : ''}
+                    </ul>
+                  </div>
+                  <div className="py-2">
+                    <p className="font-medium">Branch 2 :</p>
+                    <ul className="flex flex-row flex-wrap gap-2">
+                      {tier2ChildUsers
+                        ? tier2ChildUsers?.branch2?.map((ele) => (
+                            <li className="" key={ele}>
+                              <div className="py-2">
+                                <div className="text-base w-full">
+                                  <span
+                                    className={`${
+                                      ele.isRed
+                                        ? 'bg-[#b91c1c]'
+                                        : ele.isBlue
+                                        ? 'bg-[#0000ff]'
+                                        : ele.isYellow
+                                        ? 'bg-[#F4B400]'
+                                        : ele.isPink
+                                        ? 'bg-[#e600769c]'
+                                        : 'bg-[#16a34a]'
+                                    } py-1 px-2 rounded text-white text-sm min-w-fit`}
+                                  >
+                                    {ele}
+                                  </span>
+                                </div>
+                              </div>
+                            </li>
+                          ))
+                        : ''}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tier 2: Active ID */}
+            {currentTier === 2 && tier >= 2 && (
               <div className="bg-[#FAFBFC] p-4 rounded-2xl">
                 <div className="py-2 px-4">
                   <p className="uppercase mt-2 font-bold">{t('ACTIVE ID')}</p>
@@ -1008,119 +1216,32 @@ const Profile = () => {
                 </div>
               </div>
             )}
-            <div className="bg-[#FAFBFC] p-4 rounded-2xl">
-              <div className="py-2 px-4">
-                <p className="uppercase mt-2 font-bold">Wild Cards</p>
-                {loadingWildCards ? (
-                  <div className="py-4 text-center">
-                    <Loading />
-                  </div>
-                ) : wildCards.length === 0 ? (
-                  <div className="py-4 text-center text-gray-500">
-                    No wild cards available
-                  </div>
-                ) : (
-                  <div className="py-2">
-                    <div className="space-y-2">
-                      {wildCards.map((card: any) => (
-                        <div
-                          key={card._id}
-                          className={`p-3 rounded-lg border ${
-                            card.status === 'ACTIVE'
-                              ? 'bg-green-50 border-green-200'
-                              : card.status === 'USED'
-                              ? 'bg-gray-50 border-gray-200'
-                              : 'bg-yellow-50 border-yellow-200'
-                          }`}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <p className="font-semibold text-sm">
-                                {card.cardType}
-                              </p>
-                              <p className="text-xs text-gray-600 mt-1">
-                                {card.sourceInfo || 'No description'}
-                              </p>
-                              <div className="flex gap-4 mt-1 text-xs text-gray-500">
-                                <span>Days: {card.days}</span>
-                                <span>Tier: {card.targetTier}</span>
-                                {card.usedAt && (
-                                  <span>
-                                    Used:{' '}
-                                    {new Date(card.usedAt).toLocaleDateString(
-                                      'vi',
-                                    )}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-end gap-2">
-                              <span
-                                className={`px-2 py-1 rounded text-xs font-medium ${
-                                  card.status === 'ACTIVE'
-                                    ? 'bg-green-500 text-white'
-                                    : card.status === 'USED'
-                                    ? 'bg-gray-500 text-white'
-                                    : 'bg-yellow-500 text-white'
-                                }`}
-                              >
-                                {card.status}
-                              </span>
-                              {card.status === 'ACTIVE' && (
-                                <button
-                                  onClick={async () => {
-                                    if (
-                                      !confirm(
-                                        `Bạn có chắc chắn muốn sử dụng thẻ này? Thẻ sẽ cộng ${card.days} ngày vào dieTime của Tier ${card.targetTier}.`,
-                                      )
-                                    ) {
-                                      return;
-                                    }
 
-                                    setUsingCardId(card._id);
-                                    try {
-                                      const response =
-                                        await WildCard.useWildCard(card._id);
-                                      toast.success(
-                                        response.data.message ||
-                                          'Sử dụng Wild Card thành công!',
-                                      );
-                                      setRefresh(!refresh);
-                                    } catch (error: any) {
-                                      const message =
-                                        error.response &&
-                                        error.response.data.message
-                                          ? error.response.data.message
-                                          : error.message;
-                                      toast.error(
-                                        t(message) ||
-                                          'Có lỗi xảy ra khi sử dụng Wild Card',
-                                      );
-                                    } finally {
-                                      setUsingCardId(null);
-                                    }
-                                  }}
-                                  disabled={usingCardId === card._id}
-                                  className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                  {usingCardId === card._id ? (
-                                    <Loading />
-                                  ) : (
-                                    'Use'
-                                  )}
-                                </button>
-                              )}
-                            </div>
-                          </div>
+            {/* Tier 2: SubId Info */}
+            {currentTier === 2 && tier >= 2 && subUser && (
+              <div className="bg-[#FAFBFC] p-4 rounded-2xl">
+                <div className="py-2 px-4">
+                  <p className="uppercase mt-2 font-bold">Sub ID Information</p>
+                  <div className="lg:py-2">
+                    <div className="space-y-2">
+                      <div>
+                        <p className="text-sm font-medium">Sub ID Name:</p>
+                        <p className="text-sm">{subUser.userName || '-'}</p>
+                      </div>
+                      {subUser._id && (
+                        <div>
+                          <p className="text-sm font-medium">Sub ID ID:</p>
+                          <p className="text-sm">{subUser._id}</p>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
-                )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
+
         <div className="flex justify-between">
           {/* <button
             className={`bg-blue-900 text-white px-6 py-2 rounded-lg ${
@@ -1344,96 +1465,135 @@ const Profile = () => {
             </button>
           )}
         </form>
-      </div>
 
-      {/* Bank Info Modal */}
-      <Modal
-        isOpen={showBankInfoModal}
-        onRequestClose={() => setShowBankInfoModal(false)}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-        overlayClassName="fixed inset-0 z-40"
-        contentLabel="Bank Information Modal"
-      >
-        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-          <h2 className="text-xl font-bold mb-4">{t('Bank Information')}</h2>
-          <p className="text-gray-600 mb-4">
-            {t('Please provide your bank account information')}
-          </p>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-4 relative">
-              <label className="block text-sm font-medium mb-2">
-                {t('bank name')} <span className="text-red-500">*</span>
-              </label>
-              {/* Hidden input for form validation */}
-              <input
-                type="hidden"
-                {...register('bankName', {
-                  required: t('bank name is required'),
-                })}
-                value={selectedBank?.name || ''}
-              />
-
-              {/* Search Input */}
-              <div className="relative">
+        {/* Bank Info Modal */}
+        <Modal
+          isOpen={showBankInfoModal}
+          onRequestClose={() => setShowBankInfoModal(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          overlayClassName="fixed inset-0 z-40"
+          contentLabel="Bank Information Modal"
+        >
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold mb-4">{t('Bank Information')}</h2>
+            <p className="text-gray-600 mb-4">
+              {t('Please provide your bank account information')}
+            </p>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="mb-4 relative">
+                <label className="block text-sm font-medium mb-2">
+                  {t('bank name')} <span className="text-red-500">*</span>
+                </label>
+                {/* Hidden input for form validation */}
                 <input
-                  type="text"
-                  placeholder={
-                    selectedBank
-                      ? `(${selectedBank.code}) ${selectedBank.name}`
-                      : t('Search bank name') || 'Search bank name...'
-                  }
-                  value={
-                    showBankDropdown
-                      ? bankSearch
-                      : selectedBank
-                      ? `(${selectedBank.short_name}) ${selectedBank.name}`
-                      : ''
-                  }
-                  onChange={(e) => {
-                    setBankSearch(e.target.value);
-                    setShowBankDropdown(true);
-                  }}
-                  onFocus={() => {
-                    setShowBankDropdown(true);
-                    if (selectedBank) {
-                      setBankSearch(
-                        `${selectedBank.code} ${selectedBank.name}`,
-                      );
-                    }
-                  }}
-                  className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
-                  autoComplete="off"
+                  type="hidden"
+                  {...register('bankName', {
+                    required: t('bank name is required'),
+                  })}
+                  value={selectedBank?.name || ''}
                 />
-                {selectedBank && (
-                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedBank(null);
-                        setBankSearch('');
-                        setShowBankDropdown(false);
-                        setValue('bankName', '', { shouldValidate: true });
-                        setValue('bankCode', '', { shouldValidate: true });
-                      }}
-                      className="text-gray-400 hover:text-gray-600 text-xl leading-none w-6 h-6 flex items-center justify-center"
-                    >
-                      ×
-                    </button>
-                  </div>
-                )}
-              </div>
 
-              {/* Dropdown List */}
-              {showBankDropdown && (
-                <>
-                  <div
-                    className="fixed inset-0 z-[60]"
-                    onClick={() => setShowBankDropdown(false)}
+                {/* Search Input */}
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder={
+                      selectedBank
+                        ? `(${selectedBank.code}) ${selectedBank.name}`
+                        : t('Search bank name') || 'Search bank name...'
+                    }
+                    value={
+                      showBankDropdown
+                        ? bankSearch
+                        : selectedBank
+                        ? `(${selectedBank.short_name}) ${selectedBank.name}`
+                        : ''
+                    }
+                    onChange={(e) => {
+                      setBankSearch(e.target.value);
+                      setShowBankDropdown(true);
+                    }}
+                    onFocus={() => {
+                      setShowBankDropdown(true);
+                      if (selectedBank) {
+                        setBankSearch(
+                          `${selectedBank.code} ${selectedBank.name}`,
+                        );
+                      }
+                    }}
+                    className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
+                    autoComplete="off"
                   />
-                  <div className="absolute z-[70] w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {banks
-                      .filter(
+                  {selectedBank && (
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedBank(null);
+                          setBankSearch('');
+                          setShowBankDropdown(false);
+                          setValue('bankName', '', { shouldValidate: true });
+                          setValue('bankCode', '', { shouldValidate: true });
+                        }}
+                        className="text-gray-400 hover:text-gray-600 text-xl leading-none w-6 h-6 flex items-center justify-center"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Dropdown List */}
+                {showBankDropdown && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-[60]"
+                      onClick={() => setShowBankDropdown(false)}
+                    />
+                    <div className="absolute z-[70] w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {banks
+                        .filter(
+                          (bank: any) =>
+                            bank.name
+                              .toLowerCase()
+                              .includes(bankSearch.toLowerCase()) ||
+                            bank.code
+                              .toLowerCase()
+                              .includes(bankSearch.toLowerCase()) ||
+                            bank.short_name
+                              ?.toLowerCase()
+                              .includes(bankSearch.toLowerCase()),
+                        )
+                        .map((bank: any, index: number) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => {
+                              setSelectedBank(bank);
+                              setBankSearch(`${bank.code} ${bank.name}`);
+                              setShowBankDropdown(false);
+                              // Update form value
+                              setValue('bankName', bank.name, {
+                                shouldValidate: true,
+                              });
+                              setValue('bankCode', bank.code, {
+                                shouldValidate: true,
+                              });
+                            }}
+                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none ${
+                              selectedBank?.code === bank.code
+                                ? 'bg-gray-100 font-medium'
+                                : ''
+                            }`}
+                          >
+                            <span className="font-semibold">
+                              ({bank.short_name})
+                            </span>{' '}
+                            {bank.name}
+                          </button>
+                        ))}
+                      {banks.filter(
                         (bank: any) =>
                           bank.name
                             .toLowerCase()
@@ -1444,126 +1604,87 @@ const Profile = () => {
                           bank.short_name
                             ?.toLowerCase()
                             .includes(bankSearch.toLowerCase()),
-                      )
-                      .map((bank: any, index: number) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() => {
-                            setSelectedBank(bank);
-                            setBankSearch(`${bank.code} ${bank.name}`);
-                            setShowBankDropdown(false);
-                            // Update form value
-                            setValue('bankName', bank.name, {
-                              shouldValidate: true,
-                            });
-                            setValue('bankCode', bank.code, {
-                              shouldValidate: true,
-                            });
-                          }}
-                          className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none ${
-                            selectedBank?.code === bank.code
-                              ? 'bg-gray-100 font-medium'
-                              : ''
-                          }`}
-                        >
-                          <span className="font-semibold">
-                            ({bank.short_name})
-                          </span>{' '}
-                          {bank.name}
-                        </button>
-                      ))}
-                    {banks.filter(
-                      (bank: any) =>
-                        bank.name
-                          .toLowerCase()
-                          .includes(bankSearch.toLowerCase()) ||
-                        bank.code
-                          .toLowerCase()
-                          .includes(bankSearch.toLowerCase()) ||
-                        bank.short_name
-                          ?.toLowerCase()
-                          .includes(bankSearch.toLowerCase()),
-                    ).length === 0 && (
-                      <div className="px-4 py-2 text-sm text-gray-500 text-center">
-                        {t('No banks found') || 'No banks found'}
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
+                      ).length === 0 && (
+                        <div className="px-4 py-2 text-sm text-gray-500 text-center">
+                          {t('No banks found') || 'No banks found'}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
 
-              <p className="text-red-500 text-sm mt-1">
-                {errors.bankName?.message}
-              </p>
-            </div>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.bankName?.message}
+                </p>
+              </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">
-                {t('accountName')} <span className="text-red-500">*</span>
-              </label>
-              <input
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
-                {...register('accountName', {
-                  required: t('bank account name is required'),
-                })}
-                autoComplete="off"
-              />
-              <p className="text-red-500 text-sm mt-1">
-                {errors.accountName?.message}
-              </p>
-            </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">
+                  {t('accountName')} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
+                  {...register('accountName', {
+                    required: t('bank account name is required'),
+                  })}
+                  autoComplete="off"
+                />
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.accountName?.message}
+                </p>
+              </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">
-                {t('accountNumber')} <span className="text-red-500">*</span>
-              </label>
-              <input
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
-                {...register('accountNumber', {
-                  required: t('bank account number is required'),
-                })}
-                autoComplete="off"
-              />
-              <p className="text-red-500 text-sm mt-1">
-                {errors.accountNumber?.message}
-              </p>
-            </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">
+                  {t('accountNumber')} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
+                  {...register('accountNumber', {
+                    required: t('bank account number is required'),
+                  })}
+                  autoComplete="off"
+                />
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.accountNumber?.message}
+                </p>
+              </div>
 
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-2">
-                {t('date of birth')} <span className="text-red-500">*</span>
-              </label>
-              <DateInput
-                register={register}
-                name="dateOfBirth"
-                rules={{ required: t('date of birth is required') as any }}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
-              />
-              <p className="text-red-500 text-sm mt-1">
-                {errors.dateOfBirth?.message}
-              </p>
-            </div>
+              <div className="mb-6">
+                <label className="block text-sm font-medium mb-2">
+                  {t('date of birth')} <span className="text-red-500">*</span>
+                </label>
+                <DateInput
+                  register={register}
+                  name="dateOfBirth"
+                  rules={{ required: t('date of birth is required') as any }}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
+                />
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.dateOfBirth?.message}
+                </p>
+              </div>
 
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setShowBankInfoModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
-              >
-                {t('Skip')}
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-              >
-                {loading ? <Loading /> : t('Submit')}
-              </button>
-            </div>
-          </form>
-        </div>
-      </Modal>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowBankInfoModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+                >
+                  {t('Skip')}
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {loading ? <Loading /> : t('Submit')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </Modal>
+      </div>
     </DefaultLayout>
   );
 };
