@@ -59,6 +59,7 @@ export default function UserAssetsPage() {
     accountNumber: '',
     bankCode: '',
     bankName: '',
+    city: '',
     // Withdrawal gateway settings
     enableWithdrawCrypto: false,
     enableWithdrawBank: true,
@@ -114,14 +115,21 @@ export default function UserAssetsPage() {
           status: response.data.status || '',
           facetecTid: response.data.facetecTid || '',
           errLahCode: response.data.errLahCode || '',
+          city: response.data.city || 'VN',
           // Bank information
           accountName: response.data.accountName || '',
           accountNumber: response.data.accountNumber || '',
           bankCode: response.data.bankCode || '',
           bankName: response.data.bankName || '',
           // Withdrawal gateway settings
-          enableWithdrawCrypto: response.data.enableWithdrawCrypto !== undefined ? response.data.enableWithdrawCrypto : false,
-          enableWithdrawBank: response.data.enableWithdrawBank !== undefined ? response.data.enableWithdrawBank : true,
+          enableWithdrawCrypto:
+            response.data.enableWithdrawCrypto !== undefined
+              ? response.data.enableWithdrawCrypto
+              : false,
+          enableWithdrawBank:
+            response.data.enableWithdrawBank !== undefined
+              ? response.data.enableWithdrawBank
+              : true,
         });
       }
     } catch (error: any) {

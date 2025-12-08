@@ -15,6 +15,7 @@ import {
   findNextReferrer,
   getAllDescendantsTier2Users,
   mergeIntoThreeGroups,
+  isUserExpired,
 } from "../utils/methods.js";
 import axios from "axios";
 import Honor from "../models/honorModel.js";
@@ -36,8 +37,18 @@ const checkLinkRef = asyncHandler(async (req, res) => {
       const userReceive = await User.findById(treeUserReceive.userId);
       const userRef = await User.findById(treeUserRef.userId);
 
-      if (userRef.errLahCode === "OVER45") {
-        return res.status(400).json({ error: "invalidUrl" });
+      // Kiểm tra dieTime của tree tier 1 của userRef có quá hạn hay chưa
+      const treeTier1OfUserRef = await Tree.findOne({
+        userId: userRef._id,
+        tier: 1,
+        isSubId: false,
+      });
+
+      if (treeTier1OfUserRef) {
+        const isExpired = await isUserExpired(treeTier1OfUserRef._id);
+        if (isExpired) {
+          return res.status(400).json({ error: "invalidUrl" });
+        }
       }
 
       if (!treeUserReceive.parentId || treeUserReceive.userName === "NoExcuse 9") {
@@ -413,7 +424,7 @@ const authUser = asyncHandler(async (req, res) => {
     if (tree && tree.dieTime) {
       const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
       const dieTimeStart = moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
-      
+
       // Nếu dieTime đã quá hạn (today >= dieTime) thì errLahCode = "OVER45"
       if (todayStart.isSameOrAfter(dieTimeStart)) {
         errLahCode = "OVER45";

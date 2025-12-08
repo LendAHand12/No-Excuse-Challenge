@@ -51,7 +51,7 @@ import {
   createWildCardForTier2Users,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
-import { fixParentChildLinks, recalculateDieTimeDaily } from "./common.js";
+import { checkAbnormalIncome, fixParentChildLinks, recalculateDieTimeDaily } from "./common.js";
 import Tree from "./models/treeModel.js";
 import { getTotalLevel1ToLevel10OfUser, getTotalLevel6ToLevel10OfUser } from "./utils/methods.js";
 
@@ -122,6 +122,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 // await exportUsersWithAdminChangeButNoDieTime();
+// await checkAbnormalIncome();
 
 // Cấu hình timezone Việt Nam (GMT+7)
 const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";

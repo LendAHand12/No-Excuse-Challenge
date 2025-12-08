@@ -720,6 +720,7 @@ const getUserAssets = asyncHandler(async (req, res) => {
     enableWithdrawCrypto:
       user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
     enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
+    city: user.city || "VN",
   });
 });
 

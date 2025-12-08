@@ -2075,7 +2075,7 @@ export const checkAbnormalIncome = async () => {
     console.log("\n🔍 Bắt đầu kiểm tra thu nhập bất thường...");
 
     // Lấy danh sách user từ 01/11/2025 tới nay
-    const startDate = moment.tz("2025-11-01", "Asia/Ho_Chi_Minh").startOf("day").toDate();
+    const startDate = moment.tz("2025-10-01", "Asia/Ho_Chi_Minh").startOf("day").toDate();
     const endDate = moment.tz("Asia/Ho_Chi_Minh").endOf("day").toDate();
 
     const users = await User.find({
@@ -2086,7 +2086,7 @@ export const checkAbnormalIncome = async () => {
       isAdmin: false,
     }).select("_id userId email availableUsdt createdAt");
 
-    console.log(`📊 Tìm thấy ${users.length} user từ 01/11/2025 tới nay`);
+    console.log(`📊 Tìm thấy ${users.length} user từ 01/10/2025 tới nay`);
 
     const abnormalUsers = [];
 
@@ -2133,10 +2133,10 @@ export const checkAbnormalIncome = async () => {
         const difference = Math.abs(expectedTotal - X);
 
         // Tính số tiền đúng cần sửa lại: availableUsdt = Y + availableUsdt + 10 - X
-        const correctAvailableUsdt = Y + (user.availableUsdt || 0) - 10 - X;
+        // const correctAvailableUsdt = Y + (user.availableUsdt || 0) - 10 - X;
 
         // Nếu không bằng nhau (cho phép sai số nhỏ do làm tròn)
-        if (difference > 30) {
+        if (difference > 10 && Y > 0) {
           abnormalUsers.push({
             userId: user.userId,
             email: user.email,
@@ -2147,7 +2147,7 @@ export const checkAbnormalIncome = async () => {
             availableUsdt: user.availableUsdt || 0,
             expectedTotal: expectedTotal,
             difference: difference,
-            correctAvailableUsdt: correctAvailableUsdt,
+            // correctAvailableUsdt: correctAvailableUsdt,
           });
         }
       } catch (err) {
@@ -2187,7 +2187,7 @@ export const checkAbnormalIncome = async () => {
         content += `   Available USDT (hiện tại): ${user.availableUsdt.toFixed(2)}\n`;
         content += `   Expected Total (Y + availableUsdt): ${user.expectedTotal.toFixed(2)}\n`;
         content += `   Difference: ${user.difference.toFixed(2)}\n`;
-        content += `   Available USDT (cần sửa lại): ${user.correctAvailableUsdt.toFixed(2)}\n`;
+        // content += `   Available USDT (cần sửa lại): ${user.correctAvailableUsdt.toFixed(2)}\n`;
         content += `\n`;
       });
 
