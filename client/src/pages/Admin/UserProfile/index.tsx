@@ -19,6 +19,7 @@ import Switch from 'react-switch';
 import PhoneInput from 'react-phone-number-input';
 import banks from '@/lib/banks.json';
 import wildCardTopImage from '@/images/cover/wildcard.png';
+import wildCardTopImage2 from '@/images/cover/wildcard2.png';
 
 const UserProfile = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -2066,143 +2067,157 @@ const UserProfile = () => {
                     ) : (
                       <div className="py-2">
                         <div className="space-y-4">
-                          {wildCards.map((card: any) => (
-                            <div
-                              key={card._id}
-                              className="rounded-lg overflow-hidden shadow-lg border-2 border-gray-200 max-w-[250px] mx-auto"
-                            >
-                              {/* Top Section - Image */}
-                              <div className="w-full">
-                                <img
-                                  src={wildCardTopImage}
-                                  alt="Wild Card Top"
-                                  className="w-full h-auto object-cover"
-                                />
-                              </div>
-
-                              {/* Bottom Section - Green Background */}
+                          {wildCards.map((card: any) => {
+                            const isPromoTier2 =
+                              card.cardType === 'PROMO_TIER_2';
+                            return (
                               <div
-                                className={`${
-                                  card.status === 'ACTIVE'
-                                    ? 'bg-green-600'
-                                    : card.status === 'USED'
-                                    ? 'bg-gray-500'
-                                    : 'bg-yellow-500'
-                                } p-4 text-white`}
+                                key={card._id}
+                                className={`rounded-lg overflow-hidden shadow-lg max-w-[250px] mx-auto ${
+                                  isPromoTier2
+                                    ? 'bg-yellow-600'
+                                    : 'bg-green-600'
+                                }`}
                               >
-                                <div className="flex flex-col items-center space-y-2">
-                                  {/* WILDCARD Text */}
-                                  <p className="text-2xl font-black uppercase tracking-wider">
-                                    WILDCARD
-                                  </p>
+                                {/* Top Section - Image */}
+                                <div className="w-full">
+                                  <img
+                                    src={
+                                      isPromoTier2
+                                        ? wildCardTopImage2
+                                        : wildCardTopImage
+                                    }
+                                    alt="Wild Card Top"
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
 
-                                  {/* Days */}
-                                  <p className="text-xl font-bold uppercase">
-                                    {card.days} DAYS
-                                  </p>
-
-                                  {/* CLAIM Button */}
-                                  {card.status === 'ACTIVE' && (
-                                    <div className="flex flex-col gap-2 w-full max-w-xs">
-                                      <button
-                                        type="button"
-                                        onClick={async () => {
-                                          if (
-                                            !confirm(
-                                              `Bạn có chắc chắn muốn sử dụng thẻ này cho user ${data.userId}? Thẻ sẽ cộng ${card.days} ngày vào dieTime của Tier ${card.targetTier}.`,
-                                            )
-                                          ) {
-                                            return;
-                                          }
-
-                                          setUsingCardId(card._id);
-                                          try {
-                                            const response =
-                                              await WildCard.useWildCard(
-                                                card._id,
-                                                id,
-                                              );
-                                            toast.success(
-                                              response.data.message ||
-                                                'Sử dụng Wild Card thành công!',
-                                            );
-                                            setRefresh(!refresh);
-                                          } catch (error: any) {
-                                            const message =
-                                              error.response &&
-                                              error.response.data.message
-                                                ? error.response.data.message
-                                                : error.message;
-                                            toast.error(
-                                              t(message) ||
-                                                'Có lỗi xảy ra khi sử dụng Wild Card',
-                                            );
-                                          } finally {
-                                            setUsingCardId(null);
-                                          }
-                                        }}
-                                        disabled={usingCardId === card._id}
-                                        className="w-full bg-black text-white uppercase font-bold py-2 px-6 rounded-full hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                      >
-                                        {usingCardId === card._id ? (
-                                          <Loading />
-                                        ) : (
-                                          'CLAIM'
-                                        )}
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={async () => {
-                                          if (
-                                            !confirm(
-                                              `Bạn có chắc chắn muốn xóa thẻ này?`,
-                                            )
-                                          ) {
-                                            return;
-                                          }
-
-                                          try {
-                                            const response =
-                                              await WildCard.adminDeleteWildCard(
-                                                card._id,
-                                              );
-                                            toast.success(
-                                              response.data.message ||
-                                                'Xóa Wild Card thành công!',
-                                            );
-                                            setRefresh(!refresh);
-                                          } catch (error: any) {
-                                            const message =
-                                              error.response &&
-                                              error.response.data.message
-                                                ? error.response.data.message
-                                                : error.message;
-                                            toast.error(
-                                              t(message) ||
-                                                'Có lỗi xảy ra khi xóa Wild Card',
-                                            );
-                                          }
-                                        }}
-                                        className="w-full bg-red-600 text-white uppercase font-bold py-2 px-6 rounded-full hover:bg-red-700 transition-colors"
-                                      >
-                                        {t('Delete')}
-                                      </button>
-                                    </div>
-                                  )}
-
-                                  {/* Status for USED cards */}
-                                  {card.status === 'USED' && card.usedAt && (
-                                    <p className="text-sm opacity-75">
-                                      Used:{' '}
-                                      {new Date(card.usedAt).toLocaleDateString(
-                                        'vi',
-                                      )}
+                                {/* Bottom Section - Background based on cardType */}
+                                <div
+                                  className={`${
+                                    isPromoTier2
+                                      ? 'bg-yellow-600'
+                                      : 'bg-green-600'
+                                  } p-4 text-white`}
+                                >
+                                  <div className="flex flex-col items-center space-y-2">
+                                    {/* WILDCARD Text */}
+                                    <p className="text-2xl font-black uppercase tracking-wider">
+                                      WILDCARD
                                     </p>
-                                  )}
+
+                                    {/* Days */}
+                                    <p className="text-xl font-bold uppercase">
+                                      {card.days} DAYS
+                                    </p>
+
+                                    {/* CLAIM Button */}
+                                    {card.status === 'ACTIVE' && (
+                                      <div className="flex flex-col gap-2 w-full max-w-xs">
+                                        <button
+                                          type="button"
+                                          onClick={async () => {
+                                            if (
+                                              !confirm(
+                                                `Bạn có chắc chắn muốn sử dụng thẻ này cho user ${data.userId}? Thẻ sẽ cộng ${card.days} ngày vào dieTime của Tier ${card.targetTier}.`,
+                                              )
+                                            ) {
+                                              return;
+                                            }
+
+                                            setUsingCardId(card._id);
+                                            try {
+                                              const response =
+                                                await WildCard.useWildCard(
+                                                  card._id,
+                                                  id,
+                                                );
+                                              toast.success(
+                                                response.data.message ||
+                                                  'Sử dụng Wild Card thành công!',
+                                              );
+                                              setRefresh(!refresh);
+                                            } catch (error: any) {
+                                              const message =
+                                                error.response &&
+                                                error.response.data.message
+                                                  ? error.response.data.message
+                                                  : error.message;
+                                              toast.error(
+                                                t(message) ||
+                                                  'Có lỗi xảy ra khi sử dụng Wild Card',
+                                              );
+                                            } finally {
+                                              setUsingCardId(null);
+                                            }
+                                          }}
+                                          disabled={usingCardId === card._id}
+                                          className={`w-full text-white uppercase font-bold py-2 px-6 rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+                                            isPromoTier2
+                                              ? 'bg-white/20 backdrop-blur-sm border-2 border-white/50 hover:bg-white/30'
+                                              : 'bg-black hover:bg-gray-800'
+                                          }`}
+                                        >
+                                          {usingCardId === card._id ? (
+                                            <Loading />
+                                          ) : (
+                                            'CLAIM'
+                                          )}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={async () => {
+                                            if (
+                                              !confirm(
+                                                `Bạn có chắc chắn muốn xóa thẻ này?`,
+                                              )
+                                            ) {
+                                              return;
+                                            }
+
+                                            try {
+                                              const response =
+                                                await WildCard.adminDeleteWildCard(
+                                                  card._id,
+                                                );
+                                              toast.success(
+                                                response.data.message ||
+                                                  'Xóa Wild Card thành công!',
+                                              );
+                                              setRefresh(!refresh);
+                                            } catch (error: any) {
+                                              const message =
+                                                error.response &&
+                                                error.response.data.message
+                                                  ? error.response.data.message
+                                                  : error.message;
+                                              toast.error(
+                                                t(message) ||
+                                                  'Có lỗi xảy ra khi xóa Wild Card',
+                                              );
+                                            }
+                                          }}
+                                          className="w-full bg-red-600 text-white uppercase font-bold py-2 px-6 rounded-full hover:bg-red-700 transition-colors"
+                                        >
+                                          {t('Delete')}
+                                        </button>
+                                      </div>
+                                    )}
+
+                                    {/* Status for USED cards */}
+                                    {card.status === 'USED' && card.usedAt && (
+                                      <p className="text-sm opacity-75">
+                                        Used:{' '}
+                                        {new Date(
+                                          card.usedAt,
+                                        ).toLocaleDateString('vi')}
+                                      </p>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}

@@ -18,6 +18,7 @@ import {
 import moment from "moment-timezone";
 import fs from "fs";
 import path from "path";
+import mongoose from "mongoose";
 
 export const transferUserToTree = async () => {
   const listUser = await User.find({ isAdmin: false });
@@ -1696,7 +1697,10 @@ export const recalculateDieTimeDaily = async () => {
           if (user.adminChangeToDie === true && treeTier1.dieTime !== null) {
             // Trường hợp admin đã thay đổi ngày chết
             if (treeTier1.dieTime) {
-              const dieTimeStart = moment.tz(treeTier1.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+              const dieTimeStart = moment
+                .tz(treeTier1.dieTime, "Asia/Ho_Chi_Minh")
+                .startOf("day")
+                .add(1, "day");
 
               // Kiểm tra dieTime có quá hạn không
               if (todayStart.isBefore(dieTimeStart)) {
@@ -2213,6 +2217,51 @@ export const checkAbnormalIncome = async () => {
     }
   } catch (err) {
     console.error(`\n❌ ERROR: ${err.message}`);
+    throw err;
+  }
+};
+
+/**
+ * Tính tổng amount mà user đã nhận được
+ * @param {string} userId - ID của user
+ * @returns {number} - Tổng amount đã nhận được
+ */
+export const getTotalReceivedAmount = async (userId) => {
+  try {
+    const receivedAmount = await Transaction.aggregate([
+      {
+        $match: {
+          userId_to: userId,
+          status: "SUCCESS",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    const claimAmount = await Claim.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(userId),
+          coin: "USDT",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    console.log({ receivedAmount, claimAmount });
+    const totalAmount = receivedAmount[0]?.totalAmount + claimAmount[0]?.totalAmount;
+  } catch (err) {
+    console.error(`Error calculating total received amount: ${err.message}`);
     throw err;
   }
 };
