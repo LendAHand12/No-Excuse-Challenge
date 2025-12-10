@@ -18,6 +18,8 @@ import DatePicker from 'react-datepicker';
 import Switch from 'react-switch';
 import PhoneInput from 'react-phone-number-input';
 import banks from '@/lib/banks.json';
+import wildCardTopImage from '@/images/cover/wildcard.png';
+import wildCardTopImage2 from '@/images/cover/wildcard2.png';
 
 const UserProfile = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -65,10 +67,11 @@ const UserProfile = () => {
   const [wildCards, setWildCards] = useState([]);
   const [loadingWildCards, setLoadingWildCards] = useState(false);
   const [usingCardId, setUsingCardId] = useState<string | null>(null);
+  const [currentTier, setCurrentTier] = useState(1);
 
   useEffect(() => {
     (async () => {
-      await User.getUserById(id)
+      await User.getUserById(id, currentTier)
         .then((response) => {
           setLoading(false);
           setData(response.data);
@@ -142,7 +145,7 @@ const UserProfile = () => {
           toast.error(t(message));
         });
     })();
-  }, [id, refresh]);
+  }, [id, refresh, currentTier]);
 
   const onSubmit = useCallback(
     async (values) => {
@@ -571,29 +574,6 @@ const UserProfile = () => {
       });
   };
 
-  // const handlePushToPreTier2 = async () => {
-  //   setLoadingPushToPreTier2(true);
-
-  //   var formData = new FormData();
-
-  //   formData.append('preTier2Status', 'PENDING');
-
-  //   await User.adminUpdateUser(id, formData)
-  //     .then((response) => {
-  //       setLoadingPushToPreTier2(false);
-  //       toast.success(t(response.data.message));
-  //       setRefresh(!refresh);
-  //     })
-  //     .catch((error) => {
-  //       let message =
-  //         error.response && error.response.data.message
-  //           ? error.response.data.message
-  //           : error.message;
-  //       toast.error(t(message));
-  //       setLoadingPushToPreTier2(false);
-  //     });
-  // };
-
   const handleOpenCreateWildCardModal = useCallback(() => {
     createWildCardModal.openModal();
   }, [createWildCardModal]);
@@ -615,11 +595,6 @@ const UserProfile = () => {
   const handleChangeLockKyc = useCallback(
     () => setCurrentLockKyc(!currentLockKyc),
     [currentLockKyc],
-  );
-
-  const handleChangeTermDie = useCallback(
-    () => setCurrentTermDie(!currentTermDie),
-    [currentTermDie],
   );
 
   const handleChangeEnablePaymentCrypto = useCallback(
@@ -647,7 +622,26 @@ const UserProfile = () => {
       <ToastContainer />
       {!loading && (
         <div className="container mx-10 my-24">
-          {isBonusRef && (
+          {/* Tier Selector */}
+          {data && data.tier && (
+            <div className="flex items-center gap-4 mb-6">
+              {[...Array(Math.min(data.tier || 1, 5))].map((item, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentTier(i + 1)}
+                  className={`flex justify-center items-center hover:underline font-medium ${
+                    currentTier === i + 1
+                      ? 'bg-black text-NoExcuseChallenge'
+                      : ''
+                  } rounded-full py-4 px-8 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
+                >
+                  {t('tier')} {i + 1}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {isBonusRef && currentTier === 1 && (
             <div
               className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-5"
               role="alert"
@@ -668,19 +662,6 @@ const UserProfile = () => {
               </span>
             </div>
           )}
-
-          {/* {kycFee && (
-            <div
-              className="w-full bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded mb-5"
-              role="alert"
-            >
-              <span className="block sm:inline">
-                {t(
-                  'To enhance security, facial recognition verification and a 2 USDT/year fee will be applied. The fee will be auto-deducted annually. Thank you for your support!',
-                )}
-              </span>
-            </div>
-          )} */}
 
           {(() => {
             // Hàm helper để chuyển đổi date sang giờ Việt Nam và set về 00:00:00
@@ -712,8 +693,8 @@ const UserProfile = () => {
 
             const alerts = [];
 
-            // Tính countdown cho tier 2 (nếu có dieTimeTier2)
-            if (data.dieTimeTier2) {
+            // Tính countdown cho tier 2 (nếu có dieTimeTier2) - chỉ hiển thị khi currentTier === 2
+            if (currentTier === 2 && data.dieTimeTier2) {
               const tier2DieTime = convertToVietnamDate(data.dieTimeTier2);
               if (tier2DieTime) {
                 const countdown = Math.ceil(
@@ -746,8 +727,8 @@ const UserProfile = () => {
               }
             }
 
-            // Tính countdown cho tier 1 (nếu có dieTimeTier1)
-            if (data.dieTimeTier1) {
+            // Tính countdown cho tier 1 (nếu có dieTimeTier1) - chỉ hiển thị khi currentTier === 1
+            if (currentTier === 1 && data.dieTimeTier1) {
               const tier1DieTime = convertToVietnamDate(data.dieTimeTier1);
               if (tier1DieTime) {
                 const countdown = Math.ceil(
@@ -782,7 +763,7 @@ const UserProfile = () => {
           })()}
 
           <form onSubmit={handleSubmit(onSubmit)} className="md:flex no-wrap">
-            <div className="w-full lg:w-3/12 lg:mx-2 mb-4 lg:mb-0">
+            <div className="w-full lg:w-4/12 lg:mx-2 mb-4 lg:mb-0">
               <div className="bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                 <ul className=" text-gray-600 py-2 px-3 mt-3 divide-y rounded">
                   <li className="flex items-center py-3">
@@ -1014,321 +995,152 @@ const UserProfile = () => {
                       </span>
                     </li>
                   )}
-                  <li className="flex items-center py-3">
-                    <span>{t('memberSince')}</span>
-                    <span className="ml-auto">
-                      {isEditting ? (
-                        <Controller
-                          control={control}
-                          name="changeCreatedAt"
-                          render={({ field }) => (
-                            <DatePicker
-                              placeholderText={t('fromDate')}
-                              onChange={(date) => field.onChange(date)}
-                              selected={field.value}
-                              dateFormat="dd/MM/yyyy"
-                              className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                            />
-                          )}
-                        />
-                      ) : (
-                        new Date(data.changeCreatedAt).toLocaleDateString('vi')
-                      )}
-                    </span>
-                  </li>
-                  <li className="flex flex-col justify-between py-3">
-                    <div className="flex items-center justify-between">
-                      <div>Tier 1 :</div>
-                      <div
-                        className={`w-10 h-5 rounded-md ${
-                          data.isRed
-                            ? 'bg-[#ee0000]' // Màu đỏ
-                            : data.isBlue
-                            ? 'bg-[#0033ff]' // Màu xanh dương
-                            : data.isYellow
-                            ? 'bg-[#ffcc00]' // Màu vàng
-                            : data.isPink
-                            ? 'bg-[#ff3399]' // Màu hồng
-                            : 'bg-[#009933]' // Màu xanh lá (mặc định)
-                        }`}
-                      ></div>
-                    </div>
-                    {data.tier === 2 && (
-                      <div className="flex items-center justify-between">
-                        <div>Tier 2 :</div>
-                        <div
-                          className={`w-10 h-5 rounded-md ${
-                            data.isDisableTier2
-                              ? 'bg-[#663300]' // Màu nâu (disable)
-                              : data.isRed
-                              ? 'bg-[#ee0000]' // Màu đỏ
-                              : data.isBlue
-                              ? 'bg-[#0033ff]' // Màu xanh dương
-                              : data.isYellow
-                              ? 'bg-[#ffcc00]' // Màu vàng
-                              : data.isPink
-                              ? 'bg-[#ff3399]' // Màu hồng
-                              : 'bg-[#009933]' // Màu xanh lá (mặc định)
-                          }`}
-                        ></div>
-                      </div>
-                    )}
-                  </li>
-                  <li className="flex items-center py-3">
-                    <span>Disqualified (Tier 1)</span>
-                    <span className="ml-auto">
-                      {isEditting ? (
-                        <div className="flex items-center gap-2">
+                  {/* Tier 1: Member Since */}
+                  {currentTier === 1 && (
+                    <li className="flex items-center py-3">
+                      <span>{t('memberSince')}</span>
+                      <span className="ml-auto">
+                        {isEditting ? (
                           <Controller
                             control={control}
-                            name="dieTimeTier1"
+                            name="changeCreatedAt"
                             render={({ field }) => (
                               <DatePicker
                                 placeholderText={t('fromDate')}
                                 onChange={(date) => field.onChange(date)}
                                 selected={field.value}
                                 dateFormat="dd/MM/yyyy"
-                                isClearable
                                 className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                               />
                             )}
                           />
-                        </div>
-                      ) : (
-                        (() => {
-                          // Hiển thị dieTime theo tier
-                          const currentDieTime = data.dieTimeTier1;
-                          return currentDieTime
-                            ? new Date(currentDieTime).toLocaleDateString('vi')
-                            : '';
-                        })()
-                      )}
-                    </span>
-                  </li>
-                  {data.tier === 2 && (
-                    <li className="flex items-center py-3">
-                      <span>Disqualified (Tier 2)</span>
-                      <span className="ml-auto">
-                        {isEditting ? (
-                          <div className="flex items-center gap-2">
-                            <Controller
-                              control={control}
-                              name="dieTimeTier2"
-                              render={({ field }) => (
-                                <DatePicker
-                                  placeholderText={t('fromDate')}
-                                  onChange={(date) => field.onChange(date)}
-                                  selected={field.value}
-                                  dateFormat="dd/MM/yyyy"
-                                  isClearable
-                                  className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                                />
-                              )}
-                            />
-                          </div>
                         ) : (
-                          (() => {
-                            // Hiển thị dieTime theo tier
-                            const currentDieTime = data.dieTimeTier2;
-                            return currentDieTime
-                              ? new Date(currentDieTime).toLocaleDateString(
-                                  'vi',
-                                )
-                              : '';
-                          })()
+                          new Date(data.changeCreatedAt).toLocaleDateString(
+                            'vi',
+                          )
                         )}
                       </span>
                     </li>
                   )}
-
-                  <li className="flex items-center py-3 border-t border-gray-200 mt-2">
-                    <span className="font-semibold text-gray-700">
-                      Wild Cards
-                    </span>
-                  </li>
-                  <li className="py-3">
-                    {loadingWildCards ? (
-                      <div className="text-center py-4">
-                        <Loading />
-                      </div>
-                    ) : wildCards.length === 0 ? (
-                      <div className="text-center py-4 text-gray-500">
-                        No wild cards available
-                      </div>
-                    ) : (
-                      <div className="space-y-2 max-h-60 overflow-y-auto">
-                        {wildCards.map((card: any) => (
+                  {/* Tier 2: Tier 2 Entered */}
+                  {currentTier === 2 && data.tier >= 2 && data.tier2Time && (
+                    <li className="flex items-center py-3">
+                      <span>Tier 2 entered</span>
+                      <span className="ml-auto">
+                        {new Date(data.tier2Time).toLocaleDateString('vi')}
+                      </span>
+                    </li>
+                  )}
+                  {/* Tier 1: Màu tier 1 */}
+                  {currentTier === 1 && (
+                    <>
+                      <li className="flex flex-col justify-between py-3">
+                        <div className="flex items-center justify-between">
+                          <div>Tier 1 :</div>
                           <div
-                            key={card._id}
-                            className={`p-3 rounded-lg border ${
-                              card.status === 'ACTIVE'
-                                ? 'bg-green-50 border-green-200'
-                                : card.status === 'USED'
-                                ? 'bg-gray-50 border-gray-200'
-                                : 'bg-yellow-50 border-yellow-200'
+                            className={`w-10 h-5 rounded-md ${
+                              data.tier1?.isRed
+                                ? 'bg-[#ee0000]' // Màu đỏ
+                                : data.tier1?.isBlue
+                                ? 'bg-[#0033ff]' // Màu xanh dương
+                                : data.tier1?.isYellow
+                                ? 'bg-[#ffcc00]' // Màu vàng
+                                : data.tier1?.isPink
+                                ? 'bg-[#ff3399]' // Màu hồng
+                                : 'bg-[#009933]' // Màu xanh lá (mặc định)
                             }`}
-                          >
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <p className="font-semibold text-sm">
-                                  {card.cardType}
-                                </p>
-                                <p className="text-xs text-gray-600 mt-1">
-                                  {card.sourceInfo || 'No description'}
-                                </p>
-                                <div className="flex gap-4 mt-1 text-xs text-gray-500">
-                                  <span>Days: {card.days}</span>
-                                  <span>Tier: {card.targetTier}</span>
-                                  {card.usedAt && (
-                                    <span>
-                                      Used:{' '}
-                                      {new Date(card.usedAt).toLocaleDateString(
-                                        'vi',
-                                      )}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex flex-col items-end gap-2">
-                                <span
-                                  className={`px-2 py-1 rounded text-xs font-medium ${
-                                    card.status === 'ACTIVE'
-                                      ? 'bg-green-500 text-white'
-                                      : card.status === 'USED'
-                                      ? 'bg-gray-500 text-white'
-                                      : 'bg-yellow-500 text-white'
-                                  }`}
-                                >
-                                  {card.status}
-                                </span>
-                                <div className="flex gap-2">
-                                  {card.status === 'ACTIVE' && (
-                                    <>
-                                      <button
-                                        type="button"
-                                        onClick={async () => {
-                                          if (
-                                            !confirm(
-                                              `Bạn có chắc chắn muốn sử dụng thẻ này cho user ${data.userId}? Thẻ sẽ cộng ${card.days} ngày vào dieTime của Tier ${card.targetTier}.`,
-                                            )
-                                          ) {
-                                            return;
-                                          }
-
-                                          setUsingCardId(card._id);
-                                          try {
-                                            const response =
-                                              await WildCard.useWildCard(
-                                                card._id,
-                                                id,
-                                              );
-                                            toast.success(
-                                              response.data.message ||
-                                                'Sử dụng Wild Card thành công!',
-                                            );
-                                            setRefresh(!refresh);
-                                          } catch (error: any) {
-                                            const message =
-                                              error.response &&
-                                              error.response.data.message
-                                                ? error.response.data.message
-                                                : error.message;
-                                            toast.error(
-                                              t(message) ||
-                                                'Có lỗi xảy ra khi sử dụng Wild Card',
-                                            );
-                                          } finally {
-                                            setUsingCardId(null);
-                                          }
-                                        }}
-                                        disabled={usingCardId === card._id}
-                                        className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                                      >
-                                        {usingCardId === card._id ? (
-                                          <Loading />
-                                        ) : (
-                                          'Use'
-                                        )}
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={async () => {
-                                          if (
-                                            !confirm(
-                                              `Bạn có chắc chắn muốn xóa thẻ này?`,
-                                            )
-                                          ) {
-                                            return;
-                                          }
-
-                                          try {
-                                            const response =
-                                              await WildCard.adminDeleteWildCard(
-                                                card._id,
-                                              );
-                                            toast.success(
-                                              response.data.message ||
-                                                'Xóa Wild Card thành công!',
-                                            );
-                                            setRefresh(!refresh);
-                                          } catch (error: any) {
-                                            const message =
-                                              error.response &&
-                                              error.response.data.message
-                                                ? error.response.data.message
-                                                : error.message;
-                                            toast.error(
-                                              t(message) ||
-                                                'Có lỗi xảy ra khi xóa Wild Card',
-                                            );
-                                          }
-                                        }}
-                                        className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
-                                      >
-                                        {t('Delete')}
-                                      </button>
-                                    </>
-                                  )}
-                                </div>
-                              </div>
+                          ></div>
+                        </div>
+                      </li>
+                      <li className="flex items-center py-3">
+                        <span>Disqualified (Tier 1)</span>
+                        <span className="ml-auto">
+                          {isEditting ? (
+                            <div className="flex items-center gap-2">
+                              <Controller
+                                control={control}
+                                name="dieTimeTier1"
+                                render={({ field }) => (
+                                  <DatePicker
+                                    placeholderText={t('fromDate')}
+                                    onChange={(date) => field.onChange(date)}
+                                    selected={field.value}
+                                    dateFormat="dd/MM/yyyy"
+                                    isClearable
+                                    className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                  />
+                                )}
+                              />
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </li>
-                  <li className="flex items-center py-3">
-                    <span>{t('tier2Time')}</span>
-                    <span className="ml-auto">
-                      {data.tier2Time
-                        ? new Date(data.tier2Time).toLocaleDateString('vi')
-                        : ''}
-                    </span>
-                  </li>
-                  <li className="flex items-center py-3">
-                    <span>{t('tier3Time')}</span>
-                    <span className="ml-auto">
-                      {data.tier3Time
-                        ? new Date(data.tier3Time).toLocaleDateString('vi')
-                        : ''}
-                    </span>
-                  </li>
-                  <li className="flex items-center py-3">
-                    <span>{t('tier4Time')}</span>
-                    <span className="ml-auto">
-                      {data.tier4Time
-                        ? new Date(data.tier4Time).toLocaleDateString('vi')
-                        : ''}
-                    </span>
-                  </li>
-                  <li className="flex items-center py-3">
-                    <span>{t('tier5Time')}</span>
-                    <span className="ml-auto">
-                      {data.tier5Time
-                        ? new Date(data.tier5Time).toLocaleDateString('vi')
-                        : ''}
-                    </span>
-                  </li>
+                          ) : (
+                            (() => {
+                              // Hiển thị dieTime theo tier
+                              const currentDieTime = data.dieTimeTier1;
+                              return currentDieTime
+                                ? new Date(currentDieTime).toLocaleDateString(
+                                    'vi',
+                                  )
+                                : '';
+                            })()
+                          )}
+                        </span>
+                      </li>
+                    </>
+                  )}
+                  {/* Tier 2: Màu tier 2 */}
+                  {currentTier === 2 && data.tier >= 2 && (
+                    <>
+                      <li className="flex flex-col justify-between py-3">
+                        <div className="flex items-center justify-between">
+                          <div>Tier 2 :</div>
+                          <div
+                            className={`w-10 h-5 rounded-md ${
+                              data.isDisableTier2
+                                ? 'bg-[#663300]' // Màu nâu (disable)
+                                : data.tier2?.isYellow
+                                ? 'bg-[#ffcc00]' // Màu vàng
+                                : data.tier2?.isBlue
+                                ? 'bg-[#0033ff]' // Màu xanh dương
+                                : 'bg-[#009933]' // Màu xanh lá (mặc định)
+                            }`}
+                          ></div>
+                        </div>
+                      </li>
+                      <li className="flex items-center py-3">
+                        <span>Disqualified (Tier 2)</span>
+                        <span className="ml-auto">
+                          {isEditting ? (
+                            <div className="flex items-center gap-2">
+                              <Controller
+                                control={control}
+                                name="dieTimeTier2"
+                                render={({ field }) => (
+                                  <DatePicker
+                                    placeholderText={t('fromDate')}
+                                    onChange={(date) => field.onChange(date)}
+                                    selected={field.value}
+                                    dateFormat="dd/MM/yyyy"
+                                    isClearable
+                                    className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                  />
+                                )}
+                              />
+                            </div>
+                          ) : (
+                            (() => {
+                              // Hiển thị dieTime theo tier
+                              const currentDieTime = data.dieTimeTier2;
+                              return currentDieTime
+                                ? new Date(currentDieTime).toLocaleDateString(
+                                    'vi',
+                                  )
+                                : '';
+                            })()
+                          )}
+                        </span>
+                      </li>
+                    </>
+                  )}
                   {data.changeUser && (
                     <>
                       <li className="flex items-center py-3">
@@ -1355,16 +1167,103 @@ const UserProfile = () => {
                   )}
                 </ul>
               </div>
-              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
-                <p className="uppercase mt-2 font-bold">{t('children')}</p>
-                <div className="py-2">
-                  <ul>
-                    {data.listDirectUser
-                      .filter((ele) => !ele.isSubId)
-                      .map((ele) => (
+              {/* Tier 1: Danh sách user trực tiếp */}
+              {currentTier === 1 && (
+                <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                  <p className="uppercase mt-2 font-bold">{t('children')}</p>
+                  <div className="py-2">
+                    <ul>
+                      {data.listDirectUser
+                        .filter((ele) => !ele.isSubId)
+                        .map((ele) => (
+                          <li
+                            className="bg-white border-b hover:bg-gray-50"
+                            key={ele.userId}
+                          >
+                            <div className="py-2">
+                              <div className="text-base">
+                                <span
+                                  className={`${
+                                    ele.isRed
+                                      ? 'bg-[#b91c1c]'
+                                      : ele.isBlue
+                                      ? 'bg-[#0000ff]'
+                                      : ele.isYellow
+                                      ? 'bg-[#F4B400]'
+                                      : ele.isPink
+                                      ? 'bg-[#e600769c]'
+                                      : 'bg-[#16a34a]'
+                                  } py-1 px-2 rounded text-white text-sm`}
+                                >
+                                  {ele.userId}{' '}
+                                  {ele.dieTime
+                                    ? ' - ' +
+                                      new Date(ele.dieTime).toLocaleDateString(
+                                        'vi',
+                                      )
+                                    : ''}
+                                </span>
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* Tier 2: Sub Referral Members */}
+              {currentTier === 2 && (
+                <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                  <p className="uppercase mt-2 font-bold">
+                    direct referral sub member{' '}
+                  </p>
+                  <div className="py-2">
+                    <ul>
+                      {data.listDirectUser
+                        .filter((ele) => ele.isSubId)
+                        .map((ele) => (
+                          <li
+                            className="bg-white border-b hover:bg-gray-50"
+                            key={ele.userId}
+                          >
+                            <div className="py-2">
+                              <div className="text-base">
+                                <span
+                                  className={`${
+                                    ele.isRed
+                                      ? 'bg-[#b91c1c]'
+                                      : ele.isBlue
+                                      ? 'bg-[#0000ff]'
+                                      : ele.isYellow
+                                      ? 'bg-[#F4B400]'
+                                      : ele.isPink
+                                      ? 'bg-[#e600769c]'
+                                      : 'bg-[#16a34a]'
+                                  } py-1 px-2 rounded text-white text-sm`}
+                                >
+                                  {ele.userId}
+                                </span>
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* Tier 2: Tier 2 Users */}
+              {currentTier === 2 && data.tier >= 2 && (
+                <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                  <p className="uppercase mt-2 font-bold">Tier 2 Users</p>
+                  <div className="py-2">
+                    <p className="font-medium">Branch 1 :</p>
+                    <ul className="flex flex-wrap gap-2">
+                      {data?.tier2ChildUsers?.branch1?.map((ele) => (
                         <li
                           className="bg-white border-b hover:bg-gray-50"
-                          key={ele.userId}
+                          key={ele}
                         >
                           <div className="py-2">
                             <div className="text-base">
@@ -1381,33 +1280,21 @@ const UserProfile = () => {
                                     : 'bg-[#16a34a]'
                                 } py-1 px-2 rounded text-white text-sm`}
                               >
-                                {ele.userId}{' '}
-                                {ele.dieTime
-                                  ? ' - ' +
-                                    new Date(ele.dieTime).toLocaleDateString(
-                                      'vi',
-                                    )
-                                  : ''}
+                                {ele}
                               </span>
                             </div>
                           </div>
                         </li>
                       ))}
-                  </ul>
-                </div>
-              </div>
-              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
-                <p className="uppercase mt-2 font-bold">
-                  direct referral sub member{' '}
-                </p>
-                <div className="py-2">
-                  <ul>
-                    {data.listDirectUser
-                      .filter((ele) => ele.isSubId)
-                      .map((ele) => (
+                    </ul>
+                  </div>
+                  <div className="py-2">
+                    <p className="font-medium">Branch 2 :</p>
+                    <ul className="flex flex-wrap gap-2">
+                      {data?.tier2ChildUsers?.branch2?.map((ele) => (
                         <li
                           className="bg-white border-b hover:bg-gray-50"
-                          key={ele.userId}
+                          key={ele}
                         >
                           <div className="py-2">
                             <div className="text-base">
@@ -1424,81 +1311,19 @@ const UserProfile = () => {
                                     : 'bg-[#16a34a]'
                                 } py-1 px-2 rounded text-white text-sm`}
                               >
-                                {ele.userId}
+                                {ele}
                               </span>
                             </div>
                           </div>
                         </li>
                       ))}
-                  </ul>
+                    </ul>
+                  </div>
                 </div>
-              </div>
-              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
-                <p className="uppercase mt-2 font-bold">Tier 2 Users</p>
-                <div className="py-2">
-                  <p className="font-medium">Branch 1 :</p>
-                  <ul className="flex flex-wrap gap-2">
-                    {data?.tier2ChildUsers?.branch1?.map((ele) => (
-                      <li
-                        className="bg-white border-b hover:bg-gray-50"
-                        key={ele}
-                      >
-                        <div className="py-2">
-                          <div className="text-base">
-                            <span
-                              className={`${
-                                ele.isRed
-                                  ? 'bg-[#b91c1c]'
-                                  : ele.isBlue
-                                  ? 'bg-[#0000ff]'
-                                  : ele.isYellow
-                                  ? 'bg-[#F4B400]'
-                                  : ele.isPink
-                                  ? 'bg-[#e600769c]'
-                                  : 'bg-[#16a34a]'
-                              } py-1 px-2 rounded text-white text-sm`}
-                            >
-                              {ele}
-                            </span>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="py-2">
-                  <p className="font-medium">Branch 2 :</p>
-                  <ul className="flex flex-wrap gap-2">
-                    {data?.tier2ChildUsers?.branch2?.map((ele) => (
-                      <li
-                        className="bg-white border-b hover:bg-gray-50"
-                        key={ele}
-                      >
-                        <div className="py-2">
-                          <div className="text-base">
-                            <span
-                              className={`${
-                                ele.isRed
-                                  ? 'bg-[#b91c1c]'
-                                  : ele.isBlue
-                                  ? 'bg-[#0000ff]'
-                                  : ele.isYellow
-                                  ? 'bg-[#F4B400]'
-                                  : ele.isPink
-                                  ? 'bg-[#e600769c]'
-                                  : 'bg-[#16a34a]'
-                              } py-1 px-2 rounded text-white text-sm`}
-                            >
-                              {ele}
-                            </span>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-              {data.tier === 2 && (
+              )}
+
+              {/* Tier 2: Active ID */}
+              {currentTier === 2 && data.tier >= 2 && (
                 <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                   <p className="uppercase mt-2 font-bold">{t('ACTIVE ID')}</p>
                   <div className="lg:py-2">
@@ -1553,28 +1378,32 @@ const UserProfile = () => {
                   </div>
                 </div>
               )}
-              <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
-                <p className="uppercase mt-2 font-bold">{t('refUserName')}</p>
-                <div className="py-2">
-                  <ul>
-                    <li className="bg-white hover:bg-gray-50">
-                      <div className="py-2">
-                        <div className="text-base">
-                          <span className="">
-                            {data.refUserName}
-                            <br></br>
-                            <i className="text-xs">{data.refUserEmail}</i>
-                          </span>
+              {currentTier === 1 && (
+                <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                  <p className="uppercase mt-2 font-bold">{t('refUserName')}</p>
+                  <div className="py-2">
+                    <ul>
+                      <li className="bg-white hover:bg-gray-50">
+                        <div className="py-2">
+                          <div className="text-base">
+                            <span className="">
+                              {data.refUserName}
+                              <br></br>
+                              <i className="text-xs">{data.refUserEmail}</i>
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </li>
-                  </ul>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
-              </div>
-              {data.tier > 1 && (
+              )}
+
+              {/* Tier 2: SubId Info */}
+              {currentTier === 2 && data.tier >= 2 && data.subInfo && (
                 <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                   <p className="uppercase mt-2 font-bold">
-                    {data.subInfo?.subName}
+                    {data.subInfo?.subName || 'Sub ID Information'}
                   </p>
                   <div className="py-2">
                     <ul className="flex flex-col list-disc">
@@ -1621,81 +1450,8 @@ const UserProfile = () => {
                   </div>
                 </div>
               )}
-              {/* <div className="py-10">
-                <div className="max-w-sm">
-                  <Doughnut
-                    data={{
-                      labels: [
-                        'Group 1',
-                        'Group 2',
-                        'Group 3',
-                        'Remaining target',
-                      ],
-                      datasets: [
-                        {
-                          label: 'Members',
-                          data: [
-                            ...adjustSales(chartData, targetSales),
-                            targetSales - totalChild,
-                          ],
-                          backgroundColor: [
-                            '#FFCF65',
-                            '#02071B',
-                            '#C1C9D3',
-                            'red',
-                          ],
-                        },
-                      ],
-                    }}
-                    plugins={[ChartDataLabels]}
-                    options={{
-                      responsive: true,
-                      plugins: {
-                        legend: {
-                          position: 'bottom' as const,
-                        },
-                        tooltip: {
-                          enabled: false,
-                        },
-                        datalabels: {
-                          color: '#ffffff',
-                          anchor: 'center',
-                          font: { size: 16, weight: 'bold' },
-                          formatter: (value) => {
-                            return value <= 0
-                              ? ''
-                              : Math.round((value / targetSales) * 100) + '%';
-                          },
-                        },
-                      },
-                    }}
-                  />
-                </div>
-                <div className="w-full mt-6">
-                  <ul className="flex flex-col items-center gap-3">
-                    <li>
-                      <span className="bg-[#FFCF65] px-2 py-1 text-sm">
-                        Group 1 :
-                      </span>{' '}
-                      {chartData[0]} members
-                    </li>
-                    <li>
-                      <span className="bg-[#02071B] text-white px-2 py-1 text-sm">
-                        Group 2 :
-                      </span>{' '}
-                      {chartData[1]} members
-                    </li>
-                    <li>
-                      <span className="bg-[#C1C9D3] px-2 py-1 text-sm">
-                        Group 3 :
-                      </span>{' '}
-                      {chartData[2]} members
-                    </li>
-                  </ul>
-                </div>
-              </div> */}
             </div>
-            <div className="w-full lg:w-2/3 lg:mx-2">
+            <div className="w-full lg:w-4/12 lg:mx-2">
               <div className="bg-white p-6 shadow-md rounded-sm border-t-4 border-NoExcuseChallenge">
                 <div className="text-gray-700">
                   <div className="grid grid-cols-1 text-sm">
@@ -1720,279 +1476,264 @@ const UserProfile = () => {
                         <div className="px-4 py-2">{data.userId}</div>
                       )}
                     </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">Email</div>
-                      {isEditting ? (
-                        <div className="px-4">
-                          <input
-                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                            {...register('email', {
-                              required: t('Email is required'),
-                            })}
-                            autoComplete="off"
-                          />
-                          <p className="text-red-500 text-sm">
-                            {errors.email?.message}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="px-4 py-2">{data.email}</div>
-                      )}
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        {t('phone')}
-                      </div>
-                      <div className="py-2">
-                        {isEditting ? (
-                          <>
-                            <PhoneInput
-                              defaultCountry="VN"
-                              placeholder={t('phone')}
-                              value={phone}
-                              onChange={setPhone}
-                              className="-my-1 ml-4 w-full"
-                            />
-                            <p className="text-red-500 text-sm">
-                              {errorPhone && t('Phone is required')}
-                            </p>
-                          </>
-                        ) : (
-                          <div className="px-4 py-2">{data.phone}</div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        {t('id code')}
-                      </div>
-                      {isEditting ? (
-                        <div className="px-4">
-                          <input
-                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                            {...register('idCode', {
-                              required: t('id code is required'),
-                            })}
-                            autoComplete="off"
-                          />
-                          <p className="text-red-500 text-sm">
-                            {errors.idCode?.message}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="px-4 py-2">{data.idCode}</div>
-                      )}
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        {t('walletAddress')}
-                      </div>
-                      {isEditting ? (
-                        <div className="px-4">
-                          <input
-                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                            {...register('walletAddress', {
-                              validate: (value) => {
-                                if (!value || value.trim() === '') {
-                                  return true; // Optional field, empty is allowed
-                                }
-                                if (!/^0x[a-fA-F0-9]{40}$/g.test(value)) {
-                                  return t(
-                                    'Please enter the correct wallet format',
-                                  );
-                                }
-                                return true;
-                              },
-                            })}
-                            autoComplete="off"
-                          />
-                          <p className="text-red-500 text-sm">
-                            {errors.walletAddress?.message}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="px-4 py-2 break-words">
-                          {data.walletAddress || '-'}
-                        </div>
-                      )}
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        {t('bank name')}
-                      </div>
-                      {isEditting ? (
-                        <div className="px-4">
-                          <select
-                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 text-sm focus:outline-none focus:border-gray-400"
-                            {...register('bankName')}
-                          >
-                            <option value="">{t('Select bank name')}</option>
-                            {banks.map((bank: any, index: number) => (
-                              <option key={index} value={bank.name}>
-                                {bank.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      ) : (
-                        <div className="px-4 py-2">{data.bankName || '-'}</div>
-                      )}
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        {t('bankCode')}
-                      </div>
-                      <div className="px-4 py-2">{data.bankCode || '-'}</div>
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        {t('date of birth')}
-                      </div>
-                      {isEditting ? (
-                        <div className="px-4">
-                          <input
-                            type="date"
-                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                            {...register('dateOfBirth')}
-                          />
-                        </div>
-                      ) : (
-                        <div className="px-4 py-2">
-                          {data.dateOfBirth
-                            ? new Date(data.dateOfBirth).toLocaleDateString(
-                                'vi-Vn',
-                                {
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                  year: 'numeric',
-                                },
-                              )
-                            : '-'}
-                        </div>
-                      )}
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        {t('accountName')}
-                      </div>
-                      {isEditting ? (
-                        <div className="px-4">
-                          <input
-                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                            {...register('accountName')}
-                            autoComplete="off"
-                          />
-                        </div>
-                      ) : (
-                        <div className="px-4 py-2">
-                          {data.accountName || '-'}
-                        </div>
-                      )}
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        {t('accountNumber')}
-                      </div>
-                      {isEditting ? (
-                        <div className="px-4">
-                          <input
-                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                            {...register('accountNumber')}
-                            autoComplete="off"
-                          />
-                        </div>
-                      ) : (
-                        <div className="px-4 py-2">
-                          {data.accountNumber || '-'}
-                        </div>
-                      )}
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        {t('isRegistered')}
-                      </div>
-                      <div className="px-4 py-2">
-                        {isEditting && data.countPay === 0 && (
-                          <div className="flex gap-4">
-                            <input
-                              type="radio"
-                              {...register('isRegistered')}
-                            ></input>
-                            <p>Finished</p>
+                    {currentTier === 1 && (
+                      <>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            {t('branch')}
                           </div>
-                        )}
-                        {!isEditting || data.countPay >= 1
-                          ? data.countPay >= 1
-                            ? t('finished')
-                            : t('unfinished')
-                          : ''}
-                      </div>
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        {t('count pay')}
-                      </div>
-                      <div className="px-4 py-2">
-                        {data.countPay === 0 ? 0 : data.countPay - 3}{' '}
-                        {t('times')}
-                      </div>
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">Tier</div>
-                      {isEditting ? (
-                        <div className="px-4">
-                          <input
-                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                            {...register('tier', {
-                              required: t('tier is required'),
-                            })}
-                            autoComplete="off"
-                          />
-                          <p className="text-red-500 text-sm">
-                            {errors.tier?.message}
-                          </p>
+                          <div className="px-4 py-2">
+                            {data.city === 'VI'
+                              ? t('Vietnam')
+                              : data.city === 'US'
+                              ? t('America')
+                              : data.city === 'IN'
+                              ? t('India')
+                              : data.city || '-'}
+                          </div>
                         </div>
-                      ) : (
-                        <div className="px-4 py-2">{data.tier}</div>
-                      )}
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        {t('buyPackage')}
-                      </div>
-                      <div className="px-4 py-2">
-                        {!isEditting ? (
-                          data.buyPackage
-                        ) : (
-                          <select
-                            {...register('buyPackage')}
-                            defaultValue={data.buyPackage}
-                            disabled={loadingUpdate}
-                            className="block p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none active:outline-none"
-                          >
-                            {packageOptions.map((item) => (
-                              <option key={item} value={item}>
-                                {item}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                      </div>
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">Rank</div>
-                      <div className="px-4 py-2">
-                        {data.countPay !== 0 && (
-                          <div
-                            className={`p-2 max-w-fit text-sm bg-green-600 text-white rounded-[50px]`}
-                          >
-                            {renderRank(
-                              data.currentLayer[0] ? data.currentLayer[0] : 0,
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">Email</div>
+                          {isEditting ? (
+                            <div className="px-4">
+                              <input
+                                className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                {...register('email', {
+                                  required: t('Email is required'),
+                                })}
+                                autoComplete="off"
+                              />
+                              <p className="text-red-500 text-sm">
+                                {errors.email?.message}
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="px-4 py-2">{data.email}</div>
+                          )}
+                        </div>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            {t('phone')}
+                          </div>
+                          <div className="py-2">
+                            {isEditting ? (
+                              <>
+                                <PhoneInput
+                                  defaultCountry="VN"
+                                  placeholder={t('phone')}
+                                  value={phone}
+                                  onChange={setPhone}
+                                  className="-my-1 ml-4 w-full"
+                                />
+                                <p className="text-red-500 text-sm">
+                                  {errorPhone && t('Phone is required')}
+                                </p>
+                              </>
+                            ) : (
+                              <div className="px-4 py-2">{data.phone}</div>
                             )}
                           </div>
-                        )}
-                      </div>
-                    </div>
+                        </div>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            {t('id code')}
+                          </div>
+                          {isEditting ? (
+                            <div className="px-4">
+                              <input
+                                className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                {...register('idCode', {
+                                  required: t('id code is required'),
+                                })}
+                                autoComplete="off"
+                              />
+                              <p className="text-red-500 text-sm">
+                                {errors.idCode?.message}
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="px-4 py-2">{data.idCode}</div>
+                          )}
+                        </div>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            {t('walletAddress')}
+                          </div>
+                          {isEditting ? (
+                            <div className="px-4">
+                              <input
+                                className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                {...register('walletAddress', {
+                                  validate: (value) => {
+                                    if (!value || value.trim() === '') {
+                                      return true; // Optional field, empty is allowed
+                                    }
+                                    if (!/^0x[a-fA-F0-9]{40}$/g.test(value)) {
+                                      return t(
+                                        'Please enter the correct wallet format',
+                                      );
+                                    }
+                                    return true;
+                                  },
+                                })}
+                                autoComplete="off"
+                              />
+                              <p className="text-red-500 text-sm">
+                                {errors.walletAddress?.message}
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="px-4 py-2 break-words">
+                              {data.walletAddress || '-'}
+                            </div>
+                          )}
+                        </div>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            {t('bank name')}
+                          </div>
+                          {isEditting ? (
+                            <div className="px-4">
+                              <select
+                                className="w-full px-4 py-1.5 rounded-md border border-gray-200 text-sm focus:outline-none focus:border-gray-400"
+                                {...register('bankName')}
+                              >
+                                <option value="">
+                                  {t('Select bank name')}
+                                </option>
+                                {banks.map((bank: any, index: number) => (
+                                  <option key={index} value={bank.name}>
+                                    {bank.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          ) : (
+                            <div className="px-4 py-2">
+                              {data.bankName || '-'}
+                            </div>
+                          )}
+                        </div>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            {t('bankCode')}
+                          </div>
+                          <div className="px-4 py-2">
+                            {data.bankCode || '-'}
+                          </div>
+                        </div>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            {t('date of birth')}
+                          </div>
+                          {isEditting ? (
+                            <div className="px-4">
+                              <input
+                                type="date"
+                                className="w-full px-4 py-1.5 rounded-md border border-gray-200 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                {...register('dateOfBirth')}
+                              />
+                            </div>
+                          ) : (
+                            <div className="px-4 py-2">
+                              {data.dateOfBirth
+                                ? new Date(data.dateOfBirth).toLocaleDateString(
+                                    'vi-Vn',
+                                    {
+                                      day: '2-digit',
+                                      month: '2-digit',
+                                      year: 'numeric',
+                                    },
+                                  )
+                                : '-'}
+                            </div>
+                          )}
+                        </div>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            {t('accountName')}
+                          </div>
+                          {isEditting ? (
+                            <div className="px-4">
+                              <input
+                                className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                {...register('accountName')}
+                                autoComplete="off"
+                              />
+                            </div>
+                          ) : (
+                            <div className="px-4 py-2">
+                              {data.accountName || '-'}
+                            </div>
+                          )}
+                        </div>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            {t('accountNumber')}
+                          </div>
+                          {isEditting ? (
+                            <div className="px-4">
+                              <input
+                                className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                {...register('accountNumber')}
+                                autoComplete="off"
+                              />
+                            </div>
+                          ) : (
+                            <div className="px-4 py-2">
+                              {data.accountNumber || '-'}
+                            </div>
+                          )}
+                        </div>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            {t('isRegistered')}
+                          </div>
+                          <div className="px-4 py-2">
+                            {isEditting && data.countPay === 0 && (
+                              <div className="flex gap-4">
+                                <input
+                                  type="radio"
+                                  {...register('isRegistered')}
+                                ></input>
+                                <p>Finished</p>
+                              </div>
+                            )}
+                            {!isEditting || data.countPay >= 1
+                              ? data.countPay >= 1
+                                ? t('finished')
+                                : t('unfinished')
+                              : ''}
+                          </div>
+                        </div>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">
+                            {t('count pay')}
+                          </div>
+                          <div className="px-4 py-2">
+                            {data.countPay === 0 ? 0 : data.countPay - 3}{' '}
+                            {t('times')}
+                          </div>
+                        </div>
+                        <div className="grid lg:grid-cols-2 grid-cols-1">
+                          <div className="px-4 py-2 font-semibold">Rank</div>
+                          <div className="px-4 py-2">
+                            {data.countPay !== 0 && (
+                              <div
+                                className={`p-2 max-w-fit text-sm bg-green-600 text-white rounded-[50px]`}
+                              >
+                                {renderRank(
+                                  data.currentLayer[0]
+                                    ? data.currentLayer[0]
+                                    : 0,
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+
                     <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">
                         Available HEWE
@@ -2174,78 +1915,50 @@ const UserProfile = () => {
                         <div className="px-4 py-2">{data.note}</div>
                       )}
                     </div>
-                    {/* <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        ID Image Front
-                      </div>
-                      <div className="px-4 py-2">
-                        {data.imgFront !== '' ? (
-                          <img
-                            src={`${
-                              import.meta.env.VITE_API_URL
-                            }/uploads/CCCD/${data.imgFront}`}
-                          />
-                        ) : (
-                          'No data'
-                        )}
-                      </div>
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        ID Image Back
-                      </div>
-                      <div className="px-4 py-2">
-                        {data.imgBack !== '' ? (
-                          <img
-                            src={`${
-                              import.meta.env.VITE_API_URL
-                            }/uploads/CCCD/${data.imgBack}`}
-                          />
-                        ) : (
-                          'No data'
-                        )}
-                      </div>
-                    </div> */}
-                    <div className="w-full flex justify-center">
-                      <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
-                        <p className="font-semibold"> FaceTec Image :</p>
-                        <div className="flex flex-col items-center justify-center w-full">
-                          {data.facetecTid !== '' && (
-                            <img
-                              src={`${
-                                import.meta.env.VITE_FACETEC_URL
-                              }/api/liveness/image?tid=${data.facetecTid}`}
-                              className="w-full h-full rounded-md object-cover"
-                              alt="FaceTec image"
-                            />
-                          )}
+                    {currentTier === 1 && (
+                      <>
+                        <div className="w-full flex justify-center">
+                          <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+                            <p className="font-semibold"> FaceTec Image :</p>
+                            <div className="flex flex-col items-center justify-center w-full">
+                              {data.facetecTid !== '' && (
+                                <img
+                                  src={`${
+                                    import.meta.env.VITE_FACETEC_URL
+                                  }/api/liveness/image?tid=${data.facetecTid}`}
+                                  className="w-full h-full rounded-md object-cover"
+                                  alt="FaceTec image"
+                                />
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                    <div className="w-full flex justify-center">
-                      <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
-                        <p className="font-semibold"> FaceTec Url :</p>
-                        <div className="flex flex-col w-full">
-                          {data.facetecTid !== '' && (
-                            <a
-                              target="_blank"
-                              className="text-blue-500"
-                              href={`${
-                                import.meta.env.VITE_FACETEC_DASHBOARD_URL
-                              }/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${
-                                data.id
-                              }`}
-                            >
-                              {`${
-                                import.meta.env.VITE_FACETEC_DASHBOARD_URL
-                              }/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${
-                                data.id
-                              }`}
-                            </a>
-                          )}
+                        <div className="w-full flex justify-center">
+                          <div className="w-full grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
+                            <p className="font-semibold"> FaceTec Url :</p>
+                            <div className="flex flex-col w-full">
+                              {data.facetecTid !== '' && (
+                                <a
+                                  target="_blank"
+                                  className="text-blue-500"
+                                  href={`${
+                                    import.meta.env.VITE_FACETEC_DASHBOARD_URL
+                                  }/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${
+                                    data.id
+                                  }`}
+                                >
+                                  {`${
+                                    import.meta.env.VITE_FACETEC_DASHBOARD_URL
+                                  }/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${
+                                    data.id
+                                  }`}
+                                </a>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
+                      </>
+                    )}
                   </div>
                 </div>
                 {/* {data.status === 'PENDING' && (
@@ -2336,6 +2049,182 @@ const UserProfile = () => {
                 )}
               </div>
             </div>
+
+            {/* Cột 3: Wild Cards - Chỉ hiển thị ở Tier 2 */}
+            {currentTier === 2 && (
+              <div className="w-full lg:w-4/12 lg:mx-2 mb-4 lg:mb-0">
+                <div className="bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
+                  <div className="py-2 px-4">
+                    <p className="uppercase mt-2 font-bold">Wild Cards</p>
+                    {loadingWildCards ? (
+                      <div className="py-4 text-center">
+                        <Loading />
+                      </div>
+                    ) : wildCards.length === 0 ? (
+                      <div className="py-4 text-center text-gray-500">
+                        No wild cards available
+                      </div>
+                    ) : (
+                      <div className="py-2">
+                        <div className="space-y-4">
+                          {wildCards.map((card: any) => {
+                            const isPromoTier2 =
+                              card.cardType === 'PROMO_TIER_2';
+                            return (
+                              <div
+                                key={card._id}
+                                className={`rounded-lg overflow-hidden shadow-lg max-w-[250px] mx-auto ${
+                                  isPromoTier2
+                                    ? 'bg-yellow-600'
+                                    : 'bg-green-600'
+                                }`}
+                              >
+                                {/* Top Section - Image */}
+                                <div className="w-full">
+                                  <img
+                                    src={
+                                      isPromoTier2
+                                        ? wildCardTopImage2
+                                        : wildCardTopImage
+                                    }
+                                    alt="Wild Card Top"
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+
+                                {/* Bottom Section - Background based on cardType */}
+                                <div
+                                  className={`${
+                                    isPromoTier2
+                                      ? 'bg-yellow-600'
+                                      : 'bg-green-600'
+                                  } p-4 text-white`}
+                                >
+                                  <div className="flex flex-col items-center space-y-2">
+                                    {/* WILDCARD Text */}
+                                    <p className="text-2xl font-black uppercase tracking-wider">
+                                      WILDCARD
+                                    </p>
+
+                                    {/* Days */}
+                                    <p className="text-xl font-bold uppercase">
+                                      {card.days} DAYS
+                                    </p>
+
+                                    {/* CLAIM Button */}
+                                    {card.status === 'ACTIVE' && (
+                                      <div className="flex flex-col gap-2 w-full max-w-xs">
+                                        <button
+                                          type="button"
+                                          onClick={async () => {
+                                            if (
+                                              !confirm(
+                                                `Bạn có chắc chắn muốn sử dụng thẻ này cho user ${data.userId}? Thẻ sẽ cộng ${card.days} ngày vào dieTime của Tier ${card.targetTier}.`,
+                                              )
+                                            ) {
+                                              return;
+                                            }
+
+                                            setUsingCardId(card._id);
+                                            try {
+                                              const response =
+                                                await WildCard.useWildCard(
+                                                  card._id,
+                                                  id,
+                                                );
+                                              toast.success(
+                                                response.data.message ||
+                                                  'Sử dụng Wild Card thành công!',
+                                              );
+                                              setRefresh(!refresh);
+                                            } catch (error: any) {
+                                              const message =
+                                                error.response &&
+                                                error.response.data.message
+                                                  ? error.response.data.message
+                                                  : error.message;
+                                              toast.error(
+                                                t(message) ||
+                                                  'Có lỗi xảy ra khi sử dụng Wild Card',
+                                              );
+                                            } finally {
+                                              setUsingCardId(null);
+                                            }
+                                          }}
+                                          disabled={usingCardId === card._id}
+                                          className={`w-full text-white uppercase font-bold py-2 px-6 rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+                                            isPromoTier2
+                                              ? 'bg-white/20 backdrop-blur-sm border-2 border-white/50 hover:bg-white/30'
+                                              : 'bg-black hover:bg-gray-800'
+                                          }`}
+                                        >
+                                          {usingCardId === card._id ? (
+                                            <Loading />
+                                          ) : (
+                                            'CLAIM'
+                                          )}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={async () => {
+                                            if (
+                                              !confirm(
+                                                `Bạn có chắc chắn muốn xóa thẻ này?`,
+                                              )
+                                            ) {
+                                              return;
+                                            }
+
+                                            try {
+                                              const response =
+                                                await WildCard.adminDeleteWildCard(
+                                                  card._id,
+                                                );
+                                              toast.success(
+                                                response.data.message ||
+                                                  'Xóa Wild Card thành công!',
+                                              );
+                                              setRefresh(!refresh);
+                                            } catch (error: any) {
+                                              const message =
+                                                error.response &&
+                                                error.response.data.message
+                                                  ? error.response.data.message
+                                                  : error.message;
+                                              toast.error(
+                                                t(message) ||
+                                                  'Có lỗi xảy ra khi xóa Wild Card',
+                                              );
+                                            }
+                                          }}
+                                          className="w-full bg-red-600 text-white uppercase font-bold py-2 px-6 rounded-full hover:bg-red-700 transition-colors"
+                                        >
+                                          {t('Delete')}
+                                        </button>
+                                      </div>
+                                    )}
+
+                                    {/* Status for USED cards */}
+                                    {card.status === 'USED' && card.usedAt && (
+                                      <p className="text-sm opacity-75">
+                                        Used:{' '}
+                                        {new Date(
+                                          card.usedAt,
+                                        ).toLocaleDateString('vi')}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </form>
         </div>
       )}

@@ -14,18 +14,26 @@ export default function WithdrawModal({
   userInfo,
 }) {
   const { t } = useTranslation();
-  const enableWithdrawCrypto = userInfo?.enableWithdrawCrypto !== undefined ? userInfo.enableWithdrawCrypto : false;
-  const enableWithdrawBank = userInfo?.enableWithdrawBank !== undefined ? userInfo.enableWithdrawBank : true;
-  
+  const enableWithdrawCrypto =
+    userInfo?.enableWithdrawCrypto !== undefined
+      ? userInfo.enableWithdrawCrypto
+      : false;
+  const enableWithdrawBank =
+    userInfo?.enableWithdrawBank !== undefined
+      ? userInfo.enableWithdrawBank
+      : true;
+
   // Set default withdrawal type based on enabled gateways
   const getDefaultWithdrawalType = (): 'CRYPTO' | 'BANK' => {
     if (enableWithdrawBank) return 'BANK';
     if (enableWithdrawCrypto) return 'CRYPTO';
     return 'BANK'; // fallback
   };
-  
+
   const [amount, setAmount] = useState('');
-  const [withdrawalType, setWithdrawalType] = useState<'CRYPTO' | 'BANK'>(getDefaultWithdrawalType());
+  const [withdrawalType, setWithdrawalType] = useState<'CRYPTO' | 'BANK'>(
+    getDefaultWithdrawalType(),
+  );
   const [exchangeRate, setExchangeRate] = useState(0);
   const [loadingRate, setLoadingRate] = useState(false);
 
@@ -43,14 +51,22 @@ export default function WithdrawModal({
       fetchExchangeRate();
     }
   }, [showModal, withdrawalType]);
-  
+
   // Update withdrawal type when enabled gateways change
   useEffect(() => {
     if (showModal) {
       // If current method is disabled, switch to available method
-      if (withdrawalType === 'CRYPTO' && !enableWithdrawCrypto && enableWithdrawBank) {
+      if (
+        withdrawalType === 'CRYPTO' &&
+        !enableWithdrawCrypto &&
+        enableWithdrawBank
+      ) {
         setWithdrawalType('BANK');
-      } else if (withdrawalType === 'BANK' && !enableWithdrawBank && enableWithdrawCrypto) {
+      } else if (
+        withdrawalType === 'BANK' &&
+        !enableWithdrawBank &&
+        enableWithdrawCrypto
+      ) {
         setWithdrawalType('CRYPTO');
       } else if (!enableWithdrawCrypto && !enableWithdrawBank) {
         setWithdrawalType('BANK'); // fallback
@@ -91,7 +107,9 @@ export default function WithdrawModal({
   const calculateCryptoAmount = () => {
     if (!amount) return { amount: 0, tax: 0, fee: 0, received: 0 };
     const amountUsdt = parseFloat(amount) || 0;
-    const tax = amountUsdt * 0.1; // 10% tax
+    // Tính thuế: Ấn Độ (IN) = 0%, các nhánh khác = 10%
+    const taxRate = userInfo?.city === 'IN' ? 0 : 0.1;
+    const tax = amountUsdt * taxRate; // Tax
     const fee = 1; // Transaction fee 1 USDT
     const received = amountUsdt - tax - fee;
     return {
@@ -126,7 +144,9 @@ export default function WithdrawModal({
       return { total: 0, tax: 0, fee: 0, received: 0 };
     // Calculate all values in USDT first
     const amountUsdt = parseFloat(amount) || 0;
-    const taxUsdt = amountUsdt * 0.1; // 10% tax (USDT)
+    // Tính thuế: Ấn Độ (IN) = 0%, các nhánh khác = 10%
+    const taxRate = userInfo?.city === 'IN' ? 0 : 0.1;
+    const taxUsdt = amountUsdt * taxRate; // Tax (USDT)
     const feeUsdt = 1; // Transaction fee 1 USDT
     const receivedUsdt = amountUsdt - taxUsdt - feeUsdt; // Received amount (USDT)
 
@@ -248,7 +268,7 @@ export default function WithdrawModal({
               </div>
             </div>
           )}
-          
+
           {!enableWithdrawCrypto && !enableWithdrawBank && (
             <div className="w-full bg-red-900 border border-red-700 rounded-lg p-3 text-red-200 text-sm">
               <p className="font-semibold">
@@ -317,10 +337,18 @@ export default function WithdrawModal({
                   {cryptoAmount.amount} USDT
                 </span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">{t('withdrawModal.tax')}:</span>
-                <span className="text-red-400">-{cryptoAmount.tax} USDT</span>
-              </div>
+              {userInfo?.city !== 'IN' && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">
+                    {t('withdrawModal.tax')}{' '}
+                    {userInfo?.city === 'IN' ? '' : '(10%)'} :
+                  </span>
+                  <span className="text-red-400">
+                    -{cryptoAmount.tax}
+                    USDT
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
                 <span className="text-gray-400">
                   {t('withdrawModal.transactionFee')}:
@@ -368,12 +396,17 @@ export default function WithdrawModal({
                     </span>
                     <span className="text-white">{bankAmount.total} VND</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">
-                      {t('withdrawModal.tax')}:
-                    </span>
-                    <span className="text-red-400">-{bankAmount.tax} VND</span>
-                  </div>
+                  {userInfo?.city !== 'IN' && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">
+                        {t('withdrawModal.tax')}{' '}
+                        {userInfo?.city === 'IN' ? '' : '(10%)'} :
+                      </span>
+                      <span className="text-red-400">
+                        -{bankAmount.tax} VND
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">
                       {t('withdrawModal.transactionFee')} (1 USDT):

@@ -1,14 +1,12 @@
 import asyncHandler from "express-async-handler";
 import Cronjob from "../models/cronjobModel.js";
 import {
-  checkRefAndTotalChildOfUser,
   countChildToData,
   countLayerToData,
   deleteUser24hUnPay,
   distributionHewe,
   rankingCalc,
   checkUserPreTier2,
-  calculateTreeDieTime,
 } from "../cronJob/index.js";
 import { recalculateTreeDieTimeForOldData, testCalculateDieTimeForTree } from "../common.js";
 
@@ -34,16 +32,8 @@ const cronjobs = [
     func: rankingCalc,
   },
   {
-    title: "Check referral list",
-    func: checkRefAndTotalChildOfUser,
-  },
-  {
     title: "Check Pre Tier 2 Pending List",
     func: checkUserPreTier2,
-  },
-  {
-    title: "Calculate Tree DieTime",
-    func: calculateTreeDieTime,
   },
   {
     title: "Recalculate Tree DieTime For Old Data",

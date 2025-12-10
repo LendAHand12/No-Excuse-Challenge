@@ -236,6 +236,10 @@
   "confirm password": "Confirm password",
   "wallet address": "Wallet address",
   "user name": "User name",
+  "branch": "Branch",
+  "Vietnam": "Vietnam",
+  "America": "America",
+  "India": "India",
   "phone": "Phone number",
   "Phone is required": "Phone number is required",
   "Please enter the correct phone format": "Please enter the correct phone number format",
@@ -529,7 +533,7 @@
       "DreamPool": "DreamPool",
       "Config": "Config",
       "User History": "User History",
-      "Basic Members": "Basic Members",
+      "Standard Members": "Standard Members",
       "Pre-Tier 2 Pending": "Pre-Tier 2 Pending",
       "Pre-Tier 2 Users": "Pre-Tier 2 Users",
       "Pre-Tier 2 Pool": "Pre-Tier 2 Pool",
@@ -820,7 +824,7 @@
     "exchangeRate": "Exchange Rate",
     "totalAmount": "Total Amount",
     "withdrawalAmount": "Withdrawal Amount",
-    "tax": "Tax (10%)",
+    "tax": "Tax",
     "transactionFee": "Transaction Fee",
     "youWillReceive": "You will receive",
     "amountTooSmall": "Amount is too small after fees",
@@ -839,7 +843,7 @@
     "amount": "Amount",
     "exchangeRate": "Exchange Rate",
     "totalAmountVND": "Total Amount (VND)",
-    "tax": "Tax (10%)",
+    "tax": "Tax",
     "transactionFee": "Transaction Fee",
     "received": "Received",
     "totalReceived": "Total Amount Received",
@@ -1376,5 +1380,6 @@
     "confirm": "Confirm",
     "cancel": "Cancel"
   },
-  "status": "Status"
+  "status": "Status",
+  "Wild Card": "Wild Card"
 }

@@ -25,11 +25,13 @@ const User = {
   getAllUsersTier2: (pageNumber) => {
     return API.get(`${URL_API_USER}/tiers/2?pageNumber=${pageNumber}`);
   },
-  getUserById: (id) => {
-    return API.get(`${URL_API_USER}/${id}`);
+  getUserById: (id, tier) => {
+    const tierParam = tier ? `?tier=${tier}` : '';
+    return API.get(`${URL_API_USER}/${id}${tierParam}`);
   },
-  getUserInfo: () => {
-    return API.get(`${URL_API_USER}/info`);
+  getUserInfo: (tier) => {
+    const tierParam = tier ? `?tier=${tier}` : '';
+    return API.get(`${URL_API_USER}/info${tierParam}`);
   },
   getUserAssets: () => {
     return API.get(`${URL_API_USER}/assets`);

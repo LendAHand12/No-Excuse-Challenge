@@ -23,6 +23,7 @@ import {
   getTotalLevel1ToLevel10OfUser,
   getAllDescendantsTier2Users,
   isUserExpired,
+  countAliveIdsInBranch,
 } from "../utils/methods.js";
 import { areArraysEqual } from "../cronJob/index.js";
 import {
@@ -238,11 +239,15 @@ const getAllUsersWithKeyword = asyncHandler(async (req, res) => {
 
 const getUserById = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id).select("-password");
+  // Get tier from query parameter, default to 1
+  const requestedTier = parseInt(req.query.tier) || 1;
+  // Ensure tier is between 1 and 5
+  const tier = Math.max(1, Math.min(5, requestedTier));
 
   if (user) {
     const tree = await Tree.findOne({
       userId: user._id,
-      tier: 1,
+      tier: tier,
       isSubId: false,
     });
 
@@ -333,13 +338,16 @@ const getUserById = asyncHandler(async (req, res) => {
       type: { $regex: "HOLD", $options: "i" },
       status: "SUCCESS",
       isHoldRefund: false,
+      tier,
     });
 
     const totalHold = listTransHold.reduce((sum, ele) => sum + ele.amount, 0);
 
     let notEnoughtChild = { countChild1: 0, countChild2: 0 };
     if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 3 || user.tier > 1) {
-      notEnoughtChild = await getTotalLevel1ToLevel10OfUser(tree);
+      const branch1Count = await countAliveIdsInBranch(tree.children[0]);
+      const branch2Count = await countAliveIdsInBranch(tree.children[1]);
+      notEnoughtChild = { countChild1: branch1Count + 1, countChild2: branch2Count + 1 };
     }
 
     const isMoveSystem = await MoveSystem.find({
@@ -396,8 +404,20 @@ const getUserById = asyncHandler(async (req, res) => {
       }
     }
 
+    // Tính totalEarning theo tier được yêu cầu
+    // Nếu tier === 1, lấy cả transaction không có tier (null/undefined) và tier === 1
+    // Nếu tier > 1, chỉ lấy transaction có tier === tier được yêu cầu
+    const matchCondition =
+      tier === 1
+        ? {
+            userId_to: user.id,
+            status: "SUCCESS",
+            $or: [{ tier: 1 }, { tier: null }, { tier: { $exists: false } }],
+          }
+        : { userId_to: user.id, status: "SUCCESS", tier: tier };
+
     const result = await Transaction.aggregate([
-      { $match: { userId_to: user.id, status: "SUCCESS" } },
+      { $match: matchCondition },
       { $group: { _id: null, totalAmount: { $sum: "$amount" } } },
     ]);
 
@@ -415,6 +435,13 @@ const getUserById = asyncHandler(async (req, res) => {
     const treeTier2OfUser = await Tree.findOne({
       userId: user.id,
       tier: 2,
+      isSubId: false,
+    });
+
+    // Get tree for the requested tier
+    const treeForTier = await Tree.findOne({
+      userId: user._id,
+      tier: tier,
       isSubId: false,
     });
 
@@ -500,8 +527,8 @@ const getUserById = asyncHandler(async (req, res) => {
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
       bonusRef: user.bonusRef,
       totalHold,
-      totalChild: tree.countChild,
-      income: tree.income,
+      totalChild: treeForTier ? treeForTier.countChild : tree ? tree.countChild : 0,
+      income: treeForTier ? treeForTier.income : tree ? tree.income : 0,
       facetecTid: user.facetecTid,
       kycFee: user.kycFee,
       errLahCode: user.errLahCode,
@@ -540,43 +567,101 @@ const getUserById = asyncHandler(async (req, res) => {
       tier2ChildUsers: tier2Users,
       dieTimeTier1: dieTimeTier1, // dieTime của tier 1
       dieTimeTier2: dieTimeTier2, // dieTime của tier 2
-      isRed:
-        user.tier === 1 && user.countPay === 0
-          ? true
-          : user.tier === 1 && user.countPay < 13
-          ? true
-          : false,
-      // Tính toán isYellow và isBlue dựa trên dieTime của Tree tier 1
-      isYellow: (() => {
-        if (tree && tree.dieTime) {
-          const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
-          const dieTimeStart = moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
-          const diffDays = dieTimeStart.diff(todayStart, "days");
+      // Add dieTime for the requested tier
+      dieTimeForTier: treeForTier ? treeForTier.dieTime : null,
+      currentTierData: treeForTier
+        ? {
+            countChild: treeForTier.countChild,
+            income: treeForTier.income,
+            dieTime: treeForTier.dieTime,
+            disable: treeForTier.disable,
+          }
+        : null,
+      // Tính toán các field theo tier
+      tier1: (() => {
+        const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+        let isRed = false;
+        let isYellow = false;
+        let isBlue = false;
+        let isPink = false;
 
-          // Nếu còn 10 ngày nữa đến hạn (tier 1) hoặc 5 ngày (tier 2) → isYellow = true
-          if (diffDays > 0) {
-            if (user.tier === 1 && diffDays <= 10) {
-              return true;
-            } else if (user.tier === 2 && diffDays <= 5) {
-              return true;
+        // Use treeForTier if available, otherwise fall back to tree
+        const treeToUse = tier === 1 ? tree : treeForTier;
+
+        if (treeToUse) {
+          // Tính isRed cho tier
+          if (tier === 1) {
+            isRed =
+              user.tier === 1 && user.countPay === 0
+                ? true
+                : user.tier === 1 && user.countPay < 13
+                ? true
+                : false;
+          } else {
+            // For tier 2-5, isRed logic might be different
+            isRed = false;
+          }
+
+          // Tính isYellow và isBlue dựa trên dieTime của Tree
+          if (treeToUse.dieTime) {
+            const dieTimeStart = moment.tz(treeToUse.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+            const diffDays = dieTimeStart.diff(todayStart, "days");
+
+            // Nếu quá hạn (dieTime <= today) → isBlue = true
+            if (diffDays <= 0) {
+              isBlue = true;
+            } else {
+              // Nếu còn 10 ngày nữa đến hạn (tier 1) hoặc 5 ngày (tier 2+) → isYellow = true
+              const warningDays = tier === 1 ? 10 : 5;
+              if (diffDays <= warningDays) {
+                isYellow = true;
+              }
+            }
+          }
+
+          // Tính isPink cho tier 1
+          if (tier === 1) {
+            isPink = user.countPay === 13 && listDirectUser.length < 2;
+          }
+        }
+
+        return {
+          isRed,
+          isYellow,
+          isBlue,
+          isPink,
+        };
+      })(),
+      tier2: (() => {
+        const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+        let isYellow = false;
+        let isBlue = false;
+
+        if (treeTier2OfUser) {
+          // Tính isYellow và isBlue dựa trên dieTime của Tree tier 2
+          if (treeTier2OfUser.dieTime) {
+            const dieTimeStart = moment
+              .tz(treeTier2OfUser.dieTime, "Asia/Ho_Chi_Minh")
+              .startOf("day");
+            const diffDays = dieTimeStart.diff(todayStart, "days");
+
+            // Nếu quá hạn (dieTime <= today) → isBlue = true
+            if (diffDays <= 0) {
+              isBlue = true;
+            } else {
+              // Nếu còn 5 ngày nữa đến hạn (tier 2) → isYellow = true
+              if (diffDays <= 5) {
+                isYellow = true;
+              }
             }
           }
         }
-        return false;
-      })(),
-      isBlue: (() => {
-        if (tree && tree.dieTime) {
-          const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
-          const dieTimeStart = moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
 
-          // Nếu quá hạn (dieTime <= today) → isBlue = true
-          if (todayStart.isSameOrAfter(dieTimeStart)) {
-            return true;
-          }
-        }
-        return false;
+        return {
+          isYellow,
+          isBlue,
+        };
       })(),
-      isPink: user.countPay === 13 && listDirectUser.length < 2,
       isDisableTier2: treeTier2OfUser ? treeTier2OfUser.disable : false,
       timeToTry: user.timeToTry,
       bankName: user.bankName,
@@ -635,20 +720,25 @@ const getUserAssets = asyncHandler(async (req, res) => {
     enableWithdrawCrypto:
       user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
     enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
+    city: user.city || "VN",
   });
 });
 
 const getUserInfo = asyncHandler(async (req, res) => {
   const user = req.user;
+  // Get tier from query parameter, default to 1
+  const requestedTier = parseInt(req.query.tier) || 1;
+  // Ensure tier is between 1 and 5
+  const tier = Math.max(1, Math.min(5, requestedTier));
 
   if (user) {
     const tree = await Tree.findOne({
       userId: user._id,
-      tier: 1,
+      tier: tier,
       isSubId: false,
     });
     const listDirectUser = [];
-    const listRefIdOfUser = await Tree.find({ refId: tree._id, tier: 1 });
+    const listRefIdOfUser = tree ? await Tree.find({ refId: tree._id, tier: tier }) : [];
     if (listRefIdOfUser && listRefIdOfUser.length > 0) {
       // Lấy ngày hiện tại theo giờ Việt Nam, set về 00:00:00
       const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
@@ -726,6 +816,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
       type: { $regex: "HOLD", $options: "i" },
       status: "SUCCESS",
       isHoldRefund: false,
+      tier,
     });
 
     const totalHold = listTransHold.reduce((sum, ele) => sum + ele.amount, 0);
@@ -737,13 +828,22 @@ const getUserInfo = asyncHandler(async (req, res) => {
 
     let notEnoughtChild = { countChild1: 0, countChild2: 0 };
     if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 3 || user.tier > 1) {
-      notEnoughtChild = await getTotalLevel1ToLevel10OfUser(tree);
+      const branch1Count = await countAliveIdsInBranch(tree.children[0]);
+      const branch2Count = await countAliveIdsInBranch(tree.children[1]);
+      notEnoughtChild = { countChild1: branch1Count + 1, countChild2: branch2Count + 1 };
     }
 
     // Lấy dieTime từ Tree model thay vì User model
     const treeTier1 = await Tree.findOne({
       userId: user._id,
       tier: 1,
+      isSubId: false,
+    });
+
+    // Get tree for the requested tier
+    const treeForTier = await Tree.findOne({
+      userId: user._id,
+      tier: tier,
       isSubId: false,
     });
 
@@ -756,48 +856,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
       });
     }
 
-    // Tính toán isRed, isYellow, isBlue, isPink cho Tier 1
-    let isRed = false;
-    let isYellow = false;
-    let isBlue = false;
-    let isPink = false;
-    let isDisableTier2 = false;
-
-    if (treeTier1) {
-      // Tính toán isRed
-      isRed =
-        user.tier === 1 && user.countPay === 0
-          ? true
-          : user.tier === 1 && user.buyPackage === "B" && user.countPay < 7
-          ? true
-          : user.tier === 1 && user.buyPackage === "A" && user.countPay < 13
-          ? true
-          : false;
-
-      // Tính toán isYellow và isBlue dựa trên dieTime của Tree tier 1
-      if (treeTier1.dieTime) {
-        const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
-        const dieTimeStart = moment.tz(treeTier1.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
-        const diffDays = dieTimeStart.diff(todayStart, "days");
-
-        // Nếu quá hạn (dieTime <= today) → isBlue = true
-        if (diffDays <= 0) {
-          isBlue = true;
-        } else {
-          // Nếu còn 10 ngày nữa đến hạn (tier 1) hoặc 5 ngày (tier 2) → isYellow = true
-          if (user.tier === 1 && diffDays <= 10) {
-            isYellow = true;
-          } else if (user.tier === 2 && diffDays <= 5) {
-            isYellow = true;
-          }
-        }
-      }
-
-      // Tính toán isPink
-      isPink = user.countPay === 13 && listDirectUser.length < 2;
-    }
-
     // Tính toán isDisableTier2
+    let isDisableTier2 = false;
     if (treeTier2) {
       isDisableTier2 = treeTier2.disable || false;
     }
@@ -845,8 +905,20 @@ const getUserInfo = asyncHandler(async (req, res) => {
       });
     }
 
+    // Tính totalEarning theo tier được yêu cầu
+    // Nếu tier === 1, lấy cả transaction không có tier (null/undefined) và tier === 1
+    // Nếu tier > 1, chỉ lấy transaction có tier === tier được yêu cầu
+    const matchCondition =
+      tier === 1
+        ? {
+            userId_to: user.id,
+            status: "SUCCESS",
+            $or: [{ tier: 1 }, { tier: null }, { tier: { $exists: false } }],
+          }
+        : { userId_to: user.id, status: "SUCCESS", tier: tier };
+
     const result = await Transaction.aggregate([
-      { $match: { userId_to: user.id, status: "SUCCESS" } },
+      { $match: matchCondition },
       { $group: { _id: null, totalAmount: { $sum: "$amount" } } },
     ]);
 
@@ -930,8 +1002,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
       targetSales: process.env[`LEVEL_${user.ranking + 1}`],
       bonusRef: user.bonusRef,
       totalHold,
-      totalChild: tree.countChild,
-      income: tree.income,
+      totalChild: treeForTier ? treeForTier.countChild : tree ? tree.countChild : 0,
+      income: treeForTier ? treeForTier.income : tree ? tree.income : 0,
       facetecTid: user.facetecTid,
       kycFee: user.kycFee,
       errLahCode: errLahCode,
@@ -958,6 +1030,16 @@ const getUserInfo = asyncHandler(async (req, res) => {
       tier2ChildUsers: tier2Users,
       dieTimeTier1: treeTier1 ? treeTier1.dieTime : null,
       dieTimeTier2: treeTier2 ? treeTier2.dieTime : null,
+      // Add dieTime for the requested tier
+      dieTimeForTier: treeForTier ? treeForTier.dieTime : null,
+      currentTierData: treeForTier
+        ? {
+            countChild: treeForTier.countChild,
+            income: treeForTier.income,
+            dieTime: treeForTier.dieTime,
+            disable: treeForTier.disable,
+          }
+        : null,
       timeToTry: user.timeToTry,
       bankName: user.bankName,
       bankCode: user.bankCode,
@@ -968,11 +1050,91 @@ const getUserInfo = asyncHandler(async (req, res) => {
       enableWithdrawCrypto:
         user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
       enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
-      // Tier status colors
-      isRed,
-      isYellow,
-      isBlue,
-      isPink,
+      // Tính toán các field theo tier
+      tier1: (() => {
+        const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+        let isRed = false;
+        let isYellow = false;
+        let isBlue = false;
+        let isPink = false;
+
+        // Use treeForTier if available, otherwise fall back to treeTier1
+        const treeToUse = tier === 1 ? treeTier1 : treeForTier;
+
+        if (treeToUse) {
+          // Tính isRed cho tier
+          if (tier === 1) {
+            isRed =
+              user.tier === 1 && user.countPay === 0
+                ? true
+                : user.tier === 1 && user.buyPackage === "B" && user.countPay < 7
+                ? true
+                : user.tier === 1 && user.buyPackage === "A" && user.countPay < 13
+                ? true
+                : false;
+          } else {
+            // For tier 2-5, isRed logic might be different
+            isRed = false;
+          }
+
+          // Tính isYellow và isBlue dựa trên dieTime của Tree
+          if (treeToUse.dieTime) {
+            const dieTimeStart = moment.tz(treeToUse.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+            const diffDays = dieTimeStart.diff(todayStart, "days");
+
+            // Nếu quá hạn (dieTime <= today) → isBlue = true
+            if (diffDays <= 0) {
+              isBlue = true;
+            } else {
+              // Nếu còn 10 ngày nữa đến hạn (tier 1) hoặc 5 ngày (tier 2+) → isYellow = true
+              const warningDays = tier === 1 ? 10 : 5;
+              if (diffDays <= warningDays) {
+                isYellow = true;
+              }
+            }
+          }
+
+          // Tính isPink cho tier 1
+          if (tier === 1) {
+            isPink = user.countPay === 13 && listDirectUser.length < 2;
+          }
+        }
+
+        return {
+          isRed,
+          isYellow,
+          isBlue,
+          isPink,
+        };
+      })(),
+      tier2: (() => {
+        const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
+        let isYellow = false;
+        let isBlue = false;
+
+        if (treeTier2) {
+          // Tính isYellow và isBlue dựa trên dieTime của Tree tier 2
+          if (treeTier2.dieTime) {
+            const dieTimeStart = moment.tz(treeTier2.dieTime, "Asia/Ho_Chi_Minh").startOf("day");
+            const diffDays = dieTimeStart.diff(todayStart, "days");
+
+            // Nếu quá hạn (dieTime <= today) → isBlue = true
+            if (diffDays <= 0) {
+              isBlue = true;
+            } else {
+              // Nếu còn 5 ngày nữa đến hạn (tier 2) → isYellow = true
+              if (diffDays <= 5) {
+                isYellow = true;
+              }
+            }
+          }
+        }
+
+        return {
+          isYellow,
+          isBlue,
+        };
+      })(),
       isDisableTier2,
     });
   } else {
@@ -1777,7 +1939,6 @@ const getTreeOfUser = asyncHandler(async (req, res) => {
 
 const getChildsOfUserForTree = asyncHandler(async (req, res) => {
   const { id, currentTier } = req.body;
-  const userRequest = req.user;
   let treeOfUser;
   let user;
   treeOfUser = await Tree.findById(id).select(
@@ -1830,9 +1991,9 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
           isBlue = true;
         } else {
           // Nếu còn 10 ngày nữa đến hạn (tier 1) hoặc 5 ngày nữa đến hạn (tier 2) → isYellow = true
-          if (child.tier === 1 && diffDays <= 10) {
+          if (currentTier === 1 && diffDays <= 10) {
             isYellow = true;
-          } else if (child.tier === 2 && diffDays <= 5) {
+          } else if (currentTier === 2 && diffDays <= 5) {
             isYellow = true;
           }
         }
@@ -1843,9 +2004,9 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
         label: `${childTree.userName}`,
         totalChild: childTree.countChild,
         income: childTree.income,
-        isRed: child.tier === 1 && child.countPay === 0 ? true : false,
+        isRed: currentTier === 1 && child.countPay === 0 ? true : false,
         isYellow: isYellow,
-        isBlue: isBlue,
+        isBlue: currentTier === 1 ? isBlue : false,
         indexOnLevel: childTree.indexOnLevel,
         isSubId: childTree.isSubId,
         isPink: child.countPay === 13 && listRefOfChild.length < 2,

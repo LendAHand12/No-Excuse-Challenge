@@ -149,7 +149,9 @@ const claimUsdt = asyncHandler(async (req, res) => {
         }
 
         const amountUsdt = parseFloat(amount);
-        const tax = amountUsdt * 0.1; // 10% tax (USDT)
+        // Tính thuế: Ấn Độ (IN) = 0%, các nhánh khác = 10%
+        const taxRate = user.city === "IN" ? 0 : 0.1;
+        const tax = amountUsdt * taxRate; // Tax (USDT)
         const fee = 1; // Transaction fee 1 USDT
         const receivedAmount = amountUsdt - tax - fee; // Số tiền thực tế nhận được (USDT)
 
@@ -185,7 +187,9 @@ const claimUsdt = asyncHandler(async (req, res) => {
 
         // Calculate amounts - Tất cả tính bằng USDT
         const amountUsdt = parseFloat(amount);
-        const tax = amountUsdt * 0.1; // 10% tax (USDT)
+        // Tính thuế: Ấn Độ (IN) = 0%, các nhánh khác = 10%
+        const taxRate = user.city === "IN" ? 0 : 0.1;
+        const tax = amountUsdt * taxRate; // Tax (USDT)
         const fee = 1; // Transaction fee 1 USDT
         const receivedAmount = amountUsdt - tax - fee; // Số tiền thực tế nhận được (USDT)
 

@@ -13,11 +13,9 @@ import {
   addDays,
   findRootLayer,
   getTotalLevel1ToLevel10OfUser,
-  getTotalLevel6ToLevel10OfUser,
-  getUserClosestToNow,
-  hasTwoBranches,
   calculateDieTimeForTier1,
   calculateDieTimeForTier2,
+  isUserExpired,
 } from "../utils/methods.js";
 import Tree from "../models/treeModel.js";
 import Transaction from "../models/transactionModel.js";
@@ -25,11 +23,8 @@ import Honor from "../models/honorModel.js";
 import { getPriceHewe } from "../utils/getPriceHewe.js";
 import Config from "../models/configModel.js";
 import Income from "../models/incomeModel.js";
-import PreTier2 from "../models/preTier2Model.js";
-import mongoose from "mongoose";
 import WildCard from "../models/wildCardModel.js";
 import Claim from "../models/claimModel.js";
-import { giveTier2PromotionWildCards } from "../common.js";
 
 // Fetch VN rates from phobitcoin.com
 export const fetchVnUsdRates = asyncHandler(async () => {
@@ -457,246 +452,6 @@ export const checkUserPreTier2 = asyncHandler(async () => {
   }
 });
 
-export const checkRefAndTotalChildOfUser = asyncHandler(async () => {
-  try {
-    const listUsers = await User.find({
-      isAdmin: false,
-      status: { $ne: "DELETED" },
-      errLahCode: { $ne: "OVER45" },
-    }).sort({
-      createdAt: -1,
-    });
-    const currentDay = moment();
-
-    for (let user of listUsers) {
-      console.log({ name: user.userId });
-      // const user = await User.findById("68610d7b9fd2c5445f751333");
-      const treeOfUser = await Tree.findOne({
-        userId: user._id,
-        isSubId: false,
-        tier: 1,
-      });
-
-      if (user.tier === 1) {
-        const listRefTrees = await Tree.find({
-          refId: treeOfUser._id,
-          isSubId: false,
-        });
-        const diffDateFromCreated = currentDay.diff(user.createdAt, "days");
-        const listRefUsers = [];
-        for (let tree of listRefTrees) {
-          const refUser = await User.findById(tree.userId);
-          if (refUser && refUser.errLahCode !== "OVER45") {
-            listRefUsers.push(tree);
-          }
-        }
-
-        const hasTwoRef = await hasTwoBranches(treeOfUser._id);
-        console.log({ hasTwoRef, diffDateFromCreated, listRefUsers: listRefUsers.length });
-        if (!hasTwoRef) {
-          if (diffDateFromCreated > 30) {
-            user.errLahCode = "OVER45";
-            user.dieTime = new Date();
-          } else if (diffDateFromCreated > 20) {
-            user.errLahCode = "OVER35";
-            user.dieTime = addDays(new Date(), +10);
-          }
-        } else {
-          // cần bổ sung
-          if (listRefUsers.length < 2) {
-            const missing = 2 - listRefUsers.length; // số người còn thiếu
-            const extraDays = missing * 15;
-
-            if (!user.dieTime) {
-              // lần đầu bị thiếu → đặt hạn mới
-              user.dieTime = moment().add(extraDays, "days").toDate();
-            } else {
-              const currentDeadline = moment(user.dieTime);
-
-              if (moment().isAfter(currentDeadline)) {
-                // đã quá hạn deadline
-                user.errLahCode = "OVER45";
-                user.dieTime = new Date();
-              } else {
-                // còn hạn thì không update thêm (tránh cộng dồn)
-              }
-            }
-          } else {
-            user.errLahCode = "";
-            user.dieTime = null;
-          }
-        }
-      } else if (user.tier === 2) {
-        const INGNORE_USERID = ["Olivia", "Jay12", "Noah32", "James87", "Jake2000"];
-
-        if (!INGNORE_USERID.includes(user.userId)) {
-          const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(treeOfUser);
-
-          const totalChild = countChild1 + countChild2;
-
-          const diffDateFromTier2Date = currentDay.diff(user.tier2Time, "days");
-          if (diffDateFromTier2Date <= 30) {
-            if (totalChild < 60 || countChild1 < 19 || countChild2 < 19) {
-              user.tryToTier2 = "YES";
-              user.dieTime = moment(user.tier2Time).add(30, "days").toDate();
-            } else if (totalChild >= 60 && countChild1 >= 19 && countChild2 >= 19) {
-              user.dieTime = null;
-              user.done62Id = true;
-            }
-          } else {
-            if (user.done62Id) {
-              if (totalChild < 60) {
-                const missingIds = 60 - totalChild; // số id thiếu
-
-                if (!user.dieTime) {
-                  // lần đầu tiên phát hiện thiếu → set deadline luôn
-                  const deadline = moment()
-                    .add(missingIds * 15)
-                    .toDate();
-                  user.dieTime = deadline;
-                  user.currentShortfall = missingIds;
-                } else {
-                  // đã có deadline từ trước → so sánh với số thiếu hôm nay
-                  const oldShortfall = user.currentShortfall || 0;
-
-                  if (missingIds > oldShortfall) {
-                    // thiếu nhiều hơn → cộng thêm số ngày tương ứng cho phần chênh lệch
-                    const diff = missingIds - oldShortfall;
-                    const extraDays = diff * 15;
-
-                    user.dieTime = moment(user.dieTime).add(extraDays, "days").toDate();
-                    user.currentShortfall = missingIds;
-                  }
-                  // nếu thiếu ít hơn hoặc bằng hôm qua thì không cộng thêm ngày
-                }
-              } else {
-                user.dieTime = null;
-                user.done62Id = true;
-              }
-            } else {
-              if (totalChild >= 60 && countChild1 >= 19 && countChild2 >= 19) {
-                user.dieTime = null;
-                user.done62Id = true;
-              } else {
-                user.dieTime = null;
-                const treeTier2OfUser = await Tree.findOne({
-                  userId: user._id,
-                  tier: 2,
-                });
-
-                treeTier2OfUser.disable = true;
-                await treeTier2OfUser.save();
-              }
-            }
-          }
-        }
-      }
-
-      await user.save();
-    }
-  } catch (err) {
-    console.log({ err });
-  }
-});
-
-/**
- * Tính lại dieTime cho tất cả tree mỗi ngày
- * Logic:
- * - Tier 1: 30 ngày từ createdAt để có ít nhất 2 tree con sống
- * - Tier 2: 45 ngày từ createdAt để có đủ 62 id sống (tổng >= 62, mỗi nhánh >= 20)
- */
-export const calculateTreeDieTime = asyncHandler(async () => {
-  try {
-    console.log("Calculate tree dieTime start");
-
-    // Bước 1: Tính dieTime cho tất cả tree tier 2 trước (không phụ thuộc tree con)
-    const treesTier2 = await Tree.find({ tier: 2 });
-    console.log(`Found ${treesTier2.length} trees tier 2`);
-
-    let updatedTier2 = 0;
-    for (const tree of treesTier2) {
-      try {
-        const newDieTime = await calculateDieTimeForTier2(tree);
-        if (
-          (!tree.dieTime && newDieTime) ||
-          (tree.dieTime && newDieTime && tree.dieTime.getTime() !== newDieTime.getTime()) ||
-          (tree.dieTime && !newDieTime)
-        ) {
-          tree.dieTime = newDieTime;
-          await tree.save();
-          updatedTier2++;
-        }
-      } catch (err) {
-        console.error(`Error calculating dieTime for tree tier 2 ${tree._id}:`, err);
-      }
-    }
-
-    console.log(`Updated ${updatedTier2} trees tier 2`);
-
-    // Bước 2: Tính dieTime cho tất cả tree tier 1 (sau khi đã tính tier 2)
-    const treesTier1 = await Tree.find({ tier: 1 });
-    console.log(`Found ${treesTier1.length} trees tier 1`);
-
-    // Lấy ngày hiện tại theo giờ Việt Nam, set về 00:00:00
-    const today = moment.tz("Asia/Ho_Chi_Minh").startOf("day");
-
-    let updatedTier1 = 0;
-    let updatedErrLahCode = 0;
-    for (const tree of treesTier1) {
-      try {
-        const newDieTime = await calculateDieTimeForTier1(tree);
-        const dieTimeChanged =
-          (!tree.dieTime && newDieTime) ||
-          (tree.dieTime && newDieTime && tree.dieTime.getTime() !== newDieTime.getTime()) ||
-          (tree.dieTime && !newDieTime);
-
-        if (dieTimeChanged) {
-          tree.dieTime = newDieTime;
-          await tree.save();
-          updatedTier1++;
-        }
-
-        // Cập nhật errLahCode cho User dựa trên dieTime của tree tier 1 (chỉ tree isSubId = false)
-        if (!tree.isSubId) {
-          try {
-            const user = await User.findById(tree.userId);
-            if (user) {
-              // Chuyển đổi dieTime sang giờ Việt Nam để so sánh
-              const treeDieTime = tree.dieTime
-                ? moment.tz(tree.dieTime, "Asia/Ho_Chi_Minh").startOf("day")
-                : null;
-
-              // Nếu dieTime đã quá hạn (today > dieTime) thì errLahCode = "OVER45"
-              // Nếu dieTime = null hoặc chưa quá hạn thì errLahCode = ""
-              const newErrLahCode = treeDieTime && today.isAfter(treeDieTime) ? "OVER45" : "";
-
-              // Chỉ cập nhật nếu thay đổi
-              if (user.errLahCode !== newErrLahCode) {
-                user.errLahCode = newErrLahCode;
-                await user.save();
-                updatedErrLahCode++;
-              }
-            }
-          } catch (userErr) {
-            console.error(
-              `Error updating errLahCode for user ${tree.userId} (tree ${tree._id}):`,
-              userErr
-            );
-          }
-        }
-      } catch (err) {
-        console.error(`Error calculating dieTime for tree tier 1 ${tree._id}:`, err);
-      }
-    }
-
-    console.log(`Updated ${updatedTier1} trees tier 1`);
-    console.log(`Updated ${updatedErrLahCode} users errLahCode`);
-    console.log("Calculate tree dieTime done");
-  } catch (err) {
-    console.error("Error in calculateTreeDieTime:", err);
-  }
-});
-
 /**
  * Cronjob: Tự động tạo wild card cho user tier 2 khi có 5 refId mới
  * Logic:
@@ -737,7 +492,7 @@ export const createWildCardForTier2Users = asyncHandler(async () => {
         // Xác định thời điểm bắt đầu đếm refId mới
         // Nếu chưa có lastWildCardRewardAt, đếm từ khi user lên tier 2 (tier2Time)
         // Nếu có lastWildCardRewardAt, đếm từ thời điểm đó
-        const startDate = user.lastWildCardRewardAt || user.tier2Time || user.createdAt;
+        const startDate = user.lastWildCardRewardAt || user.createdAt;
 
         // Lấy tất cả refId mới (có createdAt > startDate)
         const allNewRefIds = await Tree.find({
@@ -747,20 +502,22 @@ export const createWildCardForTier2Users = asyncHandler(async () => {
           createdAt: { $gt: startDate },
         }).sort({ createdAt: 1 }); // Sắp xếp theo createdAt tăng dần
 
-        // Lọc các refId thỏa mãn điều kiện: status = APPROVED, countPay = 13, errLahCode !== OVER45
+        // Lọc các refId thỏa mãn điều kiện: status = APPROVED, countPay = 13, dieTime của tier 1 chưa quá hạn
         const validRefIds = [];
         for (const refIdTree of allNewRefIds) {
-          const refIdUser = await User.findById(refIdTree.userId).select(
-            "status countPay errLahCode"
-          );
-          if (
-            refIdUser &&
-            refIdUser.status === "APPROVED" &&
-            refIdUser.countPay === 13 &&
-            refIdUser.errLahCode !== "OVER45"
-          ) {
-            validRefIds.push(refIdTree);
-          }
+          // const refIdUser = await User.findById(refIdTree.userId).select("status countPay");
+          // const isExpired = await isUserExpired(refIdTree._id);
+
+          // if (
+          //   refIdUser &&
+          //   refIdUser.status === "APPROVED" &&
+          //   refIdUser.countPay === 13 &&
+          //   !isExpired
+          // ) {
+          //   console.log({ refIdTree });
+          //   validRefIds.push(refIdTree);
+          // }
+          validRefIds.push(refIdTree);
         }
 
         const newRefIdCount = validRefIds.length;
