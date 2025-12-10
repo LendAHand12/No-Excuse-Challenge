@@ -334,7 +334,7 @@ const AdminPreTier2UsersPages = () => {
 
                   <td className="px-6 py-4">
                     {userInfo?.permissions
-                      .find((p) => p.page.pageName === 'admin-user-pre-tier-2')
+                      .find((p) => p.page.path === '/admin/pre-tier-2-users')
                       ?.actions.includes('update') &&
                       ele.status !== 'PASSED' && (
                         <div className="flex gap-6">
@@ -376,7 +376,7 @@ const AdminPreTier2UsersPages = () => {
                             userInfo?.permissions
                               .find(
                                 (p) =>
-                                  p.page.pageName === 'admin-user-pre-tier-2',
+                                  p.page.path === '/admin/pre-tier-2-users',
                               )
                               ?.actions.includes('update') && (
                               <button

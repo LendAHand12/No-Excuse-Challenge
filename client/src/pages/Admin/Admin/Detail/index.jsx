@@ -331,7 +331,7 @@ const AdminProfile = () => {
                   </>
                 )}
                 {userInfo?.permissions
-                  .find((p) => p.page.pageName === "admin-admin-detail")
+                  .find((p) => p.page.path === "/admin/admin/:id")
                   ?.actions.includes("update") &&
                   !isEditting &&
                   data.status !== "UNVERIFY" &&
@@ -345,7 +345,7 @@ const AdminProfile = () => {
                     </button>
                   )}
                 {userInfo?.permissions
-                  .find((p) => p.page.pageName === "admin-users-details")
+                  .find((p) => p.page.path === "/admin/users/:id")
                   ?.actions.includes("delete") &&
                   !isEditting &&
                   data.status !== "DELETED" && (

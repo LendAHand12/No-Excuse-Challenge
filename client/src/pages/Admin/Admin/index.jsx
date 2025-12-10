@@ -141,7 +141,7 @@ const Admins = () => {
                   <td className="px-6 py-4">
                     <div className="flex gap-6">
                       {userInfo?.permissions
-                        .find((p) => p.page.pageName === "admin-admin-detail")
+                        .find((p) => p.page.path === "/admin/admin/:id")
                         ?.actions.includes("read") && (
                         <button
                           onClick={() => handleDetail(ele._id)}

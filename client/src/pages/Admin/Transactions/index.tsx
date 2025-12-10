@@ -104,7 +104,7 @@ const AdminTransactionsPage = () => {
 
   const handleRowClick = (id) => {
     userInfo?.permissions
-      .find((p) => p.page.pageName === 'admin-transactions-details')
+      .find((p) => p.page.path === '/admin/transactions/:id')
       ?.actions.includes('read') && navigate(`/admin/transactions/${id}`);
   };
 

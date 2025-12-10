@@ -1990,7 +1990,7 @@ const UserProfile = () => {
                   </>
                 )}
                 {userInfo?.permissions
-                  .find((p) => p.page.pageName === 'admin-users-details')
+                  .find((p) => p.page.path === '/admin/users/:id')
                   ?.actions.includes('update') &&
                   !isEditting &&
                   data.status !== 'DELETED' && (
@@ -2002,7 +2002,7 @@ const UserProfile = () => {
                     </button>
                   )}
                 {userInfo?.permissions
-                  .find((p) => p.page.pageName === 'admin-users-details')
+                  .find((p) => p.page.path === '/admin/users/:id')
                   ?.actions.includes('delete') &&
                   !isEditting &&
                   data.status !== 'DELETED' && (
@@ -2014,7 +2014,7 @@ const UserProfile = () => {
                     </div>
                   )}
                 {userInfo?.permissions
-                  .find((p) => p.page.pageName === 'admin-users-details')
+                  .find((p) => p.page.path === '/admin/users/:id')
                   ?.actions.includes('update') &&
                   walletChange && (
                     <div
@@ -2025,7 +2025,7 @@ const UserProfile = () => {
                     </div>
                   )}
                 {userInfo?.permissions
-                  .find((p) => p.page.pageName === 'admin-users-details')
+                  .find((p) => p.page.path === '/admin/users/:id')
                   ?.actions.includes('update') &&
                   data.facetecTid === '' &&
                   data.status === 'UNVERIFY' && (
@@ -2038,7 +2038,7 @@ const UserProfile = () => {
                     </div>
                   )}
                 {userInfo?.permissions
-                  ?.find((p) => p.page.pageName === 'admin-users-details')
+                  ?.find((p) => p.page.path === '/admin/users/:id')
                   ?.actions.includes('update') && (
                   <div
                     onClick={handleOpenCreateWildCardModal}

@@ -39,17 +39,17 @@ const AdminLoginPage: React.FC = () => {
   } | null>(null);
   const [verificationCallback, setVerificationCallback] = useState<{
     token: string;
-    facetect_tid: string;
   } | null>(null);
 
   // Check for callback params from FaceTec
   useEffect(() => {
     const token = searchParams.get('token');
-    const facetect_tid = searchParams.get('facetect_tid');
     const admin_id = searchParams.get('admin_id');
     const tempTokenParam = searchParams.get('tempToken');
 
     // If we have enrollment callback params
+    // Note: enrollment still needs facetect_tid to save to database
+    const facetect_tid = searchParams.get('facetect_tid');
     if (token && facetect_tid && admin_id && !tempTokenParam) {
       setAdminId(admin_id);
       setEnrollmentCallback({ token, facetect_tid, admin_id });
@@ -59,9 +59,10 @@ const AdminLoginPage: React.FC = () => {
     }
 
     // If we have verification callback params
-    if (token && facetect_tid && tempTokenParam) {
+    // Only need token and tempToken
+    if (token && tempTokenParam) {
       setTempToken(tempTokenParam);
-      setVerificationCallback({ token, facetect_tid });
+      setVerificationCallback({ token });
       setShowVerification(true);
       // Clean URL
       navigate('/admin/login', { replace: true });

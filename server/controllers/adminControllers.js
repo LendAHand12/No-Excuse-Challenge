@@ -75,6 +75,19 @@ const adminLogin = asyncHandler(async (req, res) => {
     });
   }
 
+  // Safety check: if firstLoginCompleted is true, both face and 2FA must be enabled
+  if (!admin.faceRegistered || !admin.googleAuthenticatorEnabled) {
+    // Reset firstLoginCompleted if setup is incomplete
+    admin.firstLoginCompleted = false;
+    await admin.save();
+    return res.json({
+      success: true,
+      requiresFirstTimeSetup: true,
+      message: "Setup incomplete. Please complete face registration and 2FA setup.",
+      adminId: admin._id,
+    });
+  }
+
   // For subsequent logins, return temporary token that requires face verification and 2FA
   const tempToken = jwt.sign(
     { id: admin._id, type: "admin_temp" },
@@ -136,28 +149,14 @@ const startFaceVerification = asyncHandler(async (req, res) => {
 
 // Verify face and 2FA for login
 const verifyLogin = asyncHandler(async (req, res) => {
-  const { tempToken, facetect_tid, twoFactorCode, token } = req.body;
+  const { tempToken, twoFactorCode, token } = req.body;
 
-  if (!tempToken || !facetect_tid || !twoFactorCode) {
+  if (!tempToken || !twoFactorCode || !token) {
     res.status(400);
-    throw new Error("Temp token, face verification ID, and 2FA code are required");
+    throw new Error("Temp token, 2FA code, and face verification token are required");
   }
 
-  // Verify callback token if provided (from face verification)
-  if (token) {
-    try {
-      const decodedToken = decodeCallbackToken(token);
-      if (decodedToken.purpose !== "admin_face_verify") {
-        res.status(400);
-        throw new Error("Invalid token purpose");
-      }
-    } catch (error) {
-      res.status(400);
-      throw new Error(error.message || "Invalid or expired callback token");
-    }
-  }
-
-  // Verify temp token
+  // Verify temp token first
   let decoded;
   try {
     decoded = jwt.verify(tempToken, process.env.JWT_ACCESS_TOKEN_SECRET);
@@ -176,24 +175,31 @@ const verifyLogin = asyncHandler(async (req, res) => {
     throw new Error("Admin not found or inactive");
   }
 
-  // Verify face - check if tid matches stored tid
+  // Verify callback token if provided (from face verification)
+  if (token) {
+    try {
+      const decodedToken = decodeCallbackToken(token);
+      if (decodedToken.purpose !== "admin_face_verify") {
+        res.status(400);
+        throw new Error("Invalid token purpose");
+      }
+      // Verify that callback token belongs to the same admin
+      if (decodedToken.userId !== admin._id.toString()) {
+        res.status(400);
+        throw new Error("Token admin mismatch");
+      }
+    } catch (error) {
+      res.status(400);
+      throw new Error(error.message || "Invalid or expired callback token");
+    }
+  }
+
+  // Verify face is registered
   if (!admin.faceRegistered || admin.facetecTid === "") {
     res.status(400);
     throw new Error("Face not registered");
   }
 
-  // Verify face - the facetect_tid from verification should be checked
-  // FaceTec verification returns a tid that we can verify against the API
-  // For now, we'll trust that if the verification callback was called successfully,
-  // the face verification passed. In production, you might want to verify the tid
-  // against FaceTec's verification API endpoint.
-  
-  // Basic check: ensure face is registered
-  if (admin.facetecTid === "") {
-    res.status(400);
-    throw new Error("Face not registered");
-  }
-  
   // Note: In a production environment, you should verify the facetect_tid
   // against FaceTec's verification API to ensure the verification was successful
 
@@ -344,11 +350,18 @@ const registerFace = asyncHandler(async (req, res) => {
 
   admin.facetecTid = facetect_tid;
   admin.faceRegistered = true;
+  
+  // If 2FA is also enabled, mark first login as completed
+  if (admin.googleAuthenticatorEnabled) {
+    admin.firstLoginCompleted = true;
+  }
+  
   await admin.save();
 
   return res.json({
     success: true,
     message: "Face registration successful",
+    firstLoginCompleted: admin.firstLoginCompleted,
   });
 });
 
@@ -367,18 +380,41 @@ const setup2FA = asyncHandler(async (req, res) => {
     throw new Error("Admin not found");
   }
 
-  // Generate secret
-  const secret = speakeasy.generateSecret({
-    name: `Admin (${admin.email})`,
-    issuer: "No-Excuse Challenge",
-  });
+  // If 2FA is already enabled, don't allow re-setup
+  if (admin.googleAuthenticatorEnabled) {
+    res.status(400);
+    throw new Error("2FA is already enabled");
+  }
 
-  // Generate QR code
-  const qrCodeUrl = await QRCode.toDataURL(secret.otpauth_url);
+  let secret;
+  let qrCodeUrl;
 
-  // Save secret temporarily (will be saved after verification)
-  admin.googleAuthenticatorSecret = secret.base32;
-  await admin.save();
+  // If there's an existing unverified secret, reuse it
+  if (admin.googleAuthenticatorSecret && !admin.googleAuthenticatorEnabled) {
+    secret = {
+      base32: admin.googleAuthenticatorSecret,
+      otpauth_url: speakeasy.otpauthURL({
+        secret: admin.googleAuthenticatorSecret,
+        label: `Admin (${admin.email})`,
+        issuer: "No-Excuse Challenge",
+        encoding: "base32",
+      }),
+    };
+    qrCodeUrl = await QRCode.toDataURL(secret.otpauth_url);
+  } else {
+    // Generate new secret
+    secret = speakeasy.generateSecret({
+      name: `Admin (${admin.email})`,
+      issuer: "No-Excuse Challenge",
+    });
+
+    // Generate QR code
+    qrCodeUrl = await QRCode.toDataURL(secret.otpauth_url);
+
+    // Save secret temporarily (will be saved after verification)
+    admin.googleAuthenticatorSecret = secret.base32;
+    await admin.save();
+  }
 
   return res.json({
     success: true,

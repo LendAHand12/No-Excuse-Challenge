@@ -570,7 +570,7 @@ const DormantUserPages = () => {
                   <td className="px-6 py-4">
                     <div className="flex gap-6">
                       {userInfo?.permissions
-                        .find((p) => p.page.pageName === 'admin-users-details')
+                        .find((p) => p.page.path === '/admin/users/:id')
                         ?.actions.includes('approve') &&
                         ele.status === 'PENDING' && (
                           <button
@@ -603,7 +603,7 @@ const DormantUserPages = () => {
                       {ele.status !== 'DELETED' &&
                         userInfo?.permissions
                           .find(
-                            (p) => p.page.pageName === 'admin-users-details',
+                            (p) => p.page.path === '/admin/users/:id',
                           )
                           ?.actions.includes('read') && (
                           <button
@@ -623,7 +623,7 @@ const DormantUserPages = () => {
 
                       {ele.status !== 'DELETED' &&
                         userInfo?.permissions
-                          .find((p) => p.page.pageName === 'admin-system')
+                          .find((p) => p.page.path === '/admin/system')
                           ?.actions.includes('read') && (
                           <button
                             onClick={() => handleTree(ele._id)}
@@ -675,7 +675,7 @@ const DormantUserPages = () => {
 
                       {ele.status !== 'DELETED' &&
                         userInfo?.permissions
-                          .find((p) => p.page.pageName === 'admin-move-system')
+                          .find((p) => p.page.path === '/admin/move-system')
                           ?.actions.includes('read') && (
                           <button
                             onClick={() => handleMoveSystem(ele._id)}
@@ -727,7 +727,7 @@ const DormantUserPages = () => {
                         )}
 
                       {userInfo?.permissions
-                        .find((p) => p.page.pageName === 'admin-users-details')
+                        .find((p) => p.page.path === '/admin/users/:id')
                         ?.actions.includes('delete') &&
                         ele.countPay === 0 &&
                         ele.status !== 'DELETED' && (

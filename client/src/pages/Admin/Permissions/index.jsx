@@ -49,7 +49,7 @@ const PermissionsPage = () => {
           <h1 className="text-2xl font-semibold">{t("permissions")}</h1>
           {
             userInfo?.permissions
-            .find((p) => p.page.pageName === 'admin-permissions-create')
+            .find((p) => p.page.path === '/admin/permissions/create')
             ?.actions.includes('read') && <button
             onClick={() => navigate("/admin/permissions/create")}
             className="px-8 py-4 text-sm flex justify-center items-center hover:underline bg-black text-NoExcuseChallenge font-bold rounded-full shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
@@ -93,7 +93,7 @@ const PermissionsPage = () => {
                   <td className="px-6 py-4">
                     {
                       userInfo?.permissions
-                      .find((p) => p.page.pageName === 'admin-permissions-detail')
+                      .find((p) => p.page.path === '/admin/permissions/:id')
                       ?.actions.includes('read') &&
                     <div className="flex gap-6">
                       {

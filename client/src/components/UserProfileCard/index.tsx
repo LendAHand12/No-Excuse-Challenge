@@ -305,7 +305,7 @@ const UserProfileCard = ({
                     </div>
                     <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 flex-shrink-0">
                       {userInfo?.permissions
-                        ?.find((p) => p.page.pageName === 'admin-users-details')
+                        ?.find((p) => p.page.path === '/admin/users/:id')
                         ?.actions.includes('update') &&
                         !isEditting &&
                         data.status !== 'DELETED' && (
@@ -320,7 +320,7 @@ const UserProfileCard = ({
                           </Button>
                         )}
                       {userInfo?.permissions
-                        ?.find((p) => p.page.pageName === 'admin-users-details')
+                        ?.find((p) => p.page.path === '/admin/users/:id')
                         ?.actions.includes('delete') &&
                         !isEditting &&
                         data.status !== 'DELETED' && (
@@ -1813,7 +1813,7 @@ const UserProfileCard = ({
               {/* Special Action Buttons */}
               <div className="space-y-2">
                 {userInfo?.permissions
-                  ?.find((p) => p.page.pageName === 'admin-users-details')
+                  ?.find((p) => p.page.path === '/admin/users/:id')
                   ?.actions.includes('update') &&
                   walletChange && (
                     <Button
@@ -1826,7 +1826,7 @@ const UserProfileCard = ({
                   )}
 
                 {userInfo?.permissions
-                  ?.find((p) => p.page.pageName === 'admin-users-details')
+                  ?.find((p) => p.page.path === '/admin/users/:id')
                   ?.actions.includes('update') &&
                   data.facetecTid === '' &&
                   data.status === 'UNVERIFY' && (
@@ -1843,7 +1843,7 @@ const UserProfileCard = ({
                   )}
 
                 {userInfo?.permissions
-                  ?.find((p) => p.page.pageName === 'admin-users-details')
+                  ?.find((p) => p.page.path === '/admin/users/:id')
                   ?.actions.includes('update') &&
                   data.preTier2Status === '' &&
                   data.status === 'APPROVED' && (

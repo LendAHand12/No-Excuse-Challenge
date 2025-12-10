@@ -41,7 +41,7 @@ const DropdownUser = () => {
             ></path>
           </svg>
         </span>
-        {userInfo?.userId}
+        {userInfo ? userInfo.role === 'admin' ? userInfo.email : userInfo?.userId : ''}
       </Link>
 
       {/* <!-- Dropdown Start --> */}

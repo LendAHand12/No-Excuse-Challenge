@@ -82,7 +82,7 @@ const ConfigPage = () => {
                     {ele.label}
                   </p>
                   {userInfo?.permissions
-                    .find((p) => p.page.pageName === 'admin-config')
+                    .find((p) => p.page.path === '/admin/config')
                     ?.actions.includes('update') && (
                     <button
                       onClick={() => onUpdate(ele._id)}
@@ -136,7 +136,7 @@ const ConfigPage = () => {
                       onChange={(e) => onChangeValue(list, ele, e.target.value)}
                       disabled={
                         userInfo?.permissions
-                          .find((p) => p.page.pageName === 'admin-config')
+                          .find((p) => p.page.path === '/admin/config')
                           ?.actions.includes('update')
                           ? false
                           : true
@@ -149,7 +149,7 @@ const ConfigPage = () => {
                       onChange={(e) => onChangeValue(list, ele, e)}
                       disabled={
                         userInfo?.permissions
-                          .find((p) => p.page.pageName === 'admin-config')
+                          .find((p) => p.page.path === '/admin/config')
                           ?.actions.includes('update')
                           ? false
                           : true

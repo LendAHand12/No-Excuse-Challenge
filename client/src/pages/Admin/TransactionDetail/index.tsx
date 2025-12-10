@@ -278,7 +278,7 @@ const AdminTransactionDetail = () => {
                     )}
                   {userInfo?.permissions
                     .find(
-                      (p) => p.page.pageName === 'admin-transactions-details',
+                      (p) => p.page.path === '/admin/transactions/:id',
                     )
                     ?.actions.includes('refund') &&
                     !trans.isHoldRefund &&
@@ -295,7 +295,7 @@ const AdminTransactionDetail = () => {
                     )}
                   {userInfo?.permissions
                     .find(
-                      (p) => p.page.pageName === 'admin-transactions-details',
+                      (p) => p.page.path === '/admin/transactions/:id',
                     )
                     ?.actions.includes('refund') &&
                     refunding && (
@@ -309,7 +309,7 @@ const AdminTransactionDetail = () => {
                     )}
                   {userInfo?.permissions
                     .find(
-                      (p) => p.page.pageName === 'admin-transactions-details',
+                      (p) => p.page.path === '/admin/transactions/:id',
                     )
                     ?.actions.includes('refund') &&
                     !trans.isHoldRefund && (

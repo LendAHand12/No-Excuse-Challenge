@@ -226,7 +226,7 @@ const EditPostPage = () => {
                 </>
               )}
               {userInfo?.permissions
-                .find((p) => p.page.pageName === 'admin-news-edit')
+                .find((p) => p.page.path === '/admin/news/:id/edit')
                 ?.actions.includes('update') && (
                 <button
                   type="submit"
@@ -237,7 +237,7 @@ const EditPostPage = () => {
               )}
 
               {userInfo?.permissions
-                .find((p) => p.page.pageName === 'admin-news-edit')
+                .find((p) => p.page.path === '/admin/news/:id/edit')
                 ?.actions.includes('delete') && (
                 <button
                   onClick={(e) => {

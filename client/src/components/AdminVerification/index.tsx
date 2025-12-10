@@ -12,7 +12,6 @@ interface AdminVerificationProps {
   onCancel: () => void;
   callbackData?: {
     token: string;
-    facetect_tid: string;
   };
 }
 
@@ -27,20 +26,21 @@ const AdminVerification: React.FC<AdminVerificationProps> = ({
   const [step, setStep] = useState<'face' | '2fa'>('face');
   const [loading, setLoading] = useState(false);
   const [faceVerified, setFaceVerified] = useState(false);
-  const [facetect_tid, setFacetect_tid] = useState<string>('');
   const [twoFactorCode, setTwoFactorCode] = useState<string>('');
+  const [callbackToken, setCallbackToken] = useState<string>('');
 
   // Reset when modal opens
   useEffect(() => {
     if (isOpen) {
       setStep('face');
       setFaceVerified(false);
-      setFacetect_tid('');
       setTwoFactorCode('');
+      setCallbackToken('');
       
       // If we have callback data, process face verification
-      if (callbackData && callbackData.token && callbackData.facetect_tid) {
-        setFacetect_tid(callbackData.facetect_tid);
+      // Only need token (callback token) to verify face verification passed
+      if (callbackData && callbackData.token) {
+        setCallbackToken(callbackData.token);
         setFaceVerified(true);
         setStep('2fa');
       }
@@ -69,7 +69,7 @@ const AdminVerification: React.FC<AdminVerificationProps> = ({
       return;
     }
 
-    if (!facetect_tid) {
+    if (!faceVerified || !callbackToken) {
       toast.error(t('Face verification is required'));
       return;
     }
@@ -78,8 +78,8 @@ const AdminVerification: React.FC<AdminVerificationProps> = ({
     try {
       const response = await Admin.verifyLogin({
         tempToken,
-        facetect_tid,
         twoFactorCode,
+        token: callbackToken, // Callback token is required to verify face verification passed
       });
       if (response.data.success) {
         toast.success(t('Login successful!'));
