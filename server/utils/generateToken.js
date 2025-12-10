@@ -4,11 +4,11 @@ import jwt from "jsonwebtoken";
 const generateToken = (id, option) => {
   if (option === "access") {
     return jwt.sign({ id }, process.env.JWT_ACCESS_TOKEN_SECRET, {
-      expiresIn: 60 * 60, // 1 hour
+      expiresIn: 60, // 1 minute (for testing)
     });
   } else if (option === "refresh") {
     return jwt.sign({ id }, process.env.JWT_REFRESH_TOKEN_SECRET, {
-      expiresIn: "7d", // 7 days
+      expiresIn: "5d", // 5 days
     });
   } else if (option === "email") {
     return jwt.sign({ id }, process.env.JWT_EMAIL_TOKEN_SECRET, {

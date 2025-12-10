@@ -202,7 +202,7 @@ const AdminUsersTable = ({
                 {/* Approve Button */}
                 {userInfo?.permissions
                   ?.find((p) => p.page.path === '/admin/users/:id')
-                  ?.actions.includes('approve') &&
+                  ?.actions.includes('update') &&
                   row.status === 'PENDING' && (
                     <button
                       onClick={() => onApprove(row._id)}
@@ -230,7 +230,7 @@ const AdminUsersTable = ({
                 {/* Tree Button */}
                 {row.status !== 'DELETED' &&
                   userInfo?.permissions
-                    ?.find((p) => p.page.path === '/admin/system')
+                    ?.find((p) => p.page.path === '/admin/system/:id')
                     ?.actions.includes('read') && (
                     <button
                       onClick={() => onTree(row._id)}
@@ -244,7 +244,7 @@ const AdminUsersTable = ({
                 {/* Move System Button */}
                 {row.status !== 'DELETED' &&
                   userInfo?.permissions
-                    ?.find((p) => p.page.path === '/admin/move-system')
+                    ?.find((p) => p.page.path === '/admin/move-system/:id')
                     ?.actions.includes('read') && (
                     <button
                       onClick={() => onMoveSystem(row._id)}

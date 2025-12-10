@@ -7,6 +7,7 @@ if (initialUserLocalStorage) {
   if (initialUser.accessToken) {
     Object.assign(defaultInitialState, {
       accessToken: initialUser.accessToken,
+      refreshToken: initialUser.refreshToken,
       userInfo: initialUser.userInfo,
     });
   }
@@ -40,5 +41,5 @@ const auth = createSlice({
 });
 
 const { reducer, actions } = auth;
-export const { LOGIN, LOGOUT, UPDATE_USER_INFO } = actions;
+export const { LOGIN, LOGOUT, UPDATE_USER_INFO, REFRESH_TOKEN } = actions;
 export default reducer;

@@ -6,6 +6,9 @@ const Admin = {
   login: (body) => {
     return API.post(`${URL_API_ADMIN}/login`, body);
   },
+  refresh: (body) => {
+    return API.post(`${URL_API_ADMIN}/refresh`, body);
+  },
   startFaceVerification: (body) => {
     return API.post(`${URL_API_ADMIN}/start-face-verification`, body);
   },

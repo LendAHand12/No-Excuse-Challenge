@@ -556,6 +556,40 @@ const getAllAdmins = asyncHandler(async (req, res) => {
   });
 });
 
+// Refresh access token for admin
+const refreshAdminToken = asyncHandler(async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    res.status(400);
+    throw new Error("Refresh token is required");
+  }
+
+  // Verify refresh token
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET);
+  } catch (error) {
+    res.status(401);
+    throw new Error("Invalid or expired refresh token");
+  }
+
+  // Check if admin exists and is active
+  const admin = await Admin.findById(decoded.id);
+  if (!admin || !admin.isActive) {
+    res.status(401);
+    throw new Error("Admin not found or inactive");
+  }
+
+  // Generate new access token
+  const accessToken = generateToken(admin._id, "access");
+
+  return res.json({
+    success: true,
+    accessToken,
+  });
+});
+
 export {
   protectAdminRoute,
   isRootAdmin,
@@ -569,5 +603,6 @@ export {
   createAdmin,
   getAdminInfo,
   getAllAdmins,
+  refreshAdminToken,
 };
 
