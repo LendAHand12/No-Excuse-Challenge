@@ -49,6 +49,7 @@ import {
   blockUserNotKYC,
   updateHewePrice,
   createWildCardForTier2Users,
+  updateErrLahCodeOver45,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
 import {
@@ -251,6 +252,18 @@ const cron8 = new CronJob(
   VIETNAM_TIMEZONE
 );
 
+const cron9 = new CronJob(
+  "30 06 * * *", // 7h sáng giờ Việt Nam
+  async () => {
+    console.log("Update errLahCode OVER45 start");
+    await updateErrLahCodeOver45();
+    console.log("Update errLahCode OVER45 done");
+  },
+  null,
+  true,
+  VIETNAM_TIMEZONE
+);
+
 await fixParentChildLinks();
 
 cron0.start();
@@ -263,6 +276,7 @@ cron4.start();
 cron6.start();
 cron7.start();
 cron8.start();
+cron9.start();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>

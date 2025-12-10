@@ -7,6 +7,7 @@ import {
   distributionHewe,
   rankingCalc,
   checkUserPreTier2,
+  updateErrLahCodeOver45,
 } from "../cronJob/index.js";
 import { recalculateTreeDieTimeForOldData, testCalculateDieTimeForTree } from "../common.js";
 
@@ -38,6 +39,10 @@ const cronjobs = [
   {
     title: "Recalculate Tree DieTime For Old Data",
     func: recalculateTreeDieTimeForOldData,
+  },
+  {
+    title: "Update errLahCode OVER45",
+    func: updateErrLahCodeOver45,
   },
 ];
 

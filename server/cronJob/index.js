@@ -573,3 +573,65 @@ export const createWildCardForTier2Users = asyncHandler(async () => {
     console.error("Error in createWildCardForTier2Users:", err);
   }
 });
+
+/**
+ * Cronjob: Cập nhật errLahCode = "OVER45" cho các user có Tree tier 1 với dieTime quá hạn
+ * Logic:
+ * - Lấy danh sách Tree ở tier 1 có dieTime quá ngày hiện tại
+ * - Cập nhật errLahCode của user tương ứng = "OVER45"
+ */
+export const updateErrLahCodeOver45 = asyncHandler(async () => {
+  try {
+    console.log("Update errLahCode OVER45 start");
+
+    // Lấy ngày hôm nay (bắt đầu từ 00:00:00)
+    const today = moment().startOf("day").toDate();
+
+    // Lấy danh sách Tree ở tier 1 có dieTime quá hạn
+    const expiredTrees = await Tree.find({
+      $and: [
+        { tier: 1 },
+        { isSubId: false },
+        { dieTime: { $exists: true, $ne: null } },
+        { dieTime: { $lt: today } }, // dieTime quá hạn (trước hôm nay)
+      ],
+    }).select("userId dieTime");
+
+    console.log(`Found ${expiredTrees.length} expired trees at tier 1`);
+
+    let updatedUsers = 0;
+    let skippedUsers = 0;
+
+    for (const tree of expiredTrees) {
+      try {
+        // Lấy user tương ứng
+        const user = await User.findById(tree.userId);
+
+        if (!user) {
+          console.log(`User not found for tree userId: ${tree.userId}`);
+          skippedUsers++;
+          continue;
+        }
+
+        // Chỉ cập nhật nếu errLahCode chưa phải là "OVER45"
+        if (user.errLahCode !== "OVER45") {
+          user.errLahCode = "OVER45";
+          await user.save();
+          updatedUsers++;
+          console.log(`Updated errLahCode to OVER45 for user: ${user.userId}`);
+        } else {
+          skippedUsers++;
+        }
+      } catch (err) {
+        console.error(`Error processing tree ${tree._id}:`, err);
+      }
+    }
+
+    console.log(`Updated ${updatedUsers} users`);
+    console.log(`Skipped ${skippedUsers} users (already OVER45 or not found)`);
+    console.log("Update errLahCode OVER45 done");
+  } catch (err) {
+    console.error("Error in updateErrLahCodeOver45:", err);
+    throw err;
+  }
+});
