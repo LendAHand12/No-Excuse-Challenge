@@ -593,7 +593,7 @@ export const updateErrLahCodeOver45 = asyncHandler(async () => {
         { tier: 1 },
         { isSubId: false },
         { dieTime: { $exists: true, $ne: null } },
-        { dieTime: { $lt: today } }, // dieTime quá hạn (trước hôm nay)
+        { dieTime: { $lte: today } }, // dieTime quá hạn (trước hôm nay)
       ],
     }).select("userId dieTime");
 

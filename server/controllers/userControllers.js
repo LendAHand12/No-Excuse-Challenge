@@ -345,8 +345,13 @@ const getUserById = asyncHandler(async (req, res) => {
 
     let notEnoughtChild = { countChild1: 0, countChild2: 0 };
     if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 3 || user.tier > 1) {
-      const branch1Count = await countAliveIdsInBranch(tree.children[0]);
-      const branch2Count = await countAliveIdsInBranch(tree.children[1]);
+      const treeTier1 = await Tree.findOne({
+        userId: user._id,
+        tier: 1,
+        isSubId: false,
+      });
+      const branch1Count = await countAliveIdsInBranch(treeTier1.children[0]);
+      const branch2Count = await countAliveIdsInBranch(treeTier1.children[1]);
       notEnoughtChild = { countChild1: branch1Count + 1, countChild2: branch2Count + 1 };
     }
 
@@ -828,8 +833,13 @@ const getUserInfo = asyncHandler(async (req, res) => {
 
     let notEnoughtChild = { countChild1: 0, countChild2: 0 };
     if (user.tryToTier2 === "YES" || user.currentLayer.slice(-1)[0] === 3 || user.tier > 1) {
-      const branch1Count = await countAliveIdsInBranch(tree.children[0]);
-      const branch2Count = await countAliveIdsInBranch(tree.children[1]);
+      const treeTier1 = await Tree.findOne({
+        userId: user._id,
+        tier: 1,
+        isSubId: false,
+      });
+      const branch1Count = await countAliveIdsInBranch(treeTier1.children[0]);
+      const branch2Count = await countAliveIdsInBranch(treeTier1.children[1]);
       notEnoughtChild = { countChild1: branch1Count + 1, countChild2: branch2Count + 1 };
     }
 
