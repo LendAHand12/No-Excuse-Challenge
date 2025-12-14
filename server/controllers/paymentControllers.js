@@ -84,9 +84,9 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
         let haveRefNotPayEnough = false;
         let registerFee = 10;
         let pigFee = 5;
-        let companyFee = 30;
-        let directCommissionFee = 55;
-        let referralCommissionFee = 10;
+        let companyFee = user.city === "IN" ? 20 : 30;
+        let directCommissionFee = user.city === "IN" ? 25 : 55;
+        let referralCommissionFee = user.city === "IN" ? 9 : 10;
         // giao dich dang ky
         payments.push({
           userName: "REGISTRATION & MANAGEMENT FEE",
@@ -946,8 +946,8 @@ const onDonePayment = asyncHandler(async (req, res) => {
       }
       const hewePriceConfig = await Config.findOne({ label: "HEWE_PRICE" });
       const hewePrice = responseHewe?.data?.ticker?.latest || hewePriceConfig.value;
-      const totalPriceHewe = 200;
-      const totalDayReturnHewe = 730;
+      const totalPriceHewe = user.city === "IN" ? 100 : 200;
+      const totalDayReturnHewe = user.city === "IN" ? 540 : 730;
       const totalHewe = Math.round(totalPriceHewe / hewePrice);
       const hewePerDay = Math.round(totalHewe / totalDayReturnHewe);
 
