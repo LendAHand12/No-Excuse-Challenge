@@ -1004,9 +1004,8 @@ export const checkAbnormalIncomeForUser = async (userId) => {
     // So sánh: X = Y_total + user.availableUsdt + Z
     // Y_total = Y (Claim) + additionalIncomeFromWithdraw (Withdraw có hash khác với Claim) + dreamPoolReward (10$ nếu có trong Honor)
     // Z là phần yêu cầu rút của user đang ở trạng thái pending, cũng được tính là phần user rút
-    const expectedTotal =
-      Y_total + (user.availableUsdt || 0) + Z + 402 - (user.shortfallAmount || 0);
-    console.log({ expectedTotal, X, dreamPoolReward });
+    const detbTier = user.shortfallAmount > 0 ? 402 - user.shortfallAmount : 0;
+    const expectedTotal = Y_total + (user.availableUsdt || 0) + Z + detbTier;
     const difference = Math.abs(expectedTotal - (X + dreamPoolReward));
 
     // Kiểm tra có bất thường không (cho phép sai số nhỏ do làm tròn)

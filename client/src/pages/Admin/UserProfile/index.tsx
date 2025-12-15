@@ -31,8 +31,11 @@ const UserProfile = () => {
   const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [loadingCheckKyc, setLoadingCheckKyc] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
-  const [loadingCheckAbnormalIncome, setLoadingCheckAbnormalIncome] = useState(false);
-  const [abnormalIncomeResult, setAbnormalIncomeResult] = useState<string | null>(null);
+  const [loadingCheckAbnormalIncome, setLoadingCheckAbnormalIncome] =
+    useState(false);
+  const [abnormalIncomeResult, setAbnormalIncomeResult] = useState<
+    string | null
+  >(null);
   const [showAbnormalIncomeModal, setShowAbnormalIncomeModal] = useState(false);
   const [data, setData] = useState({});
   const [isEditting, setEditting] = useState(false);
@@ -2076,7 +2079,7 @@ const UserProfile = () => {
                 )}
                 {userInfo?.permissions
                   ?.find((p) => p.page.pageName === 'admin-users-details')
-                  ?.actions.includes('update') && (
+                  ?.actions.includes('read') && (
                   <div
                     onClick={handleCheckAbnormalIncome}
                     className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-purple-500 text-white"
