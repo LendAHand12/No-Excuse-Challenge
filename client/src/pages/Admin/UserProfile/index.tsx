@@ -31,6 +31,9 @@ const UserProfile = () => {
   const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [loadingCheckKyc, setLoadingCheckKyc] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
+  const [loadingCheckAbnormalIncome, setLoadingCheckAbnormalIncome] = useState(false);
+  const [abnormalIncomeResult, setAbnormalIncomeResult] = useState<string | null>(null);
+  const [showAbnormalIncomeModal, setShowAbnormalIncomeModal] = useState(false);
   const [data, setData] = useState({});
   const [isEditting, setEditting] = useState(false);
   const [refresh, setRefresh] = useState(false);
@@ -577,6 +580,30 @@ const UserProfile = () => {
   const handleOpenCreateWildCardModal = useCallback(() => {
     createWildCardModal.openModal();
   }, [createWildCardModal]);
+
+  const handleCheckAbnormalIncome = async () => {
+    setLoadingCheckAbnormalIncome(true);
+    await User.checkAbnormalIncome(id)
+      .then((response) => {
+        const { content, isAbnormal, data } = response.data;
+        setAbnormalIncomeResult(content);
+        setShowAbnormalIncomeModal(true);
+        setLoadingCheckAbnormalIncome(false);
+        if (isAbnormal) {
+          toast.warning('Phát hiện thu nhập bất thường!');
+        } else {
+          toast.success('Thu nhập bình thường');
+        }
+      })
+      .catch((error) => {
+        let message =
+          error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message;
+        toast.error(t(message));
+        setLoadingCheckAbnormalIncome(false);
+      });
+  };
 
   const renderRank = (level) => {
     return USER_RANKINGS.find((ele) => level <= ele.value)?.label;
@@ -2047,6 +2074,17 @@ const UserProfile = () => {
                     {t('userProfile.buttons.createWildCard')}
                   </div>
                 )}
+                {userInfo?.permissions
+                  ?.find((p) => p.page.pageName === 'admin-users-details')
+                  ?.actions.includes('update') && (
+                  <div
+                    onClick={handleCheckAbnormalIncome}
+                    className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-purple-500 text-white"
+                  >
+                    {loadingCheckAbnormalIncome && <Loading />}
+                    {!loadingCheckAbnormalIncome && 'Kiểm tra thu nhập'}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -2226,6 +2264,45 @@ const UserProfile = () => {
               </div>
             )}
           </form>
+        </div>
+      )}
+      {/* Modal hiển thị kết quả kiểm tra thu nhập */}
+      {showAbnormalIncomeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-purple-500 text-white px-6 py-4 flex justify-between items-center">
+              <h2 className="text-xl font-bold">Kết quả kiểm tra thu nhập</h2>
+              <button
+                onClick={() => {
+                  setShowAbnormalIncomeModal(false);
+                  setAbnormalIncomeResult(null);
+                }}
+                className="text-white hover:text-gray-200 text-2xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1">
+              {abnormalIncomeResult ? (
+                <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-50 p-4 rounded border">
+                  {abnormalIncomeResult}
+                </pre>
+              ) : (
+                <p className="text-gray-500">Không có dữ liệu</p>
+              )}
+            </div>
+            <div className="bg-gray-100 px-6 py-4 flex justify-end">
+              <button
+                onClick={() => {
+                  setShowAbnormalIncomeModal(false);
+                  setAbnormalIncomeResult(null);
+                }}
+                className="bg-purple-500 text-white px-6 py-2 rounded-full hover:bg-purple-600 transition-colors"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </DefaultLayout>

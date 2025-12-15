@@ -44,6 +44,7 @@ import { getPriceHewe } from "../utils/getPriceHewe.js";
 import PreTier2 from "../models/preTier2Model.js";
 import Honor from "../models/honorModel.js";
 import WildCard from "../models/wildCardModel.js";
+import { checkAbnormalIncomeForUser } from "../utils/methods.js";
 
 dotenv.config();
 
@@ -393,6 +394,7 @@ const getUserById = asyncHandler(async (req, res) => {
 
         let docs = await Transaction.find({
           username_to: tree.userName,
+          status: "SUCCESS",
         }).lean();
         let totalAmountUsdt = docs.reduce((sum, item) => sum + (item.amount || 0), 0);
 
@@ -3739,6 +3741,27 @@ const getTreesByUserName = asyncHandler(async (req, res) => {
   });
 });
 
+// Kiểm tra thu nhập bất thường cho một user cụ thể
+const checkUserAbnormalIncome = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    res.status(400);
+    throw new Error("User ID is required");
+  }
+
+  try {
+    const result = await checkAbnormalIncomeForUser(id);
+    res.json({
+      success: true,
+      ...result,
+    });
+  } catch (error) {
+    res.status(500);
+    throw new Error(error.message || "Error checking abnormal income");
+  }
+});
+
 export {
   getUserProfile,
   getAllUsers,
@@ -3785,4 +3808,5 @@ export {
   getAllUsersOver45,
   getAllUsersPreTier2,
   getTreesByUserName,
+  checkUserAbnormalIncome,
 };

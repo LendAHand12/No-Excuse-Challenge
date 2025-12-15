@@ -2,12 +2,16 @@ import moment from "moment-timezone";
 import NextUserTier from "../models/nextUserTierModel.js";
 import Tree from "../models/treeModel.js";
 import User from "../models/userModel.js";
+import Transaction from "../models/transactionModel.js";
+import Claim from "../models/claimModel.js";
 import axios from "axios";
 import ADMIN_ID from "../constants/AdminId.js";
 import { areArraysEqual } from "../cronJob/index.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import PreTier2 from "../models/preTier2Model.js";
+import Withdraw from "../models/withdrawModel.js";
+import Honor from "../models/honorModel.js";
 
 export const getParentUser = async (userId, tier) => {
   const tree = await Tree.findOne({ userId, tier });
@@ -903,4 +907,155 @@ export const isUserExpired = async (treeId) => {
 
   // Nếu dieTime đã quá hạn (today >= dieTime) thì trả về true
   return todayStart.isSameOrAfter(dieTimeStart);
+};
+
+/**
+ * Kiểm tra thu nhập bất thường của một user cụ thể
+ * Logic giống checkAbnormalIncome nhưng chỉ check 1 user
+ * @param {string} userId - ID của user cần kiểm tra
+ * @returns {object} - Kết quả kiểm tra
+ */
+export const checkAbnormalIncomeForUser = async (userId) => {
+  try {
+    const user = await User.findById(userId).select(
+      "_id userId email availableUsdt createdAt shortfallAmount"
+    );
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Tính X = tổng amount từ Transaction có userId_to = user._id
+    const transactionResult = await Transaction.aggregate([
+      {
+        $match: {
+          userId_to: user._id.toString(),
+          status: "SUCCESS",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    const X = transactionResult[0]?.totalAmount || 0;
+
+    // Tính Y = tổng amount từ Claim có userId = user._id
+    // Lấy cả hash để so sánh với Withdraw
+    const claimResult = await Claim.find({
+      userId: user._id,
+      coin: "USDT",
+    }).select("amount hash");
+
+    const Y = claimResult.reduce((sum, claim) => sum + (claim.amount || 0), 0);
+
+    // Lấy danh sách hash từ Claim
+    const claimHashes = claimResult
+      .map((claim) => claim.hash)
+      .filter((hash) => hash && hash.trim() !== "");
+
+    // Lấy tất cả Withdraw của user (không chỉ PENDING)
+    const allWithdraws = await Withdraw.find({
+      userId: user._id,
+    }).select("amount hash status");
+
+    // Lọc những Withdraw có hash không nằm trong danh sách hash của Claim
+    // Những withdraw này vẫn được tính là thu nhập của user
+    const withdrawsWithDifferentHash = allWithdraws.filter(
+      (withdraw) =>
+        withdraw.hash && withdraw.hash.trim() !== "" && !claimHashes.includes(withdraw.hash)
+    );
+
+    // Tính tổng amount của những Withdraw có hash khác
+    const additionalIncomeFromWithdraw = withdrawsWithDifferentHash.reduce(
+      (sum, withdraw) => sum + (withdraw.amount || 0),
+      0
+    );
+
+    // Kiểm tra xem user có trong Honor không (phần thưởng dreampool)
+    const honorRecord = await Honor.findOne({ userId: user._id });
+    const dreamPoolReward = honorRecord ? 10 : 0; // 10$ nếu có trong Honor
+
+    // Cộng vào Y (tổng thu nhập từ Claim + Withdraw có hash khác + phần thưởng dreampool)
+    const Y_total = Y + additionalIncomeFromWithdraw;
+
+    // Tính Z = tổng amount từ Withdraw có userId = user._id và status = "PENDING"
+    // Z là phần yêu cầu rút của user đang ở trạng thái pending, cũng được tính là phần user rút
+    const withdrawResult = await Withdraw.aggregate([
+      {
+        $match: {
+          userId: user._id,
+          status: "PENDING",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    const Z = withdrawResult[0]?.totalAmount || 0;
+
+    // So sánh: X = Y_total + user.availableUsdt + Z
+    // Y_total = Y (Claim) + additionalIncomeFromWithdraw (Withdraw có hash khác với Claim) + dreamPoolReward (10$ nếu có trong Honor)
+    // Z là phần yêu cầu rút của user đang ở trạng thái pending, cũng được tính là phần user rút
+    const expectedTotal =
+      Y_total + (user.availableUsdt || 0) + Z + 402 - (user.shortfallAmount || 0);
+    console.log({ expectedTotal, X, dreamPoolReward });
+    const difference = Math.abs(expectedTotal - (X + dreamPoolReward));
+
+    // Kiểm tra có bất thường không (cho phép sai số nhỏ do làm tròn)
+    const isAbnormal = difference > 10 && Y > 0;
+
+    // Tạo nội dung kết quả giống như file xuất ra
+    let content = `KIỂM TRA THU NHẬP BẤT THƯỜNG\n`;
+    content += `Thời gian kiểm tra: ${moment
+      .tz("Asia/Ho_Chi_Minh")
+      .format("YYYY-MM-DD HH:mm:ss")}\n`;
+    content += `User ID: ${user.userId}\n`;
+    content += `Email: ${user.email}\n`;
+    content += `_id: ${user._id.toString()}\n`;
+    content += `Created At: ${moment(user.createdAt).format("YYYY-MM-DD HH:mm:ss")}\n`;
+    content += `Tổng thu nhập (tất cả các Tier): ${X.toFixed(2)}\n`;
+    content += `Tổng Claim: ${Y.toFixed(2)}\n`;
+    content += `Tổng Withdraw: ${additionalIncomeFromWithdraw.toFixed(2)}\n`;
+    content += `Phần thưởng Dreampool (Honor): ${dreamPoolReward.toFixed(2)}\n`;
+    content += `Tổng Withdraw PENDING - Yêu cầu rút đang chờ: ${Z.toFixed(2)}\n`;
+    content += `Available USDT (hiện tại): ${(user.availableUsdt || 0).toFixed(2)}\n`;
+    content += `Tiền nợ tier 2: ${(user.shortfallAmount || 0).toFixed(2)}\n`;
+    // content += `Expected Total (Y_total + availableUsdt + Z + 402 - shortfallAmount): ${expectedTotal.toFixed(
+    //   2
+    // )}\n`;
+    content += `Difference: ${difference.toFixed(2)}\n`;
+    content += `Trạng thái: ${isAbnormal ? "⚠️ BẤT THƯỜNG" : "✅ BÌNH THƯỜNG"}\n`;
+
+    return {
+      isAbnormal,
+      content,
+      data: {
+        userId: user.userId,
+        email: user.email,
+        _id: user._id.toString(),
+        createdAt: user.createdAt,
+        X: X,
+        Y: Y,
+        Y_total: Y_total,
+        additionalIncomeFromWithdraw: additionalIncomeFromWithdraw,
+        dreamPoolReward: dreamPoolReward,
+        Z: Z,
+        availableUsdt: user.availableUsdt || 0,
+        shortfallAmount: user.shortfallAmount || 0,
+        expectedTotal: expectedTotal,
+        difference: difference,
+      },
+    };
+  } catch (err) {
+    console.error(`Error checking abnormal income for user: ${err.message}`);
+    throw err;
+  }
 };

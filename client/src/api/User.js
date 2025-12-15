@@ -141,6 +141,9 @@ const User = {
   getSubInfo: () => {
     return API.post(`${URL_API_USER}/sub-info`);
   },
+  checkAbnormalIncome: (id) => {
+    return API.get(`${URL_API_USER}/${id}/check-abnormal-income`);
+  },
 };
 
 export default User;

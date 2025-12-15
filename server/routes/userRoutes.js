@@ -41,6 +41,7 @@ import {
   getAllUsersOver45,
   getAllUsersPreTier2,
   getTreesByUserName,
+  checkUserAbnormalIncome,
 } from "../controllers/userControllers.js";
 import { protectRoute, isAdmin, isSuperAdmin } from "../middleware/authMiddleware.js";
 import uploadCCCD from "../middleware/uploadCCCD.js";
@@ -132,5 +133,7 @@ router.route("/getLastUserInTier").post(protectRoute, isAdmin, getLastUserInTier
 router.route("/removeLastUserInTier").post(protectRoute, isAdmin, removeLastUserInTier);
 
 router.route("/sub-info").post(protectRoute, getSubUserProfile);
+
+router.route("/:id/check-abnormal-income").get(protectRoute, isAdmin, checkUserAbnormalIncome);
 
 export default router;
