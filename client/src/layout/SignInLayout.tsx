@@ -39,6 +39,26 @@ const SignInLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
                 <img src={Logo} alt="Logo" width={120} />
               </NavLink>
               <div className="flex items-center gap-4">
+                {/* Language Switcher - Mobile */}
+                <div className="lg:hidden flex items-center gap-2 border bg-white rounded-3xl px-3 py-1.5 font-medium">
+                  <button 
+                    onClick={() => onChangeLanguage('vi')}
+                    className={`px-2 py-0.5 rounded text-sm ${
+                      i18n.language.includes('vi') ? 'bg-black text-white' : 'hover:bg-gray-100 text-black'
+                    }`}
+                  >
+                    Vie
+                  </button>
+                  <span className="text-black">/</span>
+                  <button 
+                    onClick={() => onChangeLanguage('en')}
+                    className={`px-2 py-0.5 rounded text-sm ${
+                      i18n.language.includes('en') ? 'bg-black text-white' : 'hover:bg-gray-100 text-black'
+                    }`}
+                  >
+                    En
+                  </button>
+                </div>
                 <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
                   <button
                     aria-controls="sidebar"
