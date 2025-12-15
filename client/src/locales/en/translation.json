@@ -1381,5 +1381,27 @@
     "cancel": "Cancel"
   },
   "status": "Status",
-  "Wild Card": "Wild Card"
+  "Wild Card": "Wild Card",
+  "Available HEWE": "Available HEWE",
+  "Reward HEWE": "Reward HEWE",
+  "WITHDRAW HEWE": "WITHDRAW HEWE",
+  "Available USDT": "Available USDT",
+  "Processing USDT": "Processing USDT",
+  "WITHDRAW USDT": "WITHDRAW USDT",
+  "Filter by coin": "Filter by coin",
+  "All Coins": "All Coins",
+  "Processing...": "Processing...",
+  "Congratulations! You're on the waiting list for Tier 2 in the Pre-Tier2 program": "Congratulations! You're on the waiting list for Tier 2 in the Pre-Tier2 program",
+  "Congratulations! You're eligible for Tier 2 with the new Pre-Tier2 program.": "Congratulations! You're eligible for Tier 2 with the new Pre-Tier2 program.",
+  "Go to the payment page now.": "Go to the payment page now.",
+  "Tier 2 entered": "Tier 2 entered",
+  "Tier 1 :": "Tier 1 :",
+  "Tier 2 :": "Tier 2 :",
+  "Tier 2 Users": "Tier 2 Users",
+  "Available USDT :": "Available USDT :",
+  "Available HEWE :": "Available HEWE :",
+  "Available AMC :": "Available AMC :",
+  "Minimum withdrawal amount is {amount} HEWE. Your available balance is {balance} HEWE.": "Minimum withdrawal amount is {amount} HEWE. Your available balance is {balance} HEWE.",
+  "Completed ranking time": "Completed ranking time",
+  "Disqualified (Tier 1)": "Disqualified (Tier 1)"
 }

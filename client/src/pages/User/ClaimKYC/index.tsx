@@ -76,7 +76,7 @@ const ClaimKYCPage = () => {
       <ToastContainer />
       <div className="min-h-screen bg-white text-gray-900 flex flex-col justify-center items-center">
         {loadingClaim ? (
-          <h1>Processing...</h1>
+          <h1>{t('Processing...')}</h1>
         ) : claimSuccess ? (
           <div className="flex flex-col items-center gap-10">
             <svg

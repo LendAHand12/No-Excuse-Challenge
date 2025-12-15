@@ -47,7 +47,7 @@ const RegisterKYCPage = () => {
       <ToastContainer />
       <div className="min-h-screen bg-white text-gray-900 flex justify-center items-center">
         {loading ? (
-          <h1>Processing...</h1>
+          <h1>{t('Processing...')}</h1>
         ) : (
           <div className="flex flex-col items-center gap-10">
             <svg

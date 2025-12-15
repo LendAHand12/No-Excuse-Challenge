@@ -120,9 +120,9 @@ export default function SwapPage() {
 
               {/* Balances info */}
               <div className="bg-gray-700 p-3 rounded-xl mb-4 text-gray-300 space-y-1">
-                <div>Available USDT : {availableUsdt}</div>
-                <div>Available HEWE : {availableHewe}</div>
-                <div>Available AMC : {availableAmc}</div>
+                <div>{t('Available USDT :')} {availableUsdt}</div>
+                <div>{t('Available HEWE :')} {availableHewe}</div>
+                <div>{t('Available AMC :')} {availableAmc}</div>
               </div>
 
               {/* From */}

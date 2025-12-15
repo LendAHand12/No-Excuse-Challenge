@@ -545,8 +545,7 @@ const Profile = () => {
             role="alert"
           >
             <span className="block sm:inline">
-              Congratulations! You’re on the waiting list for Tier 2 in the
-              Pre-Tier2 program
+              {t("Congratulations! You're on the waiting list for Tier 2 in the Pre-Tier2 program")}
             </span>
           </div>
         )}
@@ -557,14 +556,13 @@ const Profile = () => {
             role="alert"
           >
             <span className="block sm:inline">
-              Congratulations! You’re eligible for Tier 2 with the new Pre-Tier2
-              program.{' '}
+              {t("Congratulations! You're eligible for Tier 2 with the new Pre-Tier2 program.")}{' '}
               <Link
                 to="/user/payment-for-tier-with-pre-tier-2-pool"
                 className="underline"
               >
                 {' '}
-                Go to the payment page now.
+                {t("Go to the payment page now.")}
               </Link>
             </span>
           </div>
@@ -774,7 +772,7 @@ const Profile = () => {
               {/* Tier 2: Tier 2 Entered */}
               {currentTier === 2 && tier >= 2 && userInfo.tier2Time && (
                 <div className="flex justify-between bg-[#E5E9EE] py-2 px-4 rounded-lg">
-                  <p>Tier 2 entered</p>
+                  <p>{t('Tier 2 entered')}</p>
                   <p>
                     {' '}
                     {new Date(userInfo.tier2Time).toLocaleDateString('vi')}
@@ -782,7 +780,7 @@ const Profile = () => {
                 </div>
               )}
               <div className="flex justify-between py-2 px-4">
-                <p>Completed ranking time</p>
+                <p>{t('Completed ranking time')}</p>
                 <p className="whitespace-nowrap">
                   {userInfo[`tier${ranking}Time`]}
                 </p>
@@ -792,7 +790,7 @@ const Profile = () => {
                 <>
                   <div className="flex flex-col justify-between py-3 px-4">
                     <div className="flex items-center justify-between">
-                      <div>Tier 1 :</div>
+                      <div>{t('Tier 1 :')}</div>
                       <div
                         className={`w-10 h-5 rounded-md ${
                           tier1?.isRed
@@ -809,7 +807,7 @@ const Profile = () => {
                     </div>
                   </div>
                   <div className="flex items-center justify-between py-2 px-4">
-                    <span>Disqualified (Tier 1)</span>
+                    <span>{t('Disqualified (Tier 1)')}</span>
                     <span className="ml-auto">
                       {dieTimeTier1
                         ? new Date(dieTimeTier1).toLocaleDateString('vi')
@@ -823,7 +821,7 @@ const Profile = () => {
                 <>
                   <div className="flex flex-col justify-between py-3 px-4">
                     <div className="flex items-center justify-between">
-                      <div>Tier 2 :</div>
+                      <div>{t('Tier 2 :')}</div>
                       <div
                         className={`w-10 h-5 rounded-md ${
                           isDisableTier2
@@ -1108,7 +1106,7 @@ const Profile = () => {
             {currentTier === 2 && tier >= 2 && (
               <div className="bg-[#FAFBFC] p-4 rounded-2xl">
                 <div className="py-2 px-4">
-                  <p className="uppercase mt-2 font-bold">Tier 2 Users</p>
+                  <p className="uppercase mt-2 font-bold">{t('Tier 2 Users')}</p>
                   <div className="py-2">
                     <p className="font-medium">Branch 1 :</p>
                     <ul className="flex flex-row flex-wrap gap-2">

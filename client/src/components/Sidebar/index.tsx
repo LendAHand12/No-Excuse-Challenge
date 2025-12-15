@@ -344,30 +344,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, routes }: SidebarProps) => {
       <div className="absolute z-0 bottom-4 lg:left-8 p-10 lg:p-0">
         <img src={COVER3} />
         <div className="flex items-center justify-between">
-          <p className="w-1/2 text-white">
-            {t('sidebar.copyright')}
-          </p>
-          <div className="flex text-gray-500 lg:hidden items-center gap-2 font-medium">
-            <div className="flex gap-2">
-              <span
-                onClick={() => onChangeLanguage('vi')}
-                className={`${
-                  i18n.language.includes('vi') ? 'text-NoExcuseChallenge' : ''
-                } cursor-pointer`}
-              >
-                Vie
-              </span>
-              <span>/</span>
-              <span
-                onClick={() => onChangeLanguage('en')}
-                className={`${
-                  i18n.language.includes('en') ? 'text-NoExcuseChallenge' : ''
-                } cursor-pointer`}
-              >
-                Eng
-              </span>
-            </div>
-          </div>
+          <p className="w-1/2 text-white">{t('sidebar.copyright')}</p>
           {/* <select
             className="lg:hidden bg-inherit text-NoExcuseChallenge"
             onChange={onChangeLanguage}
@@ -376,6 +353,30 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, routes }: SidebarProps) => {
             <option value="vi">Vie</option>
             <option value="en">En</option>
           </select> */}
+        </div>
+      </div>
+      {/* Language Switcher - Mobile only, at bottom of sidebar */}
+      <div className="lg:hidden mt-auto pb-4 px-6">
+        <div className="flex text-gray-500 items-center gap-2 font-medium justify-center">
+          <div className="flex gap-2">
+            <span
+              onClick={() => onChangeLanguage('vi')}
+              className={`${
+                i18n.language.includes('vi') ? 'text-NoExcuseChallenge' : ''
+              } cursor-pointer`}
+            >
+              Vie
+            </span>
+            <span>/</span>
+            <span
+              onClick={() => onChangeLanguage('en')}
+              className={`${
+                i18n.language.includes('en') ? 'text-NoExcuseChallenge' : ''
+              } cursor-pointer`}
+            >
+              Eng
+            </span>
+          </div>
         </div>
       </div>
     </aside>

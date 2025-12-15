@@ -251,7 +251,7 @@ export default function UserAssetsPage() {
             {/* HEWE Section */}
             <div className="bg-[#FAFBFC] p-4 rounded-2xl flex 2xl:flex-row flex-col items-start 2xl:items-center xl:justify-between gap-8 mb-6">
               <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
-                <p className="font-medium">Available HEWE</p>
+                <p className="font-medium">{t('Available HEWE')}</p>
                 <input
                   className="bg-black rounded-xl text-white p-2 flex-1"
                   readOnly
@@ -259,7 +259,7 @@ export default function UserAssetsPage() {
                 />
               </div>
               <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
-                <p className="font-medium">Reward HEWE</p>
+                <p className="font-medium">{t('Reward HEWE')}</p>
                 <input
                   className="bg-black rounded-xl text-white p-2 flex-1"
                   readOnly
@@ -274,19 +274,22 @@ export default function UserAssetsPage() {
                 onClick={claimHewe}
                 title={
                   !canWithdrawHewe && limitAmountHewe > 0
-                    ? `Minimum withdrawal amount is ${limitAmountHewe.toLocaleString()} HEWE. Your available balance is ${assets.availableHewe.toLocaleString()} HEWE.`
+                    ? t('Minimum withdrawal amount is {amount} HEWE. Your available balance is {balance} HEWE.', {
+                        amount: limitAmountHewe.toLocaleString(),
+                        balance: assets.availableHewe.toLocaleString(),
+                      })
                     : ''
                 }
               >
                 {loadingClaimHewe && <Loading />}
-                WITHDRAW HEWE
+                {t('WITHDRAW HEWE')}
               </button>
             </div>
 
             {/* USDT Section */}
             <div className="bg-[#FAFBFC] p-4 rounded-2xl flex 2xl:flex-row flex-col items-start xl:items-center gap-8 mb-6">
               <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
-                <p className="font-medium">Available USDT</p>
+                <p className="font-medium">{t('Available USDT')}</p>
                 <input
                   className="bg-black rounded-xl text-white p-2 flex-1"
                   readOnly
@@ -294,7 +297,7 @@ export default function UserAssetsPage() {
                 />
               </div>
               <div className="w-full flex gap-4 items-center justify-between lg:justify-center">
-                <p className="font-medium">Processing USDT</p>
+                <p className="font-medium">{t('Processing USDT')}</p>
                 <input
                   className="bg-black rounded-xl text-white p-2 flex-1"
                   readOnly
@@ -308,7 +311,7 @@ export default function UserAssetsPage() {
                 disabled={!canWithdrawUsdt}
                 onClick={() => setShowModal(true)}
               >
-                WITHDRAW USDT
+                {t('WITHDRAW USDT')}
               </button>
             </div>
 
@@ -320,10 +323,10 @@ export default function UserAssetsPage() {
                 </h2>
                 <Select value={selectedCoin} onValueChange={setSelectedCoin}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by coin" />
+                    <SelectValue placeholder={t('Filter by coin')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ALL">All Coins</SelectItem>
+                    <SelectItem value="ALL">{t('All Coins')}</SelectItem>
                     <SelectItem value="HEWE">HEWE</SelectItem>
                     <SelectItem value="USDT">USDT</SelectItem>
                   </SelectContent>
