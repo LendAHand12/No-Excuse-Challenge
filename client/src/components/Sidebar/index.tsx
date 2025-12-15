@@ -355,30 +355,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, routes }: SidebarProps) => {
           </select> */}
         </div>
       </div>
-      {/* Language Switcher - Mobile only, at bottom of sidebar */}
-      <div className="lg:hidden mt-auto pb-4 px-6">
-        <div className="flex text-gray-500 items-center gap-2 font-medium justify-center">
-          <div className="flex gap-2">
-            <span
-              onClick={() => onChangeLanguage('vi')}
-              className={`${
-                i18n.language.includes('vi') ? 'text-NoExcuseChallenge' : ''
-              } cursor-pointer`}
-            >
-              Vie
-            </span>
-            <span>/</span>
-            <span
-              onClick={() => onChangeLanguage('en')}
-              className={`${
-                i18n.language.includes('en') ? 'text-NoExcuseChallenge' : ''
-              } cursor-pointer`}
-            >
-              Eng
-            </span>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 };

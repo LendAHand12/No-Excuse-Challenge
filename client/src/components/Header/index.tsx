@@ -68,6 +68,11 @@ const Header = (props: {
             </div>
           )}
           
+          {/* Language Switcher - Mobile */}
+          <div className="lg:hidden flex items-center gap-2 border bg-white rounded-3xl px-3 py-1.5 font-medium">
+            <DropdownLanguage />
+          </div>
+          
           {/* Menu button - always visible on mobile, hidden on desktop, positioned at the rightmost */}
           <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
             <button
