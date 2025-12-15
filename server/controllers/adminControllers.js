@@ -225,8 +225,9 @@ const verifyLogin = asyncHandler(async (req, res) => {
   const accessToken = generateToken(admin._id, "access");
   const refreshToken = generateToken(admin._id, "refresh");
 
-  // Get permissions for admin role
-  const permissions = await Permission.findOne({ role: "admin" }).populate(
+  // Get permissions for admin's role
+  const adminRole = admin.role || "admin";
+  const permissions = await Permission.findOne({ role: adminRole }).populate(
     "pagePermissions.page"
   );
 
@@ -248,7 +249,7 @@ const verifyLogin = asyncHandler(async (req, res) => {
       email: admin.email,
       isRootAdmin: admin.isRootAdmin,
       firstLoginCompleted: admin.firstLoginCompleted,
-      role: "admin",
+      role: adminRole,
       isAdmin: true,
       permissions: formattedPermissions,
     },
@@ -476,11 +477,16 @@ const verifyAndEnable2FA = asyncHandler(async (req, res) => {
 
 // Create new admin (only root admin can do this)
 const createAdmin = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
   if (!email || !password) {
     res.status(400);
     throw new Error("Email and password are required");
+  }
+
+  if (!role) {
+    res.status(400);
+    throw new Error("Role is required");
   }
 
   // Check if email already exists
@@ -490,10 +496,18 @@ const createAdmin = asyncHandler(async (req, res) => {
     throw new Error("Admin with this email already exists");
   }
 
+  // Verify that the role exists in Permission model
+  const permissionExists = await Permission.findOne({ role });
+  if (!permissionExists) {
+    res.status(400);
+    throw new Error(`Permission role "${role}" does not exist. Please create it first.`);
+  }
+
   // Create new admin
   const newAdmin = await Admin.create({
     email,
     password,
+    role,
     isRootAdmin: false,
     createdBy: req.admin._id,
     firstLoginCompleted: false,
@@ -507,6 +521,7 @@ const createAdmin = asyncHandler(async (req, res) => {
     admin: {
       _id: newAdmin._id,
       email: newAdmin.email,
+      role: newAdmin.role,
       isRootAdmin: newAdmin.isRootAdmin,
     },
   });
@@ -514,8 +529,9 @@ const createAdmin = asyncHandler(async (req, res) => {
 
 // Get current admin info
 const getAdminInfo = asyncHandler(async (req, res) => {
-  // Get permissions for admin role
-  const permissions = await Permission.findOne({ role: "admin" }).populate(
+  // Get permissions for admin's role
+  const adminRole = req.admin.role || "admin";
+  const permissions = await Permission.findOne({ role: adminRole }).populate(
     "pagePermissions.page"
   );
 
@@ -536,7 +552,7 @@ const getAdminInfo = asyncHandler(async (req, res) => {
       firstLoginCompleted: req.admin.firstLoginCompleted,
       faceRegistered: req.admin.faceRegistered,
       googleAuthenticatorEnabled: req.admin.googleAuthenticatorEnabled,
-      role: "admin",
+      role: adminRole,
       isAdmin: true,
       permissions: formattedPermissions,
     },
@@ -553,6 +569,121 @@ const getAllAdmins = asyncHandler(async (req, res) => {
   return res.json({
     success: true,
     admins,
+  });
+});
+
+// Get admin by ID (only root admin)
+const getAdminById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const admin = await Admin.findById(id)
+    .select("-password -googleAuthenticatorSecret")
+    .populate("createdBy", "email");
+
+  if (!admin) {
+    res.status(404);
+    throw new Error("Admin not found");
+  }
+
+  return res.json({
+    success: true,
+    admin: {
+      _id: admin._id,
+      email: admin.email,
+      role: admin.role || "admin",
+      isRootAdmin: admin.isRootAdmin,
+      isActive: admin.isActive,
+      firstLoginCompleted: admin.firstLoginCompleted,
+      faceRegistered: admin.faceRegistered,
+      googleAuthenticatorEnabled: admin.googleAuthenticatorEnabled,
+      createdBy: admin.createdBy,
+      createdAt: admin.createdAt,
+      updatedAt: admin.updatedAt,
+    },
+  });
+});
+
+// Update admin (only root admin can do this)
+const updateAdmin = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { email, password, role } = req.body;
+
+  const admin = await Admin.findById(id);
+  if (!admin) {
+    res.status(404);
+    throw new Error("Admin not found");
+  }
+
+  // Cannot update root admin
+  if (admin.isRootAdmin) {
+    res.status(403);
+    throw new Error("Cannot update root admin");
+  }
+
+  // Update email if provided
+  if (email && email !== admin.email) {
+    // Check if email already exists
+    const existingAdmin = await Admin.findOne({ email, _id: { $ne: id } });
+    if (existingAdmin) {
+      res.status(400);
+      throw new Error("Email already exists");
+    }
+    admin.email = email;
+  }
+
+  // Update role if provided
+  if (role && role !== admin.role) {
+    // Verify that the role exists in Permission model
+    const permissionExists = await Permission.findOne({ role });
+    if (!permissionExists) {
+      res.status(400);
+      throw new Error(`Permission role "${role}" does not exist. Please create it first.`);
+    }
+    admin.role = role;
+  }
+
+  // Update password if provided
+  if (password) {
+    admin.password = password; // Will be hashed by pre-save hook
+  }
+
+  await admin.save();
+
+  return res.json({
+    success: true,
+    message: "Admin updated successfully",
+    admin: {
+      _id: admin._id,
+      email: admin.email,
+      role: admin.role,
+      isRootAdmin: admin.isRootAdmin,
+    },
+  });
+});
+
+// Delete admin (only root admin can do this)
+const deleteAdmin = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const admin = await Admin.findById(id);
+  if (!admin) {
+    res.status(404);
+    throw new Error("Admin not found");
+  }
+
+  // Cannot delete root admin
+  if (admin.isRootAdmin) {
+    res.status(403);
+    throw new Error("Cannot delete root admin");
+  }
+
+  // Soft delete: set isActive to false
+  admin.isActive = false;
+  await admin.save();
+
+  return res.json({
+    success: true,
+    message: "Admin deleted successfully",
   });
 });
 
@@ -603,6 +734,9 @@ export {
   createAdmin,
   getAdminInfo,
   getAllAdmins,
+  getAdminById,
+  updateAdmin,
+  deleteAdmin,
   refreshAdminToken,
 };
 

@@ -16,6 +16,11 @@ const adminSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Role for permissions (e.g., "admin", "accountant", "media", etc.)
+    role: {
+      type: String,
+      default: "admin",
+    },
     // Google Authenticator
     googleAuthenticatorSecret: {
       type: String,

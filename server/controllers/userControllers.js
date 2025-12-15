@@ -3434,58 +3434,6 @@ const removeLastUserInTier = asyncHandler(async (req, res) => {
   }
 });
 
-const createAdmin = asyncHandler(async (req, res) => {
-  const { userId, email, password, role } = req.body;
-
-  const userExistsUserId = await User.findOne({
-    userId: { $regex: userId, $options: "i" },
-  });
-  const userExistsEmail = await User.findOne({
-    email: { $regex: email, $options: "i" },
-  });
-
-  if (userExistsUserId) {
-    let message = "duplicateInfoUserId";
-    res.status(400);
-    throw new Error(message);
-  } else if (userExistsEmail) {
-    let message = "duplicateInfoEmail";
-    res.status(400);
-    throw new Error(message);
-  } else {
-    await User.create({
-      userId,
-      email,
-      password,
-      imgBack: "",
-      imgFront: "",
-      tier: 5,
-      countPay: 13,
-      createBy: "ADMIN",
-      status: "APPROVED",
-      isConfirmed: true,
-      role,
-      isAdmin: true,
-    });
-
-    let message = "createUserSuccessful";
-
-    res.status(201).json({
-      message,
-    });
-  }
-});
-
-const getListAdmin = asyncHandler(async (req, res) => {
-  const allUsers = await User.find({ role: { $ne: "user" } })
-    .sort("-createdAt")
-    .select("-password");
-
-  res.json({
-    admins: allUsers,
-  });
-});
-
 const updateAdmin = asyncHandler(async (req, res) => {
   console.log({ data: req.body });
   const { email, role, password } = req.body;
@@ -3758,8 +3706,6 @@ export {
   changeNextUserTier,
   getLastUserInTier,
   removeLastUserInTier,
-  createAdmin,
-  getListAdmin,
   updateAdmin,
   deleteAdmin,
   getAdminById,

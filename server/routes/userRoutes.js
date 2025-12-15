@@ -25,8 +25,6 @@ import {
   changeNextUserTier,
   getLastUserInTier,
   removeLastUserInTier,
-  createAdmin,
-  getListAdmin,
   updateAdmin,
   deleteAdmin,
   getAdminById,
@@ -72,11 +70,6 @@ router.route("/listChildSubUser").get(protectRoute, getListChildOfSubUser);
 router.route("/listChildLteBranch").get(protectRoute, getListChildNotEnoughBranchOfUser);
 router.route("/listChildForCreateAdmin").get(protectRoute, isAdmin, getListUserForCreateAdmin);
 router.route("/change-wallet").put(protectRoute, isAdmin, adminChangeWalletUser);
-
-router
-  .route("/admin")
-  .get(protectRoute, isSuperAdmin, getListAdmin)
-  .post(protectRoute, isSuperAdmin, createAdmin);
 
 router
   .route("/admin/:id")

@@ -83,8 +83,8 @@ const checkPermission = asyncHandler(async (req, res, next) => {
   // Determine role - check if it's an admin from Admin model or User model
   let userRole;
   if (req.admin) {
-    // Admin from Admin model - use "admin" role
-    userRole = "admin";
+    // Admin from Admin model - use admin's role field (defaults to "admin" if not set)
+    userRole = req.admin.role || "admin";
   } else if (req.user && req.user.role) {
     userRole = req.user.role;
   } else {
