@@ -30,23 +30,21 @@ const Admin = {
   getAdminInfo: () => {
     return API.get(`${URL_API_ADMIN}/me`);
   },
-  // Admin management (old routes, keep for compatibility)
+  // Admin management
   createAdmin: (body) => {
-    return API.post(`${URL_API_USER}/admin`, body);
+    return API.post(`${URL_API_ADMIN}/create`, body);
   },
-  updateAdmin: (userId, body) => {
-    return API.put(`${URL_API_USER}/admin/${userId}`, body);
-  },
-  getAllAdmins: (pageNumber, keyword) => {
-    return API.get(
-      `${URL_API_USER}/admin/?pageNumber=${pageNumber}&keyword=${keyword}`,
-    );
+  getAllAdmins: () => {
+    return API.get(`${URL_API_ADMIN}/all`);
   },
   getAdminById: (id) => {
-    return API.get(`${URL_API_USER}/admin/${id}`);
+    return API.get(`${URL_API_ADMIN}/${id}`);
+  },
+  updateAdmin: (id, body) => {
+    return API.put(`${URL_API_ADMIN}/${id}`, body);
   },
   deleteAdminById: (id) => {
-    return API.delete(`${URL_API_USER}/admin/${id}`);
+    return API.delete(`${URL_API_ADMIN}/${id}`);
   },
   deleteUserById: (id) => {
     return API.delete(`${URL_API_USER}/${id}`);

@@ -1,98 +1,48 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import Admin from "@/api/Admin";
 import { ToastContainer, toast } from "react-toastify";
 import NoContent from "@/components/NoContent";
 import Loading from "@/components/Loading";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import DefaultLayout from "../../../layout/DefaultLayout";
 
 const Admins = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const key = searchParams.get("keyword");
-  const page = searchParams.get("page");
-  const [pageNumber, setPageNumber] = useState(page ? page : 1);
-  const [totalPage, setTotalPage] = useState(0);
-  const [keyword, setKeyword] = useState(key ? key : "");
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
-  const [refresh, setRefresh] = useState(false);
-  const [searchKey, setSearchKey] = useState(key ? key : "");
   const { userInfo } = useSelector((state) => state.auth);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      await Admin.getAllAdmins(pageNumber, searchKey)
+      await Admin.getAllAdmins()
         .then((response) => {
-          const { admins, pages } = response.data;
-          setData(admins);
-          setTotalPage(pages);
+          setData(response.data.admins || []);
           setLoading(false);
         })
         .catch((error) => {
           let message =
-            error.response && error.response.data.error
-              ? error.response.data.error
-              : error.message;
+            error.response?.data?.message || error.response?.data?.error || error.message;
           toast.error(t(message));
           setLoading(false);
         });
     })();
-  }, [pageNumber, refresh]);
-
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      setPageNumber(1);
-      await Admin.getAllAdmins(pageNumber, searchKey)
-        .then((response) => {
-          const { admins, pages } = response.data;
-          setData(admins);
-          setTotalPage(pages);
-
-          setLoading(false);
-        })
-        .catch((error) => {
-          let message =
-            error.response && error.response.data.error
-              ? error.response.data.error
-              : error.message;
-          toast.error(t(message));
-          setLoading(false);
-        });
-    })();
-  }, [searchKey]);
-
-  const onSearch = (e) => {
-    setKeyword(e.target.value);
-  };
+  }, [t]);
 
   const handleDetail = (id) => {
     navigate(`/admin/admin/${id}`);
   };
 
-  const handleChangePage = (page) => {
-    setPageNumber(page);
-  };
-
-  const handleSearch = useCallback(() => {
-    setSearchKey(keyword);
-  }, [keyword]);
-
   return (
     <DefaultLayout>
       <ToastContainer />
       <div className="relative overflow-x-auto py-24 px-10">
-        <div className="flex items-center justify-between pb-4 bg-white">
-          <div className="relative">
+        <div className="flex items-center justify-between pb-4 bg-white mb-4">
           <h1 className="text-2xl font-bold">{t("List Admin")}</h1>
-          </div>
           <button
             onClick={() => navigate("/admin/create-admin")}
             className="px-8 py-4 flex text-xs justify-center items-center hover:underline bg-black text-NoExcuseChallenge font-bold rounded-full shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
@@ -104,10 +54,7 @@ const Admins = () => {
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
               <th scope="col" className="px-6 py-3">
-                Username
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Email
+                Email / ID
               </th>
               <th scope="col" className="px-6 py-3">
                 Role
@@ -131,13 +78,20 @@ const Admins = () => {
                   >
                     <div className="">
                       <div className="text-base font-semibold">
-                        {ele.userId}
+                        {ele.email}
                       </div>
                       <div className="font-normal text-gray-500">{ele._id}</div>
                     </div>
                   </th>
-                  <td className="px-6 py-4">{ele.email}</td>
-                  <td className="px-6 py-4">{ele.role}</td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                      ele.isRootAdmin 
+                        ? 'bg-purple-100 text-purple-800' 
+                        : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {ele.isRootAdmin ? 'Root Admin' : (ele.role || 'admin')}
+                    </span>
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-6">
                       {userInfo?.permissions

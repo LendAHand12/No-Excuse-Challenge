@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 
-import Permissions from "@/api/Permissions";
 import Loading from "@/components/Loading";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import Admin from "@/api/Admin";
-import PhoneInput from "react-phone-number-input";
-import "react-phone-number-input/style.css";
+import Permissions from "@/api/Permissions";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import DefaultLayout from "../../../../layout/DefaultLayout";
@@ -17,8 +15,6 @@ const CreateAdmin = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
-  const [phone, setPhone] = useState("");
-  const [errorPhone, setErrPhone] = useState(false);
   const [permissionsList, setPermissionsList] = useState([]);
 
   const {
@@ -29,40 +25,40 @@ const CreateAdmin = () => {
 
   useEffect(() => {
     (async () => {
-      await Permissions.getAllPermissions()
-        .then((response) => {
-          setLoading(false);
-          setPermissionsList(response.data.permissions);
-        })
-        .catch((error) => {
-          let message =
-            error.response && error.response.data.message
-              ? error.response.data.message
-              : error.message;
-          toast.error(t(message));
-        });
+      try {
+        const response = await Permissions.getAllPermissions();
+        setPermissionsList(response.data.permissions || []);
+        setLoading(false);
+      } catch (error) {
+        let message =
+          error.response?.data?.message || error.message || "Failed to load permissions";
+        toast.error(t(message));
+        setLoading(false);
+      }
     })();
-  }, []);
+  }, [t]);
 
   const onSubmit = useCallback(
     async (values) => {
       setLoadingUpdate(true);
-      await Admin.createAdmin(values)
+      await Admin.createAdmin({
+        email: values.email,
+        password: values.password,
+        role: values.role,
+      })
         .then((response) => {
           setLoadingUpdate(false);
-          toast.success(t(response.data.message));
+          toast.success(t(response.data.message || "Admin created successfully"));
           navigate("/admin/admin");
         })
         .catch((error) => {
           let message =
-            error.response && error.response.data.message
-              ? error.response.data.message
-              : error.message;
+            error.response?.data?.message || error.message || "Failed to create admin";
           toast.error(t(message));
           setLoadingUpdate(false);
         });
     },
-    [phone]
+    [navigate, t]
   );
 
   return (
@@ -82,34 +78,52 @@ const CreateAdmin = () => {
                 <div className="text-gray-700">
                   <div className="grid grid-cols-1 text-sm">
                     <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        {t("user name")}
-                      </div>
+                      <div className="px-4 py-2 font-semibold">Email</div>
                       <div className="px-4">
                         <input
+                          type="email"
                           className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                          {...register("userId", {
-                            required: t("User ID is required"),
+                          {...register("email", {
+                            required: t("Email is required"),
+                            pattern: {
+                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                              message: t("Invalid email address"),
+                            },
                           })}
                           autoComplete="off"
+                          placeholder={t("Enter email address")}
                         />
                         <p className="error-message-text">
-                          {errors.userId?.message}
+                          {errors.email?.message}
                         </p>
                       </div>
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">Email</div>
+                      <div className="px-4 py-2 font-semibold">
+                        {t("password")}
+                      </div>
                       <div className="px-4">
                         <input
+                          type="password"
                           className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                          {...register("email", {
-                            required: t("Email is required"),
+                          {...register("password", {
+                            required: t("Password is required"),
+                            minLength: {
+                              value: 8,
+                              message: t("Password must be at least 8 characters"),
+                            },
+                            pattern: {
+                              value: /^(?=.*?[a-z])(?=.*?[0-9]).{8,}$/,
+                              message: t(
+                                "Password must contain at least 8 characters and a number"
+                              ),
+                            },
                           })}
-                          autoComplete="off"
+                          autoComplete="new-password"
+                          placeholder={t("Enter password")}
                         />
                         <p className="error-message-text">
-                          {errors.email?.message}
+                          {errors.password?.message}
                         </p>
                       </div>
                     </div>
@@ -119,9 +133,10 @@ const CreateAdmin = () => {
                         <select
                           className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
                           {...register("role", {
-                            required: t("role is required"),
+                            required: t("Role is required"),
                           })}
                         >
+                          <option value="">{t("Select a role")}</option>
                           {permissionsList.length > 0 &&
                             permissionsList.map((p) => (
                               <option key={p.role} value={p.role}>
@@ -134,35 +149,13 @@ const CreateAdmin = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        {t("password")}
-                      </div>
-                      <div className="px-4">
-                        <input
-                          className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                          {...register("password", {
-                            pattern: {
-                              value: /^(?=.*?[a-z])(?=.*?[0-9]).{8,}$/,
-                              message: t(
-                                "Password must contain at least 8 characters and a number"
-                              ),
-                            },
-                          })}
-                          autoComplete="off"
-                        />
-                        <p className="error-message-text">
-                          {errors.password?.message}
-                        </p>
-                      </div>
-                    </div>
                   </div>
                 </div>
 
                 <button
                   type="submit"
                   disabled={loadingUpdate}
-                  className="w-full flex justify-center items-center hover:underline bg-black text-NoExcuseChallenge font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                  className="w-full flex justify-center items-center hover:underline bg-black text-NoExcuseChallenge font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out disabled:opacity-50"
                 >
                   {loadingUpdate && <Loading />}
                   {t("create")}

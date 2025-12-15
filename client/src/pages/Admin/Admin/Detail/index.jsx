@@ -35,25 +35,23 @@ const AdminProfile = () => {
 
   useEffect(() => {
     (async () => {
+      setLoading(true);
       await Admin.getAdminById(id)
         .then((response) => {
           setLoading(false);
           setData(response.data.admin);
-          const { userId, email, role } =
-            response.data.admin;
-          setValue("userId", userId);
+          const { email, role } = response.data.admin;
           setValue("email", email);
           setValue("role", role);
         })
         .catch((error) => {
+          setLoading(false);
           let message =
-            error.response && error.response.data.message
-              ? error.response.data.message
-              : error.message;
+            error.response?.data?.message || error.message;
           toast.error(t(message));
         });
     })();
-  }, [id, refresh]);
+  }, [id, refresh, setValue, t]);
 
   useEffect(() => {
     (async () => {
@@ -75,9 +73,6 @@ const AdminProfile = () => {
   const onSubmit = useCallback(
     async (values) => {
       const body = {};
-      if (values.userId !== data.userId) {
-        body.userId = values.userId;
-      }
       if (values.email !== data.email) {
         body.email = values.email;
       }
@@ -97,21 +92,19 @@ const AdminProfile = () => {
       await Admin.updateAdmin(id, body)
         .then((response) => {
           setLoadingUpdate(false);
-          toast.success(t(response.data.message));
+          toast.success(t(response.data.message || "Admin updated successfully"));
           setRefresh(!refresh);
           setEditting(false);
         })
         .catch((error) => {
           let message =
-            error.response && error.response.data.message
-              ? error.response.data.message
-              : error.message;
+            error.response?.data?.message || error.message;
           toast.error(t(message));
           setLoadingUpdate(false);
           setEditting(false);
         });
     },
-    [data]
+    [data, id, refresh, t]
   );
 
   const handleDeleteUser = async (onClose) => {
@@ -120,16 +113,14 @@ const AdminProfile = () => {
     toast.warning(t("deleting"));
     await Admin.deleteAdminById(id)
       .then((response) => {
-        const { message } = response.data;
+        const message = response.data?.message || "Admin deleted successfully";
         setLoadingDelete(false);
         toast.success(t(message));
         navigate("/admin/admin");
       })
       .catch((error) => {
         let message =
-          error.response && error.response.data.message
-            ? error.response.data.message
-            : error.message;
+          error.response?.data?.message || error.message || "Failed to delete admin";
         toast.error(t(message));
         setLoadingDelete(false);
       });
@@ -220,27 +211,6 @@ const AdminProfile = () => {
                 <div className="text-gray-700">
                   <div className="grid grid-cols-1 text-sm">
                     <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        {t("user name")}
-                      </div>
-                      {isEditting ? (
-                        <div className="px-4">
-                          <input
-                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                            {...register("userId", {
-                              required: t("User ID is required"),
-                            })}
-                            autoComplete="off"
-                          />
-                          <p className="error-message-text">
-                            {errors.userId?.message}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="px-4 py-2">{data.userId}</div>
-                      )}
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">Email</div>
                       {isEditting ? (
                         <div className="px-4">
@@ -315,14 +285,15 @@ const AdminProfile = () => {
                 {isEditting && (
                   <>
                     <button
-                      onClick={() => setEditting(true)}
-                      disabled={loading}
-                      className="w-full flex justify-center items-center hover:underline bg-black text-NoExcuseChallenge font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                      type="submit"
+                      disabled={loadingUpdate}
+                      className="w-full flex justify-center items-center hover:underline bg-black text-NoExcuseChallenge font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out disabled:opacity-50"
                     >
-                      {loading && <Loading />}
+                      {loadingUpdate && <Loading />}
                       {t("update")}
                     </button>
                     <button
+                      type="button"
                       onClick={() => setEditting(false)}
                       className="w-full flex justify-center items-center hover:underline border font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
                     >
@@ -334,21 +305,20 @@ const AdminProfile = () => {
                   .find((p) => p.page.path === "/admin/admin/:id")
                   ?.actions.includes("update") &&
                   !isEditting &&
-                  data.status !== "UNVERIFY" &&
-                  data.status !== "DELETED" && (
+                  data.isActive !== false && (
                     <button
                       onClick={() => setEditting(true)}
                       className="w-full flex justify-center items-center hover:underline bg-black text-NoExcuseChallenge font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
                     >
-                      {loadingUpdate && <Loading />}
                       {t("edit")}
                     </button>
                   )}
                 {userInfo?.permissions
-                  .find((p) => p.page.path === "/admin/users/:id")
-                  ?.actions.includes("delete") &&
+                  .find((p) => p.page.path === "/admin/admin/:id")
+                  ?.actions.includes("update") &&
                   !isEditting &&
-                  data.status !== "DELETED" && (
+                  data.isActive !== false &&
+                  !data.isRootAdmin && (
                     <div
                       onClick={handleDelete}
                       className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-red-500 text-white"
