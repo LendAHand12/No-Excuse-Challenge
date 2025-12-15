@@ -192,3 +192,4 @@ const createAdminPermissions = async () => {
 
 createAdminPermissions();
 
+
