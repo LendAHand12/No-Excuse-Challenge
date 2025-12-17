@@ -25,11 +25,6 @@ import {
   changeNextUserTier,
   getLastUserInTier,
   removeLastUserInTier,
-  createAdmin,
-  getListAdmin,
-  updateAdmin,
-  deleteAdmin,
-  getAdminById,
   getUserInfo,
   getUserAssets,
   adminChangeWalletUser,
@@ -75,16 +70,7 @@ router.route("/listChildLteBranch").get(protectRoute, getListChildNotEnoughBranc
 router.route("/listChildForCreateAdmin").get(protectAdminRoute, getListUserForCreateAdmin);
 router.route("/change-wallet").put(protectAdminRoute, adminChangeWalletUser);
 
-router
-  .route("/admin")
-  .get(protectAdminRoute, isRootAdmin, getListAdmin)
-  .post(protectAdminRoute, isRootAdmin, createAdmin);
-
-router
-  .route("/admin/:id")
-  .get(protectAdminRoute, isRootAdmin, getAdminById)
-  .put(protectAdminRoute, isRootAdmin, updateAdmin)
-  .delete(protectAdminRoute, isRootAdmin, deleteAdmin);
+// Admin management routes moved to adminRoutes.js
 
 router.route("/tiers/2").get(protectRoute, getAllUsersTier2);
 

@@ -12,16 +12,10 @@ import Permission from "../models/permissionModel.js";
 const protectAdminRoute = asyncHandler(async (req, res, next) => {
   let token;
 
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
     try {
       token = req.headers.authorization.split(" ")[1];
-      const decodedToken = jwt.verify(
-        token,
-        process.env.JWT_ACCESS_TOKEN_SECRET
-      );
+      const decodedToken = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET);
 
       req.admin = await Admin.findById(decodedToken.id).select("-password");
       if (!req.admin || !req.admin.isActive) {
@@ -198,17 +192,16 @@ const verifyLogin = asyncHandler(async (req, res) => {
   const refreshToken = generateToken(admin._id, "refresh");
 
   // Get permissions for admin role
-  const permissions = await Permission.findOne({ role: "admin" }).populate(
-    "pagePermissions.page"
-  );
+  const permissions = await Permission.findOne({ role: "admin" }).populate("pagePermissions.page");
 
   // Format permissions to match frontend expectations
-  const formattedPermissions = permissions && permissions.pagePermissions
-    ? permissions.pagePermissions.map((pp) => ({
-        page: pp.page,
-        actions: pp.actions || [],
-      }))
-    : [];
+  const formattedPermissions =
+    permissions && permissions.pagePermissions
+      ? permissions.pagePermissions.map((pp) => ({
+          page: pp.page,
+          actions: pp.actions || [],
+        }))
+      : [];
 
   return res.json({
     success: true,
@@ -322,10 +315,10 @@ const registerFace = asyncHandler(async (req, res) => {
 
   admin.facetecTid = facetect_tid;
   admin.faceRegistered = true;
-  
+
   // Note: Face registration is no longer required for first login completion
   // First login is completed when 2FA is enabled (see verifyAndEnable2FA)
-  
+
   await admin.save();
 
   return res.json({
@@ -378,6 +371,8 @@ const setup2FA = asyncHandler(async (req, res) => {
       issuer: "No-Excuse Challenge",
     });
 
+    console.log({ secret });
+
     // Generate QR code
     qrCodeUrl = await QRCode.toDataURL(secret.otpauth_url);
 
@@ -398,6 +393,8 @@ const setup2FA = asyncHandler(async (req, res) => {
 const verifyAndEnable2FA = asyncHandler(async (req, res) => {
   const { adminId, twoFactorCode } = req.body;
 
+  console.log({ adminId, twoFactorCode });
+
   if (!adminId || !twoFactorCode) {
     res.status(400);
     throw new Error("Admin ID and 2FA code are required");
@@ -414,6 +411,8 @@ const verifyAndEnable2FA = asyncHandler(async (req, res) => {
     throw new Error("2FA secret not generated. Please setup 2FA first.");
   }
 
+  console.log({ admin });
+
   // Verify the code
   const verified = speakeasy.totp.verify({
     secret: admin.googleAuthenticatorSecret,
@@ -429,10 +428,10 @@ const verifyAndEnable2FA = asyncHandler(async (req, res) => {
 
   // Enable 2FA
   admin.googleAuthenticatorEnabled = true;
-  
+
   // Mark first login as completed (face registration is no longer required)
   admin.firstLoginCompleted = true;
-  
+
   await admin.save();
 
   return res.json({
@@ -444,7 +443,7 @@ const verifyAndEnable2FA = asyncHandler(async (req, res) => {
 
 // Create new admin (only root admin can do this)
 const createAdmin = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, userId, role } = req.body; // userId and role are ignored for compatibility
 
   if (!email || !password) {
     res.status(400);
@@ -458,7 +457,7 @@ const createAdmin = asyncHandler(async (req, res) => {
     throw new Error("Admin with this email already exists");
   }
 
-  // Create new admin
+  // Create new admin (userId and role are ignored - Admin model doesn't use them)
   const newAdmin = await Admin.create({
     email,
     password,
@@ -476,6 +475,8 @@ const createAdmin = asyncHandler(async (req, res) => {
       _id: newAdmin._id,
       email: newAdmin.email,
       isRootAdmin: newAdmin.isRootAdmin,
+      userId: null, // For frontend compatibility
+      role: "admin", // For frontend compatibility
     },
   });
 });
@@ -483,17 +484,16 @@ const createAdmin = asyncHandler(async (req, res) => {
 // Get current admin info
 const getAdminInfo = asyncHandler(async (req, res) => {
   // Get permissions for admin role
-  const permissions = await Permission.findOne({ role: "admin" }).populate(
-    "pagePermissions.page"
-  );
+  const permissions = await Permission.findOne({ role: "admin" }).populate("pagePermissions.page");
 
   // Format permissions to match frontend expectations
-  const formattedPermissions = permissions && permissions.pagePermissions
-    ? permissions.pagePermissions.map((pp) => ({
-        page: pp.page,
-        actions: pp.actions || [],
-      }))
-    : [];
+  const formattedPermissions =
+    permissions && permissions.pagePermissions
+      ? permissions.pagePermissions.map((pp) => ({
+          page: pp.page,
+          actions: pp.actions || [],
+        }))
+      : [];
 
   return res.json({
     success: true,
@@ -513,14 +513,137 @@ const getAdminInfo = asyncHandler(async (req, res) => {
 
 // Get all admins (only root admin)
 const getAllAdmins = asyncHandler(async (req, res) => {
-  const admins = await Admin.find({ isActive: true })
+  const pageNumber = parseInt(req.query.pageNumber) || 1;
+  const keyword = req.query.keyword || "";
+  const pageSize = 10;
+  const skip = (pageNumber - 1) * pageSize;
+
+  // Build query
+  const query = { isActive: true };
+  if (keyword) {
+    query.$or = [{ email: { $regex: keyword, $options: "i" } }];
+  }
+
+  // Get total count
+  const total = await Admin.countDocuments(query);
+
+  // Get admins with pagination
+  const adminsRaw = await Admin.find(query)
     .select("-password -googleAuthenticatorSecret")
     .populate("createdBy", "email")
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(pageSize);
+
+  // Format admins for frontend compatibility (add userId and role)
+  const admins = adminsRaw.map((admin) => ({
+    ...admin.toObject(),
+    userId: null, // Admin model doesn't have userId, set to null for compatibility
+    role: "admin", // Set role to "admin" for compatibility
+  }));
+
+  const pages = Math.ceil(total / pageSize);
 
   return res.json({
     success: true,
     admins,
+    pages,
+    total,
+  });
+});
+
+// Update admin (only root admin)
+const updateAdmin = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { email, password, userId, role } = req.body; // userId and role are ignored for compatibility
+
+  const admin = await Admin.findById(id);
+  if (!admin) {
+    res.status(404);
+    throw new Error("Admin not found");
+  }
+
+  // Check if email is being changed and if it already exists
+  if (email && email !== admin.email) {
+    const existingAdmin = await Admin.findOne({ email });
+    if (existingAdmin) {
+      res.status(400);
+      throw new Error("Admin with this email already exists");
+    }
+    admin.email = email;
+  }
+
+  // Update password if provided
+  if (password) {
+    admin.password = password;
+  }
+
+  // userId and role are ignored - Admin model doesn't use them
+
+  await admin.save();
+
+  return res.json({
+    success: true,
+    message: "Admin updated successfully",
+    admin: {
+      _id: admin._id,
+      email: admin.email,
+      isRootAdmin: admin.isRootAdmin,
+      userId: null, // For frontend compatibility
+      role: "admin", // For frontend compatibility
+    },
+  });
+});
+
+// Delete admin (only root admin) - soft delete by setting isActive to false
+const deleteAdmin = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const admin = await Admin.findById(id);
+  if (!admin) {
+    res.status(404);
+    throw new Error("Admin not found");
+  }
+
+  // Prevent deleting root admin
+  if (admin.isRootAdmin) {
+    res.status(403);
+    throw new Error("Cannot delete root admin");
+  }
+
+  // Soft delete
+  admin.isActive = false;
+  await admin.save();
+
+  return res.json({
+    success: true,
+    message: "Admin deleted successfully",
+  });
+});
+
+// Get admin by ID (only root admin)
+const getAdminById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const adminRaw = await Admin.findById(id)
+    .select("-password -googleAuthenticatorSecret")
+    .populate("createdBy", "email");
+
+  if (!adminRaw) {
+    res.status(404);
+    throw new Error("Admin not found");
+  }
+
+  // Format admin for frontend compatibility (add userId and role)
+  const admin = {
+    ...adminRaw.toObject(),
+    userId: null, // Admin model doesn't have userId, set to null for compatibility
+    role: "admin", // Set role to "admin" for compatibility
+  };
+
+  return res.json({
+    success: true,
+    admin,
   });
 });
 
@@ -571,6 +694,8 @@ export {
   createAdmin,
   getAdminInfo,
   getAllAdmins,
+  updateAdmin,
+  deleteAdmin,
+  getAdminById,
   refreshAdminToken,
 };
-

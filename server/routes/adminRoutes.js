@@ -12,6 +12,9 @@ import {
   createAdmin,
   getAdminInfo,
   getAllAdmins,
+  updateAdmin,
+  deleteAdmin,
+  getAdminById,
   refreshAdminToken,
 } from "../controllers/adminControllers.js";
 
@@ -33,6 +36,11 @@ router.route("/verify-enable-2fa").post(verifyAndEnable2FA);
 router.route("/me").get(protectAdminRoute, getAdminInfo);
 router.route("/create").post(protectAdminRoute, isRootAdmin, createAdmin);
 router.route("/all").get(protectAdminRoute, isRootAdmin, getAllAdmins);
+// Admin CRUD routes (must be after /all to avoid route conflicts)
+router
+  .route("/:id")
+  .get(protectAdminRoute, isRootAdmin, getAdminById)
+  .put(protectAdminRoute, isRootAdmin, updateAdmin)
+  .delete(protectAdminRoute, isRootAdmin, deleteAdmin);
 
 export default router;
-

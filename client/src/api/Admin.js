@@ -30,29 +30,33 @@ const Admin = {
   getAdminInfo: () => {
     return API.get(`${URL_API_ADMIN}/me`);
   },
-  // Admin management (old routes, keep for compatibility)
+  // Admin management
   createAdmin: (body) => {
-    return API.post(`${URL_API_USER}/admin`, body);
+    return API.post(`${URL_API_ADMIN}/create`, body);
   },
-  updateAdmin: (userId, body) => {
-    return API.put(`${URL_API_USER}/admin/${userId}`, body);
+  updateAdmin: (id, body) => {
+    return API.put(`${URL_API_ADMIN}/${id}`, body);
   },
   getAllAdmins: (pageNumber, keyword) => {
+    const params = new URLSearchParams();
+    if (pageNumber) params.append('pageNumber', pageNumber);
+    if (keyword) params.append('keyword', keyword);
+    const queryString = params.toString();
     return API.get(
-      `${URL_API_USER}/admin/?pageNumber=${pageNumber}&keyword=${keyword}`,
+      `${URL_API_ADMIN}/all${queryString ? `?${queryString}` : ''}`,
     );
   },
   getAdminById: (id) => {
-    return API.get(`${URL_API_USER}/admin/${id}`);
+    return API.get(`${URL_API_ADMIN}/${id}`);
   },
   deleteAdminById: (id) => {
-    return API.delete(`${URL_API_USER}/admin/${id}`);
+    return API.delete(`${URL_API_ADMIN}/${id}`);
   },
   deleteUserById: (id) => {
     return API.delete(`${URL_API_USER}/${id}`);
   },
   getProfileAdmin: (id) => {
-    return API.get(`${URL_API_USER}/admin/${id}`);
+    return API.get(`${URL_API_ADMIN}/${id}`);
   },
   getAllWithdraws: ({ status, pageNumber, keyword }) => {
     return API.get(

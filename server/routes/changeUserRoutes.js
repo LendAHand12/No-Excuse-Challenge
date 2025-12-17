@@ -13,10 +13,7 @@ import { protectAdminRoute } from "../controllers/adminControllers.js";
 
 const router = express.Router();
 
-router
-  .route("/")
-  .get(protectRoute, getChangeUsersByUserId)
-  .post(protectRoute, createChangeUser);
+router.route("/").get(protectRoute, getChangeUsersByUserId).post(protectRoute, createChangeUser);
 
 router.route("/cancel").get(protectRoute, cancleChangeUsersByUserId);
 router.route("/reject").post(protectAdminRoute, rejectChangeUser);
