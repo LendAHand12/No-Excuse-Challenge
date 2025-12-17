@@ -16,6 +16,10 @@ const adminSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    role: {
+      type: String,
+      default: "admin",
+    },
     // Google Authenticator
     googleAuthenticatorSecret: {
       type: String,
@@ -79,5 +83,3 @@ adminSchema.index({ email: 1 });
 const Admin = mongoose.model("Admin", adminSchema);
 
 export default Admin;
-
-

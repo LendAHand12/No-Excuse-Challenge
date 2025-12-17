@@ -454,6 +454,9 @@
   "addNewPermissions": "Create new permission",
   "permissions": "Permissions",
   "createAdmin": "Create new Admin",
+  "Root Admin": "Root Admin",
+  "Admin": "Admin",
+  "Grant root admin privileges": "Grant root admin privileges",
   "admin-admin-detail": "Admin Detail",
 
   "homepage": {

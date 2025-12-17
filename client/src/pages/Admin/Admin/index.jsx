@@ -104,9 +104,6 @@ const Admins = () => {
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
               <th scope="col" className="px-6 py-3">
-                Username
-              </th>
-              <th scope="col" className="px-6 py-3">
                 Email
               </th>
               <th scope="col" className="px-6 py-3">
@@ -125,19 +122,26 @@ const Admins = () => {
                   className="bg-white border-b hover:bg-gray-50"
                   key={ele._id}
                 >
-                  <th
-                    scope="row"
-                    className="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap "
-                  >
-                    <div className="">
-                      <div className="text-base font-semibold">
-                        {ele.userId}
-                      </div>
-                      <div className="font-normal text-gray-500">{ele._id}</div>
+                  <td className="px-6 py-4">
+                    <div className="text-base font-semibold text-gray-900">
+                      {ele.email}
                     </div>
-                  </th>
-                  <td className="px-6 py-4">{ele.email}</td>
-                  <td className="px-6 py-4">{ele.role}</td>
+                    <div className="font-normal text-gray-500 text-sm">
+                      {ele._id}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col gap-1">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {ele.role || "admin"}
+                      </span>
+                      {ele.isRootAdmin && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          {t("Root Admin")}
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-6">
                       {userInfo?.permissions

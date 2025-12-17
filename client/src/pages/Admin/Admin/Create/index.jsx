@@ -82,23 +82,6 @@ const CreateAdmin = () => {
                 <div className="text-gray-700">
                   <div className="grid grid-cols-1 text-sm">
                     <div className="grid lg:grid-cols-2 grid-cols-1">
-                      <div className="px-4 py-2 font-semibold">
-                        {t("user name")}
-                      </div>
-                      <div className="px-4">
-                        <input
-                          className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                          {...register("userId", {
-                            required: t("User ID is required"),
-                          })}
-                          autoComplete="off"
-                        />
-                        <p className="error-message-text">
-                          {errors.userId?.message}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="grid lg:grid-cols-2 grid-cols-1">
                       <div className="px-4 py-2 font-semibold">Email</div>
                       <div className="px-4">
                         <input
@@ -132,6 +115,21 @@ const CreateAdmin = () => {
                         <p className="error-message-text">
                           {errors.role?.message}
                         </p>
+                      </div>
+                    </div>
+                    <div className="grid lg:grid-cols-2 grid-cols-1">
+                      <div className="px-4 py-2 font-semibold">
+                        {t("Root Admin")}
+                      </div>
+                      <div className="px-4 flex items-center">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 text-NoExcuseChallenge bg-gray-100 border-gray-300 rounded focus:ring-NoExcuseChallenge focus:ring-2"
+                          {...register("isRootAdmin")}
+                        />
+                        <span className="ml-2 text-sm text-gray-600">
+                          {t("Grant root admin privileges")}
+                        </span>
                       </div>
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">

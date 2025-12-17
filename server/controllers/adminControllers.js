@@ -371,8 +371,6 @@ const setup2FA = asyncHandler(async (req, res) => {
       issuer: "No-Excuse Challenge",
     });
 
-    console.log({ secret });
-
     // Generate QR code
     qrCodeUrl = await QRCode.toDataURL(secret.otpauth_url);
 
@@ -443,7 +441,7 @@ const verifyAndEnable2FA = asyncHandler(async (req, res) => {
 
 // Create new admin (only root admin can do this)
 const createAdmin = asyncHandler(async (req, res) => {
-  const { email, password, userId, role } = req.body; // userId and role are ignored for compatibility
+  const { email, password, role, isRootAdmin } = req.body;
 
   if (!email || !password) {
     res.status(400);
@@ -457,11 +455,12 @@ const createAdmin = asyncHandler(async (req, res) => {
     throw new Error("Admin with this email already exists");
   }
 
-  // Create new admin (userId and role are ignored - Admin model doesn't use them)
+  // Create new admin
   const newAdmin = await Admin.create({
     email,
     password,
-    isRootAdmin: false,
+    role: role || "admin",
+    isRootAdmin: isRootAdmin === true || isRootAdmin === "true",
     createdBy: req.admin._id,
     firstLoginCompleted: false,
     faceRegistered: false,
@@ -474,9 +473,8 @@ const createAdmin = asyncHandler(async (req, res) => {
     admin: {
       _id: newAdmin._id,
       email: newAdmin.email,
+      role: newAdmin.role,
       isRootAdmin: newAdmin.isRootAdmin,
-      userId: null, // For frontend compatibility
-      role: "admin", // For frontend compatibility
     },
   });
 });
@@ -535,11 +533,9 @@ const getAllAdmins = asyncHandler(async (req, res) => {
     .skip(skip)
     .limit(pageSize);
 
-  // Format admins for frontend compatibility (add userId and role)
+  // Format admins for frontend
   const admins = adminsRaw.map((admin) => ({
     ...admin.toObject(),
-    userId: null, // Admin model doesn't have userId, set to null for compatibility
-    role: "admin", // Set role to "admin" for compatibility
   }));
 
   const pages = Math.ceil(total / pageSize);
@@ -555,7 +551,7 @@ const getAllAdmins = asyncHandler(async (req, res) => {
 // Update admin (only root admin)
 const updateAdmin = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { email, password, userId, role } = req.body; // userId and role are ignored for compatibility
+  const { email, password, role, isRootAdmin } = req.body;
 
   const admin = await Admin.findById(id);
   if (!admin) {
@@ -578,7 +574,15 @@ const updateAdmin = asyncHandler(async (req, res) => {
     admin.password = password;
   }
 
-  // userId and role are ignored - Admin model doesn't use them
+  // Update role if provided
+  if (role) {
+    admin.role = role;
+  }
+
+  // Update isRootAdmin if provided
+  if (isRootAdmin !== undefined) {
+    admin.isRootAdmin = isRootAdmin === true || isRootAdmin === "true";
+  }
 
   await admin.save();
 
@@ -588,9 +592,8 @@ const updateAdmin = asyncHandler(async (req, res) => {
     admin: {
       _id: admin._id,
       email: admin.email,
+      role: admin.role,
       isRootAdmin: admin.isRootAdmin,
-      userId: null, // For frontend compatibility
-      role: "admin", // For frontend compatibility
     },
   });
 });
@@ -634,12 +637,8 @@ const getAdminById = asyncHandler(async (req, res) => {
     throw new Error("Admin not found");
   }
 
-  // Format admin for frontend compatibility (add userId and role)
-  const admin = {
-    ...adminRaw.toObject(),
-    userId: null, // Admin model doesn't have userId, set to null for compatibility
-    role: "admin", // Set role to "admin" for compatibility
-  };
+  // Format admin for frontend
+  const admin = adminRaw.toObject();
 
   return res.json({
     success: true,
