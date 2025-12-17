@@ -186,11 +186,14 @@ const DropdownNotification = () => {
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <button
         onClick={() => setDropdownOpen(!dropdownOpen)}
-        className="relative flex items-center justify-center w-10 h-10 rounded-full bg-white hover:bg-gray-100 transition-colors"
+        className="relative z-9 block p-1.5 shadow-sm rounded-full bg-white hover:bg-gray-100 transition-colors lg:border lg:border-gray-300 lg:shadow-md"
+        aria-label="Notifications"
       >
-        <Bell className="w-5 h-5 text-gray-700" />
+        <span className="relative block h-5.5 w-5.5 cursor-pointer">
+          <Bell className="w-5 h-5 text-gray-700" />
+        </span>
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
+          <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] text-xs font-bold text-white bg-red-500 rounded-full px-1">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import ClickOutside from '../ClickOutside';
 import { useDispatch, useSelector } from 'react-redux';
 import { useDisconnect } from 'wagmi';
@@ -20,16 +20,14 @@ const DropdownUser = () => {
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
-      <Link
+      <button
         onClick={() => setDropdownOpen(!dropdownOpen)}
-        className="flex items-center text-sm gap-2 bg-black rounded-3xl p-2 text-white pr-4"
-        to="#"
+        className="z-9 block p-1.5 shadow-sm rounded-full bg-white hover:bg-gray-100 transition-colors lg:flex lg:items-center lg:gap-2 lg:pr-4 lg:rounded-3xl lg:border lg:border-gray-300 lg:shadow-md"
+        aria-label="User menu"
       >
-        <span className="h-8 w-8 flex justify-center items-center rounded-full bg-NoExcuseChallenge">
+        <span className="relative block h-5.5 w-5.5 cursor-pointer lg:flex lg:items-center lg:justify-center">
           <svg
-            fill="#000000"
-            width="24"
-            height="24"
+            className="w-5 h-5 text-gray-700"
             viewBox="0 0 24 24"
             id="user"
             data-name="Flat Color"
@@ -37,12 +35,19 @@ const DropdownUser = () => {
           >
             <path
               id="primary"
+              fill="currentColor"
               d="M21,20a2,2,0,0,1-2,2H5a2,2,0,0,1-2-2,6,6,0,0,1,6-6h6A6,6,0,0,1,21,20Zm-9-8A5,5,0,1,0,7,7,5,5,0,0,0,12,12Z"
             ></path>
           </svg>
         </span>
-        {userInfo ? userInfo.role === 'admin' ? userInfo.email : userInfo?.userId : ''}
-      </Link>
+        <span className="hidden lg:inline text-sm font-medium text-gray-700">
+          {userInfo
+            ? userInfo.role === 'admin'
+              ? userInfo.email
+              : userInfo?.userId
+            : ''}
+        </span>
+      </button>
 
       {/* <!-- Dropdown Start --> */}
       {dropdownOpen && (
