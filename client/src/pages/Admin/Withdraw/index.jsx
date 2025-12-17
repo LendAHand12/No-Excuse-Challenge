@@ -1190,7 +1190,7 @@ const AdminWithdrawPages = () => {
                     <div className="flex gap-6">
                       {userInfo?.permissions
                         .find((p) => p.page.path === '/admin/withdraw')
-                        ?.actions.includes('approve') &&
+                        ?.actions.includes('update') &&
                         ele.status === 'PENDING' && (
                           <button
                             onClick={() => handleApprove(ele)}
@@ -1221,7 +1221,7 @@ const AdminWithdrawPages = () => {
                         )}
                       {userInfo?.permissions
                         .find((p) => p.page.path === '/admin/withdraw')
-                        ?.actions.includes('approve') &&
+                        ?.actions.includes('update') &&
                         ele.status === 'PENDING' && (
                           <button
                             onClick={() => handleCancel(ele)}
