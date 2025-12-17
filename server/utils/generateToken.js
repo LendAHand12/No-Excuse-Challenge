@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 const generateToken = (id, option) => {
   if (option === "access") {
     return jwt.sign({ id }, process.env.JWT_ACCESS_TOKEN_SECRET, {
-      expiresIn: 60, // 1 minute (for testing)
+      expiresIn: 3600, // 1 hour (for testing)
     });
   } else if (option === "refresh") {
     return jwt.sign({ id }, process.env.JWT_REFRESH_TOKEN_SECRET, {
