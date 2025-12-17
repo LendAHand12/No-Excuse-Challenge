@@ -12,9 +12,9 @@ const getAllPermissions = asyncHandler(async (req, res) => {
 const getPermissions = asyncHandler(async (req, res) => {
   // Check if it's an admin from Admin model or User model
   let role;
-  if (req.admin) {
+  if (req.user) {
     // Use actual role from Admin model
-    role = req.admin.role || "admin";
+    role = req.user.role || "admin";
   } else if (req.user && req.user.role) {
     role = req.user.role;
   } else {
@@ -22,9 +22,7 @@ const getPermissions = asyncHandler(async (req, res) => {
     throw new Error("Not authorised");
   }
 
-  const permission = await Permission.findOne({ role }).populate(
-    "pagePermissions.page"
-  );
+  const permission = await Permission.findOne({ role }).populate("pagePermissions.page");
 
   if (!permission) {
     return res.json({
@@ -78,9 +76,7 @@ const updatePermission = asyncHandler(async (req, res) => {
 
 const getPermissionsById = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const permission = await Permission.findById(id).populate(
-    "pagePermissions.page"
-  );
+  const permission = await Permission.findById(id).populate("pagePermissions.page");
 
   res.json({
     permission,

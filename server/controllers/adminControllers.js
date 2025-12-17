@@ -485,7 +485,7 @@ const createAdmin = asyncHandler(async (req, res) => {
 // Get current admin info
 const getAdminInfo = asyncHandler(async (req, res) => {
   // Get permissions for the admin's actual role
-  const adminRole = req.admin.role || "admin";
+  const adminRole = req.user.role || "admin";
   const permissions = await Permission.findOne({ role: adminRole }).populate(
     "pagePermissions.page"
   );
@@ -502,12 +502,12 @@ const getAdminInfo = asyncHandler(async (req, res) => {
   return res.json({
     success: true,
     admin: {
-      _id: req.admin._id,
-      email: req.admin.email,
-      isRootAdmin: req.admin.isRootAdmin,
-      firstLoginCompleted: req.admin.firstLoginCompleted,
-      faceRegistered: req.admin.faceRegistered,
-      googleAuthenticatorEnabled: req.admin.googleAuthenticatorEnabled,
+      _id: req.user._id,
+      email: req.user.email,
+      isRootAdmin: req.user.isRootAdmin,
+      firstLoginCompleted: req.user.firstLoginCompleted,
+      faceRegistered: req.user.faceRegistered,
+      googleAuthenticatorEnabled: req.user.googleAuthenticatorEnabled,
       role: adminRole, // Use actual role from Admin model
       isAdmin: true,
       permissions: formattedPermissions,
