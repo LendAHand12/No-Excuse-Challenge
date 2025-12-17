@@ -10,6 +10,7 @@ import {
   isAdmin,
   protectRoute,
 } from "../middleware/authMiddleware.js";
+import { protectAdminRoute } from "../controllers/adminControllers.js";
 import { getPermissions } from "../controllers/permissionControllers.js";
 
 const router = express.Router();
@@ -17,15 +18,15 @@ const router = express.Router();
 router
   .route("/")
   .get(protectRoute, getAllPermissions)
-  .post(protectRoute, isAdmin, createPermission);
+  .post(protectAdminRoute, createPermission);
 
 router
   .route("/me")
-  .get(protectRoute, isAdmin, getPermissions);
+  .get(protectAdminRoute, getPermissions);
 
 router
   .route("/:id")
   .get(protectRoute, getPermissionsById)
-  .put(protectRoute, isAdmin, updatePermission);
+  .put(protectAdminRoute, updatePermission);
 
 export default router;

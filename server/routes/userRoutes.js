@@ -44,53 +44,54 @@ import {
   checkUserAbnormalIncome,
 } from "../controllers/userControllers.js";
 import { protectRoute, isAdmin, isSuperAdmin } from "../middleware/authMiddleware.js";
+import { protectAdminRoute, isRootAdmin } from "../controllers/adminControllers.js";
 import uploadCCCD from "../middleware/uploadCCCD.js";
 
 const router = express.Router();
 
-router.route("/").get(protectRoute, isAdmin, getAllUsers);
-router.route("/over45").get(protectRoute, isAdmin, getAllUsersOver45);
+router.route("/").get(protectAdminRoute, getAllUsers);
+router.route("/over45").get(protectAdminRoute, getAllUsersOver45);
 router.route("/trees").get(getTreesByUserName);
 router.route("/info").get(protectRoute, getUserInfo);
 router.route("/assets").get(protectRoute, getUserAssets);
-router.route("/getAllDeletedUsers").get(protectRoute, isAdmin, getAllDeletedUsers);
-router.route("/getAllUsersPreTier2").get(protectRoute, isAdmin, getAllUsersPreTier2);
+router.route("/getAllDeletedUsers").get(protectAdminRoute, getAllDeletedUsers);
+router.route("/getAllUsersPreTier2").get(protectAdminRoute, getAllUsersPreTier2);
 router.route("/profile").get(protectRoute, getUserProfile);
 router
   .route("/changeWallet")
   .get(protectRoute, mailForChangeWallet)
   .post(protectRoute, changeWallet);
-router.route("/status").put(protectRoute, isAdmin, changeStatusUser);
+router.route("/status").put(protectAdminRoute, changeStatusUser);
 router.route("/tree").get(protectRoute, getTree);
-router.route("/tree/:id").get(protectRoute, isAdmin, getTreeOfUser);
+router.route("/tree/:id").get(protectAdminRoute, getTreeOfUser);
 router.route("/treeNode").post(protectRoute, getChildsOfUserForTree);
-router.route("/changeSystem").post(protectRoute, isAdmin, changeSystem);
-router.route("/getAllUsersForExport").post(protectRoute, isAdmin, getAllUsersForExport);
+router.route("/changeSystem").post(protectAdminRoute, changeSystem);
+router.route("/getAllUsersForExport").post(protectAdminRoute, getAllUsersForExport);
 
-router.route("/getAllUsersWithKeyword").post(protectRoute, isAdmin, getAllUsersWithKeyword);
+router.route("/getAllUsersWithKeyword").post(protectAdminRoute, getAllUsersWithKeyword);
 router.route("/listChild").get(protectRoute, getListChildOfUser);
 router.route("/listChildSubUser").get(protectRoute, getListChildOfSubUser);
 router.route("/listChildLteBranch").get(protectRoute, getListChildNotEnoughBranchOfUser);
-router.route("/listChildForCreateAdmin").get(protectRoute, isAdmin, getListUserForCreateAdmin);
-router.route("/change-wallet").put(protectRoute, isAdmin, adminChangeWalletUser);
+router.route("/listChildForCreateAdmin").get(protectAdminRoute, getListUserForCreateAdmin);
+router.route("/change-wallet").put(protectAdminRoute, adminChangeWalletUser);
 
 router
   .route("/admin")
-  .get(protectRoute, isSuperAdmin, getListAdmin)
-  .post(protectRoute, isSuperAdmin, createAdmin);
+  .get(protectAdminRoute, isRootAdmin, getListAdmin)
+  .post(protectAdminRoute, isRootAdmin, createAdmin);
 
 router
   .route("/admin/:id")
-  .get(protectRoute, isSuperAdmin, getAdminById)
-  .put(protectRoute, isSuperAdmin, updateAdmin)
-  .delete(protectRoute, isSuperAdmin, deleteAdmin);
+  .get(protectAdminRoute, isRootAdmin, getAdminById)
+  .put(protectAdminRoute, isRootAdmin, updateAdmin)
+  .delete(protectAdminRoute, isRootAdmin, deleteAdmin);
 
 router.route("/tiers/2").get(protectRoute, getAllUsersTier2);
 
 router
   .route("/:id")
-  .delete(protectRoute, isAdmin, adminDeleteUser)
-  .get(protectRoute, isAdmin, getUserById)
+  .delete(protectAdminRoute, adminDeleteUser)
+  .get(protectAdminRoute, getUserById)
   .put(
     protectRoute,
     uploadCCCD.fields([
@@ -101,8 +102,7 @@ router
   );
 
 router.route("/update/:id").post(
-  protectRoute,
-  isAdmin,
+  protectAdminRoute,
   uploadCCCD.fields([
     { name: "imgFront", maxCount: 1 },
     { name: "imgBack", maxCount: 1 },
@@ -117,23 +117,22 @@ router.route("/create").post(
     { name: "imgFront", maxCount: 1 },
     { name: "imgBack", maxCount: 1 },
   ]),
-  protectRoute,
-  isAdmin,
+  protectAdminRoute,
   adminCreateUser
 );
 
-router.route("/listNextUserTier").post(protectRoute, isAdmin, getListNextUserWithTier);
+router.route("/listNextUserTier").post(protectAdminRoute, getListNextUserWithTier);
 
-router.route("/getUsersWithTier").post(protectRoute, isAdmin, getUsersWithTier);
+router.route("/getUsersWithTier").post(protectAdminRoute, getUsersWithTier);
 
-router.route("/changeNextUserTier").post(protectRoute, isAdmin, changeNextUserTier);
+router.route("/changeNextUserTier").post(protectAdminRoute, changeNextUserTier);
 
-router.route("/getLastUserInTier").post(protectRoute, isAdmin, getLastUserInTier);
+router.route("/getLastUserInTier").post(protectAdminRoute, getLastUserInTier);
 
-router.route("/removeLastUserInTier").post(protectRoute, isAdmin, removeLastUserInTier);
+router.route("/removeLastUserInTier").post(protectAdminRoute, removeLastUserInTier);
 
 router.route("/sub-info").post(protectRoute, getSubUserProfile);
 
-router.route("/:id/check-abnormal-income").get(protectRoute, isAdmin, checkUserAbnormalIncome);
+router.route("/:id/check-abnormal-income").get(protectAdminRoute, checkUserAbnormalIncome);
 
 export default router;

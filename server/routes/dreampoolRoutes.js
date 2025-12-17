@@ -6,14 +6,15 @@ import {
   getAllDreampoolForExport,
 } from "../controllers/dreampoolControllers.js";
 import { isAdmin, protectRoute } from "../middleware/authMiddleware.js";
+import { protectAdminRoute } from "../controllers/adminControllers.js";
 
 const router = express.Router();
 
 router.route("/").get(protectRoute, getDreamPool);
-router.route("/").post(protectRoute, isAdmin, updateDreamPool);
+router.route("/").post(protectAdminRoute, updateDreamPool);
 router
   .route("/notHonors")
-  .get(protectRoute, isAdmin, getUserForUpdateDreampool);
-router.route("/export").post(protectRoute, isAdmin, getAllDreampoolForExport);
+  .get(protectAdminRoute, getUserForUpdateDreampool);
+router.route("/export").post(protectAdminRoute, getAllDreampoolForExport);
 
 export default router;

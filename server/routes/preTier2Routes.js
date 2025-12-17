@@ -16,10 +16,11 @@ import {
   checkOrderStatus,
 } from "../controllers/preTier2Controllers.js";
 import { isAdmin, protectRoute } from "../middleware/authMiddleware.js";
+import { protectAdminRoute } from "../controllers/adminControllers.js";
 
 const router = express.Router();
 
-router.route("/").get(protectRoute, isAdmin, getAllPreTier2Users);
+router.route("/").get(protectAdminRoute, getAllPreTier2Users);
 router.route("/pre-tier-2-list").get(protectRoute, getPreTier2UsersForUser);
 router.route("/pre-tier-2-passed-list").get(protectRoute, getPassedUsers);
 router.route("/pool").get(protectRoute, getInfoPreTier2Pool);
@@ -29,9 +30,9 @@ router.route("/createBankOrder").post(protectRoute, createBankOrder);
 router.route("/checkOrder/:orderId").get(protectRoute, checkOrderStatus);
 router.route("/payment-tier-2-info").get(protectRoute, getPaymentTier2Info);
 router.route("/done-payment-tier-2").post(protectRoute, onDoneTier2Payment);
-router.route("/change-order").post(protectRoute, isAdmin, changeOrderByAdmin);
-router.route("/achieve-user/:id").put(protectRoute, isAdmin, achievedUserTier2);
-router.route("/add-pool").post(protectRoute, isAdmin, adminAddToPool);
-router.route("/:id").put(protectRoute, isAdmin, approveUserPreTier2);
+router.route("/change-order").post(protectAdminRoute, changeOrderByAdmin);
+router.route("/achieve-user/:id").put(protectAdminRoute, achievedUserTier2);
+router.route("/add-pool").post(protectAdminRoute, adminAddToPool);
+router.route("/:id").put(protectAdminRoute, approveUserPreTier2);
 
 export default router;

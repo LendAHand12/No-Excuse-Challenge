@@ -9,12 +9,13 @@ import {
   closeTicket,
 } from "../controllers/ticketControllers.js";
 import { protectRoute, isAdmin } from "../middleware/authMiddleware.js";
+import { protectAdminRoute } from "../controllers/adminControllers.js";
 import uploadTicket from "../middleware/uploadTicket.js";
 
 const router = express.Router();
 
 // Admin routes (must be before user routes to avoid conflicts)
-router.route("/").get(protectRoute, isAdmin, getAllTickets);
+router.route("/").get(protectAdminRoute, getAllTickets);
 
 // User routes
 router.route("/").post(
@@ -37,8 +38,8 @@ router.route("/user").get(protectRoute, getUserTickets);
 router.route("/:id").get(protectRoute, getTicketById);
 
 // Admin routes (continued)
-router.route("/:id/reply").put(protectRoute, isAdmin, replyTicket);
-router.route("/:id/resolve").put(protectRoute, isAdmin, markResolved);
-router.route("/:id/close").put(protectRoute, isAdmin, closeTicket);
+router.route("/:id/reply").put(protectAdminRoute, replyTicket);
+router.route("/:id/resolve").put(protectAdminRoute, markResolved);
+router.route("/:id/close").put(protectAdminRoute, closeTicket);
 
 export default router;

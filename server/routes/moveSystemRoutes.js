@@ -5,13 +5,14 @@ import {
   updateMoveSystemStatus
 } from "../controllers/moveSysetmControllers.js";
 import { isAdmin, protectRoute } from "../middleware/authMiddleware.js";
+import { protectAdminRoute } from "../controllers/adminControllers.js";
 
 const router = express.Router();
 
 router.route("/register").post(protectRoute, moveSystemStart);
 router
   .route("/")
-  .get(protectRoute, isAdmin, getAllMoveSystem)
-  .put(protectRoute, isAdmin, updateMoveSystemStatus);
+  .get(protectAdminRoute, getAllMoveSystem)
+  .put(protectAdminRoute, updateMoveSystemStatus);
 
 export default router;
