@@ -17,8 +17,8 @@ const protectAdminRoute = asyncHandler(async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
       const decodedToken = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET);
 
-      req.admin = await Admin.findById(decodedToken.id).select("-password");
-      if (!req.admin || !req.admin.isActive) {
+      req.user = await Admin.findById(decodedToken.id).select("-password");
+      if (!req.user || !req.user.isActive) {
         res.status(401);
         throw new Error("Not authorized. Admin account is inactive.");
       }
