@@ -257,7 +257,7 @@ const AdminUsersTable = ({
 
                 {/* Delete Button */}
                 {userInfo?.permissions
-                  ?.find((p) => p.page.path === '/admin/users/:id')
+                  ?.find((p) => p.page.path === '/admin/users')
                   ?.actions.includes('delete') &&
                   row.countPay === 0 &&
                   row.status !== 'DELETED' && (
