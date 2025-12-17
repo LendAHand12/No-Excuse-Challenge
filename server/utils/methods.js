@@ -399,10 +399,10 @@ export const countLayerOfAdmin = async () => {
   }
 };
 
-export const createCallbackToken = (userId) => {
+export const createCallbackToken = (userId, purpose = "kyc") => {
   const payload = {
     userId,
-    purpose: "kyc",
+    purpose,
   };
 
   return jwt.sign(payload, process.env.JWT_REFRESH_TOKEN_SECRET, {

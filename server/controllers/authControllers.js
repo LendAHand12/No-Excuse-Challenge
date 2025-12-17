@@ -8,7 +8,6 @@ import bcrypt from "bcryptjs";
 import Tree from "../models/treeModel.js";
 import MoveSystem from "../models/moveSystemModel.js";
 import { getActivePackages } from "./packageControllers.js";
-import Permission from "../models/permissionModel.js";
 import {
   checkSerepayWallet,
   checkUserCanNextTier,
@@ -395,10 +394,6 @@ const authUser = asyncHandler(async (req, res) => {
 
     const packages = await getActivePackages();
 
-    const permissions = await Permission.findOne({ role: user.role }).populate(
-      "pagePermissions.page"
-    );
-
     const isMoveSystem = await MoveSystem.find({
       userId: user._id,
     });
@@ -437,7 +432,7 @@ const authUser = asyncHandler(async (req, res) => {
         email: user.email,
         name: user.name,
         userId: user.userId,
-        isAdmin: user.isAdmin,
+        isAdmin: false,
         isConfirmed: user.isConfirmed,
         avatar: user.avatar,
         walletAddress: user.walletAddress,
@@ -462,7 +457,6 @@ const authUser = asyncHandler(async (req, res) => {
         role: user.role,
         // isSerepayWallet: await checkSerepayWallet(user.walletAddress1),
         isSerepayWallet: true,
-        permissions: permissions ? permissions.pagePermissions : [],
         totalHewe: user.totalHewe,
         hewePerDay: user.hewePerDay,
         availableHewe: user.availableHewe,
@@ -550,13 +544,6 @@ const confirmUser = asyncHandler(async (req, res) => {
 
 const getAccessToken = asyncHandler(async (req, res) => {
   const { email, refreshToken } = req.body;
-
-  // search if currently loggedin user has the refreshToken sent
-  const currentAccessToken = await Token.findOne({ email });
-
-  if (!refreshToken || refreshToken !== currentAccessToken.token) {
-    res.status(400).json({ error: "Refresh token not found, login again" });
-  }
 
   // If the refresh token is valid, create a new accessToken and return it.
   jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, (err, user) => {

@@ -183,7 +183,7 @@ const PermissionsDetailPage = () => {
         </div> */}
         <div>
           {userInfo?.permissions
-            .find((p) => p.page.pageName === 'admin-permissions-detail')
+            .find((p) => p.page.path === '/admin/permissions/:id')
             ?.actions.includes('update') && (
             <>
               <button

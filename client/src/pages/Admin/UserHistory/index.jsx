@@ -359,7 +359,7 @@ const UserHistoryPage = () => {
                   <td className="px-6 py-4">
                     <div className="flex gap-6">
                       {userInfo?.permissions
-                        .find((p) => p.page.pageName === 'admin-user-history')
+                        .find((p) => p.page.path === '/admin/user-history')
                         ?.actions.includes('update') &&
                         ele.status === 'pending' && (
                           <button
@@ -390,7 +390,7 @@ const UserHistoryPage = () => {
                           </button>
                         )}
                       {userInfo?.permissions
-                        .find((p) => p.page.pageName === 'admin-user-history')
+                        .find((p) => p.page.path === '/admin/user-history')
                         ?.actions.includes('update') &&
                         ele.status === 'pending' && (
                           <button

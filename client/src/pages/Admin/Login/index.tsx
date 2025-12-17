@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SignInLayout from '@/layout/SignInLayout';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import COVER4 from '@/images/cover/cover-4.png';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
-import Auth from '@/api/Auth';
+import Admin from '@/api/Admin';
 import { ToastContainer, toast } from 'react-toastify';
 import { LOGIN } from '@/slices/auth';
+import AdminFirstTimeSetup from '@/components/AdminFirstTimeSetup';
+import AdminVerification from '@/components/AdminVerification';
+import Loading from '@/components/Loading';
 
-const SignInPage: React.FC = () => {
+const AdminLoginPage: React.FC = () => {
   const { t } = useTranslation();
   const {
     register,
@@ -20,24 +23,106 @@ const SignInPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const onSubmit = async (data) => {
-    const { code, password } = data;
+  // Admin login states
+  const [showFirstTimeSetup, setShowFirstTimeSetup] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
+  const [adminId, setAdminId] = useState<string>('');
+  const [tempToken, setTempToken] = useState<string>('');
+
+  // Callback data state
+  const [enrollmentCallback, setEnrollmentCallback] = useState<{
+    token: string;
+    facetect_tid: string;
+    admin_id: string;
+  } | null>(null);
+  const [verificationCallback, setVerificationCallback] = useState<{
+    token: string;
+  } | null>(null);
+
+  // Check for callback params from FaceTec
+  useEffect(() => {
+    const token = searchParams.get('token');
+    const admin_id = searchParams.get('admin_id');
+    const tempTokenParam = searchParams.get('tempToken');
+
+    // If we have enrollment callback params
+    // Note: enrollment still needs facetect_tid to save to database
+    const facetect_tid = searchParams.get('facetect_tid');
+    if (token && facetect_tid && admin_id && !tempTokenParam) {
+      setAdminId(admin_id);
+      setEnrollmentCallback({ token, facetect_tid, admin_id });
+      setShowFirstTimeSetup(true);
+      // Clean URL
+      navigate('/admin/login', { replace: true });
+    }
+
+    // If we have verification callback params
+    // Only need token and tempToken
+    if (token && tempTokenParam) {
+      setTempToken(tempTokenParam);
+      setVerificationCallback({ token });
+      setShowVerification(true);
+      // Clean URL
+      navigate('/admin/login', { replace: true });
+    }
+  }, [searchParams, navigate]);
+
+  const onSubmit = async (data: any) => {
+    const { email, password } = data;
     setLoading(true);
-    await Auth.login({ code, password })
-      .then((response) => {
+    
+    try {
+      const response = await Admin.login({ email, password });
+      
+      // Check if first time setup is required
+      if (response.data.requiresFirstTimeSetup) {
+        setAdminId(response.data.adminId);
+        setShowFirstTimeSetup(true);
         setLoading(false);
+        return;
+      }
+
+      // Check if verification is required
+      if (response.data.requiresVerification && response.data.tempToken) {
+        setTempToken(response.data.tempToken);
+        setShowVerification(true);
+        setLoading(false);
+        return;
+      }
+
+      // If login successful directly (shouldn't happen with 2FA)
+      if (response.data.success && response.data.accessToken) {
         dispatch(LOGIN(response.data));
-        navigate('/');
-      })
-      .catch((error) => {
-        let message =
-          error.response && error.response.data.error
-            ? error.response.data.error
-            : error.message;
-        toast.error(t(message));
-        setLoading(false);
-      });
+        navigate('/admin/dashboard');
+      }
+    } catch (error: any) {
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message;
+      toast.error(t(message));
+      setLoading(false);
+    }
+  };
+
+  const handleFirstTimeSetupComplete = () => {
+    setShowFirstTimeSetup(false);
+    toast.success(t('Setup completed! Please login again.'));
+    // Reset form
+    window.location.reload();
+  };
+
+  const handleVerificationSuccess = (data: any) => {
+    setShowVerification(false);
+    dispatch(LOGIN(data));
+    navigate('/admin/dashboard');
+  };
+
+  const handleVerificationCancel = () => {
+    setShowVerification(false);
+    setTempToken('');
   };
 
   return (
@@ -52,19 +137,23 @@ const SignInPage: React.FC = () => {
             className="-mt-28 py-10 rounded-t-3xl bg-white flex w-full lg:max-w-150 flex-col justify-center gap-6 px-4"
           >
             <h1 className="text-4xl font-bold text-black text-center mb-10">
-              {t('login')}
+              {t('Admin Login')}
             </h1>
             <div className="">
               <input
-                type="text"
+                type="email"
                 className="bg-black px-4 py-3 shadow-xl rounded-lg w-full text-white"
-                placeholder={t('emailOrUsername')}
-                {...register('code', {
-                  required: t('emailOrUsernameRequired'),
+                placeholder={t('Email')}
+                {...register('email', {
+                  required: t('Email is required'),
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: t('Invalid email address'),
+                  },
                 })}
               />
               <p className="text-red-500 mt-1 text-sm">
-                {errors.code?.message}
+                {errors.email?.message as string}
               </p>
             </div>
             <div className="relative">
@@ -74,14 +163,10 @@ const SignInPage: React.FC = () => {
                 placeholder={t('password')}
                 {...register('password', {
                   required: t('signin.passwordRequired'),
-                  pattern: {
-                    value: /^(?=.*?[a-z])(?=.*?[0-9]).{8,}$/,
-                    message: t('signin.passwordPattern'),
-                  },
                 })}
               />
               <p className="text-red-500 mt-1 text-sm">
-                {errors.password?.message}
+                {errors.password?.message as string}
               </p>
               <span
                 className="absolute right-3 top-3 cursor-pointer"
@@ -115,52 +200,37 @@ const SignInPage: React.FC = () => {
                 )}
               </span>
             </div>
-            <div className="flex justify-between">
-              <div className="flex gap-2">
-                <input type="checkbox" id="remember" />
-                <label htmlFor="remember" className="text-black font-medium">
-                  {t('rememberMe')}
-                </label>
-              </div>
-              <Link
-                to="/forgot-password"
-                className="text-NoExcuseChallenge font-medium hover:underline"
-              >
-                {t('forgotPassword')}
-              </Link>
-            </div>
             <button
               type="submit"
-              className="font-semibold rounded-3xl border py-4 border-black text-black hover:bg-black hover:text-white duration-100 ease-linear"
+              disabled={loading}
+              className="font-semibold rounded-3xl border py-4 border-black text-black hover:bg-black hover:text-white duration-100 ease-linear disabled:opacity-50"
             >
-              {t('confirm')}
+              {loading ? <Loading /> : t('confirm')}
             </button>
-            <div className="flex flex-col gap-2">
-              <Link
-                to="/"
-                className="text-black font-medium hover:underline flex gap-2"
+            <Link
+              to="/"
+              className="text-black font-medium hover:underline flex gap-2"
+            >
+              <svg
+                fill="#000000"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                id="left"
+                data-name="Flat Color"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <svg
-                  fill="#000000"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  id="left"
-                  data-name="Flat Color"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    id="primary"
-                    d="M21,11H5.41l5.3-5.29A1,1,0,1,0,9.29,4.29l-7,7a1,1,0,0,0,0,1.42l7,7a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42L5.41,13H21a1,1,0,0,0,0-2Z"
-                  ></path>
-                </svg>
-                {t('signin.backToHomepage')}
+                <path
+                  id="primary"
+                  d="M21,11H5.41l5.3-5.29A1,1,0,1,0,9.29,4.29l-7,7a1,1,0,0,0,0,1.42l7,7a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42L5.41,13H21a1,1,0,0,0,0-2Z"
+                ></path>
+              </svg>
+              {t('signin.backToHomepage')}
+            </Link>
+            <div className="text-center text-sm text-gray-500 mt-2">
+              <Link to="/signin" className="hover:underline">
+                {t('User Login')}
               </Link>
-              <div className="text-center text-sm text-gray-500">
-                <Link to="/admin/login" className="hover:underline">
-                  {t('Admin Login')}
-                </Link>
-              </div>
             </div>
           </form>
           <div className="lg:hidden w-full bg-black text-NoExcuseChallenge text-center py-2">
@@ -168,8 +238,26 @@ const SignInPage: React.FC = () => {
           </div>
         </div>
       </SignInLayout>
+
+      {/* First Time Setup Modal */}
+      <AdminFirstTimeSetup
+        isOpen={showFirstTimeSetup}
+        adminId={adminId}
+        onComplete={handleFirstTimeSetupComplete}
+        callbackData={enrollmentCallback || undefined}
+      />
+
+      {/* Verification Modal */}
+      <AdminVerification
+        isOpen={showVerification}
+        tempToken={tempToken}
+        onSuccess={handleVerificationSuccess}
+        onCancel={handleVerificationCancel}
+        callbackData={verificationCallback || undefined}
+      />
     </>
   );
 };
 
-export default SignInPage;
+export default AdminLoginPage;
+

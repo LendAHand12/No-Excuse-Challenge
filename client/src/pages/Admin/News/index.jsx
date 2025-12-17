@@ -130,7 +130,7 @@ const AdminNewsPage = () => {
           </div>
 
           {userInfo?.permissions
-            .find((p) => p.page.pageName === 'admin-news-create')
+            .find((p) => p.page.path === '/admin/news/create')
             ?.actions.includes('create') && (
             <button
               onClick={handleCreate}
@@ -184,7 +184,7 @@ const AdminNewsPage = () => {
                   <td className="px-6 py-4">{ele.createdAt}</td>
                   <td className="px-6 py-4">
                     {userInfo?.permissions
-                      .find((p) => p.page.pageName === 'admin-news-edit')
+                      .find((p) => p.page.path === '/admin/news/:id/edit')
                       ?.actions.includes('read') && (
                       <div className="flex gap-6">
                         <button

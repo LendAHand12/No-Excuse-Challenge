@@ -201,8 +201,8 @@ const AdminUsersTable = ({
               <div className="flex gap-4">
                 {/* Approve Button */}
                 {userInfo?.permissions
-                  ?.find((p) => p.page.pageName === 'admin-users-details')
-                  ?.actions.includes('approve') &&
+                  ?.find((p) => p.page.path === '/admin/users/:id')
+                  ?.actions.includes('update') &&
                   row.status === 'PENDING' && (
                     <button
                       onClick={() => onApprove(row._id)}
@@ -216,7 +216,7 @@ const AdminUsersTable = ({
                 {/* View Details Button */}
                 {row.status !== 'DELETED' &&
                   userInfo?.permissions
-                    ?.find((p) => p.page.pageName === 'admin-users-details')
+                    ?.find((p) => p.page.path === '/admin/users/:id')
                     ?.actions.includes('read') && (
                     <button
                       onClick={() => onDetail(row._id)}
@@ -230,7 +230,7 @@ const AdminUsersTable = ({
                 {/* Tree Button */}
                 {row.status !== 'DELETED' &&
                   userInfo?.permissions
-                    ?.find((p) => p.page.pageName === 'admin-system')
+                    ?.find((p) => p.page.path === '/admin/system/:id')
                     ?.actions.includes('read') && (
                     <button
                       onClick={() => onTree(row._id)}
@@ -244,7 +244,7 @@ const AdminUsersTable = ({
                 {/* Move System Button */}
                 {row.status !== 'DELETED' &&
                   userInfo?.permissions
-                    ?.find((p) => p.page.pageName === 'admin-move-system')
+                    ?.find((p) => p.page.path === '/admin/move-system/:id')
                     ?.actions.includes('read') && (
                     <button
                       onClick={() => onMoveSystem(row._id)}
@@ -257,7 +257,7 @@ const AdminUsersTable = ({
 
                 {/* Delete Button */}
                 {userInfo?.permissions
-                  ?.find((p) => p.page.pageName === 'admin-users-details')
+                  ?.find((p) => p.page.path === '/admin/users/:id')
                   ?.actions.includes('delete') &&
                   row.countPay === 0 &&
                   row.status !== 'DELETED' && (

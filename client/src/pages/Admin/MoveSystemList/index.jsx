@@ -322,7 +322,7 @@ const MoveSysteListPage = () => {
                   <td className="px-6 py-4">
                     <div className="flex gap-6">
                       {userInfo?.permissions
-                        .find((p) => p.page.pageName === 'admin-move-system')
+                        .find((p) => p.page.path === '/admin/move-system')
                         ?.actions.includes('update') &&
                         ele.status === 'PENDING' && (
                           <button

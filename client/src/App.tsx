@@ -8,6 +8,9 @@ import PolicyPage from './pages/Policy';
 import ContactPage from './pages/Contact';
 import { PrivateRoute, PublicRoute } from './helpers/router';
 import SignInPage from './pages/SignIn';
+import AdminLoginPage from './pages/Admin/Login';
+import FaceEnrollCallbackPage from './pages/Admin/FaceEnrollCallback';
+import FaceVerifyCallbackPage from './pages/Admin/FaceVerifyCallback';
 import Profile from './pages/User/Profile';
 import DashboardPage from './pages/Admin/Dashboard';
 import SignUpPage from './pages/SignUp';
@@ -70,9 +73,6 @@ import SubProfilePage from './pages/User/SubProfile';
 import DormantUsersPage from './pages/Admin/DormantUsers';
 import UsersEligiblePreTier2Page from './pages/Admin/UsersEligiblePreTier2';
 import UsersPreTier2Page from './pages/Admin/UsersPreTier2';
-import UsersPreTier2 from './pages/User/UsersPreTier2';
-import PreTier2PaymentPage from './pages/User/PaymentPreTier2';
-import PaymentTier2WithPrePool from './pages/User/PaymentTier2WithPrePool';
 import AdminPreTier2PoolPage from './pages/Admin/PreTier2Pool';
 import PreTier2Pool from './pages/User/PreTier2Pool';
 import UsersPassedTier2Page from './pages/User/UsersPassedTier2';
@@ -188,6 +188,9 @@ function App() {
           }
         />
         <Route path="/signin" element={<SignInPage />} />
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin/face-enroll-callback" element={<FaceEnrollCallbackPage />} />
+        <Route path="/admin/face-verify-callback" element={<FaceVerifyCallbackPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/confirm" element={<ConfirmPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

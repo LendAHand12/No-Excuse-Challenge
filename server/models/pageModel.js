@@ -26,7 +26,7 @@ const pageSchema = mongoose.Schema(
       enum: ["admin", "user", "cms"],
     },
     actions: [
-      { type: String, enum: ["read", "update", "delete", "approve", "export"] },
+      { type: String, enum: ["read", "update", "delete", "approve", "export", "create"] },
     ],
     images: {
       type: Array,

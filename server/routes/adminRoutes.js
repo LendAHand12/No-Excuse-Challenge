@@ -12,12 +12,14 @@ import {
   createAdmin,
   getAdminInfo,
   getAllAdmins,
+  refreshAdminToken,
 } from "../controllers/adminControllers.js";
 
 const router = express.Router();
 
 // Public routes
 router.route("/login").post(adminLogin);
+router.route("/refresh").post(refreshAdminToken);
 router.route("/start-face-verification").post(startFaceVerification);
 router.route("/verify-login").post(verifyLogin);
 

@@ -312,7 +312,7 @@ const AdminEligiblePreTier2UsersPages = () => {
                       {ele.status !== 'DELETED' &&
                         userInfo?.permissions
                           .find(
-                            (p) => p.page.pageName === 'admin-users-details',
+                            (p) => p.page.path === '/admin/users/:id',
                           )
                           ?.actions.includes('read') && (
                           <button
@@ -332,7 +332,7 @@ const AdminEligiblePreTier2UsersPages = () => {
 
                       {ele.status !== 'DELETED' &&
                         userInfo?.permissions
-                          .find((p) => p.page.pageName === 'admin-system')
+                          .find((p) => p.page.path === '/admin/system')
                           ?.actions.includes('read') && (
                           <button
                             onClick={() => handleTree(ele._id)}
@@ -386,8 +386,7 @@ const AdminEligiblePreTier2UsersPages = () => {
                         userInfo?.permissions
                           .find(
                             (p) =>
-                              p.page.pageName ===
-                              'admin-user-eligible-pre-tier-2',
+                              p.page.path === '/admin/eligible-pre-tier-2',
                           )
                           ?.actions.includes('update') && (
                           <button

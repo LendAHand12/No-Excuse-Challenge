@@ -39,6 +39,7 @@ import bankWebhookRoutes from "./routes/bankWebhookRoutes.js";
 import ticketRoutes from "./routes/ticketRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import wildCardRoutes from "./routes/wildCardRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 import {
   countChildToData,
@@ -52,12 +53,7 @@ import {
   updateErrLahCodeOver45,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
-import {
-  checkAbnormalIncome,
-  fixParentChildLinks,
-  getTotalReceivedAmount,
-  recalculateDieTimeDaily,
-} from "./common.js";
+import { fixParentChildLinks, recalculateDieTimeDaily } from "./common.js";
 import Tree from "./models/treeModel.js";
 import { getTotalLevel1ToLevel10OfUser, getTotalLevel6ToLevel10OfUser } from "./utils/methods.js";
 
@@ -115,6 +111,7 @@ app.use("/api/bank-webhook", bankWebhookRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/wildcard", wildCardRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/api/test-tele", async (req, res) => {
   await sendTelegramMessage({ userName: "kiet" });
