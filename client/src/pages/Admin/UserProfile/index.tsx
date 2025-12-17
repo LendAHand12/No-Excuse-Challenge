@@ -2078,7 +2078,7 @@ const UserProfile = () => {
                   </div>
                 )}
                 {userInfo?.permissions
-                  ?.find((p) => p.page.pageName === 'admin-users-details')
+                  ?.find((p) => p.page.path === '/admin/users/:id')
                   ?.actions.includes('read') && (
                   <div
                     onClick={handleCheckAbnormalIncome}
