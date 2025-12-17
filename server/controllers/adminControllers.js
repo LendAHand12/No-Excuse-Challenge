@@ -193,7 +193,9 @@ const verifyLogin = asyncHandler(async (req, res) => {
 
   // Get permissions for the admin's actual role
   const adminRole = admin.role || "admin";
-  const permissions = await Permission.findOne({ role: adminRole }).populate("pagePermissions.page");
+  const permissions = await Permission.findOne({ role: adminRole }).populate(
+    "pagePermissions.page"
+  );
 
   // Format permissions to match frontend expectations
   const formattedPermissions =
@@ -462,7 +464,7 @@ const createAdmin = asyncHandler(async (req, res) => {
     password,
     role: role || "admin",
     isRootAdmin: isRootAdmin === true || isRootAdmin === "true",
-    createdBy: req.admin._id,
+    createdBy: req.user._id,
     firstLoginCompleted: false,
     faceRegistered: false,
     googleAuthenticatorEnabled: false,
@@ -484,7 +486,9 @@ const createAdmin = asyncHandler(async (req, res) => {
 const getAdminInfo = asyncHandler(async (req, res) => {
   // Get permissions for the admin's actual role
   const adminRole = req.admin.role || "admin";
-  const permissions = await Permission.findOne({ role: adminRole }).populate("pagePermissions.page");
+  const permissions = await Permission.findOne({ role: adminRole }).populate(
+    "pagePermissions.page"
+  );
 
   // Format permissions to match frontend expectations
   const formattedPermissions =
