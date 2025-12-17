@@ -253,10 +253,14 @@ const AdminTransactionDetail = () => {
                     </ul>
                   </div>
                   {trans.isHoldRefund && !trans.isPaid && (
-                    <p className='pt-10 font-semibold text-NoExcuseChallenge'>Admin change status (Not Paid)</p>
+                    <p className="pt-10 font-semibold text-NoExcuseChallenge">
+                      Admin change status (Not Paid)
+                    </p>
                   )}
                   {trans.isHoldRefund && trans.isPaid && (
-                    <p className='pt-10 font-semibold text-NoExcuseChallenge'>Admin has paid</p>
+                    <p className="pt-10 font-semibold text-NoExcuseChallenge">
+                      Admin has paid
+                    </p>
                   )}
                   {!trans.isHoldRefund && trans.type.includes('HOLD') && (
                     <button
@@ -277,10 +281,8 @@ const AdminTransactionDetail = () => {
                       </div>
                     )}
                   {userInfo?.permissions
-                    .find(
-                      (p) => p.page.path === '/admin/transactions/:id',
-                    )
-                    ?.actions.includes('refund') &&
+                    .find((p) => p.page.path === '/admin/transactions/:id')
+                    ?.actions.includes('update') &&
                     !trans.isHoldRefund &&
                     trans.type.includes('HOLD') &&
                     trans.userReceiveId !== 'Unknow' &&
@@ -294,10 +296,8 @@ const AdminTransactionDetail = () => {
                       </button>
                     )}
                   {userInfo?.permissions
-                    .find(
-                      (p) => p.page.path === '/admin/transactions/:id',
-                    )
-                    ?.actions.includes('refund') &&
+                    .find((p) => p.page.path === '/admin/transactions/:id')
+                    ?.actions.includes('update') &&
                     refunding && (
                       <button
                         onClick={handRefund}
@@ -308,10 +308,8 @@ const AdminTransactionDetail = () => {
                       </button>
                     )}
                   {userInfo?.permissions
-                    .find(
-                      (p) => p.page.path === '/admin/transactions/:id',
-                    )
-                    ?.actions.includes('refund') &&
+                    .find((p) => p.page.path === '/admin/transactions/:id')
+                    ?.actions.includes('update') &&
                     !trans.isHoldRefund && (
                       <button
                         onClick={handRefund}
