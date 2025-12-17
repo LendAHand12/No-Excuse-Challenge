@@ -65,30 +65,30 @@ const adminLogin = asyncHandler(async (req, res) => {
     throw new Error("Invalid email or password");
   }
 
-  // Check if first login - need to complete face registration and 2FA setup
+  // Check if first login - need to complete 2FA setup (face registration is no longer required)
   if (!admin.firstLoginCompleted) {
     return res.json({
       success: true,
       requiresFirstTimeSetup: true,
-      message: "First login detected. Please complete face registration and 2FA setup.",
+      message: "First login detected. Please complete 2FA setup.",
       adminId: admin._id,
     });
   }
 
-  // Safety check: if firstLoginCompleted is true, both face and 2FA must be enabled
-  if (!admin.faceRegistered || !admin.googleAuthenticatorEnabled) {
+  // Safety check: if firstLoginCompleted is true, 2FA must be enabled
+  if (!admin.googleAuthenticatorEnabled) {
     // Reset firstLoginCompleted if setup is incomplete
     admin.firstLoginCompleted = false;
     await admin.save();
     return res.json({
       success: true,
       requiresFirstTimeSetup: true,
-      message: "Setup incomplete. Please complete face registration and 2FA setup.",
+      message: "Setup incomplete. Please complete 2FA setup.",
       adminId: admin._id,
     });
   }
 
-  // For subsequent logins, return temporary token that requires face verification and 2FA
+  // For subsequent logins, return temporary token that requires 2FA only (face verification removed)
   const tempToken = jwt.sign(
     { id: admin._id, type: "admin_temp" },
     process.env.JWT_ACCESS_TOKEN_SECRET,
@@ -99,7 +99,7 @@ const adminLogin = asyncHandler(async (req, res) => {
     success: true,
     requiresFirstTimeSetup: false,
     requiresVerification: true,
-    message: "Please verify face and enter 2FA code",
+    message: "Please enter 2FA code",
     tempToken,
   });
 });
@@ -147,13 +147,13 @@ const startFaceVerification = asyncHandler(async (req, res) => {
   res.json({ url: redirectToKYC, token });
 });
 
-// Verify face and 2FA for login
+// Verify 2FA for login (face verification removed)
 const verifyLogin = asyncHandler(async (req, res) => {
-  const { tempToken, twoFactorCode, token } = req.body;
+  const { tempToken, twoFactorCode } = req.body;
 
-  if (!tempToken || !twoFactorCode || !token) {
+  if (!tempToken || !twoFactorCode) {
     res.status(400);
-    throw new Error("Temp token, 2FA code, and face verification token are required");
+    throw new Error("Temp token and 2FA code are required");
   }
 
   // Verify temp token first
@@ -175,35 +175,7 @@ const verifyLogin = asyncHandler(async (req, res) => {
     throw new Error("Admin not found or inactive");
   }
 
-  // Verify callback token if provided (from face verification)
-  if (token) {
-    try {
-      const decodedToken = decodeCallbackToken(token);
-      if (decodedToken.purpose !== "admin_face_verify") {
-        res.status(400);
-        throw new Error("Invalid token purpose");
-      }
-      // Verify that callback token belongs to the same admin
-      if (decodedToken.userId !== admin._id.toString()) {
-        res.status(400);
-        throw new Error("Token admin mismatch");
-      }
-    } catch (error) {
-      res.status(400);
-      throw new Error(error.message || "Invalid or expired callback token");
-    }
-  }
-
-  // Verify face is registered
-  if (!admin.faceRegistered || admin.facetecTid === "") {
-    res.status(400);
-    throw new Error("Face not registered");
-  }
-
-  // Note: In a production environment, you should verify the facetect_tid
-  // against FaceTec's verification API to ensure the verification was successful
-
-  // Verify 2FA code
+  // Verify 2FA code (face verification removed)
   if (!admin.googleAuthenticatorEnabled || !admin.googleAuthenticatorSecret) {
     res.status(400);
     throw new Error("2FA not enabled");
@@ -351,10 +323,8 @@ const registerFace = asyncHandler(async (req, res) => {
   admin.facetecTid = facetect_tid;
   admin.faceRegistered = true;
   
-  // If 2FA is also enabled, mark first login as completed
-  if (admin.googleAuthenticatorEnabled) {
-    admin.firstLoginCompleted = true;
-  }
+  // Note: Face registration is no longer required for first login completion
+  // First login is completed when 2FA is enabled (see verifyAndEnable2FA)
   
   await admin.save();
 
@@ -460,10 +430,8 @@ const verifyAndEnable2FA = asyncHandler(async (req, res) => {
   // Enable 2FA
   admin.googleAuthenticatorEnabled = true;
   
-  // If face is also registered, mark first login as completed
-  if (admin.faceRegistered) {
-    admin.firstLoginCompleted = true;
-  }
+  // Mark first login as completed (face registration is no longer required)
+  admin.firstLoginCompleted = true;
   
   await admin.save();
 
