@@ -13,7 +13,7 @@ interface AdminFirstTimeSetupProps {
     token: string;
     facetect_tid: string;
     admin_id: string;
-  };
+  }; // Keep for backward compatibility but not used anymore
 }
 
 const AdminFirstTimeSetup: React.FC<AdminFirstTimeSetupProps> = ({
@@ -23,9 +23,8 @@ const AdminFirstTimeSetup: React.FC<AdminFirstTimeSetupProps> = ({
   callbackData,
 }) => {
   const { t } = useTranslation();
-  const [step, setStep] = useState<'face' | '2fa-setup' | '2fa-verify'>('face');
+  const [step, setStep] = useState<'2fa-setup' | '2fa-verify'>('2fa-setup');
   const [loading, setLoading] = useState(false);
-  const [faceRegistered, setFaceRegistered] = useState(false);
   const [qrCode, setQrCode] = useState<string>('');
   const [secret, setSecret] = useState<string>('');
   const [twoFactorCode, setTwoFactorCode] = useState<string>('');
@@ -33,34 +32,12 @@ const AdminFirstTimeSetup: React.FC<AdminFirstTimeSetupProps> = ({
   // Reset when modal opens
   useEffect(() => {
     if (isOpen) {
-      setStep('face');
-      setFaceRegistered(false);
+      setStep('2fa-setup');
       setQrCode('');
       setSecret('');
       setTwoFactorCode('');
-      
-      // If we have callback data, process face registration
-      if (callbackData && callbackData.token && callbackData.facetect_tid && callbackData.admin_id) {
-        handleRegisterFace(callbackData.token, callbackData.facetect_tid, callbackData.admin_id);
-      }
     }
-  }, [isOpen, callbackData]);
-
-  const handleStartFaceEnrollment = async () => {
-    setLoading(true);
-    try {
-      const response = await Admin.startFaceEnrollment({ adminId });
-      if (response.data.url) {
-        window.location.href = response.data.url;
-      }
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message || error.message || 'Failed to start face enrollment';
-      toast.error(t(message));
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [isOpen]);
 
   const handleSetup2FA = async () => {
     setLoading(true);
@@ -95,44 +72,11 @@ const AdminFirstTimeSetup: React.FC<AdminFirstTimeSetupProps> = ({
         onComplete();
       } else {
         toast.success(t('2FA enabled successfully'));
-        // If face not registered yet, go back to face step
-        if (!faceRegistered) {
-          setStep('face');
-        }
+        setStep('2fa-setup');
       }
     } catch (error: any) {
       const message =
         error.response?.data?.message || error.message || 'Invalid 2FA code';
-      toast.error(t(message));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // This will be handled by parent component (AdminLoginPage)
-  // which will pass the callback data via props or state
-
-  const handleRegisterFace = async (token: string, facetect_tid: string, admin_id: string) => {
-    setLoading(true);
-    try {
-      const response = await Admin.registerFace({
-        token,
-        facetect_tid,
-        admin_id,
-      });
-      if (response.data.success) {
-        setFaceRegistered(true);
-        toast.success(t('Face registration successful'));
-        setStep('2fa-setup');
-        // Clean URL
-        const cleanUrl = window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
-      } else {
-        toast.error(t(response.data.message || 'Face registration failed'));
-      }
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message || error.message || 'Face registration failed';
       toast.error(t(message));
     } finally {
       setLoading(false);
@@ -166,21 +110,6 @@ const AdminFirstTimeSetup: React.FC<AdminFirstTimeSetupProps> = ({
         <h2 className="text-2xl font-bold mb-6 text-center">
           {t('Admin First Time Setup')}
         </h2>
-
-        {step === 'face' && (
-          <div className="space-y-4">
-            <p className="text-gray-700 mb-4">
-              {t('Please register your face using FaceTec')}
-            </p>
-            <button
-              onClick={handleStartFaceEnrollment}
-              disabled={loading}
-              className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading ? <Loading /> : t('Start Face Registration')}
-            </button>
-          </div>
-        )}
 
         {step === '2fa-setup' && (
           <div className="space-y-4">
@@ -232,9 +161,8 @@ const AdminFirstTimeSetup: React.FC<AdminFirstTimeSetupProps> = ({
         )}
 
         <div className="mt-4 text-sm text-gray-500 text-center">
-          {step === 'face' && <p>{t('Step 1 of 2: Face Registration')}</p>}
-          {step === '2fa-setup' && <p>{t('Step 2 of 2: Setup 2FA')}</p>}
-          {step === '2fa-verify' && <p>{t('Step 2 of 2: Verify 2FA')}</p>}
+          {step === '2fa-setup' && <p>{t('Step 1 of 1: Setup 2FA')}</p>}
+          {step === '2fa-verify' && <p>{t('Step 1 of 1: Verify 2FA')}</p>}
         </div>
       </div>
     </Modal>

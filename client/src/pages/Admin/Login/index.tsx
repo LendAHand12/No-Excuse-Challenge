@@ -31,7 +31,7 @@ const AdminLoginPage: React.FC = () => {
   const [adminId, setAdminId] = useState<string>('');
   const [tempToken, setTempToken] = useState<string>('');
 
-  // Callback data state
+  // Callback data state (kept for backward compatibility but not used for face verification anymore)
   const [enrollmentCallback, setEnrollmentCallback] = useState<{
     token: string;
     facetect_tid: string;
@@ -41,33 +41,8 @@ const AdminLoginPage: React.FC = () => {
     token: string;
   } | null>(null);
 
-  // Check for callback params from FaceTec
-  useEffect(() => {
-    const token = searchParams.get('token');
-    const admin_id = searchParams.get('admin_id');
-    const tempTokenParam = searchParams.get('tempToken');
-
-    // If we have enrollment callback params
-    // Note: enrollment still needs facetect_tid to save to database
-    const facetect_tid = searchParams.get('facetect_tid');
-    if (token && facetect_tid && admin_id && !tempTokenParam) {
-      setAdminId(admin_id);
-      setEnrollmentCallback({ token, facetect_tid, admin_id });
-      setShowFirstTimeSetup(true);
-      // Clean URL
-      navigate('/admin/login', { replace: true });
-    }
-
-    // If we have verification callback params
-    // Only need token and tempToken
-    if (token && tempTokenParam) {
-      setTempToken(tempTokenParam);
-      setVerificationCallback({ token });
-      setShowVerification(true);
-      // Clean URL
-      navigate('/admin/login', { replace: true });
-    }
-  }, [searchParams, navigate]);
+  // Note: Face verification callbacks are no longer needed
+  // Keeping the useEffect for backward compatibility but it won't trigger verification flow
 
   const onSubmit = async (data: any) => {
     const { email, password } = data;
@@ -253,7 +228,7 @@ const AdminLoginPage: React.FC = () => {
         tempToken={tempToken}
         onSuccess={handleVerificationSuccess}
         onCancel={handleVerificationCancel}
-        callbackData={verificationCallback || undefined}
+        // callbackData no longer needed for face verification
       />
     </>
   );
