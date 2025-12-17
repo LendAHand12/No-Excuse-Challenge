@@ -2032,7 +2032,7 @@ const UserProfile = () => {
                     </button>
                   )}
                 {userInfo?.permissions
-                  .find((p) => p.page.path === '/admin/users/:id')
+                  .find((p) => p.page.path === '/admin/users')
                   ?.actions.includes('delete') &&
                   !isEditting &&
                   data.status !== 'DELETED' && (
