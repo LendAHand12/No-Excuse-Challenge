@@ -36,7 +36,7 @@ const protectRoute = asyncHandler(async (req, res, next) => {
           _id: req.admin._id,
           email: req.admin.email,
           isAdmin: true,
-          role: "admin",
+          role: req.admin.role || "admin", // Use actual role from Admin model
           isRootAdmin: req.admin.isRootAdmin,
         };
       }
@@ -83,8 +83,8 @@ const checkPermission = asyncHandler(async (req, res, next) => {
   // Determine role - check if it's an admin from Admin model or User model
   let userRole;
   if (req.admin) {
-    // Admin from Admin model - use "admin" role
-    userRole = "admin";
+    // Admin from Admin model - use actual role from Admin model
+    userRole = req.admin.role || "admin";
   } else if (req.user && req.user.role) {
     userRole = req.user.role;
   } else {
@@ -92,8 +92,15 @@ const checkPermission = asyncHandler(async (req, res, next) => {
     throw new Error("Not authorised");
   }
 
-  // Root admin or role "admin" has full access
-  if (req.admin?.isRootAdmin || userRole === "admin") {
+  // Root admin has full access (bypass permission check)
+  if (req.admin?.isRootAdmin) {
+    return next();
+  }
+
+  // Role "admin" also has full access (for backward compatibility with User model)
+  // But for Admin model, we should use the actual role from the database
+  if (userRole === "admin" && !req.admin) {
+    // Only allow full access for User model with role "admin"
     return next();
   }
 

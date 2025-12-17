@@ -191,8 +191,9 @@ const verifyLogin = asyncHandler(async (req, res) => {
   const accessToken = generateToken(admin._id, "access");
   const refreshToken = generateToken(admin._id, "refresh");
 
-  // Get permissions for admin role
-  const permissions = await Permission.findOne({ role: "admin" }).populate("pagePermissions.page");
+  // Get permissions for the admin's actual role
+  const adminRole = admin.role || "admin";
+  const permissions = await Permission.findOne({ role: adminRole }).populate("pagePermissions.page");
 
   // Format permissions to match frontend expectations
   const formattedPermissions =
@@ -213,7 +214,7 @@ const verifyLogin = asyncHandler(async (req, res) => {
       email: admin.email,
       isRootAdmin: admin.isRootAdmin,
       firstLoginCompleted: admin.firstLoginCompleted,
-      role: "admin",
+      role: adminRole, // Use actual role from Admin model
       isAdmin: true,
       permissions: formattedPermissions,
     },
@@ -481,8 +482,9 @@ const createAdmin = asyncHandler(async (req, res) => {
 
 // Get current admin info
 const getAdminInfo = asyncHandler(async (req, res) => {
-  // Get permissions for admin role
-  const permissions = await Permission.findOne({ role: "admin" }).populate("pagePermissions.page");
+  // Get permissions for the admin's actual role
+  const adminRole = req.admin.role || "admin";
+  const permissions = await Permission.findOne({ role: adminRole }).populate("pagePermissions.page");
 
   // Format permissions to match frontend expectations
   const formattedPermissions =
@@ -502,7 +504,7 @@ const getAdminInfo = asyncHandler(async (req, res) => {
       firstLoginCompleted: req.admin.firstLoginCompleted,
       faceRegistered: req.admin.faceRegistered,
       googleAuthenticatorEnabled: req.admin.googleAuthenticatorEnabled,
-      role: "admin",
+      role: adminRole, // Use actual role from Admin model
       isAdmin: true,
       permissions: formattedPermissions,
     },

@@ -13,7 +13,8 @@ const getPermissions = asyncHandler(async (req, res) => {
   // Check if it's an admin from Admin model or User model
   let role;
   if (req.admin) {
-    role = "admin";
+    // Use actual role from Admin model
+    role = req.admin.role || "admin";
   } else if (req.user && req.user.role) {
     role = req.user.role;
   } else {
