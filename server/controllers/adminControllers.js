@@ -35,7 +35,7 @@ const protectAdminRoute = asyncHandler(async (req, res, next) => {
 
 // Check if admin is root admin
 const isRootAdmin = asyncHandler(async (req, res, next) => {
-  if (req.admin && req.admin.isRootAdmin) {
+  if (req.user && req.user.isRootAdmin) {
     next();
   } else {
     res.status(403);
