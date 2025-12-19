@@ -148,24 +148,54 @@ const updateWithdraw = asyncHandler(async (req, res) => {
   const { user: admin } = req;
 
   try {
-    const withdraw = await Withdraw.findById(id);
-    const user = await User.findById(withdraw.userId);
-
+    // Use findOneAndUpdate with condition to prevent race condition
+    // Only update if status is still PENDING (atomic operation)
+    let withdraw;
     if (status === "APPROVED") {
-      withdraw.hash = hash || "";
-      const processedAt = new Date();
+      // For APPROVED: Only update if current status is PENDING
+      withdraw = await Withdraw.findOneAndUpdate(
+        { _id: id, status: "PENDING" },
+        {
+          $set: {
+            hash: hash || "",
+            status: "APPROVED",
+            processedBy: admin.id,
+            processedAt: new Date(),
+            ...(transferContent && { transferContent }),
+          },
+        },
+        { new: true }
+      );
+
+      if (!withdraw) {
+        res.status(400);
+        throw new Error("Withdraw request not found or already processed");
+      }
+
+      const user = await User.findById(withdraw.userId);
+      if (!user) {
+        res.status(404);
+        throw new Error("User not found");
+      }
 
       if (withdraw.withdrawalType === "BANK") {
         // Bank withdrawal: Save transfer content and admin processing info
-        if (transferContent) {
-          withdraw.transferContent = transferContent;
-        }
-        withdraw.processedBy = admin.id;
-        withdraw.processedAt = processedAt;
-
-        // Create claim record for bank withdrawal
         // Use transferContent as hash for bank transfers
         const claimHash = transferContent || `BANK_${withdraw._id}_${Date.now()}`;
+
+        // Check if Claim already exists with same userId, amount, and hash
+        const existingClaim = await Claim.findOne({
+          userId: withdraw.userId,
+          amount: withdraw.amount,
+          hash: claimHash,
+        });
+
+        if (existingClaim) {
+          res.status(400);
+          throw new Error("Claim already exists for this withdrawal");
+        }
+
+        // Create claim record for bank withdrawal
         await Claim.create({
           userId: withdraw.userId,
           amount: withdraw.amount,
@@ -191,6 +221,20 @@ const updateWithdraw = asyncHandler(async (req, res) => {
         // Create claim record for crypto withdrawal
         // Use transaction hash from blockchain
         const claimHash = hash || `CRYPTO_${withdraw._id}_${Date.now()}`;
+
+        // Check if Claim already exists with same userId, amount, and hash
+        const existingClaim = await Claim.findOne({
+          userId: withdraw.userId,
+          amount: withdraw.amount,
+          hash: claimHash,
+        });
+
+        if (existingClaim) {
+          res.status(400);
+          throw new Error("Claim already exists for this withdrawal");
+        }
+
+        // Create claim record for crypto withdrawal
         await Claim.create({
           userId: withdraw.userId,
           amount: withdraw.amount,
@@ -202,7 +246,11 @@ const updateWithdraw = asyncHandler(async (req, res) => {
           fee: fee, // Phí giao dịch (USDT)
           receivedAmount: receivedAmount, // Số tiền thực tế nhận được (USDT)
         });
+
+        await user.save();
       }
+
+      const processedAt = withdraw.processedAt || new Date();
 
       // Create notification for approved withdrawal
       const processedTime = moment(processedAt).format("DD/MM/YYYY HH:mm:ss");
@@ -231,11 +279,33 @@ const updateWithdraw = asyncHandler(async (req, res) => {
         type: "SUCCESS",
         createdBy: admin.id,
       });
-    }
+    } else if (status === "CANCEL") {
+      // For CANCEL: Only update if current status is PENDING
+      withdraw = await Withdraw.findOneAndUpdate(
+        { _id: id, status: "PENDING" },
+        {
+          $set: {
+            status: "CANCEL",
+            cancelReason: cancelReason || "Không có lý do cụ thể",
+          },
+        },
+        { new: true }
+      );
 
-    if (status === "CANCEL") {
+      if (!withdraw) {
+        res.status(400);
+        throw new Error("Withdraw request not found or already processed");
+      }
+
+      const user = await User.findById(withdraw.userId);
+      if (!user) {
+        res.status(404);
+        throw new Error("User not found");
+      }
+
       // Refund USDT to user's available balance
       user.availableUsdt = user.availableUsdt + withdraw.amount;
+      await user.save();
 
       // Create notification for cancelled withdrawal
       const reason = cancelReason || "Không có lý do cụ thể";
@@ -247,11 +317,10 @@ const updateWithdraw = asyncHandler(async (req, res) => {
         type: "ERROR",
         createdBy: admin.id,
       });
+    } else {
+      res.status(400);
+      throw new Error("Invalid status");
     }
-
-    withdraw.status = status;
-    await user.save();
-    await withdraw.save();
 
     res.status(200).json({ message: status === "APPROVED" ? "Withdraw successful" : "Cancel!" });
   } catch (err) {

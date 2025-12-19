@@ -136,6 +136,11 @@ const AdminWithdrawPages = () => {
   };
 
   const paymentMetamask = useCallback(async () => {
+    // Prevent multiple simultaneous calls
+    if (loadingPayment) {
+      return;
+    }
+
     setLoadingPayment(true);
     try {
       const referralTransaction = await transfer(
@@ -147,39 +152,57 @@ const AdminWithdrawPages = () => {
         await donePayment(transactionHash);
         window.location.reload();
       } else {
-        setLoadingPayment(false);
         throw new Error(t('payment error'));
       }
     } catch (error) {
       toast.error(t(error.message));
+    } finally {
       setLoadingPayment(false);
     }
-  }, [currentApproveRequest]);
+  }, [currentApproveRequest, loadingPayment]);
 
   const donePayment = useCallback(
     async (hash, transferContentData) => {
-      await Admin.updateWithdraw({
-        hash,
-        status: 'APPROVED',
-        id: currentApproveRequest._id,
-        transferContent: transferContentData,
-      })
-        .then((response) => {
-          toast.success(t(response.data.message));
-          setShowModal(false);
-          setShowPaymentInfo(false);
-          setTransferContent('');
-          setRefresh(!refresh);
+      // Prevent multiple simultaneous calls
+      if (loadingPayment) {
+        return;
+      }
+
+      setLoadingPayment(true);
+      try {
+        await Admin.updateWithdraw({
+          hash,
+          status: 'APPROVED',
+          id: currentApproveRequest._id,
+          transferContent: transferContentData,
         })
-        .catch((error) => {
-          let message =
-            error.response && error.response.data.message
-              ? error.response.data.message
-              : error.message;
-          toast.error(t(message));
-        });
+          .then((response) => {
+            toast.success(t(response.data.message));
+            setShowModal(false);
+            setShowPaymentInfo(false);
+            setTransferContent('');
+            setRefresh(!refresh);
+          })
+          .catch((error) => {
+            let message =
+              error.response && error.response.data.message
+                ? error.response.data.message
+                : error.message;
+            toast.error(t(message));
+          })
+          .finally(() => {
+            setLoadingPayment(false);
+          });
+      } catch (error) {
+        let message =
+          error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message;
+        toast.error(t(message));
+        setLoadingPayment(false);
+      }
     },
-    [currentApproveRequest],
+    [currentApproveRequest, loadingPayment],
   );
 
   // Generate QR Code URL for bank transfer
@@ -252,6 +275,11 @@ const AdminWithdrawPages = () => {
   }, []);
 
   const handleBankApprove = () => {
+    // Prevent multiple clicks
+    if (loadingPayment) {
+      return;
+    }
+
     if (currentApproveRequest?.withdrawalType === 'BANK') {
       // For BANK withdrawal, require transfer content
       if (!transferContent.trim()) {

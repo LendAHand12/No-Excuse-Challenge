@@ -48,6 +48,10 @@ const claimSchema = mongoose.Schema(
   { timestamps: true }
 );
 
+// Add unique compound index to prevent duplicate claims
+// This ensures that the same userId, amount, and hash combination cannot exist twice
+claimSchema.index({ userId: 1, amount: 1, hash: 1 }, { unique: true });
+
 const Claim = mongoose.model("Claim", claimSchema);
 
 export default Claim;
