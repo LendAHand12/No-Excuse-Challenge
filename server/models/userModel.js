@@ -330,6 +330,10 @@ const userSchema = mongoose.Schema(
       type: Date,
       default: null,
     },
+    totalHeweTier2: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

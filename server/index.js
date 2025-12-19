@@ -53,7 +53,12 @@ import {
   updateErrLahCodeOver45,
 } from "./cronJob/index.js";
 import { sendTelegramMessage } from "./utils/sendTelegram.js";
-import { fixParentChildLinks, recalculateDieTimeDaily, syncDieTimeForSubIds } from "./common.js";
+import {
+  checkDuplicateClaims,
+  fixParentChildLinks,
+  recalculateDieTimeDaily,
+  syncDieTimeForSubIds,
+} from "./common.js";
 import Tree from "./models/treeModel.js";
 import { getTotalLevel1ToLevel10OfUser, getTotalLevel6ToLevel10OfUser } from "./utils/methods.js";
 
@@ -128,6 +133,7 @@ app.use(errorHandler);
 // await checkAbnormalIncome();
 // await getTotalReceivedAmount("68cfa7c257da2532fd757407");
 // await syncDieTimeForSubIds();
+// await checkDuplicateClaims();
 
 // Cấu hình timezone Việt Nam (GMT+7)
 const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";

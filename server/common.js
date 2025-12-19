@@ -18,7 +18,12 @@ import {
 import moment from "moment-timezone";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 import mongoose from "mongoose";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export const transferUserToTree = async () => {
   const listUser = await User.find({ isAdmin: false });
@@ -2262,6 +2267,89 @@ export const getTotalReceivedAmount = async (userId) => {
     const totalAmount = receivedAmount[0]?.totalAmount + claimAmount[0]?.totalAmount;
   } catch (err) {
     console.error(`Error calculating total received amount: ${err.message}`);
+    throw err;
+  }
+};
+
+// Kiểm tra và xóa Claims trùng lặp (cùng userId, amount, hash)
+// Giữ lại document đầu tiên, xóa các document trùng lặp còn lại
+export const checkDuplicateClaims = async () => {
+  try {
+    console.log("Bắt đầu kiểm tra và xóa Claims trùng lặp...");
+
+    // Tìm các Claims trùng lặp (cùng userId, amount, hash)
+    const duplicateGroups = await Claim.aggregate([
+      {
+        $group: {
+          _id: {
+            userId: "$userId",
+            amount: "$amount",
+            hash: "$hash",
+          },
+          count: { $sum: 1 },
+          claims: {
+            $push: {
+              _id: "$_id",
+              createdAt: "$createdAt",
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          count: { $gt: 1 }, // Chỉ lấy các nhóm có nhiều hơn 1 claim
+        },
+      },
+    ]);
+
+    console.log(`Tìm thấy ${duplicateGroups.length} nhóm Claims trùng lặp`);
+
+    let totalDeleted = 0;
+    let totalKept = 0;
+
+    // Xử lý từng nhóm trùng lặp
+    for (const group of duplicateGroups) {
+      // Sắp xếp claims theo createdAt tăng dần (document đầu tiên sẽ là claim cũ nhất)
+      const sortedClaims = group.claims.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateA - dateB;
+      });
+
+      // Giữ lại claim đầu tiên (cũ nhất)
+      const keepClaimId = sortedClaims[0]._id;
+      const deleteClaimIds = sortedClaims.slice(1).map((c) => c._id);
+
+      // Xóa các claims trùng lặp (trừ claim đầu tiên)
+      if (deleteClaimIds.length > 0) {
+        const deleteResult = await Claim.deleteMany({
+          _id: { $in: deleteClaimIds },
+        });
+
+        totalDeleted += deleteResult.deletedCount;
+        totalKept += 1;
+
+        console.log(
+          `Nhóm trùng lặp: UserId=${group._id.userId}, Amount=${group._id.amount}, Hash=${group._id.hash}`
+        );
+        console.log(`  - Giữ lại: ${keepClaimId} (createdAt: ${sortedClaims[0].createdAt})`);
+        console.log(`  - Đã xóa: ${deleteResult.deletedCount} claims`);
+      }
+    }
+
+    console.log(`\n✅ Hoàn thành xử lý Claims trùng lặp:`);
+    console.log(`  - Tổng số nhóm trùng lặp: ${duplicateGroups.length}`);
+    console.log(`  - Tổng số Claims đã giữ lại: ${totalKept}`);
+    console.log(`  - Tổng số Claims đã xóa: ${totalDeleted}`);
+
+    return {
+      success: true,
+      totalGroups: duplicateGroups.length,
+      totalKept,
+      totalDeleted,
+    };
+  } catch (err) {
+    console.error(`Error checking and deleting duplicate claims: ${err.message}`);
     throw err;
   }
 };

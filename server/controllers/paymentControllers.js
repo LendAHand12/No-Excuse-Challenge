@@ -1010,8 +1010,8 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
           (parseInt(process.env[`HEWE_AMOUNT_TIER${user.tier + 1}`]) + 25) / hewePrice
         );
 
-        user.availableHewe = user.totalHewe + user.availableHewe + totalHewe;
-        user.totalHewe = 0;
+        user.availableHewe = user.availableHewe + totalHewe;
+        user.totalHeweTier2 = totalHewe;
         user.countPay = 13;
         user.currentLayer = [...user.currentLayer, 0];
         user[`tier${user.tier + 1}Time`] = new Date();

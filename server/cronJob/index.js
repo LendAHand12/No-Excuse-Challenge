@@ -250,8 +250,13 @@ export const distributionHewe = asyncHandler(async () => {
   const hewePrice = hewePriceConfig ? Number(hewePriceConfig.value) : 0;
 
   const listUser = await User.find({
-    $and: [{ isAdmin: false }, { userId: { $ne: "Admin2" } }, { countPay: 13 }],
-  }).select("userId totalHewe availableHewe hewePerDay claimedHewe currentLayer");
+    $and: [
+      { isAdmin: false },
+      { userId: { $ne: "Admin2" } },
+      { countPay: 13 },
+      { status: { $ne: "DELETED" } },
+    ],
+  }).select("userId totalHewe availableHewe totalHeweTier2 hewePerDay claimedHewe currentLayer");
 
   for (let u of listUser) {
     try {
@@ -262,8 +267,11 @@ export const distributionHewe = asyncHandler(async () => {
       ]);
       const claimedHewe = claimedHeweResult[0]?.total || 0;
 
+      const treeOfUser = await Tree.findOne({ userId: u._id, tier: 1 });
+      const isExpired = await isUserExpired(treeOfUser._id);
+
       // Tính số hewe còn lại user sẽ được nhận
-      const remainingHewe = u.totalHewe - claimedHewe - u.availableHewe;
+      const remainingHewe = u.totalHewe + u.totalHeweTier2 - claimedHewe - u.availableHewe;
 
       // Nếu không còn hewe để nhận thì bỏ qua
       if (remainingHewe <= 0) {
@@ -273,11 +281,11 @@ export const distributionHewe = asyncHandler(async () => {
       let heweToAdd = 0;
       let incomeFrom = "";
 
-      if (u.currentLayer[0] === 4) {
+      if (u.currentLayer[0] === 4 && !isExpired) {
         // Nếu currentLayer[0] = 4: nhận số hewe = 100 / giá của hewe (làm tròn thành số nguyên)
         heweToAdd = hewePrice > 0 ? Math.round(100 / hewePrice) : 0;
         incomeFrom = "Daily HEWE level 4";
-      } else if (u.currentLayer[0] === 8) {
+      } else if (u.currentLayer[0] === 8 && !isExpired) {
         // Nếu currentLayer[0] = 8: nhận toàn bộ hewe còn lại (làm tròn thành số nguyên)
         heweToAdd = Math.round(remainingHewe);
         incomeFrom = "Daily HEWE all";
