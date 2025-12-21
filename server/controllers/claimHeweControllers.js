@@ -137,6 +137,11 @@ const claimUsdt = asyncHandler(async (req, res) => {
 
       // BANK withdrawal: Always create withdraw request
       if (withdrawType === "BANK") {
+        // Validate enableWithdrawBank - only allow if explicitly true
+        if (user.enableWithdrawBank !== true) {
+          throw new Error("Bank withdrawal is not enabled for your account");
+        }
+
         // Validate bank information
         if (!user.accountName || !user.accountNumber || !user.bankName || !user.bankCode) {
           throw new Error("Please update your bank information in Profile");
@@ -179,6 +184,11 @@ const claimUsdt = asyncHandler(async (req, res) => {
           message: "Withdrawal request has been sent to Admin. Please wait!",
         });
       } else if (withdrawType === "CRYPTO") {
+        // Validate enableWithdrawCrypto - only allow if explicitly true
+        if (user.enableWithdrawCrypto !== true) {
+          throw new Error("Crypto withdrawal is not enabled for your account");
+        }
+
         // CRYPTO withdrawal: Send USDT directly via blockchain
         // Validate wallet address
         if (!user.walletAddress) {
