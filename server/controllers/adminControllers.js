@@ -175,14 +175,37 @@ const verifyLogin = asyncHandler(async (req, res) => {
     throw new Error("2FA not enabled");
   }
 
+  // Convert token to number if it's a string
+  const tokenNumber =
+    typeof twoFactorCode === "string" ? parseInt(twoFactorCode, 10) : twoFactorCode;
+
+  // Log for debugging
+  // console.log("2FA Verification:", {
+  //   adminId: admin._id,
+  //   token: tokenNumber,
+  //   secretLength: admin.googleAuthenticatorSecret?.length,
+  //   serverTime: new Date().toISOString(),
+  // });
+
   const verified = speakeasy.totp.verify({
     secret: admin.googleAuthenticatorSecret,
     encoding: "base32",
-    token: twoFactorCode,
-    window: 2, // Allow 2 time steps before/after
+    token: tokenNumber,
+    window: 2, // Increased from 2 to 5 (allows ±2.5 minutes clock skew)
   });
 
   if (!verified) {
+    // Additional debug: try to generate current code for comparison
+    // const currentCode = speakeasy.totp({
+    //   secret: admin.googleAuthenticatorSecret,
+    //   encoding: "base32",
+    // });
+    // console.log("2FA Verification Failed:", {
+    //   providedToken: tokenNumber,
+    //   currentCode: currentCode,
+    //   serverTime: new Date().toISOString(),
+    // });
+
     res.status(401);
     throw new Error("Invalid 2FA code");
   }
@@ -412,17 +435,38 @@ const verifyAndEnable2FA = asyncHandler(async (req, res) => {
     throw new Error("2FA secret not generated. Please setup 2FA first.");
   }
 
-  console.log({ admin });
+  // Convert token to number if it's a string
+  const tokenNumber =
+    typeof twoFactorCode === "string" ? parseInt(twoFactorCode, 10) : twoFactorCode;
+
+  // Log for debugging
+  console.log("2FA Setup Verification:", {
+    adminId: admin._id,
+    token: tokenNumber,
+    secretLength: admin.googleAuthenticatorSecret?.length,
+    serverTime: new Date().toISOString(),
+  });
 
   // Verify the code
   const verified = speakeasy.totp.verify({
     secret: admin.googleAuthenticatorSecret,
     encoding: "base32",
-    token: twoFactorCode,
-    window: 2,
+    token: tokenNumber,
+    window: 5, // Increased from 2 to 5 (allows ±2.5 minutes clock skew)
   });
 
   if (!verified) {
+    // Additional debug: try to generate current code for comparison
+    const currentCode = speakeasy.totp({
+      secret: admin.googleAuthenticatorSecret,
+      encoding: "base32",
+    });
+    console.log("2FA Setup Verification Failed:", {
+      providedToken: tokenNumber,
+      currentCode: currentCode,
+      serverTime: new Date().toISOString(),
+    });
+
     res.status(401);
     throw new Error("Invalid 2FA code");
   }
