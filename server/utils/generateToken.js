@@ -8,7 +8,7 @@ const generateToken = (id, option) => {
     });
   } else if (option === "refresh") {
     return jwt.sign({ id }, process.env.JWT_REFRESH_TOKEN_SECRET, {
-      expiresIn: "5d", // 5 days
+      expiresIn: "1d", // 1 day - user must login again after 1 day
     });
   } else if (option === "email") {
     return jwt.sign({ id }, process.env.JWT_EMAIL_TOKEN_SECRET, {
