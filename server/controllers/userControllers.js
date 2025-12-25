@@ -1238,8 +1238,8 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 
   if (user) {
-    // const kycConfig = await Config.findOne({ label: "AUTO_KYC_USER_INFO" });
-    const kycConfig = { value: true };
+    const kycConfig = await Config.findOne({ label: "AUTO_KYC_USER_INFO" });
+    // const kycConfig = { value: true };
 
     const changes = [];
 
