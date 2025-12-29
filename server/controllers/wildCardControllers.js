@@ -62,7 +62,8 @@ const useWildCard = asyncHandler(async (req, res) => {
   }
 
   // Get target tier from card
-  const targetTier = card.targetTier || 1;
+  // const targetTier = card.targetTier || 1;
+  const targetTier = 2;
   const daysToAdd = card.days || 15;
 
   // Find the tree of target user with target tier
@@ -243,4 +244,10 @@ const adminDeleteWildCard = asyncHandler(async (req, res) => {
   });
 });
 
-export { getUserWildCards, useWildCard, adminGetUserWildCards, adminCreateWildCard, adminDeleteWildCard };
+export {
+  getUserWildCards,
+  useWildCard,
+  adminGetUserWildCards,
+  adminCreateWildCard,
+  adminDeleteWildCard,
+};
