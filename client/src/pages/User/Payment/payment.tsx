@@ -11,6 +11,8 @@ import { transfer } from '../../../utils/smartContract';
 import { shortenWalletAddress } from '../../../utils';
 import { useSelector } from 'react-redux';
 import PaymentModal from '@/components/PaymentModal';
+import SignaturePad from '@/components/SignaturePad';
+import User from '@/api/User';
 import '@/components/PaymentModal/index.css';
 
 Modal.setAppElement('#root');
@@ -30,6 +32,8 @@ const PaymentPage = () => {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [exchangeRate, setExchangeRate] = useState(0);
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
+  const [uploadingSignature, setUploadingSignature] = useState(false);
 
   const {
     formState: { errors },
@@ -76,8 +80,47 @@ const PaymentPage = () => {
   const handleAcceptTerms = () => {
     if (termsAccepted) {
       setShowTermsModal(false);
-      setShowPayment(true);
+      // For tier 1 (countPay === 0), show signature modal first if signature not exists
+      if (userInfo?.countPay === 0 && !userInfo?.signatureImage) {
+        setShowSignatureModal(true);
+      } else {
+        setShowPayment(true);
+      }
     }
+  };
+
+  const handleSaveSignature = async (signatureDataUrl: string) => {
+    setUploadingSignature(true);
+    try {
+      // Convert data URL to blob
+      const fetchResponse = await fetch(signatureDataUrl);
+      const blob = await fetchResponse.blob();
+
+      // Create FormData
+      const formData = new FormData();
+      formData.append('signature', blob, 'signature.png');
+
+      // Upload signature
+      await User.uploadSignature(formData);
+
+      setShowSignatureModal(false);
+      setShowPayment(true);
+      toast.success(t('Signature saved successfully'));
+    } catch (error: any) {
+      let message =
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message;
+      toast.error(t(message || 'Failed to save signature'));
+    } finally {
+      setUploadingSignature(false);
+    }
+  };
+
+  const handleCancelSignature = () => {
+    // If user cancels, still allow them to proceed (signature is optional for now)
+    setShowSignatureModal(false);
+    setShowPayment(true);
   };
 
   const handleOpenPaymentModal = () => {
@@ -1217,6 +1260,63 @@ const PaymentPage = () => {
                 {t('paymentTerms.confirm')}
               </button>
             </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Signature Modal for Tier 1 */}
+      <Modal
+        isOpen={showSignatureModal}
+        onRequestClose={() => {
+          // Allow closing - user can cancel
+          setShowSignatureModal(false);
+        }}
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+            maxWidth: '700px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            borderRadius: '8px',
+            padding: '24px',
+            backgroundColor: '#fff',
+          },
+          overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            zIndex: 1001,
+          },
+        }}
+        contentLabel="Signature"
+      >
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="flex-shrink-0 mb-6">
+            <h2 className="text-xl text-blue-800 font-bold">
+              {t('Please provide your signature')}
+            </h2>
+            <p className="text-sm text-gray-600 mt-2">
+              {t('Your signature will be used for contract signing purposes')}
+            </p>
+          </div>
+
+          {/* Signature Pad */}
+          <div className="flex-1">
+            {uploadingSignature ? (
+              <div className="flex justify-center items-center py-10">
+                <Loading />
+              </div>
+            ) : (
+              <SignaturePad
+                onSave={handleSaveSignature}
+                onCancel={handleCancelSignature}
+              />
+            )}
           </div>
         </div>
       </Modal>

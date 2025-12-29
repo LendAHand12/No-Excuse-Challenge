@@ -106,6 +106,7 @@ const Profile = () => {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -113,8 +114,6 @@ const Profile = () => {
       phone,
       email,
       walletAddress,
-      imgBackData: '',
-      imgFrontData: '',
       accountName,
       accountNumber,
       bankName: bankName || '',
@@ -136,38 +135,60 @@ const Profile = () => {
       } = data;
       if (!phoneNumber || phoneNumber === '') {
         setErrPhone(true);
-      } else {
-        setErrPhone(false);
+        return;
+      }
+      setErrPhone(false);
 
+      setLoading(true);
+      try {
         // Find bank info
         const selectedBank = banks.find((bank: any) => bank.name === bankName);
 
         const bankCode = selectedBank ? selectedBank.code : '';
         const finalBankName = selectedBank ? selectedBank.name : bankName;
 
-        // Build query params
-        const params = new URLSearchParams({
-          walletAddress: walletAddress || '',
-          phone: phoneNumber,
-          email: email || '',
-          bankName: finalBankName || '',
-          bankCode: bankCode || '',
-          accountName: accountName?.trim() || '',
-          accountNumber: accountNumber?.trim() || '',
-          dateOfBirth: dateOfBirth || '',
-        });
+        // Create FormData for file upload
+        const formData = new FormData();
+        formData.append('phone', phoneNumber);
+        formData.append('walletAddress', walletAddress || '');
+        formData.append('email', email || '');
+        formData.append('bankName', finalBankName || '');
+        formData.append('bankCode', bankCode || '');
+        formData.append('accountName', accountName?.trim() || '');
+        formData.append('accountNumber', accountNumber?.trim() || '');
+        formData.append('dateOfBirth', dateOfBirth || '');
 
-        const callbackUrl = `${
-          import.meta.env.VITE_URL
-        }/user/update-info?${params.toString()}`;
-        window.location.href = `${
-          import.meta.env.VITE_FACETEC_URL
-        }/verify.html?callback=${encodeURIComponent(
-          callbackUrl,
-        )}&user_id=${id}`;
+        // Call update API
+        await User.update(id, formData)
+          .then((response) => {
+            toast.success(t(response.data.message || 'Updated successfully'));
+            setRefresh(!refresh);
+            setIsEdit(false);
+            // Refresh user info
+            User.getUserInfo(currentTier)
+              .then((response) => {
+                dispatch(UPDATE_USER_INFO(response.data));
+              })
+              .catch((error) => {
+                console.error('Error refreshing user info:', error);
+              });
+          })
+          .catch((error: any) => {
+            let message =
+              error.response && error.response.data.error
+                ? error.response.data.error
+                : error.response && error.response.data.message
+                ? error.response.data.message
+                : error.message;
+            toast.error(t(message));
+          });
+      } catch (error: any) {
+        toast.error(t(error.message || 'Update failed'));
+      } finally {
+        setLoading(false);
       }
     },
-    [phoneNumber],
+    [phoneNumber, id, currentTier, dispatch],
   );
 
   useEffect(() => {
@@ -545,7 +566,9 @@ const Profile = () => {
             role="alert"
           >
             <span className="block sm:inline">
-              {t("Congratulations! You're on the waiting list for Tier 2 in the Pre-Tier2 program")}
+              {t(
+                "Congratulations! You're on the waiting list for Tier 2 in the Pre-Tier2 program",
+              )}
             </span>
           </div>
         )}
@@ -556,13 +579,15 @@ const Profile = () => {
             role="alert"
           >
             <span className="block sm:inline">
-              {t("Congratulations! You're eligible for Tier 2 with the new Pre-Tier2 program.")}{' '}
+              {t(
+                "Congratulations! You're eligible for Tier 2 with the new Pre-Tier2 program.",
+              )}{' '}
               <Link
                 to="/user/payment-for-tier-with-pre-tier-2-pool"
                 className="underline"
               >
                 {' '}
-                {t("Go to the payment page now.")}
+                {t('Go to the payment page now.')}
               </Link>
             </span>
           </div>
@@ -912,15 +937,12 @@ const Profile = () => {
                     <div className="py-2">
                       <div className="space-y-4">
                         {wildCards.map((card: any) => {
-                          const isPromoTier2 =
-                            card.cardType === 'PROMO_TIER_2';
+                          const isPromoTier2 = card.cardType === 'PROMO_TIER_2';
                           return (
                             <div
                               key={card._id}
                               className={`rounded-lg overflow-hidden shadow-lg max-w-[250px] mx-auto ${
-                                isPromoTier2
-                                  ? 'bg-yellow-600'
-                                  : 'bg-green-600'
+                                isPromoTier2 ? 'bg-yellow-600' : 'bg-green-600'
                               }`}
                             >
                               {/* Top Section - Image */}
@@ -970,7 +992,9 @@ const Profile = () => {
                                         setUsingCardId(card._id);
                                         try {
                                           const response =
-                                            await WildCard.useWildCard(card._id);
+                                            await WildCard.useWildCard(
+                                              card._id,
+                                            );
                                           toast.success(
                                             response.data.message ||
                                               'Sử dụng Wild Card thành công!',
@@ -1009,9 +1033,9 @@ const Profile = () => {
                                   {card.status === 'USED' && card.usedAt && (
                                     <p className="text-sm opacity-75">
                                       Used:{' '}
-                                      {new Date(
-                                        card.usedAt,
-                                      ).toLocaleDateString('vi')}
+                                      {new Date(card.usedAt).toLocaleDateString(
+                                        'vi',
+                                      )}
                                     </p>
                                   )}
                                 </div>
@@ -1106,7 +1130,9 @@ const Profile = () => {
             {currentTier === 2 && tier >= 2 && (
               <div className="bg-[#FAFBFC] p-4 rounded-2xl">
                 <div className="py-2 px-4">
-                  <p className="uppercase mt-2 font-bold">{t('Tier 2 Users')}</p>
+                  <p className="uppercase mt-2 font-bold">
+                    {t('Tier 2 Users')}
+                  </p>
                   <div className="py-2">
                     <p className="font-medium">Branch 1 :</p>
                     <ul className="flex flex-row flex-wrap gap-2">
@@ -1458,6 +1484,27 @@ const Profile = () => {
                   </>
                 )}
               </div>
+              {/* Contract Completed Status */}
+              {city === 'VN' && userInfo?.contractCompleted && (
+                <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded mt-6">
+                  <div className="flex items-center">
+                    <svg
+                      className="h-5 w-5 text-green-400 mr-2"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <p className="text-green-700 font-medium">
+                      {t('Contract has been completed')}
+                    </p>
+                  </div>
+                </div>
+              )}
               {isEdit && (
                 <button
                   type="submit"

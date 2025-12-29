@@ -493,6 +493,8 @@ const getUserById = asyncHandler(async (req, res) => {
       status: user.status,
       imgFront: user.imgFront,
       imgBack: user.imgBack,
+      signatureImage: user.signatureImage,
+      contractCompleted: user.contractCompleted,
       countPay: user.countPay,
       phone: user.phone,
       idCode: user.idCode,
@@ -972,6 +974,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
       status: user.status,
       imgFront: user.imgFront,
       imgBack: user.imgBack,
+      signatureImage: user.signatureImage,
+      contractCompleted: user.contractCompleted,
       countPay: user.countPay,
       phone: user.phone,
       idCode: user.idCode,
@@ -1391,6 +1395,26 @@ const updateUser = asyncHandler(async (req, res) => {
     // Save all changes to history
     if (changes.length > 0) {
       await UserHistory.insertMany(changes);
+    }
+
+    // Handle CCCD image uploads
+    // User can only update once if they already have images
+    // Admin can update multiple times (admin uses adminUpdateUser route)
+    if (req.files && req.files.imgFront && req.files.imgFront[0]) {
+      // Check if user already has imgFront
+      if (user.imgFront && user.imgFront !== "") {
+        res.status(400);
+        throw new Error("You can only upload CCCD front image once");
+      }
+      user.imgFront = req.files.imgFront[0].filename;
+    }
+    if (req.files && req.files.imgBack && req.files?.imgBack[0]) {
+      // Check if user already has imgBack
+      if (user.imgBack && user.imgBack !== "") {
+        res.status(400);
+        throw new Error("You can only upload CCCD back image once");
+      }
+      user.imgBack = req.files.imgBack[0].filename;
     }
 
     if (kycConfig.value === false) {
@@ -2231,6 +2255,8 @@ const getUserProfile = asyncHandler(async (req, res) => {
       status: user.status,
       imgFront: user.imgFront,
       imgBack: user.imgBack,
+      signatureImage: user.signatureImage,
+      contractCompleted: user.contractCompleted,
       countPay: user.countPay,
       phone: user.phone,
       idCode: user.idCode,
@@ -3762,6 +3788,85 @@ const checkUserAbnormalIncome = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Upload user signature for tier 1 payment
+// @route   POST /api/users/signature
+// @access  Private (User)
+const uploadSignature = asyncHandler(async (req, res) => {
+  const { user } = req;
+
+  if (!req.file) {
+    res.status(400);
+    throw new Error("Signature image is required");
+  }
+
+  const userDoc = await User.findById(user.id);
+  if (!userDoc) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  // Save signature image path
+  const signaturePath = `/uploads/signatures/${req.file.filename}`;
+  userDoc.signatureImage = signaturePath;
+  await userDoc.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Signature uploaded successfully",
+    signatureImage: signaturePath,
+  });
+});
+
+// @desc    Delete CCCD images and mark contract as completed (Admin only)
+// @route   DELETE /api/users/:id/cccd
+// @access  Private (Admin)
+const deleteCCCDImages = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const fs = await import("fs");
+  const path = await import("path");
+
+  const user = await User.findById(id);
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  // Delete imgFront file if exists
+  if (user.imgFront) {
+    const frontPath = path.join(process.cwd(), "public", "uploads", "CCCD", user.imgFront);
+    try {
+      if (fs.existsSync(frontPath)) {
+        fs.unlinkSync(frontPath);
+      }
+    } catch (error) {
+      console.error("Error deleting imgFront:", error);
+    }
+  }
+
+  // Delete imgBack file if exists
+  if (user.imgBack) {
+    const backPath = path.join(process.cwd(), "public", "uploads", "CCCD", user.imgBack);
+    try {
+      if (fs.existsSync(backPath)) {
+        fs.unlinkSync(backPath);
+      }
+    } catch (error) {
+      console.error("Error deleting imgBack:", error);
+    }
+  }
+
+  // Clear image paths and mark contract as completed
+  user.imgFront = "";
+  user.imgBack = "";
+  user.contractCompleted = true;
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "CCCD images deleted and contract marked as completed",
+  });
+});
+
 export {
   getUserProfile,
   getAllUsers,
@@ -3809,4 +3914,6 @@ export {
   getAllUsersPreTier2,
   getTreesByUserName,
   checkUserAbnormalIncome,
+  uploadSignature,
+  deleteCCCDImages,
 };

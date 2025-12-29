@@ -144,6 +144,14 @@ const User = {
   checkAbnormalIncome: (id) => {
     return API.get(`${URL_API_USER}/${id}/check-abnormal-income`);
   },
+  uploadSignature: (formData) => {
+    return API.post(`${URL_API_USER}/signature`, formData, {
+      customContentType: 'multipart/form-data',
+    });
+  },
+  deleteCCCDImages: (id) => {
+    return API.delete(`${URL_API_USER}/${id}/cccd`);
+  },
 };
 
 export default User;

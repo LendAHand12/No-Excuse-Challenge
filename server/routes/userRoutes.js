@@ -37,10 +37,13 @@ import {
   getAllUsersPreTier2,
   getTreesByUserName,
   checkUserAbnormalIncome,
+  uploadSignature,
+  deleteCCCDImages,
 } from "../controllers/userControllers.js";
 import { protectRoute, isAdmin, isSuperAdmin } from "../middleware/authMiddleware.js";
 import { protectAdminRoute, isRootAdmin } from "../controllers/adminControllers.js";
 import uploadCCCD from "../middleware/uploadCCCD.js";
+import uploadSignatureMiddleware from "../middleware/uploadSignature.js";
 
 const router = express.Router();
 
@@ -99,11 +102,11 @@ router.route("/update/:id").post(
 router.route("/tier/increase").post(protectRoute, onAcceptIncreaseTier);
 
 router.route("/create").post(
+  protectAdminRoute,
   uploadCCCD.fields([
     { name: "imgFront", maxCount: 1 },
     { name: "imgBack", maxCount: 1 },
   ]),
-  protectAdminRoute,
   adminCreateUser
 );
 
@@ -120,5 +123,11 @@ router.route("/removeLastUserInTier").post(protectAdminRoute, removeLastUserInTi
 router.route("/sub-info").post(protectRoute, getSubUserProfile);
 
 router.route("/:id/check-abnormal-income").get(protectAdminRoute, checkUserAbnormalIncome);
+
+router
+  .route("/signature")
+  .post(protectRoute, uploadSignatureMiddleware.single("signature"), uploadSignature);
+
+router.route("/:id/cccd").delete(protectAdminRoute, deleteCCCDImages);
 
 export default router;

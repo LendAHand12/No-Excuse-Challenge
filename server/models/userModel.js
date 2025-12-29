@@ -334,6 +334,14 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
+    signatureImage: {
+      type: String,
+      default: "",
+    },
+    contractCompleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
