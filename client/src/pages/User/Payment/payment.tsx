@@ -9,7 +9,8 @@ import Modal from 'react-modal';
 import DefaultLayout from '../../../layout/DefaultLayout';
 import { transfer } from '../../../utils/smartContract';
 import { shortenWalletAddress } from '../../../utils';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { UPDATE_USER_INFO } from '@/slices/auth';
 import PaymentModal from '@/components/PaymentModal';
 import SignaturePad from '@/components/SignaturePad';
 import User from '@/api/User';
@@ -20,6 +21,7 @@ Modal.setAppElement('#root');
 const PaymentPage = () => {
   const { t, i18n } = useTranslation();
   const { userInfo } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const isVietnamese = i18n.language === 'vi';
   const [total, setTotal] = useState(0);
   const [loadingPaymentInfo, setLoadingPaymentInfo] = useState(true);
@@ -81,8 +83,11 @@ const PaymentPage = () => {
     if (termsAccepted) {
       setShowTermsModal(false);
       // For tier 1 (countPay === 0), show signature modal first if signature not exists
+      // User MUST upload signature before seeing payment info
       if (userInfo?.countPay === 0 && !userInfo?.signatureImage) {
         setShowSignatureModal(true);
+        // Don't show payment info yet - wait for signature upload
+        setShowPayment(false);
       } else {
         setShowPayment(true);
       }
@@ -103,9 +108,16 @@ const PaymentPage = () => {
       // Upload signature
       await User.uploadSignature(formData);
 
-      setShowSignatureModal(false);
-      setShowPayment(true);
-      toast.success(t('Signature saved successfully'));
+      // Refresh user info to get updated signatureImage
+      const userInfoResponse = await User.getUserInfo(1);
+      if (userInfoResponse?.data) {
+        // Update userInfo in Redux store
+        dispatch(UPDATE_USER_INFO(userInfoResponse.data));
+        // Close modal and show payment info
+        setShowSignatureModal(false);
+        setShowPayment(true);
+        toast.success(t('Signature saved successfully'));
+      }
     } catch (error: any) {
       let message =
         error.response && error.response.data.message
@@ -118,9 +130,12 @@ const PaymentPage = () => {
   };
 
   const handleCancelSignature = () => {
-    // If user cancels, still allow them to proceed (signature is optional for now)
-    setShowSignatureModal(false);
-    setShowPayment(true);
+    // For tier 1, signature is REQUIRED - don't allow canceling
+    // User must upload signature to proceed
+    toast.warning(
+      t('Signature is required for Tier 1 payment. Please provide your signature.'),
+    );
+    // Keep modal open - don't close it
   };
 
   const handleOpenPaymentModal = () => {
@@ -183,7 +198,11 @@ const PaymentPage = () => {
           </div>
         ) : (
           <>
-            {!paymentCompleted && showPayment && termsAccepted && (
+            {!paymentCompleted &&
+              showPayment &&
+              termsAccepted &&
+              // For tier 1, only show payment if signature exists
+              (userInfo?.countPay !== 0 || userInfo?.signatureImage) && (
               <>
                 <div className="w-full max-w-203 mx-auto rounded-lg bg-white p-10 text-gray-700 mt-4">
                   <div className="mb-10">
@@ -1268,8 +1287,11 @@ const PaymentPage = () => {
       <Modal
         isOpen={showSignatureModal}
         onRequestClose={() => {
-          // Allow closing - user can cancel
-          setShowSignatureModal(false);
+          // For tier 1, signature is REQUIRED - prevent closing
+          // User must upload signature to proceed
+          toast.warning(
+            t('Signature is required for Tier 1 payment. Please provide your signature.'),
+          );
         }}
         style={{
           content: {
