@@ -133,7 +133,9 @@ const PaymentPage = () => {
     // For tier 1, signature is REQUIRED - don't allow canceling
     // User must upload signature to proceed
     toast.warning(
-      t('Signature is required for Tier 1 payment. Please provide your signature.'),
+      t(
+        'Signature is required for Tier 1 payment. Please provide your signature.',
+      ),
     );
     // Keep modal open - don't close it
   };
@@ -203,106 +205,106 @@ const PaymentPage = () => {
               termsAccepted &&
               // For tier 1, only show payment if signature exists
               (userInfo?.countPay !== 0 || userInfo?.signatureImage) && (
-              <>
-                <div className="w-full max-w-203 mx-auto rounded-lg bg-white p-10 text-gray-700 mt-4">
-                  <div className="mb-10">
-                    <h1 className="text-center font-bold text-4xl">
-                      {t('paymentTitle')}
-                    </h1>
-                  </div>
+                <>
+                  <div className="w-full max-w-203 mx-auto rounded-lg bg-white p-10 text-gray-700 mt-4">
+                    <div className="mb-10">
+                      <h1 className="text-center font-bold text-4xl">
+                        {t('paymentTitle')}
+                      </h1>
+                    </div>
 
-                  <div className="flex justify-between">
-                    <div className="mb-3">
-                      <p className="text-lg mb-2 ml-1">
-                        <span className="font-bold">{t('buyPackage')}</span> :
-                        NoExcuseChallenge
-                      </p>
+                    <div className="flex justify-between">
+                      <div className="mb-3">
+                        <p className="text-lg mb-2 ml-1">
+                          <span className="font-bold">{t('buyPackage')}</span> :
+                          NoExcuseChallenge
+                        </p>
+                      </div>
+                      <div className="mb-3">
+                        <p className="text-lg mb-2 ml-1">
+                          <span className="font-bold">{t('Total')}</span> :{' '}
+                          {total} USDT
+                        </p>
+                      </div>
                     </div>
-                    <div className="mb-3">
-                      <p className="text-lg mb-2 ml-1">
-                        <span className="font-bold">{t('Total')}</span> :{' '}
-                        {total} USDT
-                      </p>
-                    </div>
-                  </div>
-                  {!loadingPaymentInfo &&
-                    paymentIdsList.map((payment, i) => (
-                      <div
-                        key={payment.id}
-                        className={`flex items-center p-4 mb-4 text-sm rounded-lg ${
-                          payment.type === 'REGISTER'
-                            ? 'bg-green-50 text-green-800'
-                            : payment.type === 'DIRECT'
-                            ? 'bg-yellow-50 text-yellow-800'
-                            : payment.type === 'FINE'
-                            ? 'bg-red-50 text-red-800'
-                            : payment.type === 'PIG'
-                            ? 'bg-pink-100'
-                            : payment.type === 'COMPANY'
-                            ? 'bg-purple-100'
-                            : payment.type === 'KYC'
-                            ? 'bg-teal-100'
-                            : 'bg-blue-50 text-blue-800'
-                        }`}
-                        role="alert"
-                      >
-                        <svg
-                          className="flex-shrink-0 inline w-4 h-4 me-3"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+                    {!loadingPaymentInfo &&
+                      paymentIdsList.map((payment, i) => (
+                        <div
+                          key={payment.id}
+                          className={`flex items-center p-4 mb-4 text-sm rounded-lg ${
+                            payment.type === 'REGISTER'
+                              ? 'bg-green-50 text-green-800'
+                              : payment.type === 'DIRECT'
+                              ? 'bg-yellow-50 text-yellow-800'
+                              : payment.type === 'FINE'
+                              ? 'bg-red-50 text-red-800'
+                              : payment.type === 'PIG'
+                              ? 'bg-pink-100'
+                              : payment.type === 'COMPANY'
+                              ? 'bg-purple-100'
+                              : payment.type === 'KYC'
+                              ? 'bg-teal-100'
+                              : 'bg-blue-50 text-blue-800'
+                          }`}
+                          role="alert"
                         >
-                          <path
-                            d="M6 2h12v2H6V2zM4 6V4h2v2H4zm0 12V6H2v12h2zm2 2v-2H4v2h2zm12 0v2H6v-2h12zm2-2v2h-2v-2h2zm0-12h2v12h-2V6zm0 0V4h-2v2h2zm-9-1h2v2h3v2h-6v2h6v6h-3v2h-2v-2H8v-2h6v-2H8V7h3V5z"
-                            fill="currentColor"
-                          />
-                        </svg>
-                        <div className="w-full flex flex-col sm:flex-row justify-between gap-2">
-                          <div className="">
-                            <span className="font-medium">
-                              {payment.type === 'REGISTER'
-                                ? t('REGISTRATION & MANAGEMENT FEE')
-                                : payment.type === 'DIRECT'
-                                ? t('COMMUNITY REWARD')
-                                : payment.type === 'FINE'
-                                ? t('fine')
-                                : payment.type === 'PIG'
-                                ? t('REWARD POOL')
-                                : payment.type === 'COMPANY'
-                                ? t('EXCHANGE FOR HEWE')
-                                : payment.type === 'KYC'
-                                ? t('KYC Fee')
-                                : t('COMMUNITY SUPPORT REWARDS')}
-                              <span> : </span>
-                            </span>
-                            <span>{payment.amount} USDT</span>
-                          </div>
-                          <div className="">
-                            {(payment.type === 'DIRECT' ||
-                              payment.type === 'REFERRAL') && (
-                              <span className="mx-2 text-black">
-                                <span className="font-medium mr-2">
-                                  {t('To')} :{' '}
-                                </span>
-                                <span className="">{payment.to}</span>
+                          <svg
+                            className="flex-shrink-0 inline w-4 h-4 me-3"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M6 2h12v2H6V2zM4 6V4h2v2H4zm0 12V6H2v12h2zm2 2v-2H4v2h2zm12 0v2H6v-2h12zm2-2v2h-2v-2h2zm0-12h2v12h-2V6zm0 0V4h-2v2h2zm-9-1h2v2h3v2h-6v2h6v6h-3v2h-2v-2H8v-2h6v-2H8V7h3V5z"
+                              fill="currentColor"
+                            />
+                          </svg>
+                          <div className="w-full flex flex-col sm:flex-row justify-between gap-2">
+                            <div className="">
+                              <span className="font-medium">
+                                {payment.type === 'REGISTER'
+                                  ? t('REGISTRATION & MANAGEMENT FEE')
+                                  : payment.type === 'DIRECT'
+                                  ? t('COMMUNITY REWARD')
+                                  : payment.type === 'FINE'
+                                  ? t('fine')
+                                  : payment.type === 'PIG'
+                                  ? t('REWARD POOL')
+                                  : payment.type === 'COMPANY'
+                                  ? t('EXCHANGE FOR HEWE')
+                                  : payment.type === 'KYC'
+                                  ? t('KYC Fee')
+                                  : t('COMMUNITY SUPPORT REWARDS')}
+                                <span> : </span>
                               </span>
-                            )}
+                              <span>{payment.amount} USDT</span>
+                            </div>
+                            <div className="">
+                              {(payment.type === 'DIRECT' ||
+                                payment.type === 'REFERRAL') && (
+                                <span className="mx-2 text-black">
+                                  <span className="font-medium mr-2">
+                                    {t('To')} :{' '}
+                                  </span>
+                                  <span className="">{payment.to}</span>
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  <button
-                    type="submit"
-                    onClick={handleOpenPaymentModal}
-                    disabled={loadingPayment}
-                    className="w-2xl mx-auto flex justify-center border border-black items-center hover:underline  font-medium rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
-                  >
-                    {loadingPayment && <Loading />}
-                    {t('signin.confirm')}
-                  </button>
-                </div>
-              </>
-            )}
+                      ))}
+                    <button
+                      type="submit"
+                      onClick={handleOpenPaymentModal}
+                      disabled={loadingPayment}
+                      className="w-2xl mx-auto flex justify-center border border-black items-center hover:underline  font-medium rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                    >
+                      {loadingPayment && <Loading />}
+                      {t('signin.confirm')}
+                    </button>
+                  </div>
+                </>
+              )}
             {paymentCompleted && (
               <div>
                 <div className="flex flex-col items-center lg:gap-10 gap-4">
@@ -1290,7 +1292,9 @@ const PaymentPage = () => {
           // For tier 1, signature is REQUIRED - prevent closing
           // User must upload signature to proceed
           toast.warning(
-            t('Signature is required for Tier 1 payment. Please provide your signature.'),
+            t(
+              'Signature is required for Tier 1 payment. Please provide your signature.',
+            ),
           );
         }}
         style={{

@@ -1440,7 +1440,7 @@ const UserProfile = () => {
                       <div className="py-4">
                         <div className="mb-4">
                           <img
-                            src={`${import.meta.env.VITE_API_URL}/${
+                            src={`${import.meta.env.VITE_API_URL}${
                               data.signatureImage
                             }`}
                             alt="User Signature"
@@ -1454,7 +1454,7 @@ const UserProfile = () => {
                             try {
                               const imageUrl = `${
                                 import.meta.env.VITE_API_URL
-                              }/${data.signatureImage}`;
+                              }${data.signatureImage}`;
                               const response = await fetch(imageUrl);
                               const blob = await response.blob();
                               const filename = `signature_${
