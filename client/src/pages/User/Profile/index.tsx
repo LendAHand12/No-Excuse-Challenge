@@ -147,44 +147,33 @@ const Profile = () => {
         const bankCode = selectedBank ? selectedBank.code : '';
         const finalBankName = selectedBank ? selectedBank.name : bankName;
 
-        // Create FormData for file upload
-        const formData = new FormData();
-        formData.append('phone', phoneNumber);
-        formData.append('walletAddress', walletAddress || '');
-        formData.append('email', email || '');
-        formData.append('bankName', finalBankName || '');
-        formData.append('bankCode', bankCode || '');
-        formData.append('accountName', accountName?.trim() || '');
-        formData.append('accountNumber', accountNumber?.trim() || '');
-        formData.append('dateOfBirth', dateOfBirth || '');
+        // Prepare update data for face scan
+        const updateData: any = {};
+        if (phoneNumber) updateData.phone = phoneNumber;
+        if (walletAddress) updateData.walletAddress = walletAddress;
+        if (email) updateData.email = email;
+        if (finalBankName) updateData.bankName = finalBankName;
+        if (bankCode) updateData.bankCode = bankCode;
+        if (accountName?.trim()) updateData.accountName = accountName.trim();
+        if (accountNumber?.trim()) updateData.accountNumber = accountNumber.trim();
+        if (dateOfBirth) updateData.dateOfBirth = dateOfBirth;
 
-        // Call update API
-        await User.update(id, formData)
-          .then((response) => {
-            toast.success(t(response.data.message || 'Updated successfully'));
-            setRefresh(!refresh);
-            setIsEdit(false);
-            // Refresh user info
-            User.getUserInfo(currentTier)
-              .then((response) => {
-                dispatch(UPDATE_USER_INFO(response.data));
-              })
-              .catch((error) => {
-                console.error('Error refreshing user info:', error);
-              });
-          })
-          .catch((error: any) => {
-            let message =
-              error.response && error.response.data.error
-                ? error.response.data.error
-                : error.response && error.response.data.message
-                ? error.response.data.message
-                : error.message;
-            toast.error(t(message));
-          });
+        // Start face scan verification
+        const response = await KYC.startUpdateInfo(updateData);
+        if (response.data.url) {
+          // Redirect to face scan
+          window.location.href = response.data.url;
+        } else {
+          throw new Error('Failed to get face scan URL');
+        }
       } catch (error: any) {
-        toast.error(t(error.message || 'Update failed'));
-      } finally {
+        let message =
+          error.response && error.response.data.error
+            ? error.response.data.error
+            : error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message;
+        toast.error(t(message));
         setLoading(false);
       }
     },

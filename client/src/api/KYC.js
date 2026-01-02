@@ -19,6 +19,9 @@ const Page = {
   },
   moveSystem: (body) => {
     return API.post(`${URL_API_KYC}/move-system`, body);
+  },
+  startUpdateInfo: (body) => {
+    return API.post(`${URL_API_KYC}/start-update-info`, body);
   }
 };
 

@@ -201,4 +201,66 @@ const isValidObjectId = (id) => {
   return mongoose.Types.ObjectId.isValid(id);
 };
 
-export { startKYC, register, claimKYC, checkUserCompleteKyc, moveSystemKyc };
+// Start face verification for updating user info
+const startUpdateInfoKYC = expressAsyncHandler(async (req, res) => {
+  const { user } = req;
+  const {
+    phone,
+    walletAddress,
+    email,
+    bankName,
+    bankCode,
+    accountName,
+    accountNumber,
+    dateOfBirth,
+  } = req.body;
+
+  // Check if user has registered face
+  if (!user.facetecTid || user.facetecTid === "") {
+    return res.status(400).json({ 
+      success: false,
+      message: "Face not registered. Please register your face first." 
+    });
+  }
+
+  // Create callback token with purpose "update_info"
+  const token = createCallbackToken(user._id, "update_info");
+  
+  // Build callback URL with all update fields as params
+  let callbackUrl = `${process.env.FRONTEND_BASE_URL}/user/update-info?token=${token}`;
+  
+  // Add fields to callback URL params (only if they have values)
+  if (phone) {
+    callbackUrl += `&phone=${encodeURIComponent(phone)}`;
+  }
+  if (walletAddress) {
+    callbackUrl += `&walletAddress=${encodeURIComponent(walletAddress)}`;
+  }
+  if (email) {
+    callbackUrl += `&email=${encodeURIComponent(email)}`;
+  }
+  if (bankName) {
+    callbackUrl += `&bankName=${encodeURIComponent(bankName)}`;
+  }
+  if (bankCode) {
+    callbackUrl += `&bankCode=${encodeURIComponent(bankCode)}`;
+  }
+  if (accountName) {
+    callbackUrl += `&accountName=${encodeURIComponent(accountName)}`;
+  }
+  if (accountNumber) {
+    callbackUrl += `&accountNumber=${encodeURIComponent(accountNumber)}`;
+  }
+  if (dateOfBirth) {
+    callbackUrl += `&dateOfBirth=${encodeURIComponent(dateOfBirth)}`;
+  }
+
+  // Redirect to FaceTec verify page
+  const redirectToKYC = `${process.env.KYC_URL}/verify.html?callback=${encodeURIComponent(
+    callbackUrl
+  )}&user_id=${user.id}`;
+
+  res.json({ url: redirectToKYC });
+});
+
+export { startKYC, register, claimKYC, checkUserCompleteKyc, moveSystemKyc, startUpdateInfoKYC };

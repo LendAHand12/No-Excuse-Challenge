@@ -1169,6 +1169,7 @@ const updateUser = asyncHandler(async (req, res) => {
     accountName,
     accountNumber,
     dateOfBirth,
+    token, // Token from face scan verification
   } = req.body;
 
   const user = await User.findOne({ _id: req.params.id }).select("-password");
@@ -1185,6 +1186,47 @@ const updateUser = asyncHandler(async (req, res) => {
   if (!user) {
     res.status(400).json({ error: "User not found" });
     return;
+  }
+
+  // If token is provided, verify face scan token (from UpdateInfoKYC flow)
+  // FaceTec will only redirect to callback URL if face scan is successful
+  // So we just need to verify the token is valid
+  if (token) {
+    try {
+      const { decodeCallbackToken } = await import("../utils/methods.js");
+      
+      let decodedToken;
+      try {
+        decodedToken = decodeCallbackToken(token);
+      } catch (error) {
+        return res.status(400).json({ error: error.message || "Invalid or expired token" });
+      }
+
+      // Verify token purpose
+      if (decodedToken.purpose !== "update_info") {
+        return res.status(400).json({ error: "Invalid token purpose" });
+      }
+
+      // Verify userId from token matches user
+      if (decodedToken.userId !== user._id.toString()) {
+        return res.status(400).json({ error: "Token user mismatch" });
+      }
+
+      // Check if user has registered face
+      if (!user.facetecTid || user.facetecTid === "") {
+        return res.status(400).json({ 
+          error: "Face not registered. Please register your face first." 
+        });
+      }
+
+      // Token is valid and face scan was successful (FaceTec only redirects on success)
+      // No need to verify face scan again as FaceTec already did it
+    } catch (error) {
+      console.log({ error });
+      return res.status(500).json({ 
+        error: error.message || "Token verification error" 
+      });
+    }
   }
 
   const userHavePhone = await User.find({

@@ -42,7 +42,7 @@ const UpdateInfoKYCPage = () => {
 
   let {
     user_id,
-    status,
+    token,
     walletAddress,
     email,
     phone,
@@ -70,38 +70,38 @@ const UpdateInfoKYCPage = () => {
   dateOfBirth = dateOfBirth
     ? safeDecode(getStringValue(dateOfBirth))
     : dateOfBirth;
-  if (status !== 'success') {
-    toast.error(t('invalidUrl'));
-  }
 
   useEffect(() => {
     (async () => {
-      if (status === 'success') {
-        var formData = new FormData();
-        formData.append('phone', phone.trim());
-        formData.append('walletAddress', walletAddress.trim());
-        formData.append('email', email.trim());
-        formData.append('bankName', bankName.trim());
-        formData.append('bankCode', bankCode.trim());
-        formData.append('accountName', accountName.trim());
-        formData.append('accountNumber', accountNumber.trim());
-        formData.append('dateOfBirth', dateOfBirth.trim());
+      var formData = new FormData();
+      formData.append('phone', phone.trim());
+      formData.append('walletAddress', walletAddress.trim());
+      formData.append('email', email.trim());
+      formData.append('bankName', bankName.trim());
+      formData.append('bankCode', bankCode.trim());
+      formData.append('accountName', accountName.trim());
+      formData.append('accountNumber', accountNumber.trim());
+      formData.append('dateOfBirth', dateOfBirth.trim());
 
-        await User.update(user_id, formData)
-          .then((response) => {
-            setLoading(false);
-            toast.success(t(response.data.message));
-            setMessage(response.data.message);
-            // navigate("/user/profile");
-          })
-          .catch((error) => {
-            let message =
-              error.response && error.response.data.error
-                ? error.response.data.error
-                : error.message;
-            toast.error(t(message));
-          });
+      // Add token from URL params to verify face scan
+      if (token) {
+        formData.append('token', getStringValue(token));
       }
+
+      await User.update(user_id, formData)
+        .then((response) => {
+          setLoading(false);
+          toast.success(t(response.data.message));
+          setMessage(response.data.message);
+          // navigate("/user/profile");
+        })
+        .catch((error) => {
+          let message =
+            error.response && error.response.data.error
+              ? error.response.data.error
+              : error.message;
+          toast.error(t(message));
+        });
     })();
   }, []);
 
