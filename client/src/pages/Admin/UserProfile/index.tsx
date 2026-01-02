@@ -794,7 +794,7 @@ const UserProfile = () => {
           })()}
 
           <form onSubmit={handleSubmit(onSubmit)} className="md:flex no-wrap">
-            <div className="w-full lg:w-4/12 lg:mx-2 mb-4 lg:mb-0">
+            <div className={`w-full ${currentTier === 1 ? "lg:w-1/2" : "lg:w-4/12" } lg:mx-2 mb-4 lg:mb-0`}>
               <div className="bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                 <ul className=" text-gray-600 py-2 px-3 mt-3 divide-y rounded">
                   <li className="flex items-center py-3">
@@ -1492,8 +1492,8 @@ const UserProfile = () => {
                 </>
               )}
 
-              {/* CCCD Images for VN users */}
-              {data.city === 'VN' && (
+              {/* CCCD Images for VN users - Only show for tier 1 */}
+              {data.city === 'VN' && currentTier === 1 && (
                 <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                   <p className="uppercase mt-2 font-bold">
                     {t('CCCD (Citizen ID Card)')}
@@ -1521,11 +1521,11 @@ const UserProfile = () => {
                     <div className="py-4">
                       <div className="grid lg:grid-cols-2 gap-4 mb-4">
                         {/* CCCD Front */}
-                        {data.imgFront && (
-                          <div>
-                            <p className="text-sm font-medium mb-2">
-                              {t('CCCD Front')}
-                            </p>
+                        <div>
+                          <p className="text-sm font-medium mb-2">
+                            {t('CCCD Front')}
+                          </p>
+                          {data.imgFront ? (
                             <div className="mb-2">
                               <img
                                 src={`${
@@ -1536,54 +1536,18 @@ const UserProfile = () => {
                                 style={{ maxHeight: '300px' }}
                               />
                             </div>
-                            <div className="flex gap-2">
-                              <button
-                                type="button"
-                                onClick={async () => {
-                                  try {
-                                    const imageUrl = `${
-                                      import.meta.env.VITE_API_URL
-                                    }/uploads/CCCD/${data.imgFront}`;
-                                    const response = await fetch(imageUrl);
-                                    const blob = await response.blob();
-                                    const filename = `cccd_front_${
-                                      data.userId || 'user'
-                                    }.png`;
-                                    FileSaver.saveAs(blob, filename);
-                                  } catch (error) {
-                                    console.error(
-                                      'Error downloading CCCD front:',
-                                      error,
-                                    );
-                                    toast.error(t('Failed to download image'));
-                                  }
-                                }}
-                                className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
-                              >
-                                <svg
-                                  className="w-4 h-4 mr-1"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                                  />
-                                </svg>
-                                {t('Download')}
-                              </button>
+                          ) : (
+                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
+                              <p className="text-gray-500">{t('No front image')}</p>
                             </div>
-                          </div>
-                        )}
+                          )}
+                        </div>
                         {/* CCCD Back */}
-                        {data.imgBack && (
-                          <div>
-                            <p className="text-sm font-medium mb-2">
-                              {t('CCCD Back')}
-                            </p>
+                        <div>
+                          <p className="text-sm font-medium mb-2">
+                            {t('CCCD Back')}
+                          </p>
+                          {data.imgBack ? (
                             <div className="mb-2">
                               <img
                                 src={`${
@@ -1594,85 +1558,56 @@ const UserProfile = () => {
                                 style={{ maxHeight: '300px' }}
                               />
                             </div>
-                            <div className="flex gap-2">
-                              <button
-                                type="button"
-                                onClick={async () => {
-                                  try {
-                                    const imageUrl = `${
-                                      import.meta.env.VITE_API_URL
-                                    }/uploads/CCCD/${data.imgBack}`;
-                                    const response = await fetch(imageUrl);
-                                    const blob = await response.blob();
-                                    const filename = `cccd_back_${
-                                      data.userId || 'user'
-                                    }.png`;
-                                    FileSaver.saveAs(blob, filename);
-                                  } catch (error) {
-                                    console.error(
-                                      'Error downloading CCCD back:',
-                                      error,
-                                    );
-                                    toast.error(t('Failed to download image'));
-                                  }
-                                }}
-                                className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
-                              >
-                                <svg
-                                  className="w-4 h-4 mr-1"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                                  />
-                                </svg>
-                                {t('Download')}
-                              </button>
+                          ) : (
+                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
+                              <p className="text-gray-500">{t('No back image')}</p>
                             </div>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
-                      {/* Delete Button - Mark contract as completed */}
-                      {data.imgFront && data.imgBack && (
-                        <div className="mt-4">
+                      {/* Download and Delete Buttons */}
+                      <div className="mt-4 flex gap-2">
+                        {/* Download Both Images as Zip - Only show if both images exist */}
+                        {data.imgFront && data.imgBack && (
                           <button
                             type="button"
                             onClick={async () => {
-                              if (
-                                window.confirm(
-                                  t(
-                                    'Are you sure you want to delete CCCD images and mark contract as completed? This action cannot be undone.',
-                                  ),
-                                )
-                              ) {
-                                try {
-                                  await User.deleteCCCDImages(id);
-                                  toast.success(
-                                    t(
-                                      'CCCD images deleted and contract marked as completed',
-                                    ),
-                                  );
+                              try {
+                                const response = await User.downloadCCCDImages(id);
+                                // Create blob from response
+                                const blob = new Blob([response.data], {
+                                  type: 'application/zip',
+                                });
+                                // Create download link
+                                const url = window.URL.createObjectURL(blob);
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.download = `cccd_${data.userId || id}_${Date.now()}.zip`;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                window.URL.revokeObjectURL(url);
+                                
+                                toast.success(t('CCCD images downloaded successfully'));
+                                // Refresh after a short delay to show updated state
+                                setTimeout(() => {
                                   setRefresh(!refresh);
-                                } catch (error: any) {
-                                  let message =
-                                    error.response &&
-                                    error.response.data.message
-                                      ? error.response.data.message
-                                      : error.message;
-                                  toast.error(
-                                    t(
-                                      message || 'Failed to delete CCCD images',
-                                    ),
-                                  );
-                                }
+                                }, 1000);
+                              } catch (error: any) {
+                                let message =
+                                  error.response &&
+                                  error.response.data.message
+                                    ? error.response.data.message
+                                    : error.response &&
+                                      error.response.data.error
+                                    ? error.response.data.error
+                                    : error.message;
+                                toast.error(
+                                  t(message || 'Failed to download CCCD images'),
+                                );
                               }
                             }}
-                            className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                            className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                           >
                             <svg
                               className="w-5 h-5 mr-2"
@@ -1684,13 +1619,13 @@ const UserProfile = () => {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth={2}
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                               />
                             </svg>
-                            {t('Delete CCCD Images (Mark Contract Completed)')}
+                            {t('Download')}
                           </button>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1748,7 +1683,7 @@ const UserProfile = () => {
                 </div>
               )}
             </div>
-            <div className="w-full lg:w-4/12 lg:mx-2">
+            <div className={`w-full ${currentTier === 1 ? "lg:w-1/2" : "lg:w-4/12" }  lg:mx-2`}>
               <div className="bg-white p-6 shadow-md rounded-sm border-t-4 border-NoExcuseChallenge">
                 <div className="text-gray-700">
                   <div className="grid grid-cols-1 text-sm">

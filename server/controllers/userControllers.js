@@ -1439,25 +1439,7 @@ const updateUser = asyncHandler(async (req, res) => {
       await UserHistory.insertMany(changes);
     }
 
-    // Handle CCCD image uploads
-    // User can only update once if they already have images
-    // Admin can update multiple times (admin uses adminUpdateUser route)
-    if (req.files && req.files.imgFront && req.files.imgFront[0]) {
-      // Check if user already has imgFront
-      if (user.imgFront && user.imgFront !== "") {
-        res.status(400);
-        throw new Error("You can only upload CCCD front image once");
-      }
-      user.imgFront = req.files.imgFront[0].filename;
-    }
-    if (req.files && req.files.imgBack && req.files?.imgBack[0]) {
-      // Check if user already has imgBack
-      if (user.imgBack && user.imgBack !== "") {
-        res.status(400);
-        throw new Error("You can only upload CCCD back image once");
-      }
-      user.imgBack = req.files.imgBack[0].filename;
-    }
+    // CCCD upload is now handled by separate API endpoint
 
     if (kycConfig.value === false) {
       await sendMailChangeWalletToAdmin({
@@ -3861,13 +3843,62 @@ const uploadSignature = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Delete CCCD images and mark contract as completed (Admin only)
-// @route   DELETE /api/users/:id/cccd
+// @desc    Upload CCCD images (User only, city = VN)
+// @route   POST /api/users/cccd/upload
+// @access  Private (User)
+const uploadCCCDImages = asyncHandler(async (req, res) => {
+  const { user } = req;
+
+  // Check if user city is VN
+  if (user.city !== "VN") {
+    res.status(400);
+    throw new Error("CCCD upload is only allowed for users with city = VN");
+  }
+
+  // Check if user already has images (can only upload if admin deleted them)
+  if (user.imgFront && user.imgFront !== "") {
+    res.status(400);
+    throw new Error("You already have CCCD front image. Please contact admin to delete it first.");
+  }
+  if (user.imgBack && user.imgBack !== "") {
+    res.status(400);
+    throw new Error("You already have CCCD back image. Please contact admin to delete it first.");
+  }
+
+  // Check if files are provided
+  if (!req.files || (!req.files.imgFront && !req.files.imgBack)) {
+    res.status(400);
+    throw new Error("Please upload at least one CCCD image");
+  }
+
+  // Handle imgFront upload
+  if (req.files.imgFront && req.files.imgFront[0]) {
+    user.imgFront = req.files.imgFront[0].filename;
+  }
+
+  // Handle imgBack upload
+  if (req.files.imgBack && req.files.imgBack[0]) {
+    user.imgBack = req.files.imgBack[0].filename;
+  }
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "CCCD images uploaded successfully",
+    imgFront: user.imgFront,
+    imgBack: user.imgBack,
+  });
+});
+
+// @desc    Download CCCD images as zip and delete files (Admin only)
+// @route   GET /api/users/:id/cccd/download
 // @access  Private (Admin)
-const deleteCCCDImages = asyncHandler(async (req, res) => {
+const downloadCCCDImages = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const fs = await import("fs");
   const path = await import("path");
+  const archiver = await import("archiver");
 
   const user = await User.findById(id);
   if (!user) {
@@ -3875,40 +3906,86 @@ const deleteCCCDImages = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 
-  // Delete imgFront file if exists
-  if (user.imgFront) {
-    const frontPath = path.join(process.cwd(), "public", "uploads", "CCCD", user.imgFront);
-    try {
-      if (fs.existsSync(frontPath)) {
-        fs.unlinkSync(frontPath);
-      }
-    } catch (error) {
-      console.error("Error deleting imgFront:", error);
-    }
+  // Check if user has CCCD images
+  if (!user.imgFront && !user.imgBack) {
+    res.status(400);
+    throw new Error("User does not have CCCD images to download");
   }
 
-  // Delete imgBack file if exists
-  if (user.imgBack) {
-    const backPath = path.join(process.cwd(), "public", "uploads", "CCCD", user.imgBack);
-    try {
-      if (fs.existsSync(backPath)) {
-        fs.unlinkSync(backPath);
-      }
-    } catch (error) {
-      console.error("Error deleting imgBack:", error);
-    }
-  }
-
-  // Clear image paths and mark contract as completed
-  user.imgFront = "";
-  user.imgBack = "";
-  user.contractCompleted = true;
-  await user.save();
-
-  res.status(200).json({
-    success: true,
-    message: "CCCD images deleted and contract marked as completed",
+  // Create zip archive
+  const archive = archiver.default("zip", {
+    zlib: { level: 9 }, // Sets the compression level
   });
+
+  // Set response headers
+  const zipFileName = `cccd_${user.userId || user._id}_${Date.now()}.zip`;
+  res.attachment(zipFileName);
+  res.contentType("application/zip");
+
+  // Pipe archive data to response
+  archive.pipe(res);
+
+  const uploadsDir = path.join(process.cwd(), "public", "uploads", "CCCD");
+  const filesToDelete = [];
+
+  // Add imgFront to zip if exists
+  if (user.imgFront) {
+    const frontPath = path.join(uploadsDir, user.imgFront);
+    if (fs.existsSync(frontPath)) {
+      archive.file(frontPath, { name: `cccd_front_${user.userId || user._id}.${user.imgFront.split('.').pop()}` });
+      filesToDelete.push(frontPath);
+    }
+  }
+
+  // Add imgBack to zip if exists
+  if (user.imgBack) {
+    const backPath = path.join(uploadsDir, user.imgBack);
+    if (fs.existsSync(backPath)) {
+      archive.file(backPath, { name: `cccd_back_${user.userId || user._id}.${user.imgBack.split('.').pop()}` });
+      filesToDelete.push(backPath);
+    }
+  }
+
+  // Handle archive errors
+  archive.on("error", (err) => {
+    console.error("Archive error:", err);
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        error: "Failed to create archive",
+      });
+    }
+  });
+
+  // After response is finished, delete files
+  res.on("finish", async () => {
+    try {
+      // Delete files from server
+      for (const filePath of filesToDelete) {
+        try {
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            console.log(`Deleted file: ${filePath}`);
+          }
+        } catch (error) {
+          console.error(`Error deleting file ${filePath}:`, error);
+        }
+      }
+
+      // Clear image paths in database and mark contract as completed
+      user.imgFront = "";
+      user.imgBack = "";
+      user.contractCompleted = true;
+      await user.save();
+
+      console.log(`CCCD images downloaded and deleted for user ${user.userId || user._id}`);
+    } catch (error) {
+      console.error("Error cleaning up after download:", error);
+    }
+  });
+
+  // Finalize the archive
+  archive.finalize();
 });
 
 export {
@@ -3959,5 +4036,6 @@ export {
   getTreesByUserName,
   checkUserAbnormalIncome,
   uploadSignature,
-  deleteCCCDImages,
+  uploadCCCDImages,
+  downloadCCCDImages,
 };

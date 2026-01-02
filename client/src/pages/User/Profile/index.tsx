@@ -73,6 +73,8 @@ const Profile = () => {
     tier1,
     tier2,
     isDisableTier2,
+    imgFront,
+    imgBack,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -97,6 +99,8 @@ const Profile = () => {
   // );
   const [showBankInfoModal, setShowBankInfoModal] = useState(false);
   const [showNextTier, setShowNextTier] = useState(false);
+  const [showCCCDModal, setShowCCCDModal] = useState(false);
+  const [loadingCCCD, setLoadingCCCD] = useState(false);
   const [wildCards, setWildCards] = useState([]);
   const [loadingWildCards, setLoadingWildCards] = useState(false);
   const [usingCardId, setUsingCardId] = useState<string | null>(null);
@@ -1726,6 +1730,210 @@ const Profile = () => {
             </form>
           </div>
         </Modal>
+
+        {/* CCCD Upload Modal */}
+        {city === 'VN' && (
+          <Modal
+            isOpen={showCCCDModal}
+            onRequestClose={() => setShowCCCDModal(false)}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+            overlayClassName="fixed inset-0 z-40"
+            contentLabel="CCCD Upload Modal"
+          >
+            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <h2 className="text-xl font-bold mb-4">
+                {t('Upload CCCD (Citizen ID Card)')}
+              </h2>
+              <p className="text-gray-600 mb-4">
+                {t('Please upload both front and back of your CCCD for contract processing')}
+              </p>
+
+              {/* Display existing images if available */}
+              {(imgFront || imgBack) && (
+                <div className="mb-4 grid grid-cols-2 gap-4">
+                  {imgFront && (
+                    <div>
+                      <p className="text-sm font-medium mb-2">{t('CCCD Front')}</p>
+                      <img
+                        src={`${import.meta.env.VITE_API_URL}/uploads/CCCD/${imgFront}`}
+                        alt="CCCD Front"
+                        className="w-full h-auto border-2 border-gray-300 rounded-lg"
+                        style={{ maxHeight: '300px' }}
+                      />
+                    </div>
+                  )}
+                  {imgBack && (
+                    <div>
+                      <p className="text-sm font-medium mb-2">{t('CCCD Back')}</p>
+                      <img
+                        src={`${import.meta.env.VITE_API_URL}/uploads/CCCD/${imgBack}`}
+                        alt="CCCD Back"
+                        className="w-full h-auto border-2 border-gray-300 rounded-lg"
+                        style={{ maxHeight: '300px' }}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Upload form - only show if no images or images were deleted */}
+              {(!imgFront || !imgBack) && (
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.target as HTMLFormElement);
+                    
+                    setLoadingCCCD(true);
+                    try {
+                      await User.uploadCCCD(formData)
+                        .then((response) => {
+                          toast.success(t(response.data.message || 'CCCD uploaded successfully'));
+                          setShowCCCDModal(false);
+                          setRefresh(!refresh);
+                          // Refresh user info
+                          User.getUserInfo(currentTier)
+                            .then((response) => {
+                              dispatch(UPDATE_USER_INFO(response.data));
+                            })
+                            .catch((error) => {
+                              console.error('Error refreshing user info:', error);
+                            });
+                        })
+                        .catch((error: any) => {
+                          let message =
+                            error.response && error.response.data.error
+                              ? error.response.data.error
+                              : error.response && error.response.data.message
+                              ? error.response.data.message
+                              : error.message;
+                          toast.error(t(message));
+                        });
+                    } catch (error: any) {
+                      toast.error(t(error.message || 'Upload failed'));
+                    } finally {
+                      setLoadingCCCD(false);
+                    }
+                  }}
+                >
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    {!imgFront && (
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          {t('CCCD Front')} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="file"
+                          name="imgFront"
+                          accept="image/png,image/jpg,image/jpeg"
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
+                          required={!imgFront}
+                        />
+                      </div>
+                    )}
+                    {!imgBack && (
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          {t('CCCD Back')} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="file"
+                          name="imgBack"
+                          accept="image/png,image/jpg,image/jpeg"
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
+                          required={!imgBack}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowCCCDModal(false)}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+                    >
+                      {t('Cancel')}
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loadingCCCD}
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {loadingCCCD ? <Loading /> : t('Upload')}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* Show message if both images exist */}
+              {imgFront && imgBack && (
+                <div className="text-center py-4">
+                  <p className="text-green-600 font-medium">
+                    {t('CCCD images uploaded successfully')}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowCCCDModal(false)}
+                    className="mt-4 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                  >
+                    {t('Close')}
+                  </button>
+                </div>
+              )}
+            </div>
+          </Modal>
+        )}
+
+        {/* CCCD Section in Profile */}
+        {city === 'VN' && (
+          <div className="bg-[#FAFBFC] p-4 rounded-2xl mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold">{t('CCCD (Citizen ID Card)')}</h3>
+              {(!imgFront || !imgBack) && (
+                <button
+                  onClick={() => setShowCCCDModal(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                >
+                  {imgFront || imgBack ? t('Update CCCD') : t('Upload CCCD')}
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {imgFront ? (
+                <div>
+                  <p className="text-sm font-medium mb-2">{t('CCCD Front')}</p>
+                  <img
+                    src={`${import.meta.env.VITE_API_URL}/uploads/CCCD/${imgFront}`}
+                    alt="CCCD Front"
+                    className="w-full h-auto border-2 border-gray-300 rounded-lg bg-white"
+                    style={{ maxHeight: '300px' }}
+                  />
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                  <p className="text-gray-500">{t('No front image')}</p>
+                </div>
+              )}
+
+              {imgBack ? (
+                <div>
+                  <p className="text-sm font-medium mb-2">{t('CCCD Back')}</p>
+                  <img
+                    src={`${import.meta.env.VITE_API_URL}/uploads/CCCD/${imgBack}`}
+                    alt="CCCD Back"
+                    className="w-full h-auto border-2 border-gray-300 rounded-lg bg-white"
+                    style={{ maxHeight: '300px' }}
+                  />
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                  <p className="text-gray-500">{t('No back image')}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </DefaultLayout>
   );

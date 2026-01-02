@@ -38,7 +38,8 @@ import {
   getTreesByUserName,
   checkUserAbnormalIncome,
   uploadSignature,
-  deleteCCCDImages,
+  uploadCCCDImages,
+  downloadCCCDImages,
 } from "../controllers/userControllers.js";
 import { protectRoute, isAdmin, isSuperAdmin } from "../middleware/authMiddleware.js";
 import { protectAdminRoute, isRootAdmin } from "../controllers/adminControllers.js";
@@ -81,14 +82,7 @@ router
   .route("/:id")
   .delete(protectAdminRoute, adminDeleteUser)
   .get(protectAdminRoute, getUserById)
-  .put(
-    protectRoute,
-    uploadCCCD.fields([
-      { name: "imgFront", maxCount: 1 },
-      { name: "imgBack", maxCount: 1 },
-    ]),
-    updateUser
-  );
+  .put(protectRoute, updateUser);
 
 router.route("/update/:id").post(
   protectAdminRoute,
@@ -128,6 +122,17 @@ router
   .route("/signature")
   .post(protectRoute, uploadSignatureMiddleware.single("signature"), uploadSignature);
 
-router.route("/:id/cccd").delete(protectAdminRoute, deleteCCCDImages);
+router
+  .route("/cccd/upload")
+  .post(
+    protectRoute,
+    uploadCCCD.fields([
+      { name: "imgFront", maxCount: 1 },
+      { name: "imgBack", maxCount: 1 },
+    ]),
+    uploadCCCDImages
+  );
+
+router.route("/:id/cccd/download").get(protectAdminRoute, downloadCCCDImages);
 
 export default router;

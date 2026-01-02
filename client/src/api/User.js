@@ -149,8 +149,15 @@ const User = {
       customContentType: 'multipart/form-data',
     });
   },
-  deleteCCCDImages: (id) => {
-    return API.delete(`${URL_API_USER}/${id}/cccd`);
+  uploadCCCD: (formData) => {
+    return API.post(`${URL_API_USER}/cccd/upload`, formData, {
+      customContentType: 'multipart/form-data',
+    });
+  },
+  downloadCCCDImages: (id) => {
+    return API.get(`${URL_API_USER}/${id}/cccd/download`, {
+      responseType: 'blob',
+    });
   },
 };
 
