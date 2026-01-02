@@ -1571,6 +1571,7 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
   if (userId) {
     const userExistsUserId = await User.findOne({
       userId,
+      status: { $ne: "DELETED" },
     });
     if (userExistsUserId) {
       let message = "duplicateInfoUserId";
@@ -1580,7 +1581,8 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
   }
   if (email) {
     const userExistsEmail = await User.findOne({
-      email: { $regex: email, $options: "i" },
+      email,
+      status: { $ne: "DELETED" },
     });
     if (userExistsEmail) {
       let message = "duplicateInfoEmail";
