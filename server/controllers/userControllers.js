@@ -45,6 +45,9 @@ import PreTier2 from "../models/preTier2Model.js";
 import Honor from "../models/honorModel.js";
 import WildCard from "../models/wildCardModel.js";
 import { checkAbnormalIncomeForUser } from "../utils/methods.js";
+import fs from "fs";
+import path from "path";
+import archiver from "archiver";
 
 dotenv.config();
 
@@ -3896,9 +3899,6 @@ const uploadCCCDImages = asyncHandler(async (req, res) => {
 // @access  Private (Admin)
 const downloadCCCDImages = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const fs = await import("fs");
-  const path = await import("path");
-  const archiver = await import("archiver");
 
   const user = await User.findById(id);
   if (!user) {
@@ -3913,7 +3913,7 @@ const downloadCCCDImages = asyncHandler(async (req, res) => {
   }
 
   // Create zip archive
-  const archive = archiver.default("zip", {
+  const archive = archiver("zip", {
     zlib: { level: 9 }, // Sets the compression level
   });
 
