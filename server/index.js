@@ -40,6 +40,8 @@ import ticketRoutes from "./routes/ticketRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import wildCardRoutes from "./routes/wildCardRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import contractRoutes from "./routes/contractRoutes.js";
+
 
 import {
   countChildToData,
@@ -117,6 +119,7 @@ app.use("/api/tickets", ticketRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/wildcard", wildCardRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/contracts", contractRoutes);
 
 app.get("/api/test-tele", async (req, res) => {
   await sendTelegramMessage({ userName: "kiet" });

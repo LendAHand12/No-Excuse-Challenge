@@ -17,7 +17,9 @@ import Payment from '../../../api/Payment';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Download, Plus } from 'lucide-react';
+import { Search, Download, Plus, FileSignature } from 'lucide-react';
+import Contract from '@/api/Contract';
+
 
 const AdminUserPages = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -222,6 +224,25 @@ const AdminUserPages = () => {
         toast.error(t(message));
       });
   }, [currentApprovePaymentId]);
+
+  const handleDownloadContract = async (userId, username) => {
+    try {
+      const resp = await Contract.generateContract(userId);
+      const url = window.URL.createObjectURL(new Blob([resp.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Contract_${username}.docx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success(t('contract.downloadSuccess'));
+    } catch (error) {
+      console.error('Error downloading contract:', error);
+      toast.error(t('contract.downloadError'));
+    }
+  };
+
 
   return (
     <DefaultLayout>
@@ -453,6 +474,7 @@ const AdminUserPages = () => {
         </div>
       </Modal>
       <div className="relative overflow-x-auto py-24 px-10">
+
         <div className="flex items-center justify-between pb-4 bg-white">
           <div className="flex gap-4">
             <div>
@@ -564,12 +586,15 @@ const AdminUserPages = () => {
               onTree={handleTree}
               onMoveSystem={handleMoveSystem}
               onDelete={handleDelete}
+              onDownloadContract={handleDownloadContract}
               onApprovePayment={(id) => {
+
                 setShowApprovePayment(true);
                 setCurrentApprovePaymentId(id);
               }}
               objectFilter={objectFilter}
             />
+
             <CustomPagination
               currentPage={objectFilter.pageNumber}
               totalPages={totalPage}

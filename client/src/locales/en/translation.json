@@ -607,13 +607,26 @@
     },
     "modals": {
       "approvePayment": "Are you sure you want to approve transactions for this user?",
-      "approveButton": "Approve"
+      "approveButton": "Approve",
+      "contractPreview": {
+        "title": "Contract Preview",
+        "loading": "Loading preview data...",
+        "fullName": "Full Name",
+        "idCode": "ID Code",
+        "date": "Date",
+        "signature": "Signature",
+        "noSignature": "No signature available",
+        "cancel": "Cancel",
+        "download": "Download DOCX",
+        "error": "Error loading preview data"
+      }
     },
     "actions": {
       "approve": "Approve",
       "view": "View Details",
       "tree": "View Tree",
       "move": "Move System",
+      "viewContract": "View Contract",
       "delete": "Delete"
     }
   },
@@ -1438,5 +1451,14 @@
   "Available AMC :": "Available AMC :",
   "Minimum withdrawal amount is {amount} HEWE. Your available balance is {balance} HEWE.": "Minimum withdrawal amount is {amount} HEWE. Your available balance is {balance} HEWE.",
   "Completed ranking time": "Completed ranking time",
-  "Disqualified (Tier 1)": "Disqualified (Tier 1)"
+  "Disqualified (Tier 1)": "Disqualified (Tier 1)",
+  "contract": {
+    "downloadError": "Error downloading contract",
+    "previewError": "Error fetching preview data",
+    "downloadSuccess": "Contract downloaded successfully",
+    "download": "Download contract"
+  },
+  "noData": "No data"
 }
+
+

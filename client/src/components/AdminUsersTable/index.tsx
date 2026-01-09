@@ -17,9 +17,23 @@ import {
   TreePine,
   ArrowRightLeft,
   Trash2,
+  Download,
 } from 'lucide-react';
 
-const columnHelper = createColumnHelper();
+const columnHelper = createColumnHelper<any>();
+
+interface AdminUsersTableProps {
+  data: any[];
+  loading: boolean;
+  onApprove: (id: string) => void;
+  onDetail: (id: string) => void;
+  onTree: (id: string) => void;
+  onMoveSystem: (id: string) => void;
+  onDelete: (id: string) => void;
+  onDownloadContract: (id: string, username: string) => void;
+  onApprovePayment: (id: string) => void;
+  objectFilter: any;
+}
 
 const AdminUsersTable = ({
   data,
@@ -29,11 +43,13 @@ const AdminUsersTable = ({
   onTree,
   onMoveSystem,
   onDelete,
+  onDownloadContract,
   onApprovePayment,
   objectFilter,
-}) => {
+}: AdminUsersTableProps) => {
+
   const { t } = useTranslation();
-  const { userInfo } = useSelector((state) => state.auth);
+  const { userInfo } = useSelector((state: any) => state.auth);
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState('');
   const [selectedUserId, setSelectedUserId] = useState('');
@@ -44,16 +60,16 @@ const AdminUsersTable = ({
         id: 'username',
         header: () => t('adminUsers.table.username'),
         cell: (info) => {
-          const row = info.row.original;
+          const row = info.row.original as any;
           const AvatarCell = () => {
             const [imageError, setImageError] = useState(false);
             const avatarUrl = row.facetecTid
-              ? `${import.meta.env.VITE_FACETEC_URL}/api/liveness/image?tid=${
+              ? `${(import.meta as any).env.VITE_FACETEC_URL}/api/liveness/image?tid=${
                   row.facetecTid
                 }`
               : null;
 
-            const handleAvatarClick = (e) => {
+            const handleAvatarClick = (e: any) => {
               if (avatarUrl) {
                 e.preventDefault();
                 setSelectedImageUrl(avatarUrl);
@@ -98,7 +114,7 @@ const AdminUsersTable = ({
           return t('adminUsers.table.age');
         },
         cell: (info) => {
-          const row = info.row.original;
+          const row = info.row.original as any;
           if (objectFilter.coin === 'usdt') {
             return <p className="px-6 py-4">{row.availableUsdt}</p>;
           }
@@ -142,7 +158,7 @@ const AdminUsersTable = ({
         header: () => t('adminUsers.table.walletAddress'),
         cell: (info) => (
           <div className="px-6 py-4">
-            {shortenWalletAddress(info.getValue(), 12)}
+            {shortenWalletAddress(info.getValue() as string, 12)}
           </div>
         ),
       }),
@@ -150,8 +166,8 @@ const AdminUsersTable = ({
         id: 'paymentPending',
         header: () => t('adminUsers.table.paymentPending'),
         cell: (info) => {
-          const row = info.row.original;
-          if (row.paymentUUID.length > 0) {
+          const row = info.row.original as any;
+          if (row.paymentUUID && row.paymentUUID.length > 0) {
             return (
               <div className="px-6 py-4">
                 <button
@@ -173,9 +189,9 @@ const AdminUsersTable = ({
         id: 'status',
         header: () => t('adminUsers.table.status'),
         cell: (info) => {
-          const status = info.getValue();
+          const status = info.getValue() as string;
           const statusConfig = userStatus.find(
-            (item) => item.status === status,
+            (item: any) => item.status === status,
           );
           return (
             <div className="px-6 py-4">
@@ -195,13 +211,13 @@ const AdminUsersTable = ({
         id: 'actions',
         header: () => t('adminUsers.table.action'),
         cell: (info) => {
-          const row = info.row.original;
+          const row = info.row.original as any;
           return (
             <div className="px-6 py-4">
               <div className="flex gap-4">
                 {/* Approve Button */}
                 {userInfo?.permissions
-                  ?.find((p) => p.page.path === '/admin/users/:id')
+                  ?.find((p: any) => p.page.path === '/admin/users/:id')
                   ?.actions.includes('update') &&
                   row.status === 'PENDING' && (
                     <button
@@ -216,7 +232,7 @@ const AdminUsersTable = ({
                 {/* View Details Button */}
                 {row.status !== 'DELETED' &&
                   userInfo?.permissions
-                    ?.find((p) => p.page.path === '/admin/users/:id')
+                    ?.find((p: any) => p.page.path === '/admin/users/:id')
                     ?.actions.includes('read') && (
                     <button
                       onClick={() => onDetail(row._id)}
@@ -230,7 +246,7 @@ const AdminUsersTable = ({
                 {/* Tree Button */}
                 {row.status !== 'DELETED' &&
                   userInfo?.permissions
-                    ?.find((p) => p.page.path === '/admin/system/:id')
+                    ?.find((p: any) => p.page.path === '/admin/system/:id')
                     ?.actions.includes('read') && (
                     <button
                       onClick={() => onTree(row._id)}
@@ -244,7 +260,7 @@ const AdminUsersTable = ({
                 {/* Move System Button */}
                 {row.status !== 'DELETED' &&
                   userInfo?.permissions
-                    ?.find((p) => p.page.path === '/admin/move-system/:id')
+                    ?.find((p: any) => p.page.path === '/admin/move-system/:id')
                     ?.actions.includes('read') && (
                     <button
                       onClick={() => onMoveSystem(row._id)}
@@ -255,9 +271,18 @@ const AdminUsersTable = ({
                     </button>
                   )}
 
+                  <button
+                    onClick={() => onDownloadContract(row._id, row.userId)}
+                    className="font-medium text-gray-500 hover:text-purple-600 transition-colors"
+                    title={t('contract.download')}
+                  >
+                    <Download className="w-5 h-5" />
+                  </button>
+
+
                 {/* Delete Button */}
                 {userInfo?.permissions
-                  ?.find((p) => p.page.path === '/admin/users')
+                  ?.find((p: any) => p.page.path === '/admin/users')
                   ?.actions.includes('delete') &&
                   row.countPay === 0 &&
                   row.status !== 'DELETED' && (
@@ -284,7 +309,9 @@ const AdminUsersTable = ({
       onTree,
       onMoveSystem,
       onDelete,
+      onDownloadContract,
       onApprovePayment,
+
     ],
   );
 
@@ -387,9 +414,9 @@ const AdminUsersTable = ({
       <div className="relative overflow-x-auto">
         <table className="w-full text-sm text-left text-gray-500">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-            {table.getHeaderGroups().map((headerGroup) => (
+            {table.getHeaderGroups().map((headerGroup: any) => (
               <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
+                {headerGroup.headers.map((header: any) => (
                   <th key={header.id} scope="col" className="px-6 py-3">
                     {header.isPlaceholder
                       ? null
@@ -403,9 +430,9 @@ const AdminUsersTable = ({
             ))}
           </thead>
           <tbody>
-            {table.getRowModel().rows.map((row) => (
+            {table.getRowModel().rows.map((row: any) => (
               <tr key={row.id} className="bg-white border-b hover:bg-gray-50">
-                {row.getVisibleCells().map((cell) => (
+                {row.getVisibleCells().map((cell: any) => (
                   <td key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>

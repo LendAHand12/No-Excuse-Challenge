@@ -21,8 +21,13 @@ import banks from '@/lib/banks.json';
 import wildCardTopImage from '@/images/cover/wildcard.png';
 import wildCardTopImage2 from '@/images/cover/wildcard2.png';
 import * as FileSaver from 'file-saver';
+import Contract from '@/api/Contract';
+import { Download, FileSignature } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Modal from 'react-modal';
 
 const UserProfile = () => {
+
   const { userInfo } = useSelector((state) => state.auth);
   const { pathname } = useLocation();
   const id = pathname.split('/')[3];
@@ -38,7 +43,8 @@ const UserProfile = () => {
     string | null
   >(null);
   const [showAbnormalIncomeModal, setShowAbnormalIncomeModal] = useState(false);
-  const [data, setData] = useState({});
+  const [data, setData] = useState<any>({});
+
   const [isEditting, setEditting] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [packageOptions, setPackageOptions] = useState([]);
@@ -56,7 +62,10 @@ const UserProfile = () => {
   const [kycFee, setKycFee] = useState(false);
   const [walletChange, setWalletChange] = useState('');
   const [loadingChangeWallet, setLoadingChangeWallet] = useState(false);
+
   const createWildCardModal = CreateWildCardModal({
+
+
     userId: id,
     onSuccess: () => {
       setRefresh(!refresh);
@@ -609,7 +618,26 @@ const UserProfile = () => {
       });
   };
 
+  const handleDownloadContract = async (userId: string, username: string) => {
+    try {
+      const response = await Contract.generateContract(userId);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Contract_${username}.docx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success(t('contract.downloadSuccess'));
+    } catch (error) {
+      toast.error(t('contract.downloadError'));
+    }
+  };
+
+
   const renderRank = (level) => {
+
     return USER_RANKINGS.find((ele) => level <= ele.value)?.label;
   };
 
@@ -1486,6 +1514,15 @@ const UserProfile = () => {
                           </svg>
                           {t('Download Signature')}
                         </button>
+                        {/* <button
+                          type="button"
+                          onClick={() => handleDownloadContract(id, data.userId)}
+                          className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition ml-2"
+                        >
+                          <Download className="w-5 h-5 mr-2" />
+                          {t('contract.download')}
+                        </button> */}
+
                       </div>
                     </div>
                   )}
@@ -2468,7 +2505,7 @@ const UserProfile = () => {
                   {abnormalIncomeResult}
                 </pre>
               ) : (
-                <p className="text-gray-500">Không có dữ liệu</p>
+                <p className="text-gray-500">{t('noData')}</p>
               )}
             </div>
             <div className="bg-gray-100 px-6 py-4 flex justify-end">
@@ -2479,14 +2516,18 @@ const UserProfile = () => {
                 }}
                 className="bg-purple-500 text-white px-6 py-2 rounded-full hover:bg-purple-600 transition-colors"
               >
-                Đóng
+                {t('Close')}
               </button>
             </div>
           </div>
         </div>
       )}
+
+
     </DefaultLayout>
+
   );
 };
+
 
 export default UserProfile;

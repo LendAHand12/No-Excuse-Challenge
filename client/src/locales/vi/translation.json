@@ -691,13 +691,26 @@
     },
     "modals": {
       "approvePayment": "Bạn có chắc chắn muốn phê duyệt giao dịch cho người dùng này?",
-      "approveButton": "Phê duyệt"
+      "approveButton": "Phê duyệt",
+      "contractPreview": {
+        "title": "Xem trước hợp đồng",
+        "loading": "Đang tải dữ liệu bộ hợp đồng...",
+        "fullName": "Họ và tên",
+        "idCode": "Mã ID",
+        "date": "Ngày",
+        "signature": "Chữ ký",
+        "noSignature": "Chưa có chữ ký",
+        "cancel": "Hủy",
+        "download": "Tải xuống DOCX",
+        "error": "Lỗi khi lấy dữ liệu xem trước"
+      }
     },
     "actions": {
       "approve": "Phê duyệt",
       "view": "Xem chi tiết",
       "tree": "Xem cây",
       "move": "Di chuyển hệ thống",
+      "viewContract": "Xem hợp đồng",
       "delete": "Xóa"
     }
   },
@@ -1530,5 +1543,14 @@
   "Available AMC :": "AMC khả dụng :",
   "Minimum withdrawal amount is {amount} HEWE. Your available balance is {balance} HEWE.": "Số tiền rút tối thiểu là {amount} HEWE. Số dư khả dụng của bạn là {balance} HEWE.",
   "Completed ranking time": "Thời gian hoàn thành hạng",
-  "Disqualified (Tier 1)": "Không đủ điều kiện (Tier 1)"
+  "Disqualified (Tier 1)": "Không đủ điều kiện (Tier 1)",
+  "contract": {
+    "downloadError": "Lỗi khi tải xuống hợp đồng",
+    "previewError": "Lỗi khi lấy dữ liệu xem trước",
+    "downloadSuccess": "Tải xuống hợp đồng thành công",
+    "download": "Tải hợp đồng"
+  },
+  "noData": "Không có dữ liệu"
 }
+
+
