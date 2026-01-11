@@ -105,6 +105,10 @@ const Profile = () => {
   const [loadingWildCards, setLoadingWildCards] = useState(false);
   const [usingCardId, setUsingCardId] = useState<string | null>(null);
   const [currentTier, setCurrentTier] = useState(1);
+  const [showDirectUsers, setShowDirectUsers] = useState(false);
+  const [showSubReferralUsers, setShowSubReferralUsers] = useState(false);
+  const [showBranch1Users, setShowBranch1Users] = useState(false);
+  const [showBranch2Users, setShowBranch2Users] = useState(false);
 
   const {
     register,
@@ -175,8 +179,8 @@ const Profile = () => {
           error.response && error.response.data.error
             ? error.response.data.error
             : error.response && error.response.data.message
-            ? error.response.data.message
-            : error.message;
+              ? error.response.data.message
+              : error.message;
         toast.error(t(message));
         setLoading(false);
       }
@@ -543,9 +547,8 @@ const Profile = () => {
               <button
                 key={i}
                 onClick={() => setCurrentTier(i + 1)}
-                className={`flex justify-center items-center hover:underline font-medium ${
-                  currentTier === i + 1 ? 'bg-black text-NoExcuseChallenge' : ''
-                } rounded-full py-4 px-8 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
+                className={`flex justify-center items-center hover:underline font-medium ${currentTier === i + 1 ? 'bg-black text-NoExcuseChallenge' : ''
+                  } rounded-full py-4 px-8 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
               >
                 {t('tier')} {i + 1}
               </button>
@@ -653,7 +656,7 @@ const Profile = () => {
             if (tier2DieTime) {
               const countdown = Math.ceil(
                 (tier2DieTime.getTime() - today.getTime()) /
-                  (1000 * 60 * 60 * 24),
+                (1000 * 60 * 60 * 24),
               );
               alerts.push(
                 <div
@@ -685,7 +688,7 @@ const Profile = () => {
             if (tier1DieTime) {
               const countdown = Math.ceil(
                 (tier1DieTime.getTime() - today.getTime()) /
-                  (1000 * 60 * 60 * 24),
+                (1000 * 60 * 60 * 24),
               );
               alerts.push(
                 <div
@@ -763,19 +766,18 @@ const Profile = () => {
               <div className="flex justify-between items-center py-2 px-4">
                 <p>Status</p>
                 <div
-                  className={`p-2 text-sm ${
-                    status === 'UNVERIFY'
+                  className={`p-2 text-sm ${status === 'UNVERIFY'
                       ? 'bg-red-600'
                       : status === 'PENDING'
-                      ? 'bg-yellow-600'
-                      : status === 'APPROVED'
-                      ? 'bg-green-600'
-                      : status === 'REJECTED'
-                      ? 'bg-red-600'
-                      : status === 'LOCKED'
-                      ? 'bg-red-600'
-                      : ''
-                  } text-white rounded-[50px]`}
+                        ? 'bg-yellow-600'
+                        : status === 'APPROVED'
+                          ? 'bg-green-600'
+                          : status === 'REJECTED'
+                            ? 'bg-red-600'
+                            : status === 'LOCKED'
+                              ? 'bg-red-600'
+                              : ''
+                    } text-white rounded-[50px]`}
                 >
                   {status}
                 </div>
@@ -810,17 +812,16 @@ const Profile = () => {
                     <div className="flex items-center justify-between">
                       <div>{t('Tier 1 :')}</div>
                       <div
-                        className={`w-10 h-5 rounded-md ${
-                          tier1?.isRed
+                        className={`w-10 h-5 rounded-md ${tier1?.isRed
                             ? 'bg-[#ee0000]' // Màu đỏ
                             : tier1?.isBlue
-                            ? 'bg-[#0033ff]' // Màu xanh dương
-                            : tier1?.isYellow
-                            ? 'bg-[#ffcc00]' // Màu vàng
-                            : tier1?.isPink
-                            ? 'bg-[#ff3399]' // Màu hồng
-                            : 'bg-[#009933]' // Màu xanh lá (mặc định)
-                        }`}
+                              ? 'bg-[#0033ff]' // Màu xanh dương
+                              : tier1?.isYellow
+                                ? 'bg-[#ffcc00]' // Màu vàng
+                                : tier1?.isPink
+                                  ? 'bg-[#ff3399]' // Màu hồng
+                                  : 'bg-[#009933]' // Màu xanh lá (mặc định)
+                          }`}
                       ></div>
                     </div>
                   </div>
@@ -841,15 +842,14 @@ const Profile = () => {
                     <div className="flex items-center justify-between">
                       <div>{t('Tier 2 :')}</div>
                       <div
-                        className={`w-10 h-5 rounded-md ${
-                          isDisableTier2
+                        className={`w-10 h-5 rounded-md ${isDisableTier2
                             ? 'bg-[#663300]' // Màu nâu (disable)
                             : tier2?.isYellow
-                            ? 'bg-[#ffcc00]' // Màu vàng
-                            : tier2?.isBlue
-                            ? 'bg-[#0033ff]' // Màu xanh dương
-                            : 'bg-[#009933]' // Màu xanh lá (mặc định)
-                        }`}
+                              ? 'bg-[#ffcc00]' // Màu vàng
+                              : tier2?.isBlue
+                                ? 'bg-[#0033ff]' // Màu xanh dương
+                                : 'bg-[#009933]' // Màu xanh lá (mặc định)
+                          }`}
                       ></div>
                     </div>
                   </div>
@@ -934,9 +934,8 @@ const Profile = () => {
                           return (
                             <div
                               key={card._id}
-                              className={`rounded-lg overflow-hidden shadow-lg max-w-[250px] mx-auto ${
-                                isPromoTier2 ? 'bg-yellow-600' : 'bg-green-600'
-                              }`}
+                              className={`rounded-lg overflow-hidden shadow-lg max-w-[250px] mx-auto ${isPromoTier2 ? 'bg-yellow-600' : 'bg-green-600'
+                                }`}
                             >
                               {/* Top Section - Image */}
                               <div className="w-full">
@@ -953,11 +952,10 @@ const Profile = () => {
 
                               {/* Bottom Section - Background based on cardType */}
                               <div
-                                className={`${
-                                  isPromoTier2
+                                className={`${isPromoTier2
                                     ? 'bg-yellow-600'
                                     : 'bg-green-600'
-                                } p-4 text-white`}
+                                  } p-4 text-white`}
                               >
                                 <div className="flex flex-col items-center space-y-2">
                                   {/* WILDCARD Text */}
@@ -990,29 +988,28 @@ const Profile = () => {
                                             );
                                           toast.success(
                                             response.data.message ||
-                                              'Sử dụng Wild Card thành công!',
+                                            'Sử dụng Wild Card thành công!',
                                           );
                                           setRefresh(!refresh);
                                         } catch (error: any) {
                                           const message =
                                             error.response &&
-                                            error.response.data.message
+                                              error.response.data.message
                                               ? error.response.data.message
                                               : error.message;
                                           toast.error(
                                             t(message) ||
-                                              'Có lỗi xảy ra khi sử dụng Wild Card',
+                                            'Có lỗi xảy ra khi sử dụng Wild Card',
                                           );
                                         } finally {
                                           setUsingCardId(null);
                                         }
                                       }}
                                       disabled={usingCardId === card._id}
-                                      className={`w-full max-w-xs text-white uppercase font-bold py-2 px-6 rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
-                                        isPromoTier2
+                                      className={`w-full max-w-xs text-white uppercase font-bold py-2 px-6 rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${isPromoTier2
                                           ? 'bg-white/20 backdrop-blur-sm border-2 border-white/50 hover:bg-white/30'
                                           : 'bg-black hover:bg-gray-800'
-                                      }`}
+                                        }`}
                                     >
                                       {usingCardId === card._id ? (
                                         <Loading />
@@ -1047,34 +1044,58 @@ const Profile = () => {
             {currentTier === 1 && (
               <div className="bg-[#FAFBFC] p-4 rounded-2xl">
                 <div className="py-2 px-4">
-                  <p className="uppercase mt-2 font-bold">{t('children')}</p>
-                  <div className="lg:py-2">
-                    <ul className="flex flex-row flex-wrap gap-2">
-                      {listDirectUser.map((ele) => (
-                        <li className="" key={ele.userId}>
-                          <div className="py-2">
-                            <div className="text-base w-full">
-                              <span
-                                className={`${
-                                  ele.isRed
-                                    ? 'bg-[#b91c1c]'
-                                    : ele.isBlue
-                                    ? 'bg-[#0000ff]'
-                                    : ele.isYellow
-                                    ? 'bg-[#F4B400]'
-                                    : ele.isPink
-                                    ? 'bg-[#e600769c]'
-                                    : 'bg-[#16a34a]'
-                                } py-1 px-2 rounded text-white text-sm min-w-fit`}
-                              >
-                                {ele.userId}
-                              </span>
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+                  <div className="flex items-center gap-3 mt-2">
+                    <p className="uppercase font-bold">{t('children')}</p>
+                    <button
+                      type="button"
+                      onClick={() => setShowDirectUsers(!showDirectUsers)}
+                      className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors flex items-center gap-1"
+                    >
+                      <span>{listDirectUser?.length || 0} users</span>
+                      <svg
+                        className={`w-4 h-4 transition-transform ${showDirectUsers ? 'rotate-180' : ''
+                          }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
                   </div>
+                  {showDirectUsers && (
+                    <div className="lg:py-2">
+                      <ul className="flex flex-row flex-wrap gap-2">
+                        {listDirectUser.map((ele) => (
+                          <li className="" key={ele.userId}>
+                            <div className="py-2">
+                              <div className="text-base w-full">
+                                <span
+                                  className={`${ele.isRed
+                                      ? 'bg-[#b91c1c]'
+                                      : ele.isBlue
+                                        ? 'bg-[#0000ff]'
+                                        : ele.isYellow
+                                          ? 'bg-[#F4B400]'
+                                          : ele.isPink
+                                            ? 'bg-[#e600769c]'
+                                            : 'bg-[#16a34a]'
+                                    } py-1 px-2 rounded text-white text-sm min-w-fit`}
+                                >
+                                  {ele.userId}
+                                </span>
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1083,38 +1104,62 @@ const Profile = () => {
             {currentTier === 2 && (
               <div className="bg-[#FAFBFC] p-4 rounded-2xl">
                 <div className="py-2 px-4">
-                  <p className="uppercase mt-2 font-bold">
-                    Sub Referral Members
-                  </p>
-                  <div className="lg:py-2">
-                    <ul className="flex flex-row flex-wrap gap-2">
-                      {listDirectUser
-                        .filter((ele) => ele.isSubId)
-                        .map((ele) => (
-                          <li className="" key={ele.userId}>
-                            <div className="py-2">
-                              <div className="text-base w-full">
-                                <span
-                                  className={`${
-                                    ele.isRed
-                                      ? 'bg-[#b91c1c]'
-                                      : ele.isBlue
-                                      ? 'bg-[#0000ff]'
-                                      : ele.isYellow
-                                      ? 'bg-[#F4B400]'
-                                      : ele.isPink
-                                      ? 'bg-[#e600769c]'
-                                      : 'bg-[#16a34a]'
-                                  } py-1 px-2 rounded text-white text-sm min-w-fit`}
-                                >
-                                  {ele.userId}
-                                </span>
-                              </div>
-                            </div>
-                          </li>
-                        ))}
-                    </ul>
+                  <div className="flex items-center gap-3 mt-2">
+                    <p className="uppercase font-bold">
+                      Sub Referral Members
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowSubReferralUsers(!showSubReferralUsers)}
+                      className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors flex items-center gap-1"
+                    >
+                      <span>{listDirectUser?.filter((ele) => ele.isSubId)?.length || 0} users</span>
+                      <svg
+                        className={`w-4 h-4 transition-transform ${showSubReferralUsers ? 'rotate-180' : ''
+                          }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
                   </div>
+                  {showSubReferralUsers && (
+                    <div className="lg:py-2">
+                      <ul className="flex flex-row flex-wrap gap-2">
+                        {listDirectUser
+                          .filter((ele) => ele.isSubId)
+                          .map((ele) => (
+                            <li className="" key={ele.userId}>
+                              <div className="py-2">
+                                <div className="text-base w-full">
+                                  <span
+                                    className={`${ele.isRed
+                                        ? 'bg-[#b91c1c]'
+                                        : ele.isBlue
+                                          ? 'bg-[#0000ff]'
+                                          : ele.isYellow
+                                            ? 'bg-[#F4B400]'
+                                            : ele.isPink
+                                              ? 'bg-[#e600769c]'
+                                              : 'bg-[#16a34a]'
+                                      } py-1 px-2 rounded text-white text-sm min-w-fit`}
+                                  >
+                                    {ele.userId}
+                                  </span>
+                                </div>
+                              </div>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1126,26 +1171,51 @@ const Profile = () => {
                   <p className="uppercase mt-2 font-bold">
                     {t('Tier 2 Users')}
                   </p>
+
+                  {/* Branch 1 */}
                   <div className="py-2">
-                    <p className="font-medium">Branch 1 :</p>
-                    <ul className="flex flex-row flex-wrap gap-2">
-                      {tier2ChildUsers
-                        ? tier2ChildUsers?.branch1?.map((ele) => (
+                    <div className="flex items-center gap-3">
+                      <p className="font-medium">Branch 1 :</p>
+                      <button
+                        type="button"
+                        onClick={() => setShowBranch1Users(!showBranch1Users)}
+                        className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors flex items-center gap-1"
+                      >
+                        <span>{tier2ChildUsers?.branch1?.length || 0} users</span>
+                        <svg
+                          className={`w-4 h-4 transition-transform ${showBranch1Users ? 'rotate-180' : ''
+                            }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    {showBranch1Users && (
+                      <ul className="flex flex-row flex-wrap gap-2 mt-2">
+                        {tier2ChildUsers
+                          ? tier2ChildUsers?.branch1?.map((ele) => (
                             <li className="" key={ele}>
                               <div className="py-2">
                                 <div className="text-base w-full">
                                   <span
-                                    className={`${
-                                      ele.isRed
+                                    className={`${ele.isRed
                                         ? 'bg-[#b91c1c]'
                                         : ele.isBlue
-                                        ? 'bg-[#0000ff]'
-                                        : ele.isYellow
-                                        ? 'bg-[#F4B400]'
-                                        : ele.isPink
-                                        ? 'bg-[#e600769c]'
-                                        : 'bg-[#16a34a]'
-                                    } py-1 px-2 rounded text-white text-sm min-w-fit`}
+                                          ? 'bg-[#0000ff]'
+                                          : ele.isYellow
+                                            ? 'bg-[#F4B400]'
+                                            : ele.isPink
+                                              ? 'bg-[#e600769c]'
+                                              : 'bg-[#16a34a]'
+                                      } py-1 px-2 rounded text-white text-sm min-w-fit`}
                                   >
                                     {ele}
                                   </span>
@@ -1153,29 +1223,55 @@ const Profile = () => {
                               </div>
                             </li>
                           ))
-                        : ''}
-                    </ul>
+                          : ''}
+                      </ul>
+                    )}
                   </div>
+
+                  {/* Branch 2 */}
                   <div className="py-2">
-                    <p className="font-medium">Branch 2 :</p>
-                    <ul className="flex flex-row flex-wrap gap-2">
-                      {tier2ChildUsers
-                        ? tier2ChildUsers?.branch2?.map((ele) => (
+                    <div className="flex items-center gap-3">
+                      <p className="font-medium">Branch 2 :</p>
+                      <button
+                        type="button"
+                        onClick={() => setShowBranch2Users(!showBranch2Users)}
+                        className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors flex items-center gap-1"
+                      >
+                        <span>{tier2ChildUsers?.branch2?.length || 0} users</span>
+                        <svg
+                          className={`w-4 h-4 transition-transform ${showBranch2Users ? 'rotate-180' : ''
+                            }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    {showBranch2Users && (
+                      <ul className="flex flex-row flex-wrap gap-2 mt-2">
+                        {tier2ChildUsers
+                          ? tier2ChildUsers?.branch2?.map((ele) => (
                             <li className="" key={ele}>
                               <div className="py-2">
                                 <div className="text-base w-full">
                                   <span
-                                    className={`${
-                                      ele.isRed
+                                    className={`${ele.isRed
                                         ? 'bg-[#b91c1c]'
                                         : ele.isBlue
-                                        ? 'bg-[#0000ff]'
-                                        : ele.isYellow
-                                        ? 'bg-[#F4B400]'
-                                        : ele.isPink
-                                        ? 'bg-[#e600769c]'
-                                        : 'bg-[#16a34a]'
-                                    } py-1 px-2 rounded text-white text-sm min-w-fit`}
+                                          ? 'bg-[#0000ff]'
+                                          : ele.isYellow
+                                            ? 'bg-[#F4B400]'
+                                            : ele.isPink
+                                              ? 'bg-[#e600769c]'
+                                              : 'bg-[#16a34a]'
+                                      } py-1 px-2 rounded text-white text-sm min-w-fit`}
                                   >
                                     {ele}
                                   </span>
@@ -1183,8 +1279,9 @@ const Profile = () => {
                               </div>
                             </li>
                           ))
-                        : ''}
-                    </ul>
+                          : ''}
+                      </ul>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1467,10 +1564,10 @@ const Profile = () => {
                       <p>
                         {dateOfBirth
                           ? new Date(dateOfBirth).toLocaleDateString('vi-Vn', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                            })
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                          })
                           : '-'}
                       </p>
                     </div>
@@ -1552,8 +1649,8 @@ const Profile = () => {
                       showBankDropdown
                         ? bankSearch
                         : selectedBank
-                        ? `(${selectedBank.short_name}) ${selectedBank.name}`
-                        : ''
+                          ? `(${selectedBank.short_name}) ${selectedBank.name}`
+                          : ''
                     }
                     onChange={(e) => {
                       setBankSearch(e.target.value);
@@ -1627,11 +1724,10 @@ const Profile = () => {
                                 shouldValidate: true,
                               });
                             }}
-                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none ${
-                              selectedBank?.code === bank.code
+                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none ${selectedBank?.code === bank.code
                                 ? 'bg-gray-100 font-medium'
                                 : ''
-                            }`}
+                              }`}
                           >
                             <span className="font-semibold">
                               ({bank.short_name})
@@ -1651,10 +1747,10 @@ const Profile = () => {
                             ?.toLowerCase()
                             .includes(bankSearch.toLowerCase()),
                       ).length === 0 && (
-                        <div className="px-4 py-2 text-sm text-gray-500 text-center">
-                          {t('No banks found') || 'No banks found'}
-                        </div>
-                      )}
+                          <div className="px-4 py-2 text-sm text-gray-500 text-center">
+                            {t('No banks found') || 'No banks found'}
+                          </div>
+                        )}
                     </div>
                   </>
                 )}
@@ -1782,7 +1878,7 @@ const Profile = () => {
                   onSubmit={async (e) => {
                     e.preventDefault();
                     const formData = new FormData(e.target as HTMLFormElement);
-                    
+
                     setLoadingCCCD(true);
                     try {
                       await User.uploadCCCD(formData)
@@ -1804,8 +1900,8 @@ const Profile = () => {
                             error.response && error.response.data.error
                               ? error.response.data.error
                               : error.response && error.response.data.message
-                              ? error.response.data.message
-                              : error.message;
+                                ? error.response.data.message
+                                : error.message;
                           toast.error(t(message));
                         });
                     } catch (error: any) {

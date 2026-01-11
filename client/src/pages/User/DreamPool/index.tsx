@@ -26,6 +26,7 @@ const DreamPoolPage: React.FC = () => {
   const [refresh, setRefresh] = useState(false);
   const [currentTier, setCurrentTier] = useState(1);
   const [dreampoolFee, setDreampoolFee] = useState(0);
+  const [selectedYear, setSelectedYear] = useState(2026);
 
   useEffect(() => {
     (async () => {
@@ -47,7 +48,7 @@ const DreamPoolPage: React.FC = () => {
 
   useEffect(() => {
     (async () => {
-      await User.getDreamPool({ tier: currentTier })
+      await User.getDreamPool({ tier: currentTier, year: selectedYear })
         .then((response) => {
           setDreamPool(response.data.dreampool);
           setDreampoolFee(response.data.dreampool_fee);
@@ -62,7 +63,7 @@ const DreamPoolPage: React.FC = () => {
           toast.error(t(message));
         });
     })();
-  }, [refresh, currentTier]);
+  }, [refresh, currentTier, selectedYear]);
 
   const handleUpdateDreampool = useCallback(async () => {
     await User.updateDreamPool({
@@ -95,85 +96,85 @@ const DreamPoolPage: React.FC = () => {
       {userInfo?.permissions
         ?.find((p) => p.page.path === '/admin/dreampool')
         ?.actions.includes('update') && (
-        <Modal
-          isOpen={showEditDreampool}
-          onRequestClose={() => setShowEditDreampool(false)}
-          style={{
-            content: {
-              top: '50%',
-              left: '50%',
-              right: 'auto',
-              bottom: 'auto',
-              marginRight: '-50%',
-              transform: 'translate(-50%, -50%)',
-            },
-          }}
-        >
-          <div className="overflow-y-auto overflow-x-hidden justify-center items-center w-full md:inset-0 h-modal md:h-full">
-            <div className="relative w-full max-w-md h-full md:h-auto">
-              <div className="relative text-center bg-white rounded-lg sm:p-5">
-                <button
-                  onClick={() => setShowEditDreampool(false)}
-                  className="text-gray-400 absolute top-2.5 right-2.5 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                >
-                  <svg
-                    aria-hidden="true"
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
+          <Modal
+            isOpen={showEditDreampool}
+            onRequestClose={() => setShowEditDreampool(false)}
+            style={{
+              content: {
+                top: '50%',
+                left: '50%',
+                right: 'auto',
+                bottom: 'auto',
+                marginRight: '-50%',
+                transform: 'translate(-50%, -50%)',
+              },
+            }}
+          >
+            <div className="overflow-y-auto overflow-x-hidden justify-center items-center w-full md:inset-0 h-modal md:h-full">
+              <div className="relative w-full max-w-md h-full md:h-auto">
+                <div className="relative text-center bg-white rounded-lg sm:p-5">
+                  <button
+                    onClick={() => setShowEditDreampool(false)}
+                    className="text-gray-400 absolute top-2.5 right-2.5 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                  <span className="sr-only">Close modal</span>
-                </button>
-                {currentTier === 1 && (
-                  <div className="pt-10 mb-4">
-                    <p className="mb-4 text-gray-500 text-lg font-semibold">
-                      Please select a reward recipient
-                    </p>
-                    <Select
-                      options={notHonors.map((ele) => ({
-                        value: ele._id,
-                        label: ele.userId,
-                      }))}
-                      onChange={(e) => setNewHonors(e)}
-                      isMulti
-                      className="w-full mb-1 text-black rounded-xl focus:outline-none cursor-pointer"
-                    />
-                  </div>
-                )}
-
-                <div className="space-y-4 pt-10">
-                  <p className="mb-4 text-gray-500 text-lg font-semibold">
-                    Please input new dreampool fund number
-                  </p>
-                  <div>
-                    <input
-                      onChange={(e) => setDreamPool(e.target.value)}
-                      value={dreamPool}
-                      className="block p-2.5 w-full min-w-62.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-yellow-500 focus:border-yellow-500"
-                      placeholder="Write the reason for reject..."
-                    ></input>
-                  </div>
-                  <div className="flex justify-center items-center space-x-4">
-                    <button
-                      onClick={handleUpdateDreampool}
-                      className="py-2 px-3 text-sm font-medium text-center text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-red-300 "
+                    <svg
+                      aria-hidden="true"
+                      className="w-5 h-5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      Update
-                    </button>
+                      <path
+                        fillRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      ></path>
+                    </svg>
+                    <span className="sr-only">Close modal</span>
+                  </button>
+                  {currentTier === 1 && (
+                    <div className="pt-10 mb-4">
+                      <p className="mb-4 text-gray-500 text-lg font-semibold">
+                        Please select a reward recipient
+                      </p>
+                      <Select
+                        options={notHonors.map((ele) => ({
+                          value: ele._id,
+                          label: ele.userId,
+                        }))}
+                        onChange={(e) => setNewHonors(e)}
+                        isMulti
+                        className="w-full mb-1 text-black rounded-xl focus:outline-none cursor-pointer"
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-4 pt-10">
+                    <p className="mb-4 text-gray-500 text-lg font-semibold">
+                      Please input new dreampool fund number
+                    </p>
+                    <div>
+                      <input
+                        onChange={(e) => setDreamPool(e.target.value)}
+                        value={dreamPool}
+                        className="block p-2.5 w-full min-w-62.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-yellow-500 focus:border-yellow-500"
+                        placeholder="Write the reason for reject..."
+                      ></input>
+                    </div>
+                    <div className="flex justify-center items-center space-x-4">
+                      <button
+                        onClick={handleUpdateDreampool}
+                        className="py-2 px-3 text-sm font-medium text-center text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-red-300 "
+                      >
+                        Update
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </Modal>
-      )}
+          </Modal>
+        )}
       <div className="relative w-full min-h-screen px-10 py-24 bg-black">
         <h1 className="text-4xl font-bold mb-12 flex items-center justify-center gap-2 text-white relative z-10">
           <Sparkles className="text-yellow-300" /> DreamPool
@@ -183,16 +184,33 @@ const DreamPoolPage: React.FC = () => {
             <button
               key={i}
               onClick={() => setCurrentTier(i + 1)}
-              className={`flex justify-center items-center hover:underline font-medium ${
-                currentTier === i + 1
+              className={`flex justify-center items-center hover:underline font-medium ${currentTier === i + 1
                   ? 'bg-black text-NoExcuseChallenge border-NoExcuseChallenge'
                   : 'text-gray-200'
-              } rounded-full py-4 px-8 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
+                } rounded-full py-4 px-8 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
             >
               {t('tier')} {i + 1}
             </button>
           ))}
         </div>
+        {/* Year Filter - Only for Admin */}
+        {userInfo.isAdmin && (
+          <div className="flex justify-center items-center gap-4 mb-6">
+            <p className="text-white font-medium">Year:</p>
+            {[2025, 2026].map((year) => (
+              <button
+                key={year}
+                onClick={() => setSelectedYear(year)}
+                className={`flex justify-center items-center hover:underline font-medium ${selectedYear === year
+                    ? 'bg-NoExcuseChallenge text-black'
+                    : 'bg-gray-700 text-gray-200'
+                  } rounded-full py-2 px-6 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
+              >
+                {year}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="grid xl:grid-cols-3 gap-4">
           <div className="flex flex-col gap-4">
             <div className="relative flex items-center gap-2 text-xl text-white">
@@ -203,24 +221,24 @@ const DreamPoolPage: React.FC = () => {
               {userInfo?.permissions
                 ?.find((p) => p.page.path === '/admin/dreampool')
                 ?.actions.includes('update') && (
-                <button
-                  className="text-NoExcuseChallenge hover:opacity-70"
-                  onClick={() => setShowEditDreampool(true)}
-                >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+                  <button
+                    className="text-NoExcuseChallenge hover:opacity-70"
+                    onClick={() => setShowEditDreampool(true)}
                   >
-                    <path
-                      d="M16.293 2.293a1 1 0 0 1 1.414 0l4 4a1 1 0 0 1 0 1.414l-13 13A1 1 0 0 1 8 21H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 .293-.707l10-10 3-3zM14 7.414l-9 9V19h2.586l9-9L14 7.414zm4 1.172L19.586 7 17 4.414 15.414 6 18 8.586z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                </button>
-              )}
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M16.293 2.293a1 1 0 0 1 1.414 0l4 4a1 1 0 0 1 0 1.414l-13 13A1 1 0 0 1 8 21H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 .293-.707l10-10 3-3zM14 7.414l-9 9V19h2.586l9-9L14 7.414zm4 1.172L19.586 7 17 4.414 15.414 6 18 8.586z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </button>
+                )}
             </div>
             <div className="relative w-full sm:w-64">
               <img src={FRAME_PIG} className="sm:w-64 h-full" />
@@ -251,10 +269,9 @@ const DreamPoolPage: React.FC = () => {
                 {loading ? (
                   <Loading />
                 ) : (
-                  `${
-                    currentTier === 1
-                      ? dreamPool - iceBreakers.length * 10
-                      : dreamPool
+                  `${currentTier === 1
+                    ? dreamPool - iceBreakers.length * 10
+                    : dreamPool
                   } USD`
                 )}
               </p>
@@ -267,24 +284,24 @@ const DreamPoolPage: React.FC = () => {
               {userInfo?.permissions
                 ?.find((p) => p.page.path === '/admin/users')
                 ?.actions.includes('export') && (
-                <div>
-                  <button
-                    onClick={handleExportDreampool}
-                    className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm rounded-md hover:opacity-70"
-                  >
-                    <svg
-                      fill="currentColor"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
+                  <div>
+                    <button
+                      onClick={handleExportDreampool}
+                      className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm rounded-md hover:opacity-70"
                     >
-                      <path d="M8.71,7.71,11,5.41V15a1,1,0,0,0,2,0V5.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42l-4-4a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-4,4A1,1,0,1,0,8.71,7.71ZM21,14a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V15a1,1,0,0,0-2,0v4a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V15A1,1,0,0,0,21,14Z" />
-                    </svg>
-                    Export Data
-                  </button>
-                </div>
-              )}
+                      <svg
+                        fill="currentColor"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M8.71,7.71,11,5.41V15a1,1,0,0,0,2,0V5.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42l-4-4a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-4,4A1,1,0,1,0,8.71,7.71ZM21,14a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V15a1,1,0,0,0-2,0v4a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V15A1,1,0,0,0,21,14Z" />
+                      </svg>
+                      Export Data
+                    </button>
+                  </div>
+                )}
             </div>
             <div className="bg-black py-10">
               <table className="w-full bg-black text-left text-gray-300">

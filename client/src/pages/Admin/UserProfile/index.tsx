@@ -84,6 +84,9 @@ const UserProfile = () => {
   const [loadingWildCards, setLoadingWildCards] = useState(false);
   const [usingCardId, setUsingCardId] = useState<string | null>(null);
   const [currentTier, setCurrentTier] = useState(1);
+  const [showBranch1Users, setShowBranch1Users] = useState(false);
+  const [showBranch2Users, setShowBranch2Users] = useState(false);
+  const [showDirectUsers, setShowDirectUsers] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -218,7 +221,7 @@ const UserProfile = () => {
       // Compare with actual data value, using default values if data doesn't have the field
       const currentEnablePaymentCrypto =
         data.enablePaymentCrypto !== undefined &&
-        data.enablePaymentCrypto !== null
+          data.enablePaymentCrypto !== null
           ? data.enablePaymentCrypto
           : true;
       const currentEnablePaymentBank =
@@ -227,12 +230,12 @@ const UserProfile = () => {
           : true;
       const currentEnableWithdrawCrypto =
         data.enableWithdrawCrypto !== undefined &&
-        data.enableWithdrawCrypto !== null
+          data.enableWithdrawCrypto !== null
           ? data.enableWithdrawCrypto
           : false;
       const currentEnableWithdrawBank =
         data.enableWithdrawBank !== undefined &&
-        data.enableWithdrawBank !== null
+          data.enableWithdrawBank !== null
           ? data.enableWithdrawBank
           : true;
 
@@ -688,11 +691,10 @@ const UserProfile = () => {
                 <button
                   key={i}
                   onClick={() => setCurrentTier(i + 1)}
-                  className={`flex justify-center items-center hover:underline font-medium ${
-                    currentTier === i + 1
-                      ? 'bg-black text-NoExcuseChallenge'
-                      : ''
-                  } rounded-full py-4 px-8 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
+                  className={`flex justify-center items-center hover:underline font-medium ${currentTier === i + 1
+                    ? 'bg-black text-NoExcuseChallenge'
+                    : ''
+                    } rounded-full py-4 px-8 border focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out`}
                 >
                   {t('tier')} {i + 1}
                 </button>
@@ -758,7 +760,7 @@ const UserProfile = () => {
               if (tier2DieTime) {
                 const countdown = Math.ceil(
                   (tier2DieTime.getTime() - today.getTime()) /
-                    (1000 * 60 * 60 * 24),
+                  (1000 * 60 * 60 * 24),
                 );
                 alerts.push(
                   <div
@@ -792,7 +794,7 @@ const UserProfile = () => {
               if (tier1DieTime) {
                 const countdown = Math.ceil(
                   (tier1DieTime.getTime() - today.getTime()) /
-                    (1000 * 60 * 60 * 24),
+                  (1000 * 60 * 60 * 24),
                 );
                 alerts.push(
                   <div
@@ -822,7 +824,7 @@ const UserProfile = () => {
           })()}
 
           <form onSubmit={handleSubmit(onSubmit)} className="md:flex no-wrap">
-            <div className={`w-full ${currentTier === 1 ? "lg:w-1/2" : "lg:w-4/12" } lg:mx-2 mb-4 lg:mb-0`}>
+            <div className={`w-full ${currentTier === 1 ? "lg:w-1/2" : "lg:w-4/12"} lg:mx-2 mb-4 lg:mb-0`}>
               <div className="bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                 <ul className=" text-gray-600 py-2 px-3 mt-3 divide-y rounded">
                   <li className="flex items-center py-3">
@@ -841,21 +843,20 @@ const UserProfile = () => {
                         </select>
                       ) : (
                         <span
-                          className={`${
-                            data.status === 'UNVERIFY'
-                              ? 'bg-red-600'
-                              : data.status === 'PENDING'
+                          className={`${data.status === 'UNVERIFY'
+                            ? 'bg-red-600'
+                            : data.status === 'PENDING'
                               ? 'bg-yellow-600'
                               : data.status === 'APPROVED'
-                              ? 'bg-green-600'
-                              : data.status === 'REJECTED'
-                              ? 'bg-red-600'
-                              : data.status === 'LOCKED'
-                              ? 'bg-red-600'
-                              : data.status === 'DELETED'
-                              ? 'bg-red-600'
-                              : ''
-                          }  py-1 px-2 rounded text-white text-sm`}
+                                ? 'bg-green-600'
+                                : data.status === 'REJECTED'
+                                  ? 'bg-red-600'
+                                  : data.status === 'LOCKED'
+                                    ? 'bg-red-600'
+                                    : data.status === 'DELETED'
+                                      ? 'bg-red-600'
+                                      : ''
+                            }  py-1 px-2 rounded text-white text-sm`}
                         >
                           {t(data.status)}
                         </span>
@@ -1097,17 +1098,16 @@ const UserProfile = () => {
                         <div className="flex items-center justify-between">
                           <div>Tier 1 :</div>
                           <div
-                            className={`w-10 h-5 rounded-md ${
-                              data.tier1?.isRed
-                                ? 'bg-[#ee0000]' // Màu đỏ
-                                : data.tier1?.isBlue
+                            className={`w-10 h-5 rounded-md ${data.tier1?.isRed
+                              ? 'bg-[#ee0000]' // Màu đỏ
+                              : data.tier1?.isBlue
                                 ? 'bg-[#0033ff]' // Màu xanh dương
                                 : data.tier1?.isYellow
-                                ? 'bg-[#ffcc00]' // Màu vàng
-                                : data.tier1?.isPink
-                                ? 'bg-[#ff3399]' // Màu hồng
-                                : 'bg-[#009933]' // Màu xanh lá (mặc định)
-                            }`}
+                                  ? 'bg-[#ffcc00]' // Màu vàng
+                                  : data.tier1?.isPink
+                                    ? 'bg-[#ff3399]' // Màu hồng
+                                    : 'bg-[#009933]' // Màu xanh lá (mặc định)
+                              }`}
                           ></div>
                         </div>
                       </li>
@@ -1137,8 +1137,8 @@ const UserProfile = () => {
                               const currentDieTime = data.dieTimeTier1;
                               return currentDieTime
                                 ? new Date(currentDieTime).toLocaleDateString(
-                                    'vi',
-                                  )
+                                  'vi',
+                                )
                                 : '';
                             })()
                           )}
@@ -1153,15 +1153,14 @@ const UserProfile = () => {
                         <div className="flex items-center justify-between">
                           <div>Tier 2 :</div>
                           <div
-                            className={`w-10 h-5 rounded-md ${
-                              data.isDisableTier2
-                                ? 'bg-[#663300]' // Màu nâu (disable)
-                                : data.tier2?.isYellow
+                            className={`w-10 h-5 rounded-md ${data.isDisableTier2
+                              ? 'bg-[#663300]' // Màu nâu (disable)
+                              : data.tier2?.isYellow
                                 ? 'bg-[#ffcc00]' // Màu vàng
                                 : data.tier2?.isBlue
-                                ? 'bg-[#0033ff]' // Màu xanh dương
-                                : 'bg-[#009933]' // Màu xanh lá (mặc định)
-                            }`}
+                                  ? 'bg-[#0033ff]' // Màu xanh dương
+                                  : 'bg-[#009933]' // Màu xanh lá (mặc định)
+                              }`}
                           ></div>
                         </div>
                       </li>
@@ -1191,8 +1190,8 @@ const UserProfile = () => {
                               const currentDieTime = data.dieTimeTier2;
                               return currentDieTime
                                 ? new Date(currentDieTime).toLocaleDateString(
-                                    'vi',
-                                  )
+                                  'vi',
+                                )
                                 : '';
                             })()
                           )}
@@ -1229,45 +1228,69 @@ const UserProfile = () => {
               {/* Tier 1: Danh sách user trực tiếp */}
               {currentTier === 1 && (
                 <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
-                  <p className="uppercase mt-2 font-bold">{t('children')}</p>
-                  <div className="py-2">
-                    <ul>
-                      {data.listDirectUser
-                        .filter((ele) => !ele.isSubId)
-                        .map((ele) => (
-                          <li
-                            className="bg-white border-b hover:bg-gray-50"
-                            key={ele.userId}
-                          >
-                            <div className="py-2">
-                              <div className="text-base">
-                                <span
-                                  className={`${
-                                    ele.isRed
+                  <div className="flex items-center gap-3 mt-2">
+                    <p className="uppercase font-bold">{t('children')}</p>
+                    <button
+                      type="button"
+                      onClick={() => setShowDirectUsers(!showDirectUsers)}
+                      className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors flex items-center gap-1"
+                    >
+                      <span>{data.listDirectUser?.filter((ele) => !ele.isSubId)?.length || 0} users</span>
+                      <svg
+                        className={`w-4 h-4 transition-transform ${showDirectUsers ? 'rotate-180' : ''
+                          }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  {showDirectUsers && (
+                    <div className="py-2">
+                      <ul>
+                        {data.listDirectUser
+                          .filter((ele) => !ele.isSubId)
+                          .map((ele) => (
+                            <li
+                              className="bg-white border-b hover:bg-gray-50"
+                              key={ele.userId}
+                            >
+                              <div className="py-2">
+                                <div className="text-base">
+                                  <span
+                                    className={`${ele.isRed
                                       ? 'bg-[#b91c1c]'
                                       : ele.isBlue
-                                      ? 'bg-[#0000ff]'
-                                      : ele.isYellow
-                                      ? 'bg-[#F4B400]'
-                                      : ele.isPink
-                                      ? 'bg-[#e600769c]'
-                                      : 'bg-[#16a34a]'
-                                  } py-1 px-2 rounded text-white text-sm`}
-                                >
-                                  {ele.userId}{' '}
-                                  {ele.dieTime
-                                    ? ' - ' +
+                                        ? 'bg-[#0000ff]'
+                                        : ele.isYellow
+                                          ? 'bg-[#F4B400]'
+                                          : ele.isPink
+                                            ? 'bg-[#e600769c]'
+                                            : 'bg-[#16a34a]'
+                                      } py-1 px-2 rounded text-white text-sm`}
+                                  >
+                                    {ele.userId}{' '}
+                                    {ele.dieTime
+                                      ? ' - ' +
                                       new Date(ele.dieTime).toLocaleDateString(
                                         'vi',
                                       )
-                                    : ''}
-                                </span>
+                                      : ''}
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                          </li>
-                        ))}
-                    </ul>
-                  </div>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1289,17 +1312,16 @@ const UserProfile = () => {
                             <div className="py-2">
                               <div className="text-base">
                                 <span
-                                  className={`${
-                                    ele.isRed
-                                      ? 'bg-[#b91c1c]'
-                                      : ele.isBlue
+                                  className={`${ele.isRed
+                                    ? 'bg-[#b91c1c]'
+                                    : ele.isBlue
                                       ? 'bg-[#0000ff]'
                                       : ele.isYellow
-                                      ? 'bg-[#F4B400]'
-                                      : ele.isPink
-                                      ? 'bg-[#e600769c]'
-                                      : 'bg-[#16a34a]'
-                                  } py-1 px-2 rounded text-white text-sm`}
+                                        ? 'bg-[#F4B400]'
+                                        : ele.isPink
+                                          ? 'bg-[#e600769c]'
+                                          : 'bg-[#16a34a]'
+                                    } py-1 px-2 rounded text-white text-sm`}
                                 >
                                   {ele.userId}
                                 </span>
@@ -1316,67 +1338,119 @@ const UserProfile = () => {
               {currentTier === 2 && data.tier >= 2 && (
                 <div className="mt-10 bg-white shadow-md p-3 border-t-4 border-NoExcuseChallenge">
                   <p className="uppercase mt-2 font-bold">Tier 2 Users</p>
+
+                  {/* Branch 1 */}
                   <div className="py-2">
-                    <p className="font-medium">Branch 1 :</p>
-                    <ul className="flex flex-wrap gap-2">
-                      {data?.tier2ChildUsers?.branch1?.map((ele) => (
-                        <li
-                          className="bg-white border-b hover:bg-gray-50"
-                          key={ele}
+                    <div className="flex items-center gap-3">
+                      <p className="font-medium">Branch 1 :</p>
+                      <button
+                        type="button"
+                        onClick={() => setShowBranch1Users(!showBranch1Users)}
+                        className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors flex items-center gap-1"
+                      >
+                        <span>{data?.tier2ChildUsers?.branch1?.length || 0} users</span>
+                        <svg
+                          className={`w-4 h-4 transition-transform ${showBranch1Users ? 'rotate-180' : ''
+                            }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          <div className="py-2">
-                            <div className="text-base">
-                              <span
-                                className={`${
-                                  ele.isRed
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    {showBranch1Users && (
+                      <ul className="flex flex-wrap gap-2 mt-2">
+                        {data?.tier2ChildUsers?.branch1?.map((ele) => (
+                          <li
+                            className="bg-white border-b hover:bg-gray-50"
+                            key={ele}
+                          >
+                            <div className="py-2">
+                              <div className="text-base">
+                                <span
+                                  className={`${ele.isRed
                                     ? 'bg-[#b91c1c]'
                                     : ele.isBlue
-                                    ? 'bg-[#0000ff]'
-                                    : ele.isYellow
-                                    ? 'bg-[#F4B400]'
-                                    : ele.isPink
-                                    ? 'bg-[#e600769c]'
-                                    : 'bg-[#16a34a]'
-                                } py-1 px-2 rounded text-white text-sm`}
-                              >
-                                {ele}
-                              </span>
+                                      ? 'bg-[#0000ff]'
+                                      : ele.isYellow
+                                        ? 'bg-[#F4B400]'
+                                        : ele.isPink
+                                          ? 'bg-[#e600769c]'
+                                          : 'bg-[#16a34a]'
+                                    } py-1 px-2 rounded text-white text-sm`}
+                                >
+                                  {ele}
+                                </span>
+                              </div>
                             </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
+
+                  {/* Branch 2 */}
                   <div className="py-2">
-                    <p className="font-medium">Branch 2 :</p>
-                    <ul className="flex flex-wrap gap-2">
-                      {data?.tier2ChildUsers?.branch2?.map((ele) => (
-                        <li
-                          className="bg-white border-b hover:bg-gray-50"
-                          key={ele}
+                    <div className="flex items-center gap-3">
+                      <p className="font-medium">Branch 2 :</p>
+                      <button
+                        type="button"
+                        onClick={() => setShowBranch2Users(!showBranch2Users)}
+                        className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors flex items-center gap-1"
+                      >
+                        <span>{data?.tier2ChildUsers?.branch2?.length || 0} users</span>
+                        <svg
+                          className={`w-4 h-4 transition-transform ${showBranch2Users ? 'rotate-180' : ''
+                            }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          <div className="py-2">
-                            <div className="text-base">
-                              <span
-                                className={`${
-                                  ele.isRed
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    {showBranch2Users && (
+                      <ul className="flex flex-wrap gap-2 mt-2">
+                        {data?.tier2ChildUsers?.branch2?.map((ele) => (
+                          <li
+                            className="bg-white border-b hover:bg-gray-50"
+                            key={ele}
+                          >
+                            <div className="py-2">
+                              <div className="text-base">
+                                <span
+                                  className={`${ele.isRed
                                     ? 'bg-[#b91c1c]'
                                     : ele.isBlue
-                                    ? 'bg-[#0000ff]'
-                                    : ele.isYellow
-                                    ? 'bg-[#F4B400]'
-                                    : ele.isPink
-                                    ? 'bg-[#e600769c]'
-                                    : 'bg-[#16a34a]'
-                                } py-1 px-2 rounded text-white text-sm`}
-                              >
-                                {ele}
-                              </span>
+                                      ? 'bg-[#0000ff]'
+                                      : ele.isYellow
+                                        ? 'bg-[#F4B400]'
+                                        : ele.isPink
+                                          ? 'bg-[#e600769c]'
+                                          : 'bg-[#16a34a]'
+                                    } py-1 px-2 rounded text-white text-sm`}
+                                >
+                                  {ele}
+                                </span>
+                              </div>
                             </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 </div>
               )}
@@ -1468,9 +1542,8 @@ const UserProfile = () => {
                       <div className="py-4">
                         <div className="mb-4">
                           <img
-                            src={`${import.meta.env.VITE_API_URL}${
-                              data.signatureImage
-                            }`}
+                            src={`${import.meta.env.VITE_API_URL}${data.signatureImage
+                              }`}
                             alt="User Signature"
                             className="max-w-full h-auto border-2 border-gray-300 rounded-lg bg-white"
                             style={{ maxHeight: '300px' }}
@@ -1480,14 +1553,12 @@ const UserProfile = () => {
                           type="button"
                           onClick={async () => {
                             try {
-                              const imageUrl = `${
-                                import.meta.env.VITE_API_URL
-                              }${data.signatureImage}`;
+                              const imageUrl = `${import.meta.env.VITE_API_URL
+                                }${data.signatureImage}`;
                               const response = await fetch(imageUrl);
                               const blob = await response.blob();
-                              const filename = `signature_${
-                                data.userId || 'user'
-                              }.png`;
+                              const filename = `signature_${data.userId || 'user'
+                                }.png`;
                               FileSaver.saveAs(blob, filename);
                             } catch (error) {
                               console.error(
@@ -1535,115 +1606,113 @@ const UserProfile = () => {
                   <p className="uppercase mt-2 font-bold">
                     {t('CCCD (Citizen ID Card)')}
                   </p>
-                    <div className="py-4">
-                      <div className="grid lg:grid-cols-2 gap-4 mb-4">
-                        {/* CCCD Front */}
-                        <div>
-                          <p className="text-sm font-medium mb-2">
-                            {t('CCCD Front')}
-                          </p>
-                          {data.imgFront ? (
-                            <div className="mb-2">
-                              <img
-                                src={`${
-                                  import.meta.env.VITE_API_URL
+                  <div className="py-4">
+                    <div className="grid lg:grid-cols-2 gap-4 mb-4">
+                      {/* CCCD Front */}
+                      <div>
+                        <p className="text-sm font-medium mb-2">
+                          {t('CCCD Front')}
+                        </p>
+                        {data.imgFront ? (
+                          <div className="mb-2">
+                            <img
+                              src={`${import.meta.env.VITE_API_URL
                                 }/uploads/CCCD/${data.imgFront}`}
-                                alt="CCCD Front"
-                                className="max-w-full h-auto border-2 border-gray-300 rounded-lg bg-white"
-                                style={{ maxHeight: '300px' }}
-                              />
-                            </div>
-                          ) : (
-                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
-                              <p className="text-gray-500">{t('No front image')}</p>
-                            </div>
-                          )}
-                        </div>
-                        {/* CCCD Back */}
-                        <div>
-                          <p className="text-sm font-medium mb-2">
-                            {t('CCCD Back')}
-                          </p>
-                          {data.imgBack ? (
-                            <div className="mb-2">
-                              <img
-                                src={`${
-                                  import.meta.env.VITE_API_URL
-                                }/uploads/CCCD/${data.imgBack}`}
-                                alt="CCCD Back"
-                                className="max-w-full h-auto border-2 border-gray-300 rounded-lg bg-white"
-                                style={{ maxHeight: '300px' }}
-                              />
-                            </div>
-                          ) : (
-                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
-                              <p className="text-gray-500">{t('No back image')}</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      {/* Download and Delete Buttons */}
-                      <div className="mt-4 flex gap-2">
-                        {/* Download Both Images as Zip - Only show if both images exist */}
-                        {data.imgFront && data.imgBack && (
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              try {
-                                const response = await User.downloadCCCDImages(id);
-                                // Create blob from response
-                                const blob = new Blob([response.data], {
-                                  type: 'application/zip',
-                                });
-                                // Create download link
-                                const url = window.URL.createObjectURL(blob);
-                                const link = document.createElement('a');
-                                link.href = url;
-                                link.download = `cccd_${data.userId || id}_${Date.now()}.zip`;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                                window.URL.revokeObjectURL(url);
-                                
-                                toast.success(t('CCCD images downloaded successfully'));
-                                // Refresh after a short delay to show updated state
-                                setTimeout(() => {
-                                  setRefresh(!refresh);
-                                }, 1000);
-                              } catch (error: any) {
-                                let message =
-                                  error.response &&
-                                  error.response.data.message
-                                    ? error.response.data.message
-                                    : error.response &&
-                                      error.response.data.error
-                                    ? error.response.data.error
-                                    : error.message;
-                                toast.error(
-                                  t(message || 'Failed to download CCCD images'),
-                                );
-                              }
-                            }}
-                            className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-                          >
-                            <svg
-                              className="w-5 h-5 mr-2"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                              />
-                            </svg>
-                            {t('Download')}
-                          </button>
+                              alt="CCCD Front"
+                              className="max-w-full h-auto border-2 border-gray-300 rounded-lg bg-white"
+                              style={{ maxHeight: '300px' }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
+                            <p className="text-gray-500">{t('No front image')}</p>
+                          </div>
                         )}
                       </div>
-                    </div>    
+                      {/* CCCD Back */}
+                      <div>
+                        <p className="text-sm font-medium mb-2">
+                          {t('CCCD Back')}
+                        </p>
+                        {data.imgBack ? (
+                          <div className="mb-2">
+                            <img
+                              src={`${import.meta.env.VITE_API_URL
+                                }/uploads/CCCD/${data.imgBack}`}
+                              alt="CCCD Back"
+                              className="max-w-full h-auto border-2 border-gray-300 rounded-lg bg-white"
+                              style={{ maxHeight: '300px' }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
+                            <p className="text-gray-500">{t('No back image')}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {/* Download and Delete Buttons */}
+                    <div className="mt-4 flex gap-2">
+                      {/* Download Both Images as Zip - Only show if both images exist */}
+                      {data.imgFront && data.imgBack && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              const response = await User.downloadCCCDImages(id);
+                              // Create blob from response
+                              const blob = new Blob([response.data], {
+                                type: 'application/zip',
+                              });
+                              // Create download link
+                              const url = window.URL.createObjectURL(blob);
+                              const link = document.createElement('a');
+                              link.href = url;
+                              link.download = `cccd_${data.userId || id}_${Date.now()}.zip`;
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                              window.URL.revokeObjectURL(url);
+
+                              toast.success(t('CCCD images downloaded successfully'));
+                              // Refresh after a short delay to show updated state
+                              setTimeout(() => {
+                                setRefresh(!refresh);
+                              }, 1000);
+                            } catch (error: any) {
+                              let message =
+                                error.response &&
+                                  error.response.data.message
+                                  ? error.response.data.message
+                                  : error.response &&
+                                    error.response.data.error
+                                    ? error.response.data.error
+                                    : error.message;
+                              toast.error(
+                                t(message || 'Failed to download CCCD images'),
+                              );
+                            }
+                          }}
+                          className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                        >
+                          <svg
+                            className="w-5 h-5 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                            />
+                          </svg>
+                          {t('Download')}
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -1676,17 +1745,16 @@ const UserProfile = () => {
                           <div className="py-2">
                             <div className="text-base">
                               <span
-                                className={`${
-                                  ele.isRed
-                                    ? 'bg-[#b91c1c]'
-                                    : ele.isBlue
+                                className={`${ele.isRed
+                                  ? 'bg-[#b91c1c]'
+                                  : ele.isBlue
                                     ? 'bg-[#0000ff]'
                                     : ele.isYellow
-                                    ? 'bg-[#F4B400]'
-                                    : ele.isPink
-                                    ? 'bg-[#e600769c]'
-                                    : 'bg-[#16a34a]'
-                                } py-1 px-2 rounded text-white text-sm`}
+                                      ? 'bg-[#F4B400]'
+                                      : ele.isPink
+                                        ? 'bg-[#e600769c]'
+                                        : 'bg-[#16a34a]'
+                                  } py-1 px-2 rounded text-white text-sm`}
                               >
                                 {ele.userId}
                               </span>
@@ -1699,7 +1767,7 @@ const UserProfile = () => {
                 </div>
               )}
             </div>
-            <div className={`w-full ${currentTier === 1 ? "lg:w-1/2" : "lg:w-4/12" }  lg:mx-2`}>
+            <div className={`w-full ${currentTier === 1 ? "lg:w-1/2" : "lg:w-4/12"}  lg:mx-2`}>
               <div className="bg-white p-6 shadow-md rounded-sm border-t-4 border-NoExcuseChallenge">
                 <div className="text-gray-700">
                   <div className="grid grid-cols-1 text-sm">
@@ -1734,10 +1802,10 @@ const UserProfile = () => {
                             {data.city === 'VI'
                               ? t('Vietnam')
                               : data.city === 'US'
-                              ? t('America')
-                              : data.city === 'IN'
-                              ? t('India')
-                              : data.city || '-'}
+                                ? t('America')
+                                : data.city === 'IN'
+                                  ? t('India')
+                                  : data.city || '-'}
                           </div>
                         </div>
                         <div className="grid lg:grid-cols-2 grid-cols-1">
@@ -1886,13 +1954,13 @@ const UserProfile = () => {
                             <div className="px-4 py-2">
                               {data.dateOfBirth
                                 ? new Date(data.dateOfBirth).toLocaleDateString(
-                                    'vi-Vn',
-                                    {
-                                      day: '2-digit',
-                                      month: '2-digit',
-                                      year: 'numeric',
-                                    },
-                                  )
+                                  'vi-Vn',
+                                  {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                  },
+                                )
                                 : '-'}
                             </div>
                           )}
@@ -2020,9 +2088,9 @@ const UserProfile = () => {
                         {data.tier > 1
                           ? 0
                           : data.totalHewe > 0
-                          ? parseInt(data.totalHewe) -
+                            ? parseInt(data.totalHewe) -
                             parseInt(data.claimedHewe)
-                          : 0}
+                            : 0}
                       </div>
                     </div>
                     <div className="grid lg:grid-cols-2 grid-cols-1">
@@ -2171,9 +2239,8 @@ const UserProfile = () => {
                             <div className="flex flex-col items-center justify-center w-full">
                               {data.facetecTid !== '' && (
                                 <img
-                                  src={`${
-                                    import.meta.env.VITE_FACETEC_URL
-                                  }/api/liveness/image?tid=${data.facetecTid}`}
+                                  src={`${import.meta.env.VITE_FACETEC_URL
+                                    }/api/liveness/image?tid=${data.facetecTid}`}
                                   className="w-full h-full rounded-md object-cover"
                                   alt="FaceTec image"
                                 />
@@ -2189,11 +2256,9 @@ const UserProfile = () => {
                                 <a
                                   target="_blank"
                                   className="text-blue-500"
-                                  href={`${
-                                    import.meta.env.VITE_FACETEC_DASHBOARD_URL
-                                  }/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${
-                                    data.id
-                                  }`}
+                                  href={`${import.meta.env.VITE_FACETEC_DASHBOARD_URL
+                                    }/session-details?path=%2Fenrollment-3d&externalDatabaseRefID=ID_${data.id
+                                    }`}
                                 >
                                   link
                                 </a>
@@ -2284,24 +2349,24 @@ const UserProfile = () => {
                 {userInfo?.permissions
                   ?.find((p) => p.page.path === '/admin/users/:id')
                   ?.actions.includes('update') && (
-                  <div
-                    onClick={handleOpenCreateWildCardModal}
-                    className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-blue-500 text-white"
-                  >
-                    {t('userProfile.buttons.createWildCard')}
-                  </div>
-                )}
+                    <div
+                      onClick={handleOpenCreateWildCardModal}
+                      className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-blue-500 text-white"
+                    >
+                      {t('userProfile.buttons.createWildCard')}
+                    </div>
+                  )}
                 {userInfo?.permissions
                   ?.find((p) => p.page.path === '/admin/users/:id')
                   ?.actions.includes('read') && (
-                  <div
-                    onClick={handleCheckAbnormalIncome}
-                    className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-purple-500 text-white"
-                  >
-                    {loadingCheckAbnormalIncome && <Loading />}
-                    {!loadingCheckAbnormalIncome && 'Kiểm tra thu nhập'}
-                  </div>
-                )}
+                    <div
+                      onClick={handleCheckAbnormalIncome}
+                      className="w-full flex justify-center items-center cursor-pointer hover:underline border font-bold rounded-full my-2 py-2 px-6 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out bg-purple-500 text-white"
+                    >
+                      {loadingCheckAbnormalIncome && <Loading />}
+                      {!loadingCheckAbnormalIncome && 'Kiểm tra thu nhập'}
+                    </div>
+                  )}
               </div>
             </div>
 
@@ -2328,11 +2393,10 @@ const UserProfile = () => {
                             return (
                               <div
                                 key={card._id}
-                                className={`rounded-lg overflow-hidden shadow-lg max-w-[250px] mx-auto ${
-                                  isPromoTier2
-                                    ? 'bg-yellow-600'
-                                    : 'bg-green-600'
-                                }`}
+                                className={`rounded-lg overflow-hidden shadow-lg max-w-[250px] mx-auto ${isPromoTier2
+                                  ? 'bg-yellow-600'
+                                  : 'bg-green-600'
+                                  }`}
                               >
                                 {/* Top Section - Image */}
                                 <div className="w-full">
@@ -2349,11 +2413,10 @@ const UserProfile = () => {
 
                                 {/* Bottom Section - Background based on cardType */}
                                 <div
-                                  className={`${
-                                    isPromoTier2
-                                      ? 'bg-yellow-600'
-                                      : 'bg-green-600'
-                                  } p-4 text-white`}
+                                  className={`${isPromoTier2
+                                    ? 'bg-yellow-600'
+                                    : 'bg-green-600'
+                                    } p-4 text-white`}
                                 >
                                   <div className="flex flex-col items-center space-y-2">
                                     {/* WILDCARD Text */}
@@ -2389,29 +2452,28 @@ const UserProfile = () => {
                                                 );
                                               toast.success(
                                                 response.data.message ||
-                                                  'Sử dụng Wild Card thành công!',
+                                                'Sử dụng Wild Card thành công!',
                                               );
                                               setRefresh(!refresh);
                                             } catch (error: any) {
                                               const message =
                                                 error.response &&
-                                                error.response.data.message
+                                                  error.response.data.message
                                                   ? error.response.data.message
                                                   : error.message;
                                               toast.error(
                                                 t(message) ||
-                                                  'Có lỗi xảy ra khi sử dụng Wild Card',
+                                                'Có lỗi xảy ra khi sử dụng Wild Card',
                                               );
                                             } finally {
                                               setUsingCardId(null);
                                             }
                                           }}
                                           disabled={usingCardId === card._id}
-                                          className={`w-full text-white uppercase font-bold py-2 px-6 rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
-                                            isPromoTier2
-                                              ? 'bg-white/20 backdrop-blur-sm border-2 border-white/50 hover:bg-white/30'
-                                              : 'bg-black hover:bg-gray-800'
-                                          }`}
+                                          className={`w-full text-white uppercase font-bold py-2 px-6 rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${isPromoTier2
+                                            ? 'bg-white/20 backdrop-blur-sm border-2 border-white/50 hover:bg-white/30'
+                                            : 'bg-black hover:bg-gray-800'
+                                            }`}
                                         >
                                           {usingCardId === card._id ? (
                                             <Loading />
@@ -2437,18 +2499,18 @@ const UserProfile = () => {
                                                 );
                                               toast.success(
                                                 response.data.message ||
-                                                  'Xóa Wild Card thành công!',
+                                                'Xóa Wild Card thành công!',
                                               );
                                               setRefresh(!refresh);
                                             } catch (error: any) {
                                               const message =
                                                 error.response &&
-                                                error.response.data.message
+                                                  error.response.data.message
                                                   ? error.response.data.message
                                                   : error.message;
                                               toast.error(
                                                 t(message) ||
-                                                  'Có lỗi xảy ra khi xóa Wild Card',
+                                                'Có lỗi xảy ra khi xóa Wild Card',
                                               );
                                             }
                                           }}

@@ -120,8 +120,9 @@ const User = {
   removeLastUserInTier: (body) => {
     return API.post(`${URL_API_USER}/removeLastUserInTier`, body);
   },
-  getDreamPool: ({ tier }) => {
-    return API.get(`${URL_API_DREAMPOOL}?tier=${tier}`);
+  getDreamPool: ({ tier, year }) => {
+    const yearParam = year ? `&year=${year}` : '';
+    return API.get(`${URL_API_DREAMPOOL}?tier=${tier}${yearParam}`);
   },
   getNotHonorUsers: () => {
     return API.get(`${URL_API_DREAMPOOL}/notHonors`);

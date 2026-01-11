@@ -5,15 +5,35 @@ import Config from "../models/configModel.js";
 import User from "../models/userModel.js";
 
 const getDreamPool = expressAsyncHandler(async (req, res) => {
-  const { tier } = req.query;
-
-  const count = await Transaction.countDocuments({
+  const { tier, year } = req.query;
+  
+  // Default to current year (2026) if not provided
+  const selectedYear = year ? parseInt(year) : 2026;
+  
+  // Create date range for the selected year
+  const startDate = new Date(`${selectedYear}-01-01T00:00:00.000Z`);
+  const endDate = new Date(`${selectedYear + 1}-01-01T00:00:00.000Z`);
+  
+  // Build query with year filter
+  const transactionQuery = {
     type: "PIG",
     status: "SUCCESS",
     tier: parseInt(tier),
-  });
+    createdAt: {
+      $gte: startDate,
+      $lt: endDate,
+    },
+  };
 
-  const allBreakers = await Honor.find({})
+  const count = await Transaction.countDocuments(transactionQuery);
+
+  // Filter honors by year as well
+  const allBreakers = await Honor.find({
+    createdAt: {
+      $gte: startDate,
+      $lt: endDate,
+    },
+  })
     .populate("userId", "_id userId email")
     .sort("-createdAt");
 
