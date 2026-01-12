@@ -1585,14 +1585,14 @@ const UserProfile = () => {
                           </svg>
                           {t('Download Signature')}
                         </button>
-                        {/* <button
+                        <button
                           type="button"
                           onClick={() => handleDownloadContract(id, data.userId)}
                           className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition ml-2"
                         >
                           <Download className="w-5 h-5 mr-2" />
                           {t('contract.download')}
-                        </button> */}
+                        </button>
 
                       </div>
                     </div>

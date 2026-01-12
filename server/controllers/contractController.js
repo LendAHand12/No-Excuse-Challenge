@@ -63,12 +63,23 @@ const generateContract = asyncHandler(async (req, res) => {
 
     // Data to be injected
     const now = new Date();
+    const formatDate = (date) => {
+      if (!date) return "";
+      const d = new Date(date);
+      return `ngày ${d.getDate()} tháng ${d.getMonth() + 1} năm ${d.getFullYear()}`;
+    };
+
     const data = {
-      full_name: user.userId,
-      id_code: user.idCode || user._id,
-      current_date: now.getDate().toString(),
-      current_month: (now.getMonth() + 1).toString(),
-      signature: `http://localhost:5000${user.signatureImage}`, // This will be handled by the image module
+      fullName: user.fullName,
+      idCode: user.idCode || user._id,
+      currentDate: now.getDate().toString(),
+      currentMonth: (now.getMonth() + 1).toString(),
+      currentYear: now.getFullYear().toString(),
+      cccdIssueDate: formatDate(user.cccdIssueDate),
+      cccdIssuePlace: user.cccdIssuePlace,
+      permanentAddress: user.permanentAddress,
+      currentAddress: user.currentAddress,
+      signature: `${process.env.BASE_URL}/${user.signatureImage}`, // This will be handled by the image module
     };
 
 
@@ -98,28 +109,4 @@ const generateContract = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Preview contract data (returns JSON with data that will be in the contract)
-// @route   GET /api/contracts/preview-data/:userId
-// @access  Private/Admin
-const getPreviewData = asyncHandler(async (req, res) => {
-  const { userId } = req.params;
-  const user = await User.findById(userId);
-
-  if (!user) {
-    res.status(404);
-    throw new Error("User not found");
-  }
-
-  const now = new Date();
-  res.json({
-    full_name: user.userId,
-    id_code: user.idCode || user._id,
-    current_date: now.getDate().toString(),
-    current_month: (now.getMonth() + 1).toString(),
-    hasSignature: !!user.signatureImage,
-    signatureUrl: user.signatureImage,
-  });
-
-});
-
-export { generateContract, getPreviewData };
+export { generateContract };
