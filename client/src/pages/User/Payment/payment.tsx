@@ -74,10 +74,23 @@ const PaymentPage = () => {
   };
 
   useEffect(() => {
+    // Check if Face ID and profile are complete before allowing payment
+    if (userInfo?.facetecTid === '' && userInfo?.lockKyc === false) {
+      toast.error('Vui lòng đăng ký Face ID trước khi thanh toán');
+      window.location.href = '/user/profile';
+      return;
+    }
+
+    if (userInfo?.isProfileComplete === false) {
+      toast.error('Vui lòng hoàn thiện thông tin CCCD trước khi thanh toán');
+      window.location.href = '/user/profile';
+      return;
+    }
+
     onGetPaymentInfo();
     // Show terms modal when payment info is loaded
     setShowTermsModal(true);
-  }, []);
+  }, [userInfo?.isProfileComplete]);
 
   const handleAcceptTerms = () => {
     if (termsAccepted) {
@@ -231,21 +244,20 @@ const PaymentPage = () => {
                       paymentIdsList.map((payment, i) => (
                         <div
                           key={payment.id}
-                          className={`flex items-center p-4 mb-4 text-sm rounded-lg ${
-                            payment.type === 'REGISTER'
-                              ? 'bg-green-50 text-green-800'
-                              : payment.type === 'DIRECT'
+                          className={`flex items-center p-4 mb-4 text-sm rounded-lg ${payment.type === 'REGISTER'
+                            ? 'bg-green-50 text-green-800'
+                            : payment.type === 'DIRECT'
                               ? 'bg-yellow-50 text-yellow-800'
                               : payment.type === 'FINE'
-                              ? 'bg-red-50 text-red-800'
-                              : payment.type === 'PIG'
-                              ? 'bg-pink-100'
-                              : payment.type === 'COMPANY'
-                              ? 'bg-purple-100'
-                              : payment.type === 'KYC'
-                              ? 'bg-teal-100'
-                              : 'bg-blue-50 text-blue-800'
-                          }`}
+                                ? 'bg-red-50 text-red-800'
+                                : payment.type === 'PIG'
+                                  ? 'bg-pink-100'
+                                  : payment.type === 'COMPANY'
+                                    ? 'bg-purple-100'
+                                    : payment.type === 'KYC'
+                                      ? 'bg-teal-100'
+                                      : 'bg-blue-50 text-blue-800'
+                            }`}
                           role="alert"
                         >
                           <svg
@@ -265,16 +277,16 @@ const PaymentPage = () => {
                                 {payment.type === 'REGISTER'
                                   ? t('REGISTRATION & MANAGEMENT FEE')
                                   : payment.type === 'DIRECT'
-                                  ? t('COMMUNITY REWARD')
-                                  : payment.type === 'FINE'
-                                  ? t('fine')
-                                  : payment.type === 'PIG'
-                                  ? t('REWARD POOL')
-                                  : payment.type === 'COMPANY'
-                                  ? t('EXCHANGE FOR HEWE')
-                                  : payment.type === 'KYC'
-                                  ? t('KYC Fee')
-                                  : t('COMMUNITY SUPPORT REWARDS')}
+                                    ? t('COMMUNITY REWARD')
+                                    : payment.type === 'FINE'
+                                      ? t('fine')
+                                      : payment.type === 'PIG'
+                                        ? t('REWARD POOL')
+                                        : payment.type === 'COMPANY'
+                                          ? t('EXCHANGE FOR HEWE')
+                                          : payment.type === 'KYC'
+                                            ? t('KYC Fee')
+                                            : t('COMMUNITY SUPPORT REWARDS')}
                                 <span> : </span>
                               </span>
                               <span>{payment.amount} USDT</span>
@@ -282,13 +294,13 @@ const PaymentPage = () => {
                             <div className="">
                               {(payment.type === 'DIRECT' ||
                                 payment.type === 'REFERRAL') && (
-                                <span className="mx-2 text-black">
-                                  <span className="font-medium mr-2">
-                                    {t('To')} :{' '}
+                                  <span className="mx-2 text-black">
+                                    <span className="font-medium mr-2">
+                                      {t('To')} :{' '}
+                                    </span>
+                                    <span className="">{payment.to}</span>
                                   </span>
-                                  <span className="">{payment.to}</span>
-                                </span>
-                              )}
+                                )}
                             </div>
                           </div>
                         </div>

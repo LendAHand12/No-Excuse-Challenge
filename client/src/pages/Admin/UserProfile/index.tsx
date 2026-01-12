@@ -1904,40 +1904,44 @@ const UserProfile = () => {
                             </div>
                           )}
                         </div>
-                        <div className="grid lg:grid-cols-2 grid-cols-1">
-                          <div className="px-4 py-2 font-semibold">
-                            {t('bank name')}
-                          </div>
-                          {isEditting ? (
-                            <div className="px-4">
-                              <select
-                                className="w-full px-4 py-1.5 rounded-md border border-gray-200 text-sm focus:outline-none focus:border-gray-400"
-                                {...register('bankName')}
-                              >
-                                <option value="">
-                                  {t('Select bank name')}
-                                </option>
-                                {banks.map((bank: any, index: number) => (
-                                  <option key={index} value={bank.name}>
-                                    {bank.name}
-                                  </option>
-                                ))}
-                              </select>
+                        {data.city === 'VN' && (
+                          <>
+                            <div className="grid lg:grid-cols-2 grid-cols-1">
+                              <div className="px-4 py-2 font-semibold">
+                                {t('bank name')}
+                              </div>
+                              {isEditting ? (
+                                <div className="px-4">
+                                  <select
+                                    className="w-full px-4 py-1.5 rounded-md border border-gray-200 text-sm focus:outline-none focus:border-gray-400"
+                                    {...register('bankName')}
+                                  >
+                                    <option value="">
+                                      {t('Select bank name')}
+                                    </option>
+                                    {banks.map((bank: any, index: number) => (
+                                      <option key={index} value={bank.name}>
+                                        {bank.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              ) : (
+                                <div className="px-4 py-2">
+                                  {data.bankName || '-'}
+                                </div>
+                              )}
                             </div>
-                          ) : (
-                            <div className="px-4 py-2">
-                              {data.bankName || '-'}
+                            <div className="grid lg:grid-cols-2 grid-cols-1">
+                              <div className="px-4 py-2 font-semibold">
+                                {t('bankCode')}
+                              </div>
+                              <div className="px-4 py-2">
+                                {data.bankCode || '-'}
+                              </div>
                             </div>
-                          )}
-                        </div>
-                        <div className="grid lg:grid-cols-2 grid-cols-1">
-                          <div className="px-4 py-2 font-semibold">
-                            {t('bankCode')}
-                          </div>
-                          <div className="px-4 py-2">
-                            {data.bankCode || '-'}
-                          </div>
-                        </div>
+                          </>
+                        )}
                         <div className="grid lg:grid-cols-2 grid-cols-1">
                           <div className="px-4 py-2 font-semibold">
                             {t('date of birth')}
@@ -1967,40 +1971,93 @@ const UserProfile = () => {
                         </div>
                         <div className="grid lg:grid-cols-2 grid-cols-1">
                           <div className="px-4 py-2 font-semibold">
-                            {t('accountName')}
+                            Họ và tên
                           </div>
-                          {isEditting ? (
-                            <div className="px-4">
-                              <input
-                                className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                                {...register('accountName')}
-                                autoComplete="off"
-                              />
-                            </div>
-                          ) : (
-                            <div className="px-4 py-2">
-                              {data.accountName || '-'}
-                            </div>
-                          )}
-                        </div>
-                        <div className="grid lg:grid-cols-2 grid-cols-1">
-                          <div className="px-4 py-2 font-semibold">
-                            {t('accountNumber')}
+                          <div className="px-4 py-2">
+                            {data.fullName || '-'}
                           </div>
-                          {isEditting ? (
-                            <div className="px-4">
-                              <input
-                                className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                                {...register('accountNumber')}
-                                autoComplete="off"
-                              />
-                            </div>
-                          ) : (
-                            <div className="px-4 py-2">
-                              {data.accountNumber || '-'}
-                            </div>
-                          )}
                         </div>
+                        {data.city === 'VN' && (
+                          <>
+                            <div className="grid lg:grid-cols-2 grid-cols-1">
+                              <div className="px-4 py-2 font-semibold">
+                                Ngày cấp CCCD
+                              </div>
+                              <div className="px-4 py-2">
+                                {data.cccdIssueDate
+                                  ? new Date(data.cccdIssueDate).toLocaleDateString(
+                                    'vi-Vn',
+                                    {
+                                      day: '2-digit',
+                                      month: '2-digit',
+                                      year: 'numeric',
+                                    },
+                                  )
+                                  : '-'}
+                              </div>
+                            </div>
+                            <div className="grid lg:grid-cols-2 grid-cols-1">
+                              <div className="px-4 py-2 font-semibold">
+                                Nơi cấp CCCD
+                              </div>
+                              <div className="px-4 py-2">
+                                {data.cccdIssuePlace || '-'}
+                              </div>
+                            </div>
+                            <div className="grid lg:grid-cols-2 grid-cols-1">
+                              <div className="px-4 py-2 font-semibold">
+                                Địa chỉ thường trú
+                              </div>
+                              <div className="px-4 py-2">
+                                {data.permanentAddress || '-'}
+                              </div>
+                            </div>
+                            <div className="grid lg:grid-cols-2 grid-cols-1">
+                              <div className="px-4 py-2 font-semibold">
+                                Chỗ ở hiện tại
+                              </div>
+                              <div className="px-4 py-2">
+                                {data.currentAddress || '-'}
+                              </div>
+                            </div>
+                            <div className="grid lg:grid-cols-2 grid-cols-1">
+                              <div className="px-4 py-2 font-semibold">
+                                {t('accountName')}
+                              </div>
+                              {isEditting ? (
+                                <div className="px-4">
+                                  <input
+                                    className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                    {...register('accountName')}
+                                    autoComplete="off"
+                                  />
+                                </div>
+                              ) : (
+                                <div className="px-4 py-2">
+                                  {data.accountName || '-'}
+                                </div>
+                              )}
+                            </div>
+                            <div className="grid lg:grid-cols-2 grid-cols-1">
+                              <div className="px-4 py-2 font-semibold">
+                                {t('accountNumber')}
+                              </div>
+                              {isEditting ? (
+                                <div className="px-4">
+                                  <input
+                                    className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                    {...register('accountNumber')}
+                                    autoComplete="off"
+                                  />
+                                </div>
+                              ) : (
+                                <div className="px-4 py-2">
+                                  {data.accountNumber || '-'}
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        )}
                         <div className="grid lg:grid-cols-2 grid-cols-1">
                           <div className="px-4 py-2 font-semibold">
                             {t('isRegistered')}

@@ -48,6 +48,7 @@ import { checkAbnormalIncomeForUser } from "../utils/methods.js";
 import fs from "fs";
 import path from "path";
 import archiver from "archiver";
+import { CLIENT_RENEG_LIMIT } from "tls";
 
 dotenv.config();
 
@@ -308,8 +309,8 @@ const getUserById = asyncHandler(async (req, res) => {
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
               : refedUser.tier === 1 && refedUser.buyPackage === "A" && refedUser.countPay < 13
-              ? true
-              : false,
+                ? true
+                : false,
           isYellow: isYellow,
           isBlue: isBlue,
           isPink: refedUser.countPay === 13 && listRefOfRefUser.length < 2,
@@ -386,8 +387,8 @@ const getUserById = asyncHandler(async (req, res) => {
                 refedUser.tier === 1 && refedUser.countPay === 0
                   ? true
                   : refedUser.tier === 1 && refedUser.countPay < 13
-                  ? true
-                  : false,
+                    ? true
+                    : false,
               isYellow: refedUser.errLahCode === "OVER35",
               isBlue: refedUser.errLahCode === "OVER45",
               isPink: refedUser.countPay === 13 && listRefOfRefUser.length < 2,
@@ -420,10 +421,10 @@ const getUserById = asyncHandler(async (req, res) => {
     const matchCondition =
       tier === 1
         ? {
-            userId_to: user.id,
-            status: "SUCCESS",
-            $or: [{ tier: 1 }, { tier: null }, { tier: { $exists: false } }],
-          }
+          userId_to: user.id,
+          status: "SUCCESS",
+          $or: [{ tier: 1 }, { tier: null }, { tier: { $exists: false } }],
+        }
         : { userId_to: user.id, status: "SUCCESS", tier: tier };
 
     const result = await Transaction.aggregate([
@@ -562,17 +563,17 @@ const getUserById = asyncHandler(async (req, res) => {
       hasSubTree: !!subTree,
       mainTree: tree
         ? {
-            treeId: tree._id,
-            parentName: parentTree?.userName || "",
-            refUserName: refTree?.userName || "",
-          }
+          treeId: tree._id,
+          parentName: parentTree?.userName || "",
+          refUserName: refTree?.userName || "",
+        }
         : null,
       subTree: subTree
         ? {
-            treeId: subTree._id,
-            parentName: parentSubTree.userName,
-            refUserName: refTree.userName,
-          }
+          treeId: subTree._id,
+          parentName: parentSubTree.userName,
+          refUserName: refTree.userName,
+        }
         : null,
       preTier2Status: user.preTier2Status,
       shortfallAmount: user.shortfallAmount,
@@ -583,11 +584,11 @@ const getUserById = asyncHandler(async (req, res) => {
       dieTimeForTier: treeForTier ? treeForTier.dieTime : null,
       currentTierData: treeForTier
         ? {
-            countChild: treeForTier.countChild,
-            income: treeForTier.income,
-            dieTime: treeForTier.dieTime,
-            disable: treeForTier.disable,
-          }
+          countChild: treeForTier.countChild,
+          income: treeForTier.income,
+          dieTime: treeForTier.dieTime,
+          disable: treeForTier.disable,
+        }
         : null,
       // Tính toán các field theo tier
       tier1: (() => {
@@ -607,8 +608,8 @@ const getUserById = asyncHandler(async (req, res) => {
               user.tier === 1 && user.countPay === 0
                 ? true
                 : user.tier === 1 && user.countPay < 13
-                ? true
-                : false;
+                  ? true
+                  : false;
           } else {
             // For tier 2-5, isRed logic might be different
             isRed = false;
@@ -790,8 +791,8 @@ const getUserInfo = asyncHandler(async (req, res) => {
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
               : refedUser.tier === 1 && refedUser.countPay < 13
-              ? true
-              : false,
+                ? true
+                : false,
           isYellow: isYellow,
           isBlue: isBlue,
           isPink: refedUser.countPay === 13 && listRefOfRefUser.length < 2,
@@ -887,10 +888,10 @@ const getUserInfo = asyncHandler(async (req, res) => {
           ? treeTier1.dieTime
           : null
         : user.tier === 2
-        ? treeTier2
-          ? treeTier2.dieTime
-          : null
-        : null;
+          ? treeTier2
+            ? treeTier2.dieTime
+            : null
+          : null;
 
     if (currentDieTime) {
       const currentDay = moment(); // ngày hiện tại
@@ -928,10 +929,10 @@ const getUserInfo = asyncHandler(async (req, res) => {
     const matchCondition =
       tier === 1
         ? {
-            userId_to: user.id,
-            status: "SUCCESS",
-            $or: [{ tier: 1 }, { tier: null }, { tier: { $exists: false } }],
-          }
+          userId_to: user.id,
+          status: "SUCCESS",
+          $or: [{ tier: 1 }, { tier: null }, { tier: { $exists: false } }],
+        }
         : { userId_to: user.id, status: "SUCCESS", tier: tier };
 
     const result = await Transaction.aggregate([
@@ -962,10 +963,40 @@ const getUserInfo = asyncHandler(async (req, res) => {
     ]);
     const claimedHewe = claimedHeweResult[0]?.total || 0;
 
+    // Check profile completion for required fields
+    const missingFields = [];
+
+    // Personal Information
+    // Base required fields for everyone
+    if (!user.fullName || user.fullName.trim() === "") missingFields.push("fullName");
+    if (!user.phone || user.phone.trim() === "") missingFields.push("phone");
+    if (!user.email || user.email.trim() === "") missingFields.push("email");
+    if (!user.walletAddress || user.walletAddress.trim() === "") missingFields.push("walletAddress");
+    if (!user.dateOfBirth) missingFields.push("dateOfBirth");
+
+    // Region-specific required fields (Vietnam only)
+    if (user.city === "VN") {
+      // Bank Information
+      if (!user.bankName || user.bankName.trim() === "") missingFields.push("bankName");
+      if (!user.bankCode || user.bankCode.trim() === "") missingFields.push("bankCode");
+      if (!user.accountName || user.accountName.trim() === "") missingFields.push("accountName");
+      if (!user.accountNumber || user.accountNumber.trim() === "") missingFields.push("accountNumber");
+
+      // CCCD Information
+      if (!user.cccdIssueDate) missingFields.push("cccdIssueDate");
+      if (!user.cccdIssuePlace || user.cccdIssuePlace.trim() === "") missingFields.push("cccdIssuePlace");
+      if (!user.permanentAddress || user.permanentAddress.trim() === "") missingFields.push("permanentAddress");
+      if (!user.currentAddress || user.currentAddress.trim() === "") missingFields.push("currentAddress");
+      if (!user.imgFront || user.imgFront.trim() === "") missingFields.push("imgFront");
+      if (!user.imgBack || user.imgBack.trim() === "") missingFields.push("imgBack");
+    }
+
+    const isProfileComplete = missingFields.length === 0;
+
     res.json({
       id: user._id,
       email: user.email,
-      name: user.name,
+      fullName: user.fullName,
       userId: user.userId,
       isAdmin: user.isAdmin,
       isConfirmed: user.isConfirmed,
@@ -979,6 +1010,14 @@ const getUserInfo = asyncHandler(async (req, res) => {
       imgBack: user.imgBack,
       signatureImage: user.signatureImage,
       contractCompleted: user.contractCompleted,
+      // CCCD Information
+      cccdIssueDate: user.cccdIssueDate,
+      cccdIssuePlace: user.cccdIssuePlace,
+      permanentAddress: user.permanentAddress,
+      currentAddress: user.currentAddress,
+      // Profile completion status
+      isProfileComplete,
+      missingFields,
       countPay: user.countPay,
       phone: user.phone,
       idCode: user.idCode,
@@ -1053,11 +1092,11 @@ const getUserInfo = asyncHandler(async (req, res) => {
       dieTimeForTier: treeForTier ? treeForTier.dieTime : null,
       currentTierData: treeForTier
         ? {
-            countChild: treeForTier.countChild,
-            income: treeForTier.income,
-            dieTime: treeForTier.dieTime,
-            disable: treeForTier.disable,
-          }
+          countChild: treeForTier.countChild,
+          income: treeForTier.income,
+          dieTime: treeForTier.dieTime,
+          disable: treeForTier.disable,
+        }
         : null,
       timeToTry: user.timeToTry,
       bankName: user.bankName,
@@ -1087,10 +1126,10 @@ const getUserInfo = asyncHandler(async (req, res) => {
               user.tier === 1 && user.countPay === 0
                 ? true
                 : user.tier === 1 && user.buyPackage === "B" && user.countPay < 7
-                ? true
-                : user.tier === 1 && user.buyPackage === "A" && user.countPay < 13
-                ? true
-                : false;
+                  ? true
+                  : user.tier === 1 && user.buyPackage === "A" && user.countPay < 13
+                    ? true
+                    : false;
           } else {
             // For tier 2-5, isRed logic might be different
             isRed = false;
@@ -1167,24 +1206,22 @@ const updateUser = asyncHandler(async (req, res) => {
     phone,
     walletAddress,
     email,
+    fullName,
     bankName,
     bankCode,
     accountName,
     accountNumber,
     dateOfBirth,
+    cccdIssueDate,
+    cccdIssuePlace,
+    permanentAddress,
+    currentAddress,
     token, // Token from face scan verification
   } = req.body;
 
-  const user = await User.findOne({ _id: req.params.id }).select("-password");
+  console.log({ body: req.body });
 
-  console.log({
-    userId: user?.userId || "",
-    bankName,
-    bankCode,
-    accountName,
-    accountNumber,
-    dateOfBirth,
-  });
+  const user = await User.findOne({ _id: req.params.id }).select("-password");
 
   if (!user) {
     res.status(400).json({ error: "User not found" });
@@ -1197,7 +1234,7 @@ const updateUser = asyncHandler(async (req, res) => {
   if (token) {
     try {
       const { decodeCallbackToken } = await import("../utils/methods.js");
-      
+
       let decodedToken;
       try {
         decodedToken = decodeCallbackToken(token);
@@ -1217,8 +1254,8 @@ const updateUser = asyncHandler(async (req, res) => {
 
       // Check if user has registered face
       if (!user.facetecTid || user.facetecTid === "") {
-        return res.status(400).json({ 
-          error: "Face not registered. Please register your face first." 
+        return res.status(400).json({
+          error: "Face not registered. Please register your face first."
         });
       }
 
@@ -1226,8 +1263,8 @@ const updateUser = asyncHandler(async (req, res) => {
       // No need to verify face scan again as FaceTec already did it
     } catch (error) {
       console.log({ error });
-      return res.status(500).json({ 
-        error: error.message || "Token verification error" 
+      return res.status(500).json({
+        error: error.message || "Token verification error"
       });
     }
   }
@@ -1256,12 +1293,6 @@ const updateUser = asyncHandler(async (req, res) => {
       { isAdmin: false },
       { status: { $ne: "DELETED" } },
     ],
-  });
-
-  console.log({
-    userHavePhone: userHavePhone[0],
-    userHaveWalletAddress: userHaveWalletAddress[0],
-    userHaveEmail: userHaveEmail[0],
   });
 
   if (userHavePhone.length >= 1 || userHaveWalletAddress.length >= 1 || userHaveEmail.length >= 1) {
@@ -1340,6 +1371,9 @@ const updateUser = asyncHandler(async (req, res) => {
       return isNaN(date.getTime()) ? null : date;
     };
 
+    // All fields including personal info and CCCD fields should go through KYC review process
+    // They are handled in the loop below based on AUTO_KYC_USER_INFO config
+
     for (const field of [
       "email",
       "phone",
@@ -1349,6 +1383,11 @@ const updateUser = asyncHandler(async (req, res) => {
       "accountName",
       "accountNumber",
       "dateOfBirth",
+      "cccdIssueDate",
+      "cccdIssuePlace",
+      "permanentAddress",
+      "currentAddress",
+      "fullName"
     ]) {
       // For dateOfBirth, allow null/empty values to be set
       if (field === "dateOfBirth") {
@@ -1445,12 +1484,12 @@ const updateUser = asyncHandler(async (req, res) => {
     // CCCD upload is now handled by separate API endpoint
 
     if (kycConfig.value === false) {
-      await sendMailChangeWalletToAdmin({
-        userId: user._id,
-        userName: user.userId,
-        phone: user.phone,
-        email: user.email,
-      });
+      // await sendMailChangeWalletToAdmin({
+      //   userId: user._id,
+      //   userName: user.userId,
+      //   phone: user.phone,
+      //   email: user.email,
+      // });
     }
 
     const updatedUser = await user.save();
@@ -1872,8 +1911,8 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
         tier === 1
           ? moment().add(30, "days").toDate()
           : tier === 2
-          ? moment().add(45, "days").toDate()
-          : null;
+            ? moment().add(45, "days").toDate()
+            : null;
 
       await Tree.create({
         userName: user.userId,
@@ -2242,10 +2281,10 @@ const getUserProfile = asyncHandler(async (req, res) => {
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
               : refedUser.tier === 1 && refedUser.buyPackage === "B" && refedUser.countPay < 7
-              ? true
-              : refedUser.tier === 1 && refedUser.buyPackage === "A" && refedUser.countPay < 13
-              ? true
-              : false,
+                ? true
+                : refedUser.tier === 1 && refedUser.buyPackage === "A" && refedUser.countPay < 13
+                  ? true
+                  : false,
           isYellow: refedUser.errLahCode === "OVER30",
         });
       }
@@ -2294,10 +2333,10 @@ const getUserProfile = asyncHandler(async (req, res) => {
         packages.includes("B") && packages.includes("C")
           ? user.continueWithBuyPackageB
           : packages.includes("B")
-          ? true
-          : packages.includes("C")
-          ? false
-          : user.continueWithBuyPackageB,
+            ? true
+            : packages.includes("C")
+              ? false
+              : user.continueWithBuyPackageB,
       oldLayer: user.oldLayer,
       currentLayer: user.currentLayer,
       listDirectUser: listDirectUser,
@@ -3037,8 +3076,8 @@ const onAcceptIncreaseTier = asyncHandler(async (req, res) => {
         nextTier === 1
           ? moment().add(30, "days").toDate()
           : nextTier === 2
-          ? moment().add(45, "days").toDate()
-          : null;
+            ? moment().add(45, "days").toDate()
+            : null;
 
       const tree = await Tree.create({
         userName: u.userId,
@@ -3707,8 +3746,8 @@ const getSubUserProfile = asyncHandler(async (req, res) => {
             refedUser.tier === 1 && refedUser.countPay === 0
               ? true
               : refedUser.tier === 1 && refedUser.countPay < 13
-              ? true
-              : false,
+                ? true
+                : false,
           isYellow: refedUser.errLahCode === "OVER35",
           isBlue: refedUser.errLahCode === "OVER45",
           isPink: refedUser.countPay === 13 && listRefOfRefUser.length < 2,

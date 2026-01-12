@@ -75,15 +75,21 @@ const Profile = () => {
     isDisableTier2,
     imgFront,
     imgBack,
+    // CCCD Information
+    cccdIssueDate,
+    cccdIssuePlace,
+    permanentAddress,
+    currentAddress,
+    fullName,
+    isProfileComplete,
+    missingFields,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
   const [errorPhone, setErrPhone] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
+  // Removed isEdit state - now using popup for all updates
   const [refresh, setRefresh] = useState(false);
-  const [showFaceId, setShowFaceId] = useState(
-    lockKyc === false && facetecTid === '' ? true : false,
-  );
+  const [showFaceId, setShowFaceId] = useState(false);
   const [showLockKyc, setShowLockKyc] = useState(lockKyc);
   const [showMoveSystem, setShowMoveSystem] = useState(false);
   const [bankSearch, setBankSearch] = useState('');
@@ -97,7 +103,6 @@ const Profile = () => {
   //     ? true
   //     : false,
   // );
-  const [showBankInfoModal, setShowBankInfoModal] = useState(false);
   const [showNextTier, setShowNextTier] = useState(false);
   const [showCCCDModal, setShowCCCDModal] = useState(false);
   const [loadingCCCD, setLoadingCCCD] = useState(false);
@@ -110,6 +115,18 @@ const Profile = () => {
   const [showBranch1Users, setShowBranch1Users] = useState(false);
   const [showBranch2Users, setShowBranch2Users] = useState(false);
 
+  // Profile completion popup states
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
+  const [cccdIssueDateInput, setCccdIssueDateInput] = useState(cccdIssueDate || '');
+  const [cccdIssuePlaceInput, setCccdIssuePlaceInput] = useState(cccdIssuePlace || '');
+  const [permanentAddressInput, setPermanentAddressInput] = useState(permanentAddress || '');
+  const [currentAddressInput, setCurrentAddressInput] = useState(currentAddress || '');
+  const [cccdFrontFile, setCccdFrontFile] = useState<File | null>(null);
+  const [cccdBackFile, setCccdBackFile] = useState<File | null>(null);
+  const [cccdFrontPreview, setCccdFrontPreview] = useState(imgFront || '');
+  const [cccdBackPreview, setCccdBackPreview] = useState(imgBack || '');
+  const [savingProfile, setSavingProfile] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -121,6 +138,7 @@ const Profile = () => {
       idCode: status !== 'REJECTED' ? idCode : null,
       phone,
       email,
+      fullName: fullName || '',
       walletAddress,
       accountName,
       accountNumber,
@@ -128,6 +146,13 @@ const Profile = () => {
       dateOfBirth: dateOfBirth
         ? new Date(dateOfBirth).toISOString().split('T')[0]
         : '',
+      // CCCD fields
+      cccdIssueDate: cccdIssueDate
+        ? new Date(cccdIssueDate).toISOString().split('T')[0]
+        : '',
+      cccdIssuePlace: cccdIssuePlace || '',
+      permanentAddress: permanentAddress || '',
+      currentAddress: currentAddress || '',
     },
   });
 
@@ -136,10 +161,15 @@ const Profile = () => {
       const {
         walletAddress,
         email,
+        fullName,
         bankName,
         accountName,
         accountNumber,
         dateOfBirth,
+        cccdIssueDate,
+        cccdIssuePlace,
+        permanentAddress,
+        currentAddress,
       } = data;
       if (!phoneNumber || phoneNumber === '') {
         setErrPhone(true);
@@ -160,11 +190,18 @@ const Profile = () => {
         if (phoneNumber) updateData.phone = phoneNumber;
         if (walletAddress) updateData.walletAddress = walletAddress;
         if (email) updateData.email = email;
+        if (fullName?.trim()) updateData.fullName = fullName.trim();
         if (finalBankName) updateData.bankName = finalBankName;
         if (bankCode) updateData.bankCode = bankCode;
         if (accountName?.trim()) updateData.accountName = accountName.trim();
         if (accountNumber?.trim()) updateData.accountNumber = accountNumber.trim();
         if (dateOfBirth) updateData.dateOfBirth = dateOfBirth;
+
+        // Add CCCD text fields to KYC flow
+        if (cccdIssueDate) updateData.cccdIssueDate = cccdIssueDate;
+        if (cccdIssuePlace) updateData.cccdIssuePlace = cccdIssuePlace;
+        if (permanentAddress) updateData.permanentAddress = permanentAddress;
+        if (currentAddress) updateData.currentAddress = currentAddress;
 
         // Start face scan verification
         const response = await KYC.startUpdateInfo(updateData);
@@ -196,6 +233,18 @@ const Profile = () => {
           if (response.data.checkCanNextTier) {
             setShowNextTier(true);
           }
+
+          // Priority 1: Check if Face ID needs setup
+          if (response.data.lockKyc === false && response.data.facetecTid === '') {
+            setShowFaceId(true);
+            setShowProfilePopup(false);
+          }
+          // Priority 2: Check if profile is incomplete
+          else if (response.data.isProfileComplete === false) {
+            setShowProfilePopup(true);
+            setShowFaceId(false);
+          }
+
           // if (response.data.preTier2Status === 'PASSED') {
           //   setShowPreTier2Commit(false);
           // }
@@ -227,21 +276,51 @@ const Profile = () => {
     })();
   }, [refresh]);
 
-  // Initialize selectedBank when modal opens or bankName changes
+  // Initialize bank search with current bank name
   useEffect(() => {
-    if (showBankInfoModal && bankName) {
-      const foundBank = banks.find((bank: any) => bank.name === bankName);
-      if (foundBank) {
-        setSelectedBank(foundBank);
-        setBankSearch(`${foundBank.code} ${foundBank.name}`);
+    if (bankName && bankCode) {
+      const currentBank = banks.find((bank: any) => bank.name === bankName || bank.code === bankCode);
+      if (currentBank) {
+        setBankSearch(`${currentBank.code} ${currentBank.name}`);
+        setSelectedBank(currentBank);
       }
-    } else if (!showBankInfoModal) {
-      // Reset when modal closes
-      setSelectedBank(null);
-      setBankSearch('');
-      setShowBankDropdown(false);
     }
-  }, [showBankInfoModal, bankName]);
+  }, [bankName, bankCode]);
+
+  // Sync profile popup fields with userInfo when it changes or popup opens
+  useEffect(() => {
+    if (cccdIssueDate) {
+      try {
+        const formattedDate = new Date(cccdIssueDate).toISOString().split('T')[0];
+        setCccdIssueDateInput(formattedDate);
+      } catch (e) {
+        console.error('Error formatting cccdIssueDate:', e);
+      }
+    }
+    if (cccdIssuePlace) setCccdIssuePlaceInput(cccdIssuePlace);
+    if (permanentAddress) setPermanentAddressInput(permanentAddress);
+    if (currentAddress) setCurrentAddressInput(currentAddress);
+    if (imgFront) setCccdFrontPreview(imgFront);
+    if (imgBack) setCccdBackPreview(imgBack);
+
+    // Sync useForm fields correctly
+    if (fullName) setValue('fullName', fullName);
+    if (walletAddress) setValue('walletAddress', walletAddress);
+    if (dateOfBirth) {
+      try {
+        const dobFormatted = new Date(dateOfBirth).toISOString().split('T')[0];
+        setValue('dateOfBirth', dobFormatted);
+      } catch (e) {
+        console.error('Error formatting dateOfBirth:', e);
+      }
+    }
+    if (bankName) setValue('bankName', bankName);
+    if (accountName) setValue('accountName', accountName);
+    if (accountNumber) setValue('accountNumber', accountNumber);
+    if (idCode) setValue('idCode', idCode);
+    if (phone) setValue('phone', phone);
+    if (email) setValue('email', email);
+  }, [userInfo, showProfilePopup, setValue]);
 
   const findNextRank = (level) => {
     const currentRankIndex = USER_RANKINGS.findIndex(
@@ -303,9 +382,478 @@ const Profile = () => {
     }
   }, [valueCheckAgrree]);
 
+  const handleSaveProfileCompletion = async () => {
+    // Validate personal information
+    const fullNameValue = watch('fullName') as string;
+
+    if (!fullNameValue) {
+      toast.error('Vui lòng nhập họ và tên');
+      return;
+    }
+
+    const walletAddressValue = watch('walletAddress') as string;
+    if (!walletAddressValue) {
+      toast.error('Vui lòng nhập địa chỉ ví');
+      return;
+    }
+
+    const dateOfBirthValue = watch('dateOfBirth') as string;
+    if (!dateOfBirthValue) {
+      toast.error('Vui lòng nhập ngày tháng năm sinh');
+      return;
+    }
+
+    // Validate CCCD fields only for VN users
+    if (city === 'VN') {
+      if (!cccdIssueDateInput) {
+        toast.error('Vui lòng nhập ngày cấp CCCD');
+        return;
+      }
+      if (!cccdIssuePlaceInput) {
+        toast.error('Vui lòng nhập nơi cấp CCCD');
+        return;
+      }
+      if (!permanentAddressInput) {
+        toast.error('Vui lòng nhập địa chỉ thường trú');
+        return;
+      }
+      if (!currentAddressInput) {
+        toast.error('Vui lòng nhập chỗ ở hiện tại');
+        return;
+      }
+
+      // Only validate CCCD images if user doesn't have them yet (profile completion)
+      if (!imgFront && !imgBack) {
+        if (!cccdFrontPreview && !cccdFrontFile) {
+          toast.error('Vui lòng upload ảnh CCCD mặt trước');
+          return;
+        }
+        if (!cccdBackPreview && !cccdBackFile) {
+          toast.error('Vui lòng upload ảnh CCCD mặt sau');
+          return;
+        }
+      }
+    }
+
+    // Validate bank information only for VN users
+    if (city === 'VN') {
+      const bankNameValue = watch('bankName') as string;
+      if (!bankNameValue) {
+        toast.error('Vui lòng chọn ngân hàng');
+        return;
+      }
+
+      const accountNameValue = watch('accountName') as string;
+      if (!accountNameValue) {
+        toast.error('Vui lòng nhập tên chủ tài khoản');
+        return;
+      }
+
+      const accountNumberValue = watch('accountNumber') as string;
+      if (!accountNumberValue) {
+        toast.error('Vui lòng nhập số tài khoản');
+        return;
+      }
+    }
+
+    setSavingProfile(true);
+    try {
+      // Step 1: Upload CCCD images if new files selected
+      if ((cccdFrontFile || cccdBackFile) && (!imgFront || !imgBack)) {
+        const imageFormData = new FormData();
+        if (cccdFrontFile) {
+          imageFormData.append('imgFront', cccdFrontFile);
+        }
+        if (cccdBackFile) {
+          imageFormData.append('imgBack', cccdBackFile);
+        }
+
+        await User.uploadCCCD(imageFormData);
+        toast.success('Upload ảnh CCCD thành công!');
+      }
+
+      // Step 2: Sync CCCD text fields to form (VN only)
+      if (city === 'VN') {
+        setValue('cccdIssueDate', cccdIssueDateInput);
+        setValue('cccdIssuePlace', cccdIssuePlaceInput);
+        setValue('permanentAddress', permanentAddressInput);
+        setValue('currentAddress', currentAddressInput);
+      }
+
+      // Step 3: Close popup and trigger form submission (KYC face scan)
+      setShowProfilePopup(false);
+      setSavingProfile(false);
+
+      // Trigger form submission for KYC face scan
+      toast.info('Đang chuyển đến trang xác thực khuôn mặt...');
+      handleSubmit(onSubmit)();
+
+    } catch (error: any) {
+      let message =
+        error.response && error.response.data.error
+          ? error.response.data.error
+          : error.response && error.response.data.message
+            ? error.response.data.message
+            : error.message;
+      toast.error(t(message));
+      setSavingProfile(false);
+    }
+  };
+
+  const handleCccdImageChange = (e: React.ChangeEvent<HTMLInputElement>, side: 'front' | 'back') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Vui lòng chọn file hình ảnh');
+        return;
+      }
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Kích thước file không được vượt quá 5MB');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (side === 'front') {
+          setCccdFrontFile(file);
+          setCccdFrontPreview(reader.result as string);
+        } else {
+          setCccdBackFile(file);
+          setCccdBackPreview(reader.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+
   return (
     <DefaultLayout>
-      <ToastContainer />
+      <ToastContainer style={{ zIndex: 10000 }} />
+
+      {/* Profile Completion Modal - Cannot be closed until complete */}
+      <Modal
+        isOpen={showProfilePopup}
+        onRequestClose={() => { }} // Prevent closing
+        shouldCloseOnOverlayClick={false}
+        shouldCloseOnEsc={false}
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+            maxWidth: '600px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+          },
+          overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            zIndex: 9000,
+          },
+        }}
+      >
+        <div className="p-6">
+          <h2 className="text-2xl font-bold mb-4 text-red-600">
+            {isProfileComplete ? 'Cập nhật thông tin cá nhân' : 'Hoàn thiện thông tin bắt buộc'}
+          </h2>
+          <p className="mb-6 text-gray-700">
+            {isProfileComplete
+              ? (city === 'VN'
+                ? 'Cập nhật thông tin cá nhân của bạn. Lưu ý: Ảnh CCCD không thể thay đổi. Sau khi cập nhật, bạn sẽ cần xác thực khuôn mặt để hoàn tất.'
+                : 'Cập nhật thông tin cá nhân của bạn. Sau khi cập nhật, bạn sẽ cần xác thực khuôn mặt để hoàn tất.')
+              : (city === 'VN'
+                ? 'Vui lòng cung cấp đầy đủ thông tin CCCD và ngân hàng. Sau khi upload ảnh CCCD, bạn sẽ cần xác thực khuôn mặt để hoàn tất cập nhật.'
+                : 'Vui lòng cung cấp đầy đủ thông tin cá nhân. Sau khi cập nhật, bạn sẽ cần xác thực khuôn mặt để hoàn tất.')}
+          </p>
+
+          <div className="space-y-4">
+            {/* Họ và tên */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Họ và tên <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                {...register('fullName', { required: true })}
+                placeholder="Nhập họ và tên đầy đủ"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Wallet Address */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Địa chỉ ví <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                {...register('walletAddress', { required: true })}
+                placeholder="Nhập địa chỉ ví"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* CCCD Information - Only for VN */}
+            {city === 'VN' && (
+              <>
+                {/* Divider */}
+                <div className="border-t border-gray-300 my-4"></div>
+                <p className="text-lg font-semibold text-gray-800 mb-2">Thông tin CCCD</p>
+
+                {/* Ngày cấp CCCD */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Ngày cấp CCCD <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={cccdIssueDateInput}
+                    onChange={(e) => setCccdIssueDateInput(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    max={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+
+                {/* Nơi cấp CCCD */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nơi cấp CCCD <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={cccdIssuePlaceInput}
+                    onChange={(e) => setCccdIssuePlaceInput(e.target.value)}
+                    placeholder="Ví dụ: Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Địa chỉ thường trú */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Địa chỉ thường trú <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={permanentAddressInput}
+                    onChange={(e) => setPermanentAddressInput(e.target.value)}
+                    placeholder="Nhập địa chỉ thường trú đầy đủ"
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Chỗ ở hiện tại */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Chỗ ở hiện tại <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={currentAddressInput}
+                    onChange={(e) => setCurrentAddressInput(e.target.value)}
+                    placeholder="Nhập địa chỉ chỗ ở hiện tại"
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Ngày tháng năm sinh */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Ngày tháng năm sinh <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                {...register('dateOfBirth')}
+                max={new Date().toISOString().split('T')[0]}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Bank Information - Only for VN */}
+            {city === 'VN' && (
+              <>
+                {/* Divider */}
+                <div className="border-t border-gray-300 my-4"></div>
+                <p className="text-lg font-semibold text-gray-800 mb-2">Thông tin ngân hàng</p>
+
+                {/* Bank Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tên ngân hàng <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={bankSearch}
+                      onChange={(e) => {
+                        setBankSearch(e.target.value);
+                        setShowBankDropdown(true);
+                      }}
+                      onFocus={() => setShowBankDropdown(true)}
+                      placeholder="Tìm kiếm ngân hàng..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {showBankDropdown && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        {banks
+                          .filter((bank: any) =>
+                            bankSearch
+                              ? `${bank.code} ${bank.name}`.toLowerCase().includes(bankSearch.toLowerCase())
+                              : true
+                          )
+                          .slice(0, 10)
+                          .map((bank: any) => (
+                            <div
+                              key={bank.code}
+                              onClick={() => {
+                                setSelectedBank(bank);
+                                setBankSearch(`${bank.code} ${bank.name}`);
+                                setShowBankDropdown(false);
+                                setValue('bankName', bank.name);
+                              }}
+                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                            >
+                              <div className="font-medium">{bank.code}</div>
+                              <div className="text-sm text-gray-600">{bank.name}</div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Account Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tên chủ tài khoản <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    {...register('accountName')}
+                    placeholder="Nhập tên chủ tài khoản"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Account Number */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Số tài khoản <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    {...register('accountNumber')}
+                    placeholder="Nhập số tài khoản"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* CCCD Images Section - Only show if VN and user doesn't have CCCD images yet */}
+            {city === 'VN' && (!imgFront || !imgBack) && (
+              <>
+                {/* Divider */}
+                <div className="border-t border-gray-300 my-4"></div>
+                <p className="text-lg font-semibold text-gray-800 mb-2">Hình ảnh CCCD</p>
+
+                {/* CCCD mặt trước */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    CCCD mặt trước <span className="text-red-500">*</span>
+                  </label>
+                  {!imgFront ? (
+                    <>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleCccdImageChange(e, 'front')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      {cccdFrontPreview && (
+                        <img
+                          src={cccdFrontPreview}
+                          alt="CCCD Front Preview"
+                          className="mt-2 max-w-full h-auto rounded border"
+                          style={{ maxHeight: '200px' }}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <div>
+                      <img
+                        src={`${import.meta.env.VITE_API_URL}/uploads/CCCD/${imgFront}`}
+                        alt="CCCD Front"
+                        className="mt-2 max-w-full h-auto rounded border"
+                        style={{ maxHeight: '200px' }}
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Đã có ảnh CCCD mặt trước. Liên hệ admin nếu cần thay đổi.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* CCCD mặt sau */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    CCCD mặt sau <span className="text-red-500">*</span>
+                  </label>
+                  {!imgBack ? (
+                    <>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleCccdImageChange(e, 'back')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      {cccdBackPreview && (
+                        <img
+                          src={cccdBackPreview}
+                          alt="CCCD Back Preview"
+                          className="mt-2 max-w-full h-auto rounded border"
+                          style={{ maxHeight: '200px' }}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <div>
+                      <img
+                        src={`${import.meta.env.VITE_API_URL}/uploads/CCCD/${imgBack}`}
+                        alt="CCCD Back"
+                        className="mt-2 max-w-full h-auto rounded border"
+                        style={{ maxHeight: '200px' }}
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Đã có ảnh CCCD mặt sau. Liên hệ admin nếu cần thay đổi.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Submit Button */}
+          <div className="mt-6">
+            <button
+              onClick={handleSaveProfileCompletion}
+              disabled={savingProfile}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {savingProfile ? 'Đang lưu...' : 'Hoàn thành'}
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal
         isOpen={showFaceId}
@@ -744,17 +1292,9 @@ const Profile = () => {
                     </span>
                     <br />
                     {t(
-                      'Please update your bank information (Bank Name, Account Name, Account Number) to enable bank transfer withdrawal.',
+                      'Please update your bank information (Bank Name, Account Name, Account Number) via the profile completion form above.',
                     )}
                   </p>
-                  <div className="mt-2">
-                    <button
-                      onClick={() => setShowBankInfoModal(true)}
-                      className="text-sm font-medium text-yellow-800 underline hover:text-yellow-900"
-                    >
-                      {t('Update Bank Information')}
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>
@@ -767,16 +1307,16 @@ const Profile = () => {
                 <p>Status</p>
                 <div
                   className={`p-2 text-sm ${status === 'UNVERIFY'
-                      ? 'bg-red-600'
-                      : status === 'PENDING'
-                        ? 'bg-yellow-600'
-                        : status === 'APPROVED'
-                          ? 'bg-green-600'
-                          : status === 'REJECTED'
+                    ? 'bg-red-600'
+                    : status === 'PENDING'
+                      ? 'bg-yellow-600'
+                      : status === 'APPROVED'
+                        ? 'bg-green-600'
+                        : status === 'REJECTED'
+                          ? 'bg-red-600'
+                          : status === 'LOCKED'
                             ? 'bg-red-600'
-                            : status === 'LOCKED'
-                              ? 'bg-red-600'
-                              : ''
+                            : ''
                     } text-white rounded-[50px]`}
                 >
                   {status}
@@ -813,14 +1353,14 @@ const Profile = () => {
                       <div>{t('Tier 1 :')}</div>
                       <div
                         className={`w-10 h-5 rounded-md ${tier1?.isRed
-                            ? 'bg-[#ee0000]' // Màu đỏ
-                            : tier1?.isBlue
-                              ? 'bg-[#0033ff]' // Màu xanh dương
-                              : tier1?.isYellow
-                                ? 'bg-[#ffcc00]' // Màu vàng
-                                : tier1?.isPink
-                                  ? 'bg-[#ff3399]' // Màu hồng
-                                  : 'bg-[#009933]' // Màu xanh lá (mặc định)
+                          ? 'bg-[#ee0000]' // Màu đỏ
+                          : tier1?.isBlue
+                            ? 'bg-[#0033ff]' // Màu xanh dương
+                            : tier1?.isYellow
+                              ? 'bg-[#ffcc00]' // Màu vàng
+                              : tier1?.isPink
+                                ? 'bg-[#ff3399]' // Màu hồng
+                                : 'bg-[#009933]' // Màu xanh lá (mặc định)
                           }`}
                       ></div>
                     </div>
@@ -843,12 +1383,12 @@ const Profile = () => {
                       <div>{t('Tier 2 :')}</div>
                       <div
                         className={`w-10 h-5 rounded-md ${isDisableTier2
-                            ? 'bg-[#663300]' // Màu nâu (disable)
-                            : tier2?.isYellow
-                              ? 'bg-[#ffcc00]' // Màu vàng
-                              : tier2?.isBlue
-                                ? 'bg-[#0033ff]' // Màu xanh dương
-                                : 'bg-[#009933]' // Màu xanh lá (mặc định)
+                          ? 'bg-[#663300]' // Màu nâu (disable)
+                          : tier2?.isYellow
+                            ? 'bg-[#ffcc00]' // Màu vàng
+                            : tier2?.isBlue
+                              ? 'bg-[#0033ff]' // Màu xanh dương
+                              : 'bg-[#009933]' // Màu xanh lá (mặc định)
                           }`}
                       ></div>
                     </div>
@@ -953,8 +1493,8 @@ const Profile = () => {
                               {/* Bottom Section - Background based on cardType */}
                               <div
                                 className={`${isPromoTier2
-                                    ? 'bg-yellow-600'
-                                    : 'bg-green-600'
+                                  ? 'bg-yellow-600'
+                                  : 'bg-green-600'
                                   } p-4 text-white`}
                               >
                                 <div className="flex flex-col items-center space-y-2">
@@ -1007,8 +1547,8 @@ const Profile = () => {
                                       }}
                                       disabled={usingCardId === card._id}
                                       className={`w-full max-w-xs text-white uppercase font-bold py-2 px-6 rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${isPromoTier2
-                                          ? 'bg-white/20 backdrop-blur-sm border-2 border-white/50 hover:bg-white/30'
-                                          : 'bg-black hover:bg-gray-800'
+                                        ? 'bg-white/20 backdrop-blur-sm border-2 border-white/50 hover:bg-white/30'
+                                        : 'bg-black hover:bg-gray-800'
                                         }`}
                                     >
                                       {usingCardId === card._id ? (
@@ -1077,14 +1617,14 @@ const Profile = () => {
                               <div className="text-base w-full">
                                 <span
                                   className={`${ele.isRed
-                                      ? 'bg-[#b91c1c]'
-                                      : ele.isBlue
-                                        ? 'bg-[#0000ff]'
-                                        : ele.isYellow
-                                          ? 'bg-[#F4B400]'
-                                          : ele.isPink
-                                            ? 'bg-[#e600769c]'
-                                            : 'bg-[#16a34a]'
+                                    ? 'bg-[#b91c1c]'
+                                    : ele.isBlue
+                                      ? 'bg-[#0000ff]'
+                                      : ele.isYellow
+                                        ? 'bg-[#F4B400]'
+                                        : ele.isPink
+                                          ? 'bg-[#e600769c]'
+                                          : 'bg-[#16a34a]'
                                     } py-1 px-2 rounded text-white text-sm min-w-fit`}
                                 >
                                   {ele.userId}
@@ -1141,14 +1681,14 @@ const Profile = () => {
                                 <div className="text-base w-full">
                                   <span
                                     className={`${ele.isRed
-                                        ? 'bg-[#b91c1c]'
-                                        : ele.isBlue
-                                          ? 'bg-[#0000ff]'
-                                          : ele.isYellow
-                                            ? 'bg-[#F4B400]'
-                                            : ele.isPink
-                                              ? 'bg-[#e600769c]'
-                                              : 'bg-[#16a34a]'
+                                      ? 'bg-[#b91c1c]'
+                                      : ele.isBlue
+                                        ? 'bg-[#0000ff]'
+                                        : ele.isYellow
+                                          ? 'bg-[#F4B400]'
+                                          : ele.isPink
+                                            ? 'bg-[#e600769c]'
+                                            : 'bg-[#16a34a]'
                                       } py-1 px-2 rounded text-white text-sm min-w-fit`}
                                   >
                                     {ele.userId}
@@ -1207,14 +1747,14 @@ const Profile = () => {
                                 <div className="text-base w-full">
                                   <span
                                     className={`${ele.isRed
-                                        ? 'bg-[#b91c1c]'
-                                        : ele.isBlue
-                                          ? 'bg-[#0000ff]'
-                                          : ele.isYellow
-                                            ? 'bg-[#F4B400]'
-                                            : ele.isPink
-                                              ? 'bg-[#e600769c]'
-                                              : 'bg-[#16a34a]'
+                                      ? 'bg-[#b91c1c]'
+                                      : ele.isBlue
+                                        ? 'bg-[#0000ff]'
+                                        : ele.isYellow
+                                          ? 'bg-[#F4B400]'
+                                          : ele.isPink
+                                            ? 'bg-[#e600769c]'
+                                            : 'bg-[#16a34a]'
                                       } py-1 px-2 rounded text-white text-sm min-w-fit`}
                                   >
                                     {ele}
@@ -1263,14 +1803,14 @@ const Profile = () => {
                                 <div className="text-base w-full">
                                   <span
                                     className={`${ele.isRed
-                                        ? 'bg-[#b91c1c]'
-                                        : ele.isBlue
-                                          ? 'bg-[#0000ff]'
-                                          : ele.isYellow
-                                            ? 'bg-[#F4B400]'
-                                            : ele.isPink
-                                              ? 'bg-[#e600769c]'
-                                              : 'bg-[#16a34a]'
+                                      ? 'bg-[#b91c1c]'
+                                      : ele.isBlue
+                                        ? 'bg-[#0000ff]'
+                                        : ele.isYellow
+                                          ? 'bg-[#F4B400]'
+                                          : ele.isPink
+                                            ? 'bg-[#e600769c]'
+                                            : 'bg-[#16a34a]'
                                       } py-1 px-2 rounded text-white text-sm min-w-fit`}
                                   >
                                     {ele}
@@ -1382,12 +1922,12 @@ const Profile = () => {
                 </button>
               )}
 
-              {errLahCode !== 'OVER45' && !isEdit && status === 'APPROVED' && (
+              {errLahCode !== 'OVER45' && status === 'APPROVED' && (
                 <button
-                  onClick={() => setIsEdit(true)}
-                  className="flex gap-2 font-semibold py-2 px-4 rounded-lg"
+                  onClick={() => setShowProfilePopup(true)}
+                  className="flex gap-2 font-semibold py-2 px-4 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
                 >
-                  Update{' '}
+                  Cập nhật thông tin{' '}
                   <svg
                     width="18"
                     height="21"
@@ -1397,32 +1937,13 @@ const Profile = () => {
                   >
                     <path
                       d="M15.675 1.63718C15.3938 1.35583 15.0599 1.13267 14.6924 0.980441C14.325 0.828213 13.9311 0.749907 13.5333 0.75C13.1355 0.750093 12.7417 0.828583 12.3743 0.980982C12.0068 1.13338 11.6731 1.3567 11.392 1.63818L1.885 11.1582C1.31853 11.7259 1.00028 12.4951 1 13.2972V16.5002C1 16.9142 1.336 17.2502 1.75 17.2502H4.973C5.776 17.2502 6.546 16.9302 7.113 16.3632L16.613 6.85718C17.1797 6.28915 17.4979 5.51954 17.4979 4.71718C17.4979 3.91481 17.1797 3.1452 16.613 2.57718L15.675 1.63718ZM0.75 18.7502C0.551088 18.7502 0.360322 18.8292 0.21967 18.9698C0.0790175 19.1105 0 19.3013 0 19.5002C0 19.6991 0.0790175 19.8899 0.21967 20.0305C0.360322 20.1712 0.551088 20.2502 0.75 20.2502H16.75C16.9489 20.2502 17.1397 20.1712 17.2803 20.0305C17.421 19.8899 17.5 19.6991 17.5 19.5002C17.5 19.3013 17.421 19.1105 17.2803 18.9698C17.1397 18.8292 16.9489 18.7502 16.75 18.7502H0.75Z"
-                      fill="#02071B"
+                      fill="white"
                     />
                   </svg>
                 </button>
               )}
             </div>
-            {isEdit && (
-              <div className="flex justify-end">
-                <button
-                  onClick={() => setIsEdit(false)}
-                  className="flex gap-2 font-semibold py-2 px-4 rounded-lg"
-                >
-                  Cancel
-                  <svg
-                    fill="currentColor"
-                    width="24"
-                    height="24"
-                    viewBox="-28 0 512 512"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <title>cancel</title>
-                    <path d="M64 388L196 256 64 124 96 92 228 224 360 92 392 124 260 256 392 388 360 420 228 288 96 420 64 388Z" />
-                  </svg>
-                </button>
-              </div>
-            )}
+
             <form
               onSubmit={handleSubmit(onSubmit)}
               encType="multipart/form-data"
@@ -1439,79 +1960,19 @@ const Profile = () => {
                 </div>
                 <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
                   <p>Email :</p>
-                  {isEdit ? (
-                    <div className="">
-                      <input
-                        className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                        {...register('email', {
-                          required: t('email is required'),
-                        })}
-                        autoComplete="off"
-                      />
-                      <p className="text-sm text-red-500">
-                        {errors.email?.message}
-                      </p>
-                    </div>
-                  ) : (
-                    <p>{email}</p>
-                  )}
+                  <p>{email}</p>
                 </div>
                 <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
                   <p>Phone number :</p>
-                  {isEdit ? (
-                    <div className="">
-                      <PhoneInput
-                        defaultCountry="VN"
-                        placeholder={t('phone')}
-                        value={phoneNumber}
-                        onChange={setPhoneNumber}
-                        className="-my-1 ml-4 w-full"
-                      />
-                      <p className="text-red-500 text-sm">
-                        {errorPhone && t('Phone is required')}
-                      </p>
-                    </div>
-                  ) : (
-                    <p>{phone}</p>
-                  )}
+                  <p>{phone}</p>
                 </div>
                 <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 items-center py-2 px-4">
                   <p>ID/DL/Passport number :</p>
-                  {isEdit && status !== 'APPROVED' ? (
-                    <div className="">
-                      <input
-                        className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                        {...register('idCode', {
-                          required: t('id code is required'),
-                        })}
-                        autoComplete="off"
-                      />
-                      <p className="text-sm text-red-500">
-                        {errors.idCode?.message}
-                      </p>
-                    </div>
-                  ) : (
-                    <p>{status !== 'REJECTED' && idCode}</p>
-                  )}
+                  <p>{status !== 'REJECTED' && idCode}</p>
                 </div>
                 <div className="grid lg:grid-cols-2 gap-2 bg-[#E5E9EE] lg:gap-0 items-center py-2 px-4 rounded-lg">
                   <p>Wallet Address :</p>
-                  {isEdit ? (
-                    <div className="">
-                      <input
-                        className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                        {...register('walletAddress', {
-                          required: t('walletAddress is required'),
-                        })}
-                        autoComplete="off"
-                      />
-                      <p className="text-sm text-red-500">
-                        {errors.walletAddress?.message}
-                      </p>
-                    </div>
-                  ) : (
-                    <p>{shortenWalletAddress(walletAddress, 14)}</p>
-                  )}
+                  <p>{shortenWalletAddress(walletAddress, 14)}</p>
                 </div>
                 <div className="grid lg:grid-cols-2 gap-2 lg:gap-0  py-2 px-4 rounded-lg">
                   <p>Completed Registration :</p>
@@ -1541,7 +2002,26 @@ const Profile = () => {
                     </div>
                   </>
                 )}
-                {city !== 'US' && (
+                {/* Always show Date of Birth and Full Name */}
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
+                  <p>{t('date of birth')} :</p>
+                  <p>
+                    {dateOfBirth
+                      ? new Date(dateOfBirth).toLocaleDateString('vi-Vn', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })
+                      : '-'}
+                  </p>
+                </div>
+                <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                  <p>Họ và tên :</p>
+                  <p>{fullName || '-'}</p>
+                </div>
+
+                {/* Bank and CCCD Info - Only for VN */}
+                {city === 'VN' && (
                   <>
                     <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
                       <p>{t('bank name')} :</p>
@@ -1560,16 +2040,28 @@ const Profile = () => {
                       <p>{accountNumber || '-'}</p>
                     </div>
                     <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
-                      <p>{t('date of birth')} :</p>
+                      <p>Ngày cấp CCCD :</p>
                       <p>
-                        {dateOfBirth
-                          ? new Date(dateOfBirth).toLocaleDateString('vi-Vn', {
+                        {cccdIssueDate
+                          ? new Date(cccdIssueDate).toLocaleDateString('vi-Vn', {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric',
                           })
                           : '-'}
                       </p>
+                    </div>
+                    <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                      <p>Nơi cấp CCCD :</p>
+                      <p>{cccdIssuePlace || '-'}</p>
+                    </div>
+                    <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
+                      <p>Địa chỉ thường trú :</p>
+                      <p>{permanentAddress || '-'}</p>
+                    </div>
+                    <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                      <p>Chỗ ở hiện tại :</p>
+                      <p>{currentAddress || '-'}</p>
                     </div>
                   </>
                 )}
@@ -1595,237 +2087,11 @@ const Profile = () => {
                   </div>
                 </div>
               )}
-              {isEdit && (
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex items-center justify-center w-full px-8 py-3 my-6 font-medium border border-black transition duration-300 ease-in-out transform rounded-full shadow-lg hover:underline gradient focus:outline-none focus:shadow-outline hover:scale-105"
-                >
-                  {loading && <Loading />}
-                  {t('update')}
-                </button>
-              )}
+
             </form>
           </>
         )}
 
-        {/* Bank Info Modal */}
-        <Modal
-          isOpen={showBankInfoModal}
-          onRequestClose={() => setShowBankInfoModal(false)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-          overlayClassName="fixed inset-0 z-40"
-          contentLabel="Bank Information Modal"
-        >
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h2 className="text-xl font-bold mb-4">{t('Bank Information')}</h2>
-            <p className="text-gray-600 mb-4">
-              {t('Please provide your bank account information')}
-            </p>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="mb-4 relative">
-                <label className="block text-sm font-medium mb-2">
-                  {t('bank name')} <span className="text-red-500">*</span>
-                </label>
-                {/* Hidden input for form validation */}
-                <input
-                  type="hidden"
-                  {...register('bankName', {
-                    required: t('bank name is required'),
-                  })}
-                  value={selectedBank?.name || ''}
-                />
-
-                {/* Search Input */}
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder={
-                      selectedBank
-                        ? `(${selectedBank.code}) ${selectedBank.name}`
-                        : t('Search bank name') || 'Search bank name...'
-                    }
-                    value={
-                      showBankDropdown
-                        ? bankSearch
-                        : selectedBank
-                          ? `(${selectedBank.short_name}) ${selectedBank.name}`
-                          : ''
-                    }
-                    onChange={(e) => {
-                      setBankSearch(e.target.value);
-                      setShowBankDropdown(true);
-                    }}
-                    onFocus={() => {
-                      setShowBankDropdown(true);
-                      if (selectedBank) {
-                        setBankSearch(
-                          `${selectedBank.code} ${selectedBank.name}`,
-                        );
-                      }
-                    }}
-                    className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
-                    autoComplete="off"
-                  />
-                  {selectedBank && (
-                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedBank(null);
-                          setBankSearch('');
-                          setShowBankDropdown(false);
-                          setValue('bankName', '', { shouldValidate: true });
-                          setValue('bankCode', '', { shouldValidate: true });
-                        }}
-                        className="text-gray-400 hover:text-gray-600 text-xl leading-none w-6 h-6 flex items-center justify-center"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Dropdown List */}
-                {showBankDropdown && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-[60]"
-                      onClick={() => setShowBankDropdown(false)}
-                    />
-                    <div className="absolute z-[70] w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                      {banks
-                        .filter(
-                          (bank: any) =>
-                            bank.name
-                              .toLowerCase()
-                              .includes(bankSearch.toLowerCase()) ||
-                            bank.code
-                              .toLowerCase()
-                              .includes(bankSearch.toLowerCase()) ||
-                            bank.short_name
-                              ?.toLowerCase()
-                              .includes(bankSearch.toLowerCase()),
-                        )
-                        .map((bank: any, index: number) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => {
-                              setSelectedBank(bank);
-                              setBankSearch(`${bank.code} ${bank.name}`);
-                              setShowBankDropdown(false);
-                              // Update form value
-                              setValue('bankName', bank.name, {
-                                shouldValidate: true,
-                              });
-                              setValue('bankCode', bank.code, {
-                                shouldValidate: true,
-                              });
-                            }}
-                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none ${selectedBank?.code === bank.code
-                                ? 'bg-gray-100 font-medium'
-                                : ''
-                              }`}
-                          >
-                            <span className="font-semibold">
-                              ({bank.short_name})
-                            </span>{' '}
-                            {bank.name}
-                          </button>
-                        ))}
-                      {banks.filter(
-                        (bank: any) =>
-                          bank.name
-                            .toLowerCase()
-                            .includes(bankSearch.toLowerCase()) ||
-                          bank.code
-                            .toLowerCase()
-                            .includes(bankSearch.toLowerCase()) ||
-                          bank.short_name
-                            ?.toLowerCase()
-                            .includes(bankSearch.toLowerCase()),
-                      ).length === 0 && (
-                          <div className="px-4 py-2 text-sm text-gray-500 text-center">
-                            {t('No banks found') || 'No banks found'}
-                          </div>
-                        )}
-                    </div>
-                  </>
-                )}
-
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.bankName?.message}
-                </p>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  {t('accountName')} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
-                  {...register('accountName', {
-                    required: t('bank account name is required'),
-                  })}
-                  autoComplete="off"
-                />
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.accountName?.message}
-                </p>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  {t('accountNumber')} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
-                  {...register('accountNumber', {
-                    required: t('bank account number is required'),
-                  })}
-                  autoComplete="off"
-                />
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.accountNumber?.message}
-                </p>
-              </div>
-
-              <div className="mb-6">
-                <label className="block text-sm font-medium mb-2">
-                  {t('date of birth')} <span className="text-red-500">*</span>
-                </label>
-                <DateInput
-                  register={register}
-                  name="dateOfBirth"
-                  rules={{ required: t('date of birth is required') as any }}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
-                />
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.dateOfBirth?.message}
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowBankInfoModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
-                >
-                  {t('Skip')}
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {loading ? <Loading /> : t('Submit')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </Modal>
 
         {/* CCCD Upload Modal */}
         {city === 'VN' && (

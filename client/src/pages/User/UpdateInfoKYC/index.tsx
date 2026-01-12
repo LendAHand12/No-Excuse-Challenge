@@ -7,7 +7,6 @@ import queryString from 'query-string';
 import User from '@/api/User';
 
 import DefaultLayout from '../../../layout/DefaultLayout';
-import { useSelector } from 'react-redux';
 
 const UpdateInfoKYCPage = () => {
   const { t } = useTranslation();
@@ -45,12 +44,17 @@ const UpdateInfoKYCPage = () => {
     token,
     walletAddress,
     email,
+    fullName,
     phone,
     bankName,
     bankCode,
     accountName,
     accountNumber,
     dateOfBirth,
+    cccdIssueDate,
+    cccdIssuePlace,
+    permanentAddress,
+    currentAddress,
   } = parsed;
 
   // Decode values that might contain special characters (Vietnamese, spaces, etc.)
@@ -58,6 +62,7 @@ const UpdateInfoKYCPage = () => {
     ? safeDecode(getStringValue(walletAddress))
     : walletAddress;
   email = email ? safeDecode(getStringValue(email)) : email;
+  fullName = fullName ? safeDecode(getStringValue(fullName)) : fullName;
   phone = phone ? safeDecode(getStringValue(phone)) : phone;
   bankName = bankName ? safeDecode(getStringValue(bankName)) : bankName;
   bankCode = bankCode ? safeDecode(getStringValue(bankCode)) : bankCode;
@@ -70,18 +75,49 @@ const UpdateInfoKYCPage = () => {
   dateOfBirth = dateOfBirth
     ? safeDecode(getStringValue(dateOfBirth))
     : dateOfBirth;
+  cccdIssueDate = cccdIssueDate
+    ? safeDecode(getStringValue(cccdIssueDate))
+    : cccdIssueDate;
+  cccdIssuePlace = cccdIssuePlace
+    ? safeDecode(getStringValue(cccdIssuePlace))
+    : cccdIssuePlace;
+  permanentAddress = permanentAddress
+    ? safeDecode(getStringValue(permanentAddress))
+    : permanentAddress;
+  currentAddress = currentAddress
+    ? safeDecode(getStringValue(currentAddress))
+    : currentAddress;
+
+  console.log(parsed);
 
   useEffect(() => {
     (async () => {
       var formData = new FormData();
-      formData.append('phone', phone.trim());
-      formData.append('walletAddress', walletAddress.trim());
-      formData.append('email', email.trim());
-      formData.append('bankName', bankName.trim());
-      formData.append('bankCode', bankCode.trim());
-      formData.append('accountName', accountName.trim());
-      formData.append('accountNumber', accountNumber.trim());
-      formData.append('dateOfBirth', dateOfBirth.trim());
+      if (phone) formData.append('phone', phone.trim());
+      if (walletAddress) formData.append('walletAddress', walletAddress.trim());
+      if (email) formData.append('email', email.trim());
+      if (fullName) {
+        formData.append('fullName', getStringValue(fullName).trim());
+      }
+      if (bankName) formData.append('bankName', bankName.trim());
+      if (bankCode) formData.append('bankCode', bankCode.trim());
+      if (accountName) formData.append('accountName', accountName.trim());
+      if (accountNumber) formData.append('accountNumber', accountNumber.trim());
+      if (dateOfBirth) formData.append('dateOfBirth', dateOfBirth.trim());
+
+      // Add CCCD fields
+      if (cccdIssueDate) {
+        formData.append('cccdIssueDate', getStringValue(cccdIssueDate).trim());
+      }
+      if (cccdIssuePlace) {
+        formData.append('cccdIssuePlace', getStringValue(cccdIssuePlace).trim());
+      }
+      if (permanentAddress) {
+        formData.append('permanentAddress', getStringValue(permanentAddress).trim());
+      }
+      if (currentAddress) {
+        formData.append('currentAddress', getStringValue(currentAddress).trim());
+      }
 
       // Add token from URL params to verify face scan
       if (token) {
@@ -101,6 +137,7 @@ const UpdateInfoKYCPage = () => {
               ? error.response.data.error
               : error.message;
           toast.error(t(message));
+          setLoading(false);
         });
     })();
   }, []);

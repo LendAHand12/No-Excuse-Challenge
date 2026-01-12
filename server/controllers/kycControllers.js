@@ -208,11 +208,16 @@ const startUpdateInfoKYC = expressAsyncHandler(async (req, res) => {
     phone,
     walletAddress,
     email,
+    fullName,
     bankName,
     bankCode,
     accountName,
     accountNumber,
     dateOfBirth,
+    cccdIssueDate,
+    cccdIssuePlace,
+    permanentAddress,
+    currentAddress,
   } = req.body;
 
   // Check if user has registered face
@@ -239,6 +244,9 @@ const startUpdateInfoKYC = expressAsyncHandler(async (req, res) => {
   if (email) {
     callbackUrl += `&email=${encodeURIComponent(email)}`;
   }
+  if (fullName) {
+    callbackUrl += `&fullName=${encodeURIComponent(fullName)}`;
+  }
   if (bankName) {
     callbackUrl += `&bankName=${encodeURIComponent(bankName)}`;
   }
@@ -253,6 +261,19 @@ const startUpdateInfoKYC = expressAsyncHandler(async (req, res) => {
   }
   if (dateOfBirth) {
     callbackUrl += `&dateOfBirth=${encodeURIComponent(dateOfBirth)}`;
+  }
+  // Add CCCD fields
+  if (cccdIssueDate) {
+    callbackUrl += `&cccdIssueDate=${encodeURIComponent(cccdIssueDate)}`;
+  }
+  if (cccdIssuePlace) {
+    callbackUrl += `&cccdIssuePlace=${encodeURIComponent(cccdIssuePlace)}`;
+  }
+  if (permanentAddress) {
+    callbackUrl += `&permanentAddress=${encodeURIComponent(permanentAddress)}`;
+  }
+  if (currentAddress) {
+    callbackUrl += `&currentAddress=${encodeURIComponent(currentAddress)}`;
   }
 
   // Redirect to FaceTec verify page

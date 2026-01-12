@@ -14,6 +14,10 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    fullName: {
+      type: String,
+      default: "",
+    },
     password: {
       type: String,
       required: true,
@@ -42,6 +46,23 @@ const userSchema = mongoose.Schema(
       default: "",
     },
     imgBack: {
+      type: String,
+      default: "",
+    },
+    // CCCD Information
+    cccdIssueDate: {
+      type: Date,
+      default: null,
+    },
+    cccdIssuePlace: {
+      type: String,
+      default: "",
+    },
+    permanentAddress: {
+      type: String,
+      default: "",
+    },
+    currentAddress: {
       type: String,
       default: "",
     },

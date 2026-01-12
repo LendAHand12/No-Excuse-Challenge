@@ -82,7 +82,10 @@ router
   .route("/:id")
   .delete(protectAdminRoute, adminDeleteUser)
   .get(protectAdminRoute, getUserById)
-  .put(protectRoute, updateUser);
+  .put(protectRoute, uploadCCCD.fields([
+    { name: "imgFront", maxCount: 1 },
+    { name: "imgBack", maxCount: 1 },
+  ]), updateUser);
 
 router.route("/update/:id").post(
   protectAdminRoute,
