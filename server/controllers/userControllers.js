@@ -686,7 +686,12 @@ const getUserById = asyncHandler(async (req, res) => {
       enableWithdrawCrypto:
         user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
       enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
-      wildCards: wildCards, // Danh sách wild cards của user
+      wildCards: wildCards, // Danh sách wild cards của user,
+      cccdIssueDate: user.cccdIssueDate,
+      cccdIssuePlace: user.cccdIssuePlace,
+      permanentAddress: user.permanentAddress,
+      currentAddress: user.currentAddress,
+      fullName: user.fullName
     });
   } else {
     res.status(404);
