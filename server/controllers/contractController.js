@@ -6,6 +6,8 @@ import path from "path";
 import axios from "axios";
 import asyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
+import Config from "../models/configModel.js";
+import { numberToVietnameseWords } from "../utils/numberToWords.js";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -69,16 +71,21 @@ const generateContract = asyncHandler(async (req, res) => {
       return `ngày ${d.getDate()} tháng ${d.getMonth() + 1} năm ${d.getFullYear()}`;
     };
 
+    // Get exchange rate from Config
+    const usdToVndConfig = await Config.findOne({ label: "USD_TO_VND_SELL" });
+    const exchangeRate = usdToVndConfig ? usdToVndConfig.value : 25000; // Default fallback
+    const packagePrice = 200 * exchangeRate;
+
     const data = {
       fullName: user.fullName,
       idCode: user.idCode || user._id,
       currentDate: now.getDate().toString(),
       currentMonth: (now.getMonth() + 1).toString(),
       currentYear: now.getFullYear().toString(),
-      cccdIssueDate: formatDate(user.cccdIssueDate),
-      cccdIssuePlace: user.cccdIssuePlace,
-      permanentAddress: user.permanentAddress,
+      phone: user.phone,
       currentAddress: user.currentAddress,
+      packagePrice: packagePrice.toLocaleString('vi-VN'), // Format with thousand separators
+      packagePriceInWords: numberToVietnameseWords(packagePrice), // Price in Vietnamese words
       signature: `${process.env.BASE_URL}/${user.signatureImage}`, // This will be handled by the image module
     };
 

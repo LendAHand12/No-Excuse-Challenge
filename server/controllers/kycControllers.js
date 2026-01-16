@@ -214,26 +214,23 @@ const startUpdateInfoKYC = expressAsyncHandler(async (req, res) => {
     accountName,
     accountNumber,
     dateOfBirth,
-    cccdIssueDate,
-    cccdIssuePlace,
-    permanentAddress,
     currentAddress,
   } = req.body;
 
   // Check if user has registered face
   if (!user.facetecTid || user.facetecTid === "") {
-    return res.status(400).json({ 
+    return res.status(400).json({
       success: false,
-      message: "Face not registered. Please register your face first." 
+      message: "Face not registered. Please register your face first."
     });
   }
 
   // Create callback token with purpose "update_info"
   const token = createCallbackToken(user._id, "update_info");
-  
+
   // Build callback URL with all update fields as params
   let callbackUrl = `${process.env.FRONTEND_BASE_URL}/user/update-info?token=${token}`;
-  
+
   // Add fields to callback URL params (only if they have values)
   if (phone) {
     callbackUrl += `&phone=${encodeURIComponent(phone)}`;
@@ -261,16 +258,6 @@ const startUpdateInfoKYC = expressAsyncHandler(async (req, res) => {
   }
   if (dateOfBirth) {
     callbackUrl += `&dateOfBirth=${encodeURIComponent(dateOfBirth)}`;
-  }
-  // Add CCCD fields
-  if (cccdIssueDate) {
-    callbackUrl += `&cccdIssueDate=${encodeURIComponent(cccdIssueDate)}`;
-  }
-  if (cccdIssuePlace) {
-    callbackUrl += `&cccdIssuePlace=${encodeURIComponent(cccdIssuePlace)}`;
-  }
-  if (permanentAddress) {
-    callbackUrl += `&permanentAddress=${encodeURIComponent(permanentAddress)}`;
   }
   if (currentAddress) {
     callbackUrl += `&currentAddress=${encodeURIComponent(currentAddress)}`;

@@ -7,8 +7,8 @@ const Contract = {
       responseType: "blob",
     });
   },
-  getPreviewData: (userId) => {
-    return API.get(`${URL_API_CONTRACTS}/preview-data/${userId}`);
+  getContractContent: (userId) => {
+    return API.get(`${URL_API_CONTRACTS}/content/${userId}`);
   },
 };
 

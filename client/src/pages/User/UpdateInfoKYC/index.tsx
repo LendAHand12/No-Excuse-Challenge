@@ -51,9 +51,6 @@ const UpdateInfoKYCPage = () => {
     accountName,
     accountNumber,
     dateOfBirth,
-    cccdIssueDate,
-    cccdIssuePlace,
-    permanentAddress,
     currentAddress,
   } = parsed;
 
@@ -75,15 +72,6 @@ const UpdateInfoKYCPage = () => {
   dateOfBirth = dateOfBirth
     ? safeDecode(getStringValue(dateOfBirth))
     : dateOfBirth;
-  cccdIssueDate = cccdIssueDate
-    ? safeDecode(getStringValue(cccdIssueDate))
-    : cccdIssueDate;
-  cccdIssuePlace = cccdIssuePlace
-    ? safeDecode(getStringValue(cccdIssuePlace))
-    : cccdIssuePlace;
-  permanentAddress = permanentAddress
-    ? safeDecode(getStringValue(permanentAddress))
-    : permanentAddress;
   currentAddress = currentAddress
     ? safeDecode(getStringValue(currentAddress))
     : currentAddress;
@@ -104,17 +92,6 @@ const UpdateInfoKYCPage = () => {
       if (accountName) formData.append('accountName', accountName.trim());
       if (accountNumber) formData.append('accountNumber', accountNumber.trim());
       if (dateOfBirth) formData.append('dateOfBirth', dateOfBirth.trim());
-
-      // Add CCCD fields
-      if (cccdIssueDate) {
-        formData.append('cccdIssueDate', getStringValue(cccdIssueDate).trim());
-      }
-      if (cccdIssuePlace) {
-        formData.append('cccdIssuePlace', getStringValue(cccdIssuePlace).trim());
-      }
-      if (permanentAddress) {
-        formData.append('permanentAddress', getStringValue(permanentAddress).trim());
-      }
       if (currentAddress) {
         formData.append('currentAddress', getStringValue(currentAddress).trim());
       }

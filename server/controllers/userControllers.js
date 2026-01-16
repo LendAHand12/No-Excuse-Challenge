@@ -686,10 +686,7 @@ const getUserById = asyncHandler(async (req, res) => {
       enableWithdrawCrypto:
         user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
       enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
-      wildCards: wildCards, // Danh sách wild cards của user,
-      cccdIssueDate: user.cccdIssueDate,
-      cccdIssuePlace: user.cccdIssuePlace,
-      permanentAddress: user.permanentAddress,
+      wildCards: wildCards, // Danh sách wild cards của user
       currentAddress: user.currentAddress,
       fullName: user.fullName
     });
@@ -988,9 +985,6 @@ const getUserInfo = asyncHandler(async (req, res) => {
       if (!user.accountNumber || user.accountNumber.trim() === "") missingFields.push("accountNumber");
 
       // CCCD Information
-      if (!user.cccdIssueDate) missingFields.push("cccdIssueDate");
-      if (!user.cccdIssuePlace || user.cccdIssuePlace.trim() === "") missingFields.push("cccdIssuePlace");
-      if (!user.permanentAddress || user.permanentAddress.trim() === "") missingFields.push("permanentAddress");
       if (!user.currentAddress || user.currentAddress.trim() === "") missingFields.push("currentAddress");
       if (!user.imgFront || user.imgFront.trim() === "") missingFields.push("imgFront");
       if (!user.imgBack || user.imgBack.trim() === "") missingFields.push("imgBack");
@@ -1015,10 +1009,6 @@ const getUserInfo = asyncHandler(async (req, res) => {
       imgBack: user.imgBack,
       signatureImage: user.signatureImage,
       contractCompleted: user.contractCompleted,
-      // CCCD Information
-      cccdIssueDate: user.cccdIssueDate,
-      cccdIssuePlace: user.cccdIssuePlace,
-      permanentAddress: user.permanentAddress,
       currentAddress: user.currentAddress,
       // Profile completion status
       isProfileComplete,
@@ -1211,16 +1201,8 @@ const updateUser = asyncHandler(async (req, res) => {
     phone,
     walletAddress,
     email,
-    fullName,
-    bankName,
     bankCode,
-    accountName,
     accountNumber,
-    dateOfBirth,
-    cccdIssueDate,
-    cccdIssuePlace,
-    permanentAddress,
-    currentAddress,
     token, // Token from face scan verification
   } = req.body;
 
@@ -1388,9 +1370,6 @@ const updateUser = asyncHandler(async (req, res) => {
       "accountName",
       "accountNumber",
       "dateOfBirth",
-      "cccdIssueDate",
-      "cccdIssuePlace",
-      "permanentAddress",
       "currentAddress",
       "fullName"
     ]) {

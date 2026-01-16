@@ -3,18 +3,17 @@ import DefaultLayout from '../../../layout/DefaultLayout';
 import { shortenWalletAddress } from '../../../utils';
 import { useTranslation } from 'react-i18next';
 import Loading from '@/components/Loading';
-import DateInput from '@/components/DateInput';
 import { UPDATE_USER_INFO } from '@/slices/auth';
 import { useForm } from 'react-hook-form';
 import User from '@/api/User';
 import KYC from '@/api/KYC';
 import WildCard from '@/api/WildCard';
+import Contract from '@/api/Contract';
 import { useCallback, useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import USER_RANKINGS from '@/constants/userRankings';
 import Modal from 'react-modal';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import PhoneInput from 'react-phone-number-input';
 import SignaturePad from '@/components/SignaturePad';
 import './index.css';
 import { Link, useNavigate } from 'react-router-dom';
@@ -26,7 +25,6 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Profile = () => {
   const { t, i18n } = useTranslation();
-  const isVietnamese = i18n.language === 'vi';
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const { userInfo } = useSelector((state) => state.auth);
@@ -50,11 +48,9 @@ const Profile = () => {
     totalHold,
     bonusRef,
     currentLayer,
-    facetecTid,
     errLahCode,
     pendingUpdateInfo,
     notEnoughtChild,
-    countdown,
     lockKyc,
     accountName,
     accountNumber,
@@ -69,7 +65,6 @@ const Profile = () => {
     tier2ChildUsers,
     enablePaymentBank,
     enableWithdrawBank,
-    dieTime,
     dieTimeTier1,
     dieTimeTier2,
     tier1,
@@ -78,13 +73,9 @@ const Profile = () => {
     imgFront,
     imgBack,
     // CCCD Information
-    cccdIssueDate,
-    cccdIssuePlace,
-    permanentAddress,
     currentAddress,
     fullName,
     isProfileComplete,
-    missingFields,
   } = userInfo;
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
@@ -99,12 +90,6 @@ const Profile = () => {
   const [selectedBank, setSelectedBank] = useState<any>(null);
   const [errAgrre, setErrAgrre] = useState(false);
   const [valueCheckAgrree, setValueCheckAgrree] = useState('');
-  // const [showPreTier2Commit, setShowPreTier2Commit] = useState(
-  //   tier === 1 &&
-  //     (preTier2Status === 'APPROVED' || preTier2Status === 'ACHIEVED')
-  //     ? true
-  //     : false,
-  // );
   const [showNextTier, setShowNextTier] = useState(false);
   const [showCCCDModal, setShowCCCDModal] = useState(false);
   const [loadingCCCD, setLoadingCCCD] = useState(false);
@@ -119,19 +104,84 @@ const Profile = () => {
 
   // Profile completion popup states
   const [showProfilePopup, setShowProfilePopup] = useState(false);
-  const [cccdIssueDateInput, setCccdIssueDateInput] = useState(cccdIssueDate || '');
-  const [cccdIssuePlaceInput, setCccdIssuePlaceInput] = useState(cccdIssuePlace || '');
-  const [permanentAddressInput, setPermanentAddressInput] = useState(permanentAddress || '');
-  const [currentAddressInput, setCurrentAddressInput] = useState(currentAddress || '');
   const [cccdFrontFile, setCccdFrontFile] = useState<File | null>(null);
   const [cccdBackFile, setCccdBackFile] = useState<File | null>(null);
   const [cccdFrontPreview, setCccdFrontPreview] = useState(imgFront || '');
   const [cccdBackPreview, setCccdBackPreview] = useState(imgBack || '');
   const [savingProfile, setSavingProfile] = useState(false);
+  // Terms and Signature states
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showSignatureModal, setShowSignatureModal] = useState(false);
   const [uploadingSignature, setUploadingSignature] = useState(false);
+  const [contractContent, setContractContent] = useState<string>('');
+  const [contractCSS, setContractCSS] = useState<string>('');
+  const [loadingContract, setLoadingContract] = useState(false);
+
+  // Fetch contract content when component mounts
+  useEffect(() => {
+    const fetchContractContent = async () => {
+      if (!userInfo?.id) {
+        return;
+      }
+
+      // Only fetch contract if user has complete information
+      const hasCompleteInfo = userInfo.fullName && userInfo.phone && userInfo.currentAddress;
+      if (!hasCompleteInfo) {
+        setContractContent('<p style="text-align: center; color: #666;">Vui lòng hoàn thiện thông tin cá nhân để xem hợp đồng.</p>');
+        return;
+      }
+
+      try {
+        setLoadingContract(true);
+
+        const response = await Contract.getContractContent(userInfo.id);
+
+        if (response.data.success) {
+          setContractContent(response.data.content);
+          setContractCSS(response.data.css || '');
+        } else {
+          // console.error('❌ API returned success: false');
+          setContractContent('<p style="color: red;">Không thể tải nội dung hợp đồng.</p>');
+        }
+      } catch (error: any) {
+        console.error('❌ Error fetching contract:', error);
+        setContractContent('<p style="color: red;">Lỗi: ' + (error?.message || 'Không thể tải hợp đồng') + '</p>');
+      } finally {
+        setLoadingContract(false);
+      }
+    };
+
+    fetchContractContent();
+  }, [userInfo?.id, userInfo?.fullName, userInfo?.phone, userInfo?.currentAddress]);
+
+  // Inject contract CSS into document head
+  useEffect(() => {
+    if (!contractCSS) return;
+
+    console.log('💅 Injecting contract CSS into document head');
+    const styleId = 'contract-preview-styles';
+
+    // Remove existing style tag if any
+    const existingStyle = document.getElementById(styleId);
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+
+    // Create and inject new style tag
+    const styleTag = document.createElement('style');
+    styleTag.id = styleId;
+    styleTag.textContent = contractCSS;
+    document.head.appendChild(styleTag);
+
+    // Cleanup on unmount
+    return () => {
+      const style = document.getElementById(styleId);
+      if (style) {
+        style.remove();
+      }
+    };
+  }, [contractCSS]);
 
   const {
     register,
@@ -153,11 +203,6 @@ const Profile = () => {
         ? new Date(dateOfBirth).toISOString().split('T')[0]
         : '',
       // CCCD fields
-      cccdIssueDate: cccdIssueDate
-        ? new Date(cccdIssueDate).toISOString().split('T')[0]
-        : '',
-      cccdIssuePlace: cccdIssuePlace || '',
-      permanentAddress: permanentAddress || '',
       currentAddress: currentAddress || '',
     },
   });
@@ -172,9 +217,6 @@ const Profile = () => {
         accountName,
         accountNumber,
         dateOfBirth,
-        cccdIssueDate,
-        cccdIssuePlace,
-        permanentAddress,
         currentAddress,
       } = data;
       if (!phoneNumber || phoneNumber === '') {
@@ -199,15 +241,10 @@ const Profile = () => {
         if (fullName?.trim()) updateData.fullName = fullName.trim();
         if (finalBankName) updateData.bankName = finalBankName;
         if (bankCode) updateData.bankCode = bankCode;
+        if (currentAddress?.trim()) updateData.currentAddress = currentAddress.trim();
         if (accountName?.trim()) updateData.accountName = accountName.trim();
         if (accountNumber?.trim()) updateData.accountNumber = accountNumber.trim();
         if (dateOfBirth) updateData.dateOfBirth = dateOfBirth;
-
-        // Add CCCD text fields to KYC flow
-        if (cccdIssueDate) updateData.cccdIssueDate = cccdIssueDate;
-        if (cccdIssuePlace) updateData.cccdIssuePlace = cccdIssuePlace;
-        if (permanentAddress) updateData.permanentAddress = permanentAddress;
-        if (currentAddress) updateData.currentAddress = currentAddress;
 
         // Start face scan verification
         const response = await KYC.startUpdateInfo(updateData);
@@ -305,23 +342,13 @@ const Profile = () => {
 
   // Sync profile popup fields with userInfo when it changes or popup opens
   useEffect(() => {
-    if (cccdIssueDate) {
-      try {
-        const formattedDate = new Date(cccdIssueDate).toISOString().split('T')[0];
-        setCccdIssueDateInput(formattedDate);
-      } catch (e) {
-        console.error('Error formatting cccdIssueDate:', e);
-      }
-    }
-    if (cccdIssuePlace) setCccdIssuePlaceInput(cccdIssuePlace);
-    if (permanentAddress) setPermanentAddressInput(permanentAddress);
-    if (currentAddress) setCurrentAddressInput(currentAddress);
     if (imgFront) setCccdFrontPreview(imgFront);
     if (imgBack) setCccdBackPreview(imgBack);
 
     // Sync useForm fields correctly
     if (fullName) setValue('fullName', fullName);
     if (walletAddress) setValue('walletAddress', walletAddress);
+    if (currentAddress) setValue(currentAddress);
     if (dateOfBirth) {
       try {
         const dobFormatted = new Date(dateOfBirth).toISOString().split('T')[0];
@@ -461,22 +488,6 @@ const Profile = () => {
 
     // Validate CCCD fields only for VN users
     if (city === 'VN') {
-      if (!cccdIssueDateInput) {
-        toast.error('Vui lòng nhập ngày cấp CCCD');
-        return;
-      }
-      if (!cccdIssuePlaceInput) {
-        toast.error('Vui lòng nhập nơi cấp CCCD');
-        return;
-      }
-      if (!permanentAddressInput) {
-        toast.error('Vui lòng nhập địa chỉ thường trú');
-        return;
-      }
-      if (!currentAddressInput) {
-        toast.error('Vui lòng nhập chỗ ở hiện tại');
-        return;
-      }
 
       // Only validate CCCD images if user doesn't have them yet (profile completion)
       if (!imgFront && !imgBack) {
@@ -510,6 +521,12 @@ const Profile = () => {
         toast.error('Vui lòng nhập số tài khoản');
         return;
       }
+
+      const currentAddressValue = watch('currentAddress') as string;
+      if (!currentAddressValue) {
+        toast.error('Vui lòng nhập địa chỉ hiện tại');
+        return;
+      }
     }
 
     setSavingProfile(true);
@@ -526,14 +543,6 @@ const Profile = () => {
 
         await User.uploadCCCD(imageFormData);
         toast.success('Upload ảnh CCCD thành công!');
-      }
-
-      // Step 2: Sync CCCD text fields to form (VN only)
-      if (city === 'VN') {
-        setValue('cccdIssueDate', cccdIssueDateInput);
-        setValue('cccdIssuePlace', cccdIssuePlaceInput);
-        setValue('permanentAddress', permanentAddressInput);
-        setValue('currentAddress', currentAddressInput);
       }
 
       // Step 3: Close popup and trigger form submission (KYC face scan)
@@ -614,299 +623,271 @@ const Profile = () => {
           },
         }}
       >
-        <div className="p-6">
-          <h2 className="text-2xl font-bold mb-4 text-red-600">
-            {isProfileComplete ? 'Cập nhật thông tin cá nhân' : 'Hoàn thiện thông tin bắt buộc'}
-          </h2>
-          <p className="mb-6 text-gray-700">
-            {isProfileComplete
-              ? (city === 'VN'
-                ? 'Cập nhật thông tin cá nhân của bạn. Lưu ý: Ảnh CCCD không thể thay đổi. Sau khi cập nhật, bạn sẽ cần xác thực khuôn mặt để hoàn tất.'
-                : 'Cập nhật thông tin cá nhân của bạn. Sau khi cập nhật, bạn sẽ cần xác thực khuôn mặt để hoàn tất.')
-              : (city === 'VN'
-                ? 'Vui lòng cung cấp đầy đủ thông tin CCCD và ngân hàng. Sau khi upload ảnh CCCD, bạn sẽ cần xác thực khuôn mặt để hoàn tất cập nhật.'
-                : 'Vui lòng cung cấp đầy đủ thông tin cá nhân. Sau khi cập nhật, bạn sẽ cần xác thực khuôn mặt để hoàn tất.')}
-          </p>
+        <div className="flex flex-col h-full">
+          {/* Header with logout button */}
+          <div className="flex justify-between items-center p-4 border-b border-gray-300">
+            <h2 className="text-2xl font-bold text-red-600">
+              {isProfileComplete ? 'Cập nhật thông tin cá nhân' : 'Hoàn thiện thông tin bắt buộc'}
+            </h2>
+            <button
+              onClick={() => {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+              }}
+              className="px-4 py-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600 transition"
+            >
+              Đăng xuất
+            </button>
+          </div>
 
-          <div className="space-y-4">
-            {/* Họ và tên */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Họ và tên <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                {...register('fullName', { required: true })}
-                placeholder="Nhập họ và tên đầy đủ"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+          <div className="flex-1 overflow-y-auto p-6">
+            <p className="mb-6 text-gray-700">
+              {isProfileComplete
+                ? (city === 'VN'
+                  ? 'Cập nhật thông tin cá nhân của bạn. Lưu ý: Ảnh CCCD không thể thay đổi. Sau khi cập nhật, bạn sẽ cần xác thực khuôn mặt để hoàn tất.'
+                  : 'Cập nhật thông tin cá nhân của bạn. Sau khi cập nhật, bạn sẽ cần xác thực khuôn mặt để hoàn tất.')
+                : (city === 'VN'
+                  ? 'Vui lòng cung cấp đầy đủ thông tin CCCD và ngân hàng. Sau khi upload ảnh CCCD, bạn sẽ cần xác thực khuôn mặt để hoàn tất cập nhật.'
+                  : 'Vui lòng cung cấp đầy đủ thông tin cá nhân. Sau khi cập nhật, bạn sẽ cần xác thực khuôn mặt để hoàn tất.')}
+            </p>
 
-            {/* Wallet Address */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Địa chỉ ví <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                {...register('walletAddress', { required: true })}
-                placeholder="Nhập địa chỉ ví"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+            <div className="space-y-4">
+              {/* Họ và tên */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Họ và tên <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  {...register('fullName', { required: true })}
+                  placeholder="Nhập họ và tên đầy đủ"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
 
-            {/* CCCD Information - Only for VN */}
-            {city === 'VN' && (
-              <>
-                {/* Divider */}
-                <div className="border-t border-gray-300 my-4"></div>
-                <p className="text-lg font-semibold text-gray-800 mb-2">Thông tin CCCD</p>
+              {/* Wallet Address */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Địa chỉ ví <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  {...register('walletAddress', { required: true })}
+                  placeholder="Nhập địa chỉ ví"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
 
-                {/* Ngày cấp CCCD */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Ngày cấp CCCD <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={cccdIssueDateInput}
-                    onChange={(e) => setCccdIssueDateInput(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    max={new Date().toISOString().split('T')[0]}
-                  />
-                </div>
+              {/* CCCD Information - Only for VN */}
+              {city === 'VN' && (
+                <>
+                  {/* Divider */}
+                  <div className="border-t border-gray-300 my-4"></div>
+                  <p className="text-lg font-semibold text-gray-800 mb-2">Thông tin CCCD</p>
 
-                {/* Nơi cấp CCCD */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nơi cấp CCCD <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={cccdIssuePlaceInput}
-                    onChange={(e) => setCccdIssuePlaceInput(e.target.value)}
-                    placeholder="Ví dụ: Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                {/* Địa chỉ thường trú */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Địa chỉ thường trú <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    value={permanentAddressInput}
-                    onChange={(e) => setPermanentAddressInput(e.target.value)}
-                    placeholder="Nhập địa chỉ thường trú đầy đủ"
-                    rows={2}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                {/* Chỗ ở hiện tại */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Chỗ ở hiện tại <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    value={currentAddressInput}
-                    onChange={(e) => setCurrentAddressInput(e.target.value)}
-                    placeholder="Nhập địa chỉ chỗ ở hiện tại"
-                    rows={2}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </>
-            )}
-
-            {/* Ngày tháng năm sinh */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ngày tháng năm sinh <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                {...register('dateOfBirth')}
-                max={new Date().toISOString().split('T')[0]}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Bank Information - Only for VN */}
-            {city === 'VN' && (
-              <>
-                {/* Divider */}
-                <div className="border-t border-gray-300 my-4"></div>
-                <p className="text-lg font-semibold text-gray-800 mb-2">Thông tin ngân hàng</p>
-
-                {/* Bank Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Tên ngân hàng <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={bankSearch}
-                      onChange={(e) => {
-                        setBankSearch(e.target.value);
-                        setShowBankDropdown(true);
-                      }}
-                      onFocus={() => setShowBankDropdown(true)}
-                      placeholder="Tìm kiếm ngân hàng..."
+                  {/* Chỗ ở hiện tại */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Chỗ ở hiện tại <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      {...register('currentAddress', { required: true })}
+                      placeholder="Nhập địa chỉ chỗ ở hiện tại"
+                      rows={2}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {showBankDropdown && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                        {banks
-                          .filter((bank: any) =>
-                            bankSearch
-                              ? `${bank.code} ${bank.name}`.toLowerCase().includes(bankSearch.toLowerCase())
-                              : true
-                          )
-                          .slice(0, 10)
-                          .map((bank: any) => (
-                            <div
-                              key={bank.code}
-                              onClick={() => {
-                                setSelectedBank(bank);
-                                setBankSearch(`${bank.code} ${bank.name}`);
-                                setShowBankDropdown(false);
-                                setValue('bankName', bank.name);
-                              }}
-                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                            >
-                              <div className="font-medium">{bank.code}</div>
-                              <div className="text-sm text-gray-600">{bank.name}</div>
-                            </div>
-                          ))}
+                  </div>
+                </>
+              )}
+
+              {/* Ngày tháng năm sinh */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Ngày tháng năm sinh <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  {...register('dateOfBirth')}
+                  max={new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Bank Information - Only for VN */}
+              {city === 'VN' && (
+                <>
+                  {/* Divider */}
+                  <div className="border-t border-gray-300 my-4"></div>
+                  <p className="text-lg font-semibold text-gray-800 mb-2">Thông tin ngân hàng</p>
+
+                  {/* Bank Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tên ngân hàng <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={bankSearch}
+                        onChange={(e) => {
+                          setBankSearch(e.target.value);
+                          setShowBankDropdown(true);
+                        }}
+                        onFocus={() => setShowBankDropdown(true)}
+                        placeholder="Tìm kiếm ngân hàng..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      {showBankDropdown && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                          {banks
+                            .filter((bank: any) =>
+                              bankSearch
+                                ? `${bank.code} ${bank.name}`.toLowerCase().includes(bankSearch.toLowerCase())
+                                : true
+                            )
+                            .slice(0, 10)
+                            .map((bank: any) => (
+                              <div
+                                key={bank.code}
+                                onClick={() => {
+                                  setSelectedBank(bank);
+                                  setBankSearch(`${bank.code} ${bank.name}`);
+                                  setShowBankDropdown(false);
+                                  setValue('bankName', bank.name);
+                                }}
+                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                              >
+                                <div className="font-medium">{bank.code}</div>
+                                <div className="text-sm text-gray-600">{bank.name}</div>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Account Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tên chủ tài khoản <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      {...register('accountName')}
+                      placeholder="Nhập tên chủ tài khoản"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Account Number */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Số tài khoản <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      {...register('accountNumber')}
+                      placeholder="Nhập số tài khoản"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* CCCD Images Section - Only show if VN and user doesn't have CCCD images yet */}
+              {city === 'VN' && (!imgFront || !imgBack) && (
+                <>
+                  {/* Divider */}
+                  <div className="border-t border-gray-300 my-4"></div>
+                  <p className="text-lg font-semibold text-gray-800 mb-2">Hình ảnh CCCD</p>
+
+                  {/* CCCD mặt trước */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      CCCD mặt trước <span className="text-red-500">*</span>
+                    </label>
+                    {!imgFront ? (
+                      <>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleCccdImageChange(e, 'front')}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {cccdFrontPreview && (
+                          <img
+                            src={cccdFrontPreview}
+                            alt="CCCD Front Preview"
+                            className="mt-2 max-w-full h-auto rounded border"
+                            style={{ maxHeight: '200px' }}
+                          />
+                        )}
+                      </>
+                    ) : (
+                      <div>
+                        <img
+                          src={`${import.meta.env.VITE_API_URL}/uploads/CCCD/${imgFront}`}
+                          alt="CCCD Front"
+                          className="mt-2 max-w-full h-auto rounded border"
+                          style={{ maxHeight: '200px' }}
+                        />
+                        <p className="text-sm text-gray-500 mt-1">
+                          Đã có ảnh CCCD mặt trước. Liên hệ admin nếu cần thay đổi.
+                        </p>
                       </div>
                     )}
                   </div>
-                </div>
 
-                {/* Account Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Tên chủ tài khoản <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    {...register('accountName')}
-                    placeholder="Nhập tên chủ tài khoản"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                {/* Account Number */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Số tài khoản <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    {...register('accountNumber')}
-                    placeholder="Nhập số tài khoản"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </>
-            )}
-
-            {/* CCCD Images Section - Only show if VN and user doesn't have CCCD images yet */}
-            {city === 'VN' && (!imgFront || !imgBack) && (
-              <>
-                {/* Divider */}
-                <div className="border-t border-gray-300 my-4"></div>
-                <p className="text-lg font-semibold text-gray-800 mb-2">Hình ảnh CCCD</p>
-
-                {/* CCCD mặt trước */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    CCCD mặt trước <span className="text-red-500">*</span>
-                  </label>
-                  {!imgFront ? (
-                    <>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleCccdImageChange(e, 'front')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      {cccdFrontPreview && (
+                  {/* CCCD mặt sau */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      CCCD mặt sau <span className="text-red-500">*</span>
+                    </label>
+                    {!imgBack ? (
+                      <>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleCccdImageChange(e, 'back')}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {cccdBackPreview && (
+                          <img
+                            src={cccdBackPreview}
+                            alt="CCCD Back Preview"
+                            className="mt-2 max-w-full h-auto rounded border"
+                            style={{ maxHeight: '200px' }}
+                          />
+                        )}
+                      </>
+                    ) : (
+                      <div>
                         <img
-                          src={cccdFrontPreview}
-                          alt="CCCD Front Preview"
+                          src={`${import.meta.env.VITE_API_URL}/uploads/CCCD/${imgBack}`}
+                          alt="CCCD Back"
                           className="mt-2 max-w-full h-auto rounded border"
                           style={{ maxHeight: '200px' }}
                         />
-                      )}
-                    </>
-                  ) : (
-                    <div>
-                      <img
-                        src={`${import.meta.env.VITE_API_URL}/uploads/CCCD/${imgFront}`}
-                        alt="CCCD Front"
-                        className="mt-2 max-w-full h-auto rounded border"
-                        style={{ maxHeight: '200px' }}
-                      />
-                      <p className="text-sm text-gray-500 mt-1">
-                        Đã có ảnh CCCD mặt trước. Liên hệ admin nếu cần thay đổi.
-                      </p>
-                    </div>
-                  )}
-                </div>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Đã có ảnh CCCD mặt sau. Liên hệ admin nếu cần thay đổi.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
 
-                {/* CCCD mặt sau */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    CCCD mặt sau <span className="text-red-500">*</span>
-                  </label>
-                  {!imgBack ? (
-                    <>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleCccdImageChange(e, 'back')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      {cccdBackPreview && (
-                        <img
-                          src={cccdBackPreview}
-                          alt="CCCD Back Preview"
-                          className="mt-2 max-w-full h-auto rounded border"
-                          style={{ maxHeight: '200px' }}
-                        />
-                      )}
-                    </>
-                  ) : (
-                    <div>
-                      <img
-                        src={`${import.meta.env.VITE_API_URL}/uploads/CCCD/${imgBack}`}
-                        alt="CCCD Back"
-                        className="mt-2 max-w-full h-auto rounded border"
-                        style={{ maxHeight: '200px' }}
-                      />
-                      <p className="text-sm text-gray-500 mt-1">
-                        Đã có ảnh CCCD mặt sau. Liên hệ admin nếu cần thay đổi.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <div className="mt-6">
-            <button
-              onClick={handleSaveProfileCompletion}
-              disabled={savingProfile}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {savingProfile ? 'Đang lưu...' : 'Hoàn thành'}
-            </button>
+            {/* Submit Button */}
+            <div className="mt-6">
+              <button
+                onClick={handleSaveProfileCompletion}
+                disabled={savingProfile}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {savingProfile ? 'Đang lưu...' : 'Hoàn thành'}
+              </button>
+            </div>
           </div>
         </div>
       </Modal>
@@ -2091,29 +2072,9 @@ const Profile = () => {
                       <p>{t('accountName')} :</p>
                       <p>{accountName || '-'}</p>
                     </div>
-                    <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
+                    <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
                       <p>{t('accountNumber')} :</p>
                       <p>{accountNumber || '-'}</p>
-                    </div>
-                    <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
-                      <p>Ngày cấp CCCD :</p>
-                      <p>
-                        {cccdIssueDate
-                          ? new Date(cccdIssueDate).toLocaleDateString('vi-Vn', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                          })
-                          : '-'}
-                      </p>
-                    </div>
-                    <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
-                      <p>Nơi cấp CCCD :</p>
-                      <p>{cccdIssuePlace || '-'}</p>
-                    </div>
-                    <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 py-2 px-4 rounded-lg">
-                      <p>Địa chỉ thường trú :</p>
-                      <p>{permanentAddress || '-'}</p>
                     </div>
                     <div className="grid lg:grid-cols-2 gap-2 lg:gap-0 bg-[#E5E9EE] py-2 px-4 rounded-lg">
                       <p>Chỗ ở hiện tại :</p>
@@ -2391,60 +2352,38 @@ const Profile = () => {
               <h2 className="text-xl text-blue-800">{t('paymentTerms.title')}</h2>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            {/* Content - scrollable area */}
+            <div className="flex-1 overflow-y-auto p-6" style={{ paddingBottom: '140px' }}>
               <div className="prose max-w-none text-gray-700 text-sm">
-                {isVietnamese ? (
-                  <>
-                    <p><b>Ngày hiệu lực</b>: 12 tháng 4, 2025</p>
-                    <br></br>
-                    <p>
-                      <b>Thỏa thuận & Xác nhận Thành viên</b> ("Thỏa thuận") này quy định các điều khoản và điều kiện mà các cá nhân ("Thành viên") có thể tham gia vào <b>Chương trình No Excuse Challenge</b>, một chương trình được tạo và vận hành bởi <b>Ameritec IPS (Hoa Kỳ)</b> và <b>America Technology (Việt Nam)</b> (sau đây gọi chung là "Tổ chức").
-                    </p>
-                    <br></br>
-                    <p>
-                      Thỏa thuận này mô tả quyền lợi, nghĩa vụ và trách nhiệm của cả Tổ chức và Thành viên, đồng thời xác định bản chất của việc tham gia, cơ chế cộng đồng, cách phân phối quyền lợi và chính sách bảo vệ dữ liệu cá nhân trong khuôn khổ Chương trình <b>Chương trình No Excuse Challenge.</b>
-                    </p>
-                    <br></br>
-                    <p className="text-lg text-blue-800">Tổng quan về Tư cách Thành viên</p>
-                    <p>Để tham gia <b>No Excuse Challenge</b>, bạn trước tiên phải trở thành một thành viên đã đăng ký hợp lệ.</p>
-                    <p>Phí thành viên của bạn được xác định dựa trên quốc gia cư trú của bạn — một bước nhỏ mở ra cánh cửa cho một hành trình phi thường của sự phát triển, đổi mới và cơ hội.</p>
-                    <br></br>
-                    <p className="text-lg text-blue-800">Lợi ích Thành viên</p>
-                    <p>Là một thành viên của cộng đồng <b>No Excuse Challenge</b>, bạn sẽ nhận được các lợi ích sau:</p>
-                    <ul className="list-disc list-inside">
-                      <li><b>Truy cập vào Nền tảng No Excuse Challenge</b> — nơi sự chuyển đổi bắt đầu.</li>
-                      <li><b>Truy cập vào Ứng dụng Đi bộ Cao cấp của chúng tôi</b> — đi bộ cho sức khỏe của bạn, kiếm tiền cho sự phát triển của bạn.</li>
-                      <li><b>Truy cập vào AmChain Blockchain</b> — được xây dựng cho tốc độ, bảo mật và sử dụng thực tế.</li>
-                      <li><b>Truy cập vào Quantum Wallet của chúng tôi</b> — một ví bảo mật hậu lượng tử được xây dựng cho tương lai.</li>
-                      <li><b>Sở hữu 100 USDT trị giá HEWE Coin</b> — tài sản kỹ thuật số Sức khỏe & Tài sản của bạn.</li>
-                      <li><b>Đủ điều kiện để Nâng cấp và Duy trì Thành viên Cao cấp</b> — cho phép tiếp tục tham gia vào Chương trình Challenge, bao gồm đóng góp cộng đồng, phần thưởng đánh giá cao, và tiền thưởng độc quyền của công ty.</li>
-                    </ul>
-                  </>
+                {loadingContract ? (
+                  <div className="flex justify-center items-center py-20">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    <p className="ml-4 text-gray-600">Đang tải nội dung hợp đồng...</p>
+                  </div>
                 ) : (
-                  <>
-                    <p><b>Effective Date</b>: April 12, 2025</p>
-                    <br></br>
-                    <p>
-                      This <b>Member Acknowledgment & Agreement</b> ("Agreement") establishes the terms and conditions under which individuals ("Members") may participate in the <b>No Excuse Challenge Program</b>, a program created and operated by <b>Ameritec IPS (United States)</b> and <b>America Technology (Vietnam)</b> (collectively referred to as "the Organization").
-                    </p>
-                    <br></br>
-                    <p>
-                      This Agreement outlines the rights, obligations, and responsibilities of both the Organization and its Members. It defines the nature of participation, community engagement, benefit mechanisms, and data protection practices that govern the <b>No Excuse Challenge Program.</b>
-                    </p>
-                    <br></br>
-                    <p className="text-lg text-blue-800">Membership Overview</p>
-                    <p>To join the <b>No Excuse Challenge</b>, you must first become a registered member.</p>
-                    <p>Your membership fee is determined based on your country of residence — a small step that opens the door to an extraordinary journey of growth, innovation, and opportunity.</p>
-                  </>
+                  <div
+                    className="contract-content"
+                    dangerouslySetInnerHTML={{ __html: contractContent }}
+                    style={{
+                      fontFamily: "'Times New Roman', Times, serif",
+                      lineHeight: '1.6',
+                      textAlign: 'justify'
+                    }}
+                  />
                 )}
-                {/* ... existing template logic shortened for concise replacement if needed, 
-                    but I'll include the full logic to match previous page behavior */}
               </div>
             </div>
 
-            {/* Footer with checkbox and buttons */}
-            <div className="flex-shrink-0 p-6 border-t border-gray-200 bg-gray-50">
+            {/* Footer - Fixed at bottom using sticky */}
+            <div
+              className="flex-shrink-0 p-6 border-t border-gray-200 bg-white"
+              style={{
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 10,
+                boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.1)'
+              }}
+            >
               <div className="flex items-start mb-4">
                 <input
                   type="checkbox"
@@ -2531,7 +2470,7 @@ const Profile = () => {
           </div>
         </Modal>
       </div>
-    </DefaultLayout>
+    </DefaultLayout >
   );
 };
 

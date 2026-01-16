@@ -1981,39 +1981,6 @@ const UserProfile = () => {
                           <>
                             <div className="grid lg:grid-cols-2 grid-cols-1">
                               <div className="px-4 py-2 font-semibold">
-                                Ngày cấp CCCD
-                              </div>
-                              <div className="px-4 py-2">
-                                {data.cccdIssueDate
-                                  ? new Date(data.cccdIssueDate).toLocaleDateString(
-                                    'vi-Vn',
-                                    {
-                                      day: '2-digit',
-                                      month: '2-digit',
-                                      year: 'numeric',
-                                    },
-                                  )
-                                  : '-'}
-                              </div>
-                            </div>
-                            <div className="grid lg:grid-cols-2 grid-cols-1">
-                              <div className="px-4 py-2 font-semibold">
-                                Nơi cấp CCCD
-                              </div>
-                              <div className="px-4 py-2">
-                                {data.cccdIssuePlace || '-'}
-                              </div>
-                            </div>
-                            <div className="grid lg:grid-cols-2 grid-cols-1">
-                              <div className="px-4 py-2 font-semibold">
-                                Địa chỉ thường trú
-                              </div>
-                              <div className="px-4 py-2">
-                                {data.permanentAddress || '-'}
-                              </div>
-                            </div>
-                            <div className="grid lg:grid-cols-2 grid-cols-1">
-                              <div className="px-4 py-2 font-semibold">
                                 Chỗ ở hiện tại
                               </div>
                               <div className="px-4 py-2">

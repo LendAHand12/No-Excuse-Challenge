@@ -1509,7 +1509,7 @@
   "Enable Withdraw - Bank": "Bật rút tiền - Ngân hàng",
   "No payment methods available": "Không có phương thức thanh toán nào",
   "paymentTerms": {
-    "title": "Nội quy và cam kết",
+    "title": "Nội dung Hợp Đồng",
     "contentPlaceholder": "Nội dung sẽ được thêm vào đây...",
     "agreeText": "Tôi đã đọc và đồng ý với các điều khoản và cam kết",
     "confirm": "Xác nhận",

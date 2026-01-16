@@ -49,19 +49,6 @@ const userSchema = mongoose.Schema(
       type: String,
       default: "",
     },
-    // CCCD Information
-    cccdIssueDate: {
-      type: Date,
-      default: null,
-    },
-    cccdIssuePlace: {
-      type: String,
-      default: "",
-    },
-    permanentAddress: {
-      type: String,
-      default: "",
-    },
     currentAddress: {
       type: String,
       default: "",
