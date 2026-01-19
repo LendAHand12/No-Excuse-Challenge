@@ -137,15 +137,15 @@ const claimHewe = asyncHandler(async (req, res) => {
     // Bước 3: Check balance and process withdrawal
     if (user.availableHewe > 0) {
       // Gửi token HEWE
-      // const receipt = await sendHewe({
-      //   amount: user.availableHewe,
-      //   receiverAddress: user.walletAddress,
-      // });
+      const receipt = await sendHewe({
+        amount: user.availableHewe,
+        receiverAddress: user.walletAddress,
+      });
 
       await Claim.create({
         userId: user.id,
         amount: user.availableHewe,
-        hash: "receipt.hash",
+        hash: receipt.hash,
         coin: "HEWE",
       });
 
