@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 export const shortenWalletAddress = (walletAddress: string, length = 20) => {
   if (walletAddress) {
     const startLength = Math.ceil(length / 2);
@@ -36,6 +38,20 @@ export const formatDateDDMMYYYY = (datetime: string) => {
 export const adjustSales = (arr, targetSales) => {
   const maxLimit = targetSales * 0.4;
   return arr.map((item) => (item > maxLimit ? maxLimit : item));
+};
+
+export const isUserExpired = async (dieTime) => {
+
+  // User chỉ hết hạn khi dieTime !== null và dieTime đã quá hạn ngày hiện tại
+  if (dieTime === null || dieTime === undefined) {
+    return false;
+  }
+
+  const todayStart = moment().startOf("day");
+  const dieTimeStart = moment(dieTime).startOf("day");
+
+  // Nếu dieTime đã quá hạn (today >= dieTime) thì trả về true
+  return todayStart.isSameOrAfter(dieTimeStart);
 };
 
 export { formatDateVN, formatDateTimeVN } from './dateFormat';

@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import DefaultLayout from '../../../layout/DefaultLayout';
-import { shortenWalletAddress } from '../../../utils';
+import { isUserExpired, shortenWalletAddress } from '../../../utils';
 import { useTranslation } from 'react-i18next';
 import Loading from '@/components/Loading';
 import { UPDATE_USER_INFO } from '@/slices/auth';
@@ -277,26 +277,31 @@ const Profile = () => {
             setShowNextTier(true);
           }
 
-          // Priority 1: Check if Face ID needs setup
-          if (response.data.lockKyc === false && response.data.facetecTid === '') {
-            setShowFaceId(true);
+          if (response.data.errLahCode === "OVER45") {
             setShowProfilePopup(false);
             setShowTermsModal(false);
             setShowSignatureModal(false);
-          }
-          // Priority 2: Check if profile is incomplete
-          else if (response.data.isProfileComplete === false) {
-            setShowProfilePopup(true);
-            setShowFaceId(false);
-            setShowTermsModal(false);
-            setShowSignatureModal(false);
-          }
-          // Priority 3: Check if signature is missing for Tier 1
-          else if (response.data.countPay === 0 && !response.data.signatureImage) {
-            setShowTermsModal(true);
-            setShowFaceId(false);
-            setShowProfilePopup(false);
-          }
+          } else
+            // Priority 1: Check if Face ID needs setup
+            if (response.data.lockKyc === false && response.data.facetecTid === '') {
+              setShowFaceId(true);
+              setShowProfilePopup(false);
+              setShowTermsModal(false);
+              setShowSignatureModal(false);
+            }
+            // Priority 2: Check if profile is incomplete
+            else if (response.data.isProfileComplete === false) {
+              setShowProfilePopup(true);
+              setShowFaceId(false);
+              setShowTermsModal(false);
+              setShowSignatureModal(false);
+            }
+            // Priority 3: Check if signature is missing for Tier 1
+            else if (response.data.countPay === 0 && !response.data.signatureImage) {
+              setShowTermsModal(true);
+              setShowFaceId(false);
+              setShowProfilePopup(false);
+            }
 
           // if (response.data.preTier2Status === 'PASSED') {
           //   setShowPreTier2Commit(false);
@@ -2264,7 +2269,7 @@ const Profile = () => {
         )}
 
         {/* CCCD Section in Profile */}
-        {city === 'VN' && (
+        {/* {city === 'VN' && (
           <div className="bg-[#FAFBFC] p-4 rounded-2xl mb-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold">{t('CCCD (Citizen ID Card)')}</h3>
@@ -2312,7 +2317,7 @@ const Profile = () => {
               )}
             </div>
           </div>
-        )}
+        )} */}
         {/* Terms and Commitment Modal */}
         <Modal
           isOpen={showTermsModal}

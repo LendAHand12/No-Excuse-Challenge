@@ -42,6 +42,19 @@ const claimKYC = expressAsyncHandler(async (req, res) => {
   res.json({ url: redirectToKYC });
 });
 
+const claimHeweKYC = expressAsyncHandler(async (req, res) => {
+  const { user } = req;
+
+  const token = createCallbackToken(user._id);
+  const callbackUrl = `${process.env.FRONTEND_BASE_URL}/user/claim-hewe?token=${token}`;
+
+  const redirectToKYC = `${process.env.KYC_URL}/verify.html?callback=${encodeURIComponent(
+    callbackUrl
+  )}&user_id=${user.id}`;
+
+  res.json({ url: redirectToKYC });
+});
+
 const moveSystemKyc = expressAsyncHandler(async (req, res) => {
   const { user } = req;
 
@@ -271,4 +284,4 @@ const startUpdateInfoKYC = expressAsyncHandler(async (req, res) => {
   res.json({ url: redirectToKYC });
 });
 
-export { startKYC, register, claimKYC, checkUserCompleteKyc, moveSystemKyc, startUpdateInfoKYC };
+export { startKYC, register, claimKYC, claimHeweKYC, checkUserCompleteKyc, moveSystemKyc, startUpdateInfoKYC };

@@ -71,8 +71,8 @@ export default function UserAssetsPage() {
     assets.tier > 1
       ? 0
       : assets.totalHewe > 0
-      ? assets.totalHewe - assets.claimedHewe
-      : 0;
+        ? assets.totalHewe - assets.claimedHewe
+        : 0;
 
   // Fetch assets on component mount
   useEffect(() => {
@@ -135,8 +135,8 @@ export default function UserAssetsPage() {
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message ||
-          error?.message ||
-          'Failed to fetch assets',
+        error?.message ||
+        'Failed to fetch assets',
       );
     } finally {
       setLoadingAssets(false);
@@ -155,22 +155,48 @@ export default function UserAssetsPage() {
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message ||
-          error?.message ||
-          'Failed to fetch history',
+        error?.message ||
+        'Failed to fetch history',
       );
     } finally {
       setLoading(false);
     }
   };
 
+  //  // OLD FLOW: Direct HEWE withdrawal without face scanning
+  // Kept for future use if needed
+  // const claimHewe = async () => {
+  //   setLoadingClaimHewe(true);
+  //   await Claim.hewe()
+  //     .then((response) => {
+  //       toast.success(t(response.data.message) || 'Withdraw HEWE successful');
+  //       setLoadingClaimHewe(false);
+  //       // Refresh assets
+  //       fetchAssets();
+  //     })
+  //     .catch((error) => {
+  //       let message =
+  //         error.response && error.response.data.error
+  //           ? error.response.data.error
+  //           : error.message;
+  //       toast.error(t(message));
+  //       setLoadingClaimHewe(false);
+  //     });
+  // };
+
+  // NEW FLOW: HEWE withdrawal with face scanning verification
   const claimHewe = async () => {
     setLoadingClaimHewe(true);
-    await Claim.hewe()
+    await KYC.claimHewe()
       .then((response) => {
-        toast.success(t(response.data.message) || 'Withdraw HEWE successful');
-        setLoadingClaimHewe(false);
-        // Refresh assets
-        fetchAssets();
+        if (response.data.url) {
+          window.location.href = response.data.url;
+        } else {
+          toast.success(t('Withdraw HEWE successful'));
+          setLoadingClaimHewe(false);
+          // Refresh assets
+          fetchAssets();
+        }
       })
       .catch((error) => {
         let message =
@@ -267,17 +293,16 @@ export default function UserAssetsPage() {
                 />
               </div>
               <button
-                className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
-                  !canWithdrawHewe ? 'opacity-30' : ''
-                }`}
+                className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${!canWithdrawHewe ? 'opacity-30' : ''
+                  }`}
                 disabled={!canWithdrawHewe}
                 onClick={claimHewe}
                 title={
                   !canWithdrawHewe && limitAmountHewe > 0
                     ? t('Minimum withdrawal amount is {amount} HEWE. Your available balance is {balance} HEWE.', {
-                        amount: limitAmountHewe.toLocaleString(),
-                        balance: assets.availableHewe.toLocaleString(),
-                      })
+                      amount: limitAmountHewe.toLocaleString(),
+                      balance: assets.availableHewe.toLocaleString(),
+                    })
                     : ''
                 }
               >
@@ -305,9 +330,8 @@ export default function UserAssetsPage() {
                 />
               </div>
               <button
-                className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${
-                  !canWithdrawUsdt ? 'opacity-30' : ''
-                }`}
+                className={`w-full border border-black rounded-2xl px-12 py-2 flex justify-center hover:bg-black hover:text-white ${!canWithdrawUsdt ? 'opacity-30' : ''
+                  }`}
                 disabled={!canWithdrawUsdt}
                 onClick={() => setShowModal(true)}
               >
@@ -373,8 +397,8 @@ export default function UserAssetsPage() {
                             (isCryptoHash
                               ? 'CRYPTO'
                               : item.coin === 'USDT'
-                              ? 'BANK'
-                              : null);
+                                ? 'BANK'
+                                : null);
 
                           // For BANK withdrawal: calculate amounts in VND
                           const isBank =
@@ -457,11 +481,11 @@ export default function UserAssetsPage() {
                                 <span className="font-semibold text-green-600">
                                   {isBank && exchangeRate > 0
                                     ? Math.floor(
-                                        receivedAmountVND,
-                                      ).toLocaleString()
+                                      receivedAmountVND,
+                                    ).toLocaleString()
                                     : Number(
-                                        receivedAmount,
-                                      ).toLocaleString()}{' '}
+                                      receivedAmount,
+                                    ).toLocaleString()}{' '}
                                   {isBank ? 'VND' : item.coin}
                                 </span>
                               </td>

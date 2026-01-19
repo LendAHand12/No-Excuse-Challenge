@@ -60,6 +60,7 @@ import RulesPage from './pages/Rules';
 import { useSelector } from 'react-redux';
 import RegisterKYCPage from './pages/User/RegisterKYC';
 import ClaimKYCPage from './pages/User/ClaimKYC';
+import ClaimHeweKYCPage from './pages/User/ClaimHeweKYC';
 import MoveSystemPage from './pages/User/MoveSystemKYC';
 import AdminDoubleKycPage from './pages/Admin/DoubleKyc';
 import AdminConfigPage from './pages/Admin/Config';
@@ -209,550 +210,550 @@ function App() {
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/transactions')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/transactions"
-            element={
-              <>
-                <PageTitle title="Transactions | NoExcuseChallenge" />
-                <AdminTransactionsPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/transactions"
+              element={
+                <>
+                  <PageTitle title="Transactions | NoExcuseChallenge" />
+                  <AdminTransactionsPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/approve-payment')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/approve-payment"
-            element={
-              <>
-                <PageTitle title="Approve Payment | NoExcuseChallenge" />
-                <ApprovePaymentPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/approve-payment"
+              element={
+                <>
+                  <PageTitle title="Approve Payment | NoExcuseChallenge" />
+                  <ApprovePaymentPage />
+                </>
+              }
+            />
+          )}
 
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/eligible-pre-tier-2')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/eligible-pre-tier-2"
-            element={
-              <>
-                <PageTitle title="Users Eligible Pre-Tier 2 | NoExcuseChallenge" />
-                <UsersEligiblePreTier2Page />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/eligible-pre-tier-2"
+              element={
+                <>
+                  <PageTitle title="Users Eligible Pre-Tier 2 | NoExcuseChallenge" />
+                  <UsersEligiblePreTier2Page />
+                </>
+              }
+            />
+          )}
 
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/pre-tier-2-users')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/pre-tier-2-users"
-            element={
-              <>
-                <PageTitle title="Users Pre-Tier 2 | NoExcuseChallenge" />
-                <UsersPreTier2Page />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/pre-tier-2-users"
+              element={
+                <>
+                  <PageTitle title="Users Pre-Tier 2 | NoExcuseChallenge" />
+                  <UsersPreTier2Page />
+                </>
+              }
+            />
+          )}
 
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/users-passed-tier-2')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/users-passed-tier-2"
-            element={
-              <>
-                <PageTitle title="Users Passed Tier 2 | NoExcuseChallenge" />
-                <UsersPassedTier2Page />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/users-passed-tier-2"
+              element={
+                <>
+                  <PageTitle title="Users Passed Tier 2 | NoExcuseChallenge" />
+                  <UsersPassedTier2Page />
+                </>
+              }
+            />
+          )}
 
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/pre-tier-2-pool')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/pre-tier-2-pool"
-            element={
-              <>
-                <PageTitle title="Pre-Tier 2 Pool | NoExcuseChallenge" />
-                <AdminPreTier2PoolPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/pre-tier-2-pool"
+              element={
+                <>
+                  <PageTitle title="Pre-Tier 2 Pool | NoExcuseChallenge" />
+                  <AdminPreTier2PoolPage />
+                </>
+              }
+            />
+          )}
 
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/move-system-list')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/move-system-list"
-            element={
-              <>
-                <PageTitle title="Move System List | NoExcuseChallenge" />
-                <MoveSystemList />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/move-system-list"
+              element={
+                <>
+                  <PageTitle title="Move System List | NoExcuseChallenge" />
+                  <MoveSystemList />
+                </>
+              }
+            />
+          )}
 
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/users/:id')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/users/:id"
-            element={
-              <>
-                <PageTitle title="User Profile | NoExcuseChallenge" />
-                <AdminUserProfile />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/users/:id"
+              element={
+                <>
+                  <PageTitle title="User Profile | NoExcuseChallenge" />
+                  <AdminUserProfile />
+                </>
+              }
+            />
+          )}
 
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/move-system/:id')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/move-system/:id"
-            element={
-              <>
-                <PageTitle title="Move System | NoExcuseChallenge" />
-                <MoveSystem />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/move-system/:id"
+              element={
+                <>
+                  <PageTitle title="Move System | NoExcuseChallenge" />
+                  <MoveSystem />
+                </>
+              }
+            />
+          )}
 
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/transactions')
           ?.actions.includes('export') && (
-          <Route
-            path="/admin/transaction/export"
-            element={
-              <>
-                <PageTitle title="Admin Export Transaction | NoExcuseChallenge" />
-                <ExportPaymentsPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/transaction/export"
+              element={
+                <>
+                  <PageTitle title="Admin Export Transaction | NoExcuseChallenge" />
+                  <ExportPaymentsPage />
+                </>
+              }
+            />
+          )}
 
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/transactions/:id')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/transactions/:id"
-            element={
-              <>
-                <PageTitle title="Transaction Detail | NoExcuseChallenge" />
-                <AdminTransactionDetail />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/transactions/:id"
+              element={
+                <>
+                  <PageTitle title="Transaction Detail | NoExcuseChallenge" />
+                  <AdminTransactionDetail />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/wallets')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/wallets"
-            element={
-              <>
-                <PageTitle title="Setting Wallets | NoExcuseChallenge" />
-                <SettingWallets />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/wallets"
+              element={
+                <>
+                  <PageTitle title="Setting Wallets | NoExcuseChallenge" />
+                  <SettingWallets />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/users')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/users"
-            element={
-              <>
-                <PageTitle title="Users | NoExcuseChallenge" />
-                <AdminUserPages />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/users"
+              element={
+                <>
+                  <PageTitle title="Users | NoExcuseChallenge" />
+                  <AdminUserPages />
+                </>
+              }
+            />
+          )}
 
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/system/:id')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/system/:id"
-            element={
-              <>
-                <PageTitle title="System | NoExcuseChallenge" />
-                <AdminSystemPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/system/:id"
+              element={
+                <>
+                  <PageTitle title="System | NoExcuseChallenge" />
+                  <AdminSystemPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/linkVerify')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/linkVerify"
-            element={
-              <>
-                <PageTitle title="Link verify | NoExcuseChallenge" />
-                <GetVerifyLinkPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/linkVerify"
+              element={
+                <>
+                  <PageTitle title="Link verify | NoExcuseChallenge" />
+                  <GetVerifyLinkPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/withdraw')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/withdraw"
-            element={
-              <>
-                <PageTitle title="Withdraw request | NoExcuseChallenge" />
-                <AdminWithdrawPages />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/withdraw"
+              element={
+                <>
+                  <PageTitle title="Withdraw request | NoExcuseChallenge" />
+                  <AdminWithdrawPages />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/withdraw')
           ?.actions.includes('export') && (
-          <Route
-            path="/admin/withdraw/export"
-            element={
-              <>
-                <PageTitle title="Admin Export Withdraw | NoExcuseChallenge" />
-                <ExportWithdrawPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/withdraw/export"
+              element={
+                <>
+                  <PageTitle title="Admin Export Withdraw | NoExcuseChallenge" />
+                  <ExportWithdrawPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/news')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/news"
-            element={
-              <>
-                <PageTitle title="News | NoExcuseChallenge" />
-                <AdminNewsPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/news"
+              element={
+                <>
+                  <PageTitle title="News | NoExcuseChallenge" />
+                  <AdminNewsPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/claims')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/claims"
-            element={
-              <>
-                <PageTitle title="Claims | NoExcuseChallenge" />
-                <AdminClaimsPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/claims"
+              element={
+                <>
+                  <PageTitle title="Claims | NoExcuseChallenge" />
+                  <AdminClaimsPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/claims')
           ?.actions.includes('export') && (
-          <Route
-            path="/admin/claims/export"
-            element={
-              <>
-                <PageTitle title="Export Claims | NoExcuseChallenge" />
-                <AdminExportClaimsPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/claims/export"
+              element={
+                <>
+                  <PageTitle title="Export Claims | NoExcuseChallenge" />
+                  <AdminExportClaimsPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/tickets')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/tickets"
-            element={
-              <>
-                <PageTitle title="Support Tickets | NoExcuseChallenge" />
-                <AdminTicketsPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/tickets"
+              element={
+                <>
+                  <PageTitle title="Support Tickets | NoExcuseChallenge" />
+                  <AdminTicketsPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/tickets/:id')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/tickets/:id"
-            element={
-              <>
-                <PageTitle title="Ticket Detail | NoExcuseChallenge" />
-                <AdminTicketDetailPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/tickets/:id"
+              element={
+                <>
+                  <PageTitle title="Ticket Detail | NoExcuseChallenge" />
+                  <AdminTicketDetailPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/news/create')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/news/create"
-            element={
-              <>
-                <PageTitle title="Create News | NoExcuseChallenge" />
-                <AdminCreateNewsPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/news/create"
+              element={
+                <>
+                  <PageTitle title="Create News | NoExcuseChallenge" />
+                  <AdminCreateNewsPage />
+                </>
+              }
+            />
+          )}
 
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/news/edit')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/news/edit"
-            element={
-              <>
-                <PageTitle title="Edit News | NoExcuseChallenge" />
-                <AdminEditNewsPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/news/edit"
+              element={
+                <>
+                  <PageTitle title="Edit News | NoExcuseChallenge" />
+                  <AdminEditNewsPage />
+                </>
+              }
+            />
+          )}
 
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/dreampool')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/dreampool"
-            element={
-              <>
-                <PageTitle title="DreamPool | NoExcuseChallenge" />
-                <DreamPoolPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/dreampool"
+              element={
+                <>
+                  <PageTitle title="DreamPool | NoExcuseChallenge" />
+                  <DreamPoolPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/dreampool')
           ?.actions.includes('export') && (
-          <Route
-            path="/admin/dreampool/export"
-            element={
-              <>
-                <PageTitle title="Export DreamPool | NoExcuseChallenge" />
-                <ExportDreampoolPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/dreampool/export"
+              element={
+                <>
+                  <PageTitle title="Export DreamPool | NoExcuseChallenge" />
+                  <ExportDreampoolPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/permissions')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/permissions"
-            element={
-              <>
-                <PageTitle title="Permissions | NoExcuseChallenge" />
-                <PermissionsPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/permissions"
+              element={
+                <>
+                  <PageTitle title="Permissions | NoExcuseChallenge" />
+                  <PermissionsPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/permissions/:id')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/permissions/:id"
-            element={
-              <>
-                <PageTitle title="Permissions Details | NoExcuseChallenge" />
-                <PermissionsDetailsPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/permissions/:id"
+              element={
+                <>
+                  <PageTitle title="Permissions Details | NoExcuseChallenge" />
+                  <PermissionsDetailsPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/permissions/create')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/permissions/create"
-            element={
-              <>
-                <PageTitle title="Create New Permissions | NoExcuseChallenge" />
-                <PermissionsCreatePage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/permissions/create"
+              element={
+                <>
+                  <PageTitle title="Create New Permissions | NoExcuseChallenge" />
+                  <PermissionsCreatePage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/admin')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/admin"
-            element={
-              <>
-                <PageTitle title="Admin | NoExcuseChallenge" />
-                <AdminPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/admin"
+              element={
+                <>
+                  <PageTitle title="Admin | NoExcuseChallenge" />
+                  <AdminPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/wallet-connect-list')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/wallet-connect-list"
-            element={
-              <>
-                <PageTitle title="Wallet Connect List | NoExcuseChallenge" />
-                <AdminWalletConnectHistoryPages />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/wallet-connect-list"
+              element={
+                <>
+                  <PageTitle title="Wallet Connect List | NoExcuseChallenge" />
+                  <AdminWalletConnectHistoryPages />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/create-admin')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/create-admin"
-            element={
-              <>
-                <PageTitle title="Create new Admin | NoExcuseChallenge" />
-                <AdminCreatePage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/create-admin"
+              element={
+                <>
+                  <PageTitle title="Create new Admin | NoExcuseChallenge" />
+                  <AdminCreatePage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/admin/:id')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/admin/:id"
-            element={
-              <>
-                <PageTitle title="Admin Detail | NoExcuseChallenge" />
-                <AdminDetailPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/admin/:id"
+              element={
+                <>
+                  <PageTitle title="Admin Detail | NoExcuseChallenge" />
+                  <AdminDetailPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/users')
           ?.actions.includes('export') && (
-          <Route
-            path="/admin/user/export"
-            element={
-              <>
-                <PageTitle title="Admin Export User | NoExcuseChallenge" />
-                <ExportUsersPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/user/export"
+              element={
+                <>
+                  <PageTitle title="Admin Export User | NoExcuseChallenge" />
+                  <ExportUsersPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/users')
           ?.actions.includes('create') && (
-          <Route
-            path="/admin/users/create"
-            element={
-              <>
-                <PageTitle title="Admin Create User | NoExcuseChallenge" />
-                <CreateUserPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/users/create"
+              element={
+                <>
+                  <PageTitle title="Admin Create User | NoExcuseChallenge" />
+                  <CreateUserPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/cronjob')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/cronjob"
-            element={
-              <>
-                <PageTitle title="Cronjob | NoExcuseChallenge" />
-                <AdminCronjobPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/cronjob"
+              element={
+                <>
+                  <PageTitle title="Cronjob | NoExcuseChallenge" />
+                  <AdminCronjobPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/double-kyc')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/double-kyc"
-            element={
-              <>
-                <PageTitle title="Double KYC | NoExcuseChallenge" />
-                <AdminDoubleKycPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/double-kyc"
+              element={
+                <>
+                  <PageTitle title="Double KYC | NoExcuseChallenge" />
+                  <AdminDoubleKycPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/config')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/config"
-            element={
-              <>
-                <PageTitle title="Config | NoExcuseChallenge" />
-                <AdminConfigPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/config"
+              element={
+                <>
+                  <PageTitle title="Config | NoExcuseChallenge" />
+                  <AdminConfigPage />
+                </>
+              }
+            />
+          )}
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/user-history')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/user-history"
-            element={
-              <>
-                <PageTitle title="User History | NoExcuseChallenge" />
-                <UserHistoryPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/user-history"
+              element={
+                <>
+                  <PageTitle title="User History | NoExcuseChallenge" />
+                  <UserHistoryPage />
+                </>
+              }
+            />
+          )}
 
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/user/tier2')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/user/tier2"
-            element={
-              <>
-                <PageTitle title="Users Tier2 | NoExcuseChallenge" />
-                <UsersTier2 />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/user/tier2"
+              element={
+                <>
+                  <PageTitle title="Users Tier2 | NoExcuseChallenge" />
+                  <UsersTier2 />
+                </>
+              }
+            />
+          )}
 
         {userInfo?.permissions
           ?.find((p) => p.page.path === '/admin/user/dormant')
           ?.actions.includes('read') && (
-          <Route
-            path="/admin/user/dormant"
-            element={
-              <>
-                <PageTitle title="Dormant Users | NoExcuseChallenge" />
-                <DormantUsersPage />
-              </>
-            }
-          />
-        )}
+            <Route
+              path="/admin/user/dormant"
+              element={
+                <>
+                  <PageTitle title="Dormant Users | NoExcuseChallenge" />
+                  <DormantUsersPage />
+                </>
+              }
+            />
+          )}
       </Route>
       <Route element={<PrivateRoute />}>
         <Route
@@ -987,6 +988,15 @@ function App() {
           <>
             <PageTitle title="Claim KYC | NoExcuseChallenge" />
             <ClaimKYCPage />
+          </>
+        }
+      />
+      <Route
+        path="/user/claim-hewe"
+        element={
+          <>
+            <PageTitle title="Claim HEWE KYC | NoExcuseChallenge" />
+            <ClaimHeweKYCPage />
           </>
         }
       />

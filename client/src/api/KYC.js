@@ -11,6 +11,9 @@ const Page = {
   claim: (body) => {
     return API.post(`${URL_API_KYC}/claim`, body);
   },
+  claimHewe: () => {
+    return API.post(`${URL_API_KYC}/claim-hewe`);
+  },
   getDouble: (pageNumber, keyword) => {
     return API.get(`${URL_API_KYC}/double?pageNumber=${pageNumber}&keyword=${keyword}`);
   },

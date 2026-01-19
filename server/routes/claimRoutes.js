@@ -14,7 +14,8 @@ import { protectAdminRoute } from "../controllers/adminControllers.js";
 
 const router = express.Router();
 
-router.route("/hewe").post(protectRoute, claimHewe);
+router.route("/hewe").post(claimHewe); // Token-based auth after face scan
+// OLD: router.route("/hewe").post(protectRoute, claimHewe); // Direct withdrawal
 router.route("/amc").post(protectRoute, claimAmc);
 router.route("/usdt").post(claimUsdt);
 // router.route("/usdt").post(protectRoute, claimUsdt);

@@ -14,58 +14,143 @@ import { getPriceHewe } from "../utils/getPriceHewe.js";
 import { getPriceAmc } from "../utils/getPriceAmc.js";
 import moment from "moment-timezone";
 
-const claimHewe = asyncHandler(async (req, res) => {
-  const { user } = req;
+// OLD FLOW: Direct HEWE withdrawal without face scanning
+// Kept for future use if needed
+// const claimHewe = asyncHandler(async (req, res) => {
+//   const { user } = req;
 
-  // Dùng findOneAndUpdate để set isClaimingHewe = true
-  const lockedUser = await User.findOneAndUpdate(
-    { _id: user._id, isClaiming: false },
+//   // Dùng findOneAndUpdate để set isClaimingHewe = true
+//   const lockedUser = await User.findOneAndUpdate(
+//     { _id: user._id, isClaiming: false },
+//     { $set: { isClaiming: true } },
+//     { new: true }
+//   );
+
+//   if (!lockedUser) {
+//     return res.status(400).json({
+//       error: "Your HEWE claim is already being processed. Please wait!",
+//     });
+//   }
+
+//   try {
+//     // Kiểm tra giới hạn rút HEWE từ config
+//     const limitConfig = await Config.findOne({ label: "LIMIT_AMOUNT_HEWE" });
+//     const limitAmount = limitConfig ? Number(limitConfig.value) : 0;
+
+//     // Nếu có config giới hạn và availableHewe chưa đạt giới hạn thì không cho rút
+//     if (limitAmount > 0 && lockedUser.availableHewe < limitAmount) {
+//       throw new Error(
+//         `Minimum withdrawal amount is ${limitAmount} HEWE. Your available balance is ${lockedUser.availableHewe} HEWE.`
+//       );
+//     }
+
+//     // Giới hạn tối đa số hewe có thể rút là 700000
+//     const MAX_WITHDRAWAL_AMOUNT = 700000;
+//     if (lockedUser.availableHewe > MAX_WITHDRAWAL_AMOUNT) {
+//       throw new Error(
+//         `Maximum withdrawal amount is ${MAX_WITHDRAWAL_AMOUNT} HEWE. Your available balance is ${lockedUser.availableHewe} HEWE.`
+//       );
+//     }
+
+//     if (lockedUser.availableHewe > 0) {
+//       // Gửi token HEWE
+//       const receipt = await sendHewe({
+//         amount: lockedUser.availableHewe,
+//         receiverAddress: lockedUser.walletAddress,
+//       });
+
+//       await Claim.create({
+//         userId: lockedUser.id,
+//         amount: lockedUser.availableHewe,
+//         hash: receipt.hash,
+//         coin: "HEWE",
+//       });
+
+//       lockedUser.availableHewe = 0;
+//       await lockedUser.save();
+
+//       res.status(200).json({
+//         message: "Claim HEWE successful",
+//       });
+//     } else {
+//       throw new Error("Insufficient balance in account");
+//     }
+//   } catch (err) {
+//     res.status(400).json({
+//       error: err.message || "Internal error",
+//     });
+//   } finally {
+//     // Reset lại trạng thái để lần sau vẫn claim được
+//     await User.findByIdAndUpdate(lockedUser._id, { isClaiming: false });
+//   }
+// });
+
+// NEW FLOW: HEWE withdrawal with face scanning verification
+const claimHewe = asyncHandler(async (req, res) => {
+  const { token } = req.body;
+  const decode = decodeCallbackToken(token);
+
+  if (!decode) {
+    throw new Error("Internal Error");
+  }
+
+  const { userId } = decode;
+
+  // Bước 1: Set isClaiming = true chỉ khi hiện tại nó = false
+  const user = await User.findOneAndUpdate(
+    { _id: userId, isClaiming: false },
     { $set: { isClaiming: true } },
     { new: true }
   );
 
-  if (!lockedUser) {
+  if (!user) {
     return res.status(400).json({
       error: "Your HEWE claim is already being processed. Please wait!",
     });
   }
 
   try {
+    // Bước 2: Validate user - check if face is registered
+    if (user.status !== "APPROVED" || user.facetecTid === "") {
+      throw new Error("Please verify your account");
+    }
+
     // Kiểm tra giới hạn rút HEWE từ config
     const limitConfig = await Config.findOne({ label: "LIMIT_AMOUNT_HEWE" });
     const limitAmount = limitConfig ? Number(limitConfig.value) : 0;
 
     // Nếu có config giới hạn và availableHewe chưa đạt giới hạn thì không cho rút
-    if (limitAmount > 0 && lockedUser.availableHewe < limitAmount) {
+    if (limitAmount > 0 && user.availableHewe < limitAmount) {
       throw new Error(
-        `Minimum withdrawal amount is ${limitAmount} HEWE. Your available balance is ${lockedUser.availableHewe} HEWE.`
+        `Minimum withdrawal amount is ${limitAmount} HEWE. Your available balance is ${user.availableHewe} HEWE.`
       );
     }
 
     // Giới hạn tối đa số hewe có thể rút là 700000
     const MAX_WITHDRAWAL_AMOUNT = 700000;
-    if (lockedUser.availableHewe > MAX_WITHDRAWAL_AMOUNT) {
+    if (user.availableHewe > MAX_WITHDRAWAL_AMOUNT) {
       throw new Error(
-        `Maximum withdrawal amount is ${MAX_WITHDRAWAL_AMOUNT} HEWE. Your available balance is ${lockedUser.availableHewe} HEWE.`
+        `Maximum withdrawal amount is ${MAX_WITHDRAWAL_AMOUNT} HEWE. Your available balance is ${user.availableHewe} HEWE.`
       );
     }
 
-    if (lockedUser.availableHewe > 0) {
+    // Bước 3: Check balance and process withdrawal
+    if (user.availableHewe > 0) {
       // Gửi token HEWE
-      const receipt = await sendHewe({
-        amount: lockedUser.availableHewe,
-        receiverAddress: lockedUser.walletAddress,
-      });
+      // const receipt = await sendHewe({
+      //   amount: user.availableHewe,
+      //   receiverAddress: user.walletAddress,
+      // });
 
       await Claim.create({
-        userId: lockedUser.id,
-        amount: lockedUser.availableHewe,
-        hash: receipt.hash,
+        userId: user.id,
+        amount: user.availableHewe,
+        hash: "receipt.hash",
         coin: "HEWE",
       });
 
-      lockedUser.availableHewe = 0;
-      await lockedUser.save();
+      user.availableHewe = 0;
+      await user.save();
 
       res.status(200).json({
         message: "Claim HEWE successful",
@@ -75,19 +160,17 @@ const claimHewe = asyncHandler(async (req, res) => {
     }
   } catch (err) {
     res.status(400).json({
-      error: err.message || "Internal error",
+      error: err.message ? err.message.split(",")[0] : "Internal Error",
     });
   } finally {
-    // Reset lại trạng thái để lần sau vẫn claim được
-    await User.findByIdAndUpdate(lockedUser._id, { isClaiming: false });
+    // Reset trạng thái sau khi xử lý xong (dù success hay error)
+    await User.findByIdAndUpdate(userId, { isClaiming: false });
   }
 });
 
 const claimUsdt = asyncHandler(async (req, res) => {
   const { token, amount, withdrawalType, exchangeRate } = req.body;
-  console.log({ withdrawalType });
   const decode = decodeCallbackToken(token);
-  console.log({ decode });
 
   if (!decode) {
     throw new Error("Internal Error");
