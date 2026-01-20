@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import DefaultLayout from '../../../layout/DefaultLayout';
-import { isUserExpired, shortenWalletAddress } from '../../../utils';
+import { shortenWalletAddress } from '../../../utils';
 import { useTranslation } from 'react-i18next';
 import Loading from '@/components/Loading';
 import { UPDATE_USER_INFO } from '@/slices/auth';
@@ -20,6 +20,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import banks from '@/lib/banks.json';
 import wildCardTopImage from '@/images/cover/wildcard.png';
 import wildCardTopImage2 from '@/images/cover/wildcard2.png';
+import { useDisconnect } from 'wagmi';
+import { LOGOUT } from '@/slices/auth';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -29,6 +31,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const { userInfo } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+  const { disconnect } = useDisconnect();
   let {
     email,
     userId,
@@ -77,6 +80,8 @@ const Profile = () => {
     fullName,
     isProfileComplete,
   } = userInfo;
+
+
 
   const [phoneNumber, setPhoneNumber] = useState(phone);
   const [errorPhone, setErrPhone] = useState(false);
@@ -598,6 +603,12 @@ const Profile = () => {
     }
   };
 
+  const handleLogout = () => {
+    disconnect();
+    dispatch(LOGOUT());
+    navigate('/signin');
+  };
+
 
   return (
     <DefaultLayout>
@@ -635,10 +646,7 @@ const Profile = () => {
               {isProfileComplete ? 'Cập nhật thông tin cá nhân' : 'Hoàn thiện thông tin bắt buộc'}
             </h2>
             <button
-              onClick={() => {
-                localStorage.removeItem('token');
-                window.location.href = '/login';
-              }}
+              onClick={handleLogout}
               className="px-4 py-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600 transition"
             >
               Đăng xuất
