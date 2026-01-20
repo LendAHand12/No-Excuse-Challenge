@@ -120,6 +120,9 @@ const AdminPreTier2Pool = () => {
                 Amount
               </th>
               <th scope="col" className="px-6 py-3">
+                {t('Description')}
+              </th>
+              <th scope="col" className="px-6 py-3">
                 {t('time')}
               </th>
               <th scope="col" className="px-6 py-3">
@@ -149,16 +152,20 @@ const AdminPreTier2Pool = () => {
                     <b>{ele.amount}</b> USDT
                   </td>
                   <td className="px-6 py-4">
+                    <span className="text-gray-600 italic">
+                      {ele.description || '-'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
                     {new Date(ele.createdAt).toLocaleString('vi')}
                   </td>
                   <td className="px-6 py-4">
                     <div
-                      className={`max-w-fit text-white rounded-sm py-1 px-2 text-sm ${
-                        [
-                          { status: 'IN', color: 'bg-green-600' },
-                          { status: 'OUT', color: 'bg-red-600' },
-                        ].find((item) => item.status === ele.status).color
-                      } mr-2`}
+                      className={`max-w-fit text-white rounded-sm py-1 px-2 text-sm ${[
+                        { status: 'IN', color: 'bg-green-600' },
+                        { status: 'OUT', color: 'bg-red-600' },
+                      ].find((item) => item.status === ele.status).color
+                        } mr-2`}
                     >
                       {ele.status}
                     </div>

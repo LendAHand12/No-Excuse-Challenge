@@ -32,6 +32,7 @@ const AdminPreTier2Pool = () => {
   const [total, setTotal] = useState(0);
   const [showAddPool, setShowAddPool] = useState(false);
   const [amount, setAmount] = useState(0);
+  const [description, setDescription] = useState('');
 
   const onSearch = (e) => {
     setKeyword(e.target.value);
@@ -96,15 +97,18 @@ const AdminPreTier2Pool = () => {
   }, [keyword, objectFilter]);
 
   const addToPool = useCallback(async () => {
-    if (amount <= 0) {
-      toast.error('Amount must be greater than 0');
+    const numAmount = parseFloat(amount);
+    if (isNaN(numAmount) || numAmount === 0) {
+      toast.error('Amount must not be zero');
       return;
     } else {
-      await PreTier2.adminAddToPool({ amount })
+      await PreTier2.adminAddToPool({ amount: numAmount, description })
         .then((response) => {
           const { message } = response.data;
           toast.success(message);
           setShowAddPool(false);
+          setAmount(0);
+          setDescription('');
           setRefresh(!refresh);
         })
         .catch((error) => {
@@ -116,7 +120,7 @@ const AdminPreTier2Pool = () => {
           setLoading(false);
         });
     }
-  }, [amount]);
+  }, [amount, description]);
 
   return (
     <DefaultLayout>
@@ -146,10 +150,19 @@ const AdminPreTier2Pool = () => {
               {/* Input số tiền */}
               <input
                 type="number"
-                placeholder="Ex: 100..."
+                placeholder="Ex: 100 (add) or -50 (withdraw)..."
                 className="w-full p-2 mb-4 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
+              />
+
+              {/* Input description */}
+              <textarea
+                placeholder="Enter description (optional)..."
+                className="w-full p-2 mb-4 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none"
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
               />
 
               {/* Nút hành động */}
@@ -260,6 +273,9 @@ const AdminPreTier2Pool = () => {
                 Amount
               </th>
               <th scope="col" className="px-6 py-3">
+                Description
+              </th>
+              <th scope="col" className="px-6 py-3">
                 {t('time')}
               </th>
               <th scope="col" className="px-6 py-3">
@@ -295,16 +311,20 @@ const AdminPreTier2Pool = () => {
                     <b>{ele.amount}</b> USDT
                   </td>
                   <td className="px-6 py-4">
+                    <span className="text-gray-600 italic">
+                      {ele.description || '-'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
                     {new Date(ele.createdAt).toLocaleString('vi')}
                   </td>
                   <td className="px-6 py-4">
                     <div
-                      className={`max-w-fit text-white rounded-sm py-1 px-2 text-sm ${
-                        [
-                          { status: 'IN', color: 'bg-green-600' },
-                          { status: 'OUT', color: 'bg-red-600' },
-                        ].find((item) => item.status === ele.status).color
-                      } mr-2`}
+                      className={`max-w-fit text-white rounded-sm py-1 px-2 text-sm ${[
+                        { status: 'IN', color: 'bg-green-600' },
+                        { status: 'OUT', color: 'bg-red-600' },
+                      ].find((item) => item.status === ele.status).color
+                        } mr-2`}
                     >
                       {ele.status}
                     </div>

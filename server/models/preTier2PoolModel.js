@@ -16,6 +16,9 @@ const PreTier2PoolSchema = mongoose.Schema(
       required: true,
       enum: ["OUT", "IN"],
     },
+    description: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

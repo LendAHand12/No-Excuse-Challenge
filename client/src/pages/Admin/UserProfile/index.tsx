@@ -62,6 +62,7 @@ const UserProfile = () => {
   const [kycFee, setKycFee] = useState(false);
   const [walletChange, setWalletChange] = useState('');
   const [loadingChangeWallet, setLoadingChangeWallet] = useState(false);
+  const [originalShortfallAmount, setOriginalShortfallAmount] = useState(0);
 
   const createWildCardModal = CreateWildCardModal({
 
@@ -120,6 +121,7 @@ const UserProfile = () => {
             enableWithdrawCrypto,
             enableWithdrawBank,
             wildCards,
+            shortfallAmount,
           } = response.data;
           setWildCards(wildCards);
           setValue('userId', userId);
@@ -155,6 +157,8 @@ const UserProfile = () => {
           setCurrentTermDie(errLahCode === 'OVER45' ? true : false);
           setIsBonusRef(bonusRef);
           setKycFee(kycFee);
+          setOriginalShortfallAmount(shortfallAmount || 0);
+          setValue('shortfallAmount', shortfallAmount || 0);
         })
         .catch((error) => {
           let message =
@@ -168,7 +172,6 @@ const UserProfile = () => {
 
   const onSubmit = useCallback(
     async (values) => {
-      console.log({ values });
       if (phone === '') {
         setErrPhone(true);
         return;
@@ -352,6 +355,12 @@ const UserProfile = () => {
       }
       if (values.dateOfBirth !== data.dateOfBirth) {
         formData.append('dateOfBirth', values.dateOfBirth);
+      }
+
+      // Handle shortfallAmount update
+      if (values.shortfallAmount !== undefined && parseFloat(values.shortfallAmount) !== originalShortfallAmount) {
+        formData.append('shortfallAmount', values.shortfallAmount);
+        formData.append('shortfallDescription', values.shortfallDescription);
       }
 
       formData.append('isRegistered', values.isRegistered);
@@ -2175,10 +2184,50 @@ const UserProfile = () => {
                       <div className="px-4 py-2 font-semibold">
                         Outstanding Pre-Tier2 Pool Amount
                       </div>
-                      <div className="px-4 py-2">
-                        {data.shortfallAmount} USDT
-                      </div>
+                      {isEditting ? (
+                        <div className="px-4">
+                          <input
+                            type="number"
+                            step="0.01"
+                            className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                            {...register('shortfallAmount')}
+                          />
+                        </div>
+                      ) : (
+                        <div className="px-4 py-2">
+                          {data.shortfallAmount} USDT
+                        </div>
+                      )}
                     </div>
+                    {/* Conditional description field when shortfallAmount changes */}
+                    {isEditting && (
+                      <Controller
+                        name="shortfallAmount"
+                        control={control}
+                        render={({ field }) => {
+                          const currentValue = parseFloat(field.value || 0);
+                          const hasChanged = currentValue !== originalShortfallAmount;
+
+                          if (!hasChanged) return <></>;
+
+                          return (
+                            <div className="grid lg:grid-cols-2 grid-cols-1">
+                              <div className="px-4 py-2 font-semibold">
+                                Pre-Tier2 Pool Description
+                              </div>
+                              <div className="px-4">
+                                <textarea
+                                  className="w-full px-4 py-1.5 rounded-md border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
+                                  placeholder="Enter description for this pool adjustment..."
+                                  rows={3}
+                                  {...register('shortfallDescription')}
+                                />
+                              </div>
+                            </div>
+                          );
+                        }}
+                      />
+                    )}
                     {data.city === 'US' && (
                       <>
                         <div className="grid lg:grid-cols-2 grid-cols-1">

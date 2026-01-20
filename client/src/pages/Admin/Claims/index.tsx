@@ -165,24 +165,24 @@ const AdminClaimsPage = () => {
             {userInfo?.permissions
               ?.find((p) => p.page.path === '/admin/claims')
               ?.actions.includes('export') && (
-              <div>
-                <button
-                  onClick={handleExportClaims}
-                  className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm rounded-md hover:opacity-70"
-                >
-                  <svg
-                    fill="currentColor"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
+                <div>
+                  <button
+                    onClick={handleExportClaims}
+                    className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm rounded-md hover:opacity-70"
                   >
-                    <path d="M8.71,7.71,11,5.41V15a1,1,0,0,0,2,0V5.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42l-4-4a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-4,4A1,1,0,1,0,8.71,7.71ZM21,14a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V15a1,1,0,0,0-2,0v4a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V15A1,1,0,0,0,21,14Z" />
-                  </svg>
-                  Export Data
-                </button>
-              </div>
-            )}
+                    <svg
+                      fill="currentColor"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M8.71,7.71,11,5.41V15a1,1,0,0,0,2,0V5.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42l-4-4a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-4,4A1,1,0,1,0,8.71,7.71ZM21,14a1,1,0,0,0-1,1v4a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V15a1,1,0,0,0-2,0v4a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V15A1,1,0,0,0,21,14Z" />
+                    </svg>
+                    Export Data
+                  </button>
+                </div>
+              )}
           </div>
           {loading ? (
             <div className="flex justify-center py-8">
@@ -222,8 +222,8 @@ const AdminClaimsPage = () => {
                         (isCryptoHash
                           ? 'CRYPTO'
                           : item.coin === 'USDT'
-                          ? 'BANK'
-                          : null);
+                            ? 'BANK'
+                            : null);
 
                       // For BANK withdrawal: calculate amounts in VND
                       const isBank =
@@ -338,7 +338,11 @@ const AdminClaimsPage = () => {
                             {item.hash ? (
                               isCryptoHash ? (
                                 <a
-                                  href={`https://bscscan.com/tx/${item.hash}`}
+                                  href={
+                                    item.coin === 'HEWE'
+                                      ? `https://explorer.amchain.net/transactions_detail/${item.hash}`
+                                      : `https://bscscan.com/tx/${item.hash}`
+                                  }
                                   target="_blank"
                                   rel="noreferrer"
                                   className="text-blue-600 hover:text-blue-800 underline truncate inline-block max-w-[220px] align-bottom"

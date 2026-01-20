@@ -1090,8 +1090,8 @@ const getPaymentTier2Info = asyncHandler(async (req, res) => {
             type: rePayForPoolRef
               ? "POOLREPAYMENT"
               : haveParentNotPayEnough
-              ? "REFERRALHOLD"
-              : "REFERRAL",
+                ? "REFERRALHOLD"
+                : "REFERRAL",
             status: "PENDING",
           });
           paymentIds.push({
@@ -1198,8 +1198,8 @@ const onDoneTier2Payment = asyncHandler(async (req, res) => {
           user.tier === 1
             ? moment().add(30, "days").toDate()
             : user.tier === 2
-            ? moment().add(45, "days").toDate()
-            : null;
+              ? moment().add(45, "days").toDate()
+              : null;
 
         const newTreeTier1 = await Tree.create({
           userName: user.userId + "1-1",
@@ -1229,8 +1229,8 @@ const onDoneTier2Payment = asyncHandler(async (req, res) => {
           nextTier === 1
             ? moment().add(30, "days").toDate()
             : nextTier === 2
-            ? moment().add(45, "days").toDate()
-            : null;
+              ? moment().add(45, "days").toDate()
+              : null;
 
         const treeOfUserTier2 = await Tree.create({
           userName: user.userId,
@@ -1336,6 +1336,7 @@ const getInfoPreTier2Pool = asyncHandler(async (req, res) => {
         status: 1,
         amount: 1,
         createdAt: 1,
+        description: 1,
         userInfo: {
           _id: 1,
           userId: 1,
@@ -1452,21 +1453,28 @@ const getPassedUsers = asyncHandler(async (req, res) => {
 });
 
 const adminAddToPool = asyncHandler(async (req, res) => {
-  let { amount } = req.body;
-  if (amount > 0) {
-    await PreTier2Pool.create({
-      userId: "6494e9101e2f152a593b66f2",
-      amount,
-      status: "IN",
-      createdAt: new Date(),
-    });
+  let { amount, description } = req.body;
+  const numAmount = parseFloat(amount);
 
-    res.json({
-      message: "Pool added!",
-    });
-  } else {
-    throw new Error("Amount must be greater than 0");
+  if (numAmount === 0) {
+    throw new Error("Amount must not be zero");
   }
+
+  // Nếu số âm -> status OUT, nếu số dương -> status IN
+  const status = numAmount < 0 ? "OUT" : "IN";
+  const absoluteAmount = Math.abs(numAmount);
+
+  await PreTier2Pool.create({
+    userId: "6494e9101e2f152a593b66f2",
+    amount: absoluteAmount,
+    status: status,
+    description: description || "",
+    createdAt: new Date(),
+  });
+
+  res.json({
+    message: "Pool added!",
+  });
 });
 
 export {

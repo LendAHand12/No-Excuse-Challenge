@@ -42,6 +42,7 @@ import moment from "moment";
 import "moment-timezone";
 import { getPriceHewe } from "../utils/getPriceHewe.js";
 import PreTier2 from "../models/preTier2Model.js";
+import PreTier2Pool from "../models/preTier2PoolModel.js";
 import Honor from "../models/honorModel.js";
 import WildCard from "../models/wildCardModel.js";
 import { checkAbnormalIncomeForUser } from "../utils/methods.js";
@@ -1616,6 +1617,8 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
     enablePaymentBank,
     enableWithdrawCrypto,
     enableWithdrawBank,
+    shortfallAmount,
+    shortfallDescription,
   } = req.body;
 
   if (userId) {
@@ -1808,6 +1811,27 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
           await treeTier2.save();
         }
       }
+    }
+
+    // Handle shortfallAmount update and create pre tier 2 pool
+    if (shortfallAmount !== undefined && parseFloat(shortfallAmount) !== user.shortfallAmount) {
+      const oldAmount = user.shortfallAmount || 0;
+      const newAmount = parseFloat(shortfallAmount);
+      const difference = newAmount - oldAmount;
+
+      // Create new pre tier 2 pool record
+      const poolStatus = difference < 0 ? 'IN' : 'OUT';
+      const poolAmount = Math.abs(difference);
+
+      await PreTier2Pool.create({
+        userId: user._id,
+        amount: poolAmount,
+        status: poolStatus,
+        description: shortfallDescription || '',
+      });
+
+      // Update user's shortfallAmount
+      user.shortfallAmount = newAmount;
     }
 
     user.fine = newFine || user.fine;
