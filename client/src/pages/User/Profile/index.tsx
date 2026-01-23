@@ -288,21 +288,21 @@ const Profile = () => {
             setShowSignatureModal(false);
           } else
             // Priority 1: Check if Face ID needs setup
-            if (response.data.lockKyc === false && response.data.facetecTid === '') {
+            if (response.data.lockKyc === false && response.data.facetecTid === '' && response.data.city === "VN") {
               setShowFaceId(true);
               setShowProfilePopup(false);
               setShowTermsModal(false);
               setShowSignatureModal(false);
             }
             // Priority 2: Check if profile is incomplete
-            else if (response.data.isProfileComplete === false) {
+            else if (response.data.isProfileComplete === false && response.data.city === "VN") {
               setShowProfilePopup(true);
               setShowFaceId(false);
               setShowTermsModal(false);
               setShowSignatureModal(false);
             }
             // Priority 3: Check if signature is missing for Tier 1
-            else if (response.data.countPay === 0 && !response.data.signatureImage) {
+            else if (response.data.countPay === 0 && !response.data.signatureImage && response.data.city === "VN") {
               setShowTermsModal(true);
               setShowFaceId(false);
               setShowProfilePopup(false);
