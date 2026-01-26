@@ -786,8 +786,8 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
             type: rePayForPoolRef
               ? "POOLREPAYMENT"
               : haveParentNotPayEnough
-              ? "REFERRALHOLD"
-              : "REFERRAL",
+                ? "REFERRALHOLD"
+                : "REFERRAL",
             status: "PENDING",
           });
           paymentIds.push({
@@ -1176,7 +1176,7 @@ const getAllPayments = asyncHandler(async (req, res) => {
           amount: pay.amount,
           userId: user.userId,
           email: user.email,
-          userReceiveId: userRef ? userRef.userId : "Unknow",
+          userReceiveId: pay.username_to,
           userReceiveEmail: userRef ? userRef.email : "Unknow",
           userCountPay: pay.userCountPay,
           type: pay.type,
@@ -1209,7 +1209,7 @@ const getAllPayments = asyncHandler(async (req, res) => {
               amount: pay.amount,
               userId: user.userId,
               email: user.email,
-              userReceiveId: userReceive ? userReceive.userId : "Unknow",
+              userReceiveId: pay.username_to,
               userReceiveEmail: userReceive ? userReceive.email : "Unknow",
               type: pay.type,
               userCountPay: pay.userCountPay,

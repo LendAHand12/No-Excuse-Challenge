@@ -138,7 +138,6 @@ const UserHistoryPage = () => {
   }, [currentCancelRequest]);
 
   const handleApproveChange = useCallback(async () => {
-    console.log({currentApproveRequest});
     await UserHistory.update({
       status: 'approve',
       id: currentApproveRequest._id,
@@ -347,11 +346,10 @@ const UserHistoryPage = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div
-                      className={`max-w-fit text-white rounded-sm py-1 px-2 text-sm ${
-                        userHistoryStatus.find(
-                          (item) => item.status === ele.status.toUpperCase(),
-                        ).color
-                      } mr-2`}
+                      className={`max-w-fit text-white rounded-sm py-1 px-2 text-sm ${userHistoryStatus.find(
+                        (item) => item.status === ele.status.toUpperCase(),
+                      ).color
+                        } mr-2`}
                     >
                       {ele.status.toUpperCase()}
                     </div>

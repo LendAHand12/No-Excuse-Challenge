@@ -1207,8 +1207,6 @@ const updateUser = asyncHandler(async (req, res) => {
     token, // Token from face scan verification
   } = req.body;
 
-  console.log({ body: req.body });
-
   const user = await User.findOne({ _id: req.params.id }).select("-password");
 
   if (!user) {
@@ -1687,8 +1685,20 @@ const adminUpdateUser = asyncHandler(async (req, res) => {
   const oldUser = user.toObject();
   if (user) {
     if (userId && user.userId !== userId) {
+      const oldUserId = user.userId;
       user.userId = userId;
-      await Tree.updateMany({ userId: user._id }, { userName: userId });
+
+      // Update all tree records, preserving any suffix after the base userId
+      const treeDocs = await Tree.find({ userId: user._id });
+      for (const tree of treeDocs) {
+        // Extract suffix by removing the old userId from the beginning
+        const suffix = tree.userName.startsWith(oldUserId)
+          ? tree.userName.substring(oldUserId.length)
+          : '';
+        // Set new userName as new userId + preserved suffix
+        tree.userName = userId + suffix;
+        await tree.save();
+      }
     }
     user.phone = phone || user.phone;
     user.email = email || user.email;
