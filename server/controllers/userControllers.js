@@ -3975,7 +3975,9 @@ const downloadCCCDImages = asyncHandler(async (req, res) => {
   });
 
   // Set response headers
-  const zipFileName = `cccd_${user.userId || user._id}_${Date.now()}.zip`;
+  // Sanitize filename to remove invalid characters (spaces, special chars, etc.)
+  const sanitizedUserId = (user.userId || user._id.toString()).replace(/[^\w\-]/g, '_');
+  const zipFileName = `cccd_${sanitizedUserId}_${Date.now()}.zip`;
   res.attachment(zipFileName);
   res.contentType("application/zip");
 
