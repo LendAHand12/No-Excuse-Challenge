@@ -9,6 +9,7 @@ import User from "../models/userModel.js";
 import Config from "../models/configModel.js";
 import { numberToVietnameseWords } from "../utils/numberToWords.js";
 import { fileURLToPath } from "url";
+import { CLIENT_RENEG_LIMIT } from "tls";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -89,6 +90,8 @@ const generateContract = asyncHandler(async (req, res) => {
       signature: `${process.env.BASE_URL}/${user.signatureImage}`, // This will be handled by the image module
     };
 
+    console.log({ data });
+
 
     // Render the document
     await doc.renderAsync(data);
@@ -103,9 +106,12 @@ const generateContract = asyncHandler(async (req, res) => {
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     );
+
+    // Sanitize filename to remove invalid characters
+    const sanitizedUserId = (user.userId || user._id.toString()).replace(/[^\w\-]/g, '_');
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=Contract_${user.userId}.docx`
+      `attachment; filename=Contract_${sanitizedUserId}.docx`
     );
 
     res.send(buffer);
