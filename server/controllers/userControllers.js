@@ -682,11 +682,11 @@ const getUserById = asyncHandler(async (req, res) => {
       bankCode: user.bankCode,
       dateOfBirth: user.dateOfBirth,
       // Payment and withdrawal gateway settings
-      enablePaymentCrypto: user.enablePaymentCrypto !== undefined ? user.enablePaymentCrypto : true,
-      enablePaymentBank: user.enablePaymentBank !== undefined ? user.enablePaymentBank : true,
-      enableWithdrawCrypto:
-        user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
-      enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
+      // [LOCKED] Bank disabled → always return crypto=true regardless of DB value
+      enablePaymentCrypto: true,
+      enablePaymentBank: false, // [LOCKED] re-enable: user.enablePaymentBank !== undefined ? user.enablePaymentBank : true
+      enableWithdrawCrypto: true,
+      enableWithdrawBank: false, // [LOCKED] re-enable: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true
       wildCards: wildCards, // Danh sách wild cards của user
       currentAddress: user.currentAddress,
       fullName: user.fullName
@@ -731,11 +731,11 @@ const getUserAssets = asyncHandler(async (req, res) => {
     bankCode: user.bankCode || "",
     bankName: user.bankName || "",
     // Payment and withdrawal gateway settings
-    enablePaymentCrypto: user.enablePaymentCrypto !== undefined ? user.enablePaymentCrypto : true,
-    enablePaymentBank: user.enablePaymentBank !== undefined ? user.enablePaymentBank : true,
-    enableWithdrawCrypto:
-      user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
-    enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
+    // [LOCKED] Bank disabled → always return crypto=true regardless of DB value
+    enablePaymentCrypto: true,
+    enablePaymentBank: false, // [LOCKED] re-enable: user.enablePaymentBank !== undefined ? user.enablePaymentBank : true
+    enableWithdrawCrypto: true,
+    enableWithdrawBank: false, // [LOCKED] re-enable: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true
     city: user.city || "VN",
   });
 });
@@ -1099,11 +1099,11 @@ const getUserInfo = asyncHandler(async (req, res) => {
       bankCode: user.bankCode,
       dateOfBirth: user.dateOfBirth,
       // Payment and withdrawal gateway settings
-      enablePaymentCrypto: user.enablePaymentCrypto !== undefined ? user.enablePaymentCrypto : true,
-      enablePaymentBank: user.enablePaymentBank !== undefined ? user.enablePaymentBank : true,
-      enableWithdrawCrypto:
-        user.enableWithdrawCrypto !== undefined ? user.enableWithdrawCrypto : false,
-      enableWithdrawBank: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true,
+      // [LOCKED] Bank disabled → always return crypto=true regardless of DB value
+      enablePaymentCrypto: true,
+      enablePaymentBank: false, // [LOCKED] re-enable: user.enablePaymentBank !== undefined ? user.enablePaymentBank : true
+      enableWithdrawCrypto: true,
+      enableWithdrawBank: false, // [LOCKED] re-enable: user.enableWithdrawBank !== undefined ? user.enableWithdrawBank : true
       // Tính toán các field theo tier
       tier1: (() => {
         const todayStart = moment.tz("Asia/Ho_Chi_Minh").startOf("day");

@@ -17,11 +17,11 @@ export default function WithdrawModal({
   const enableWithdrawCrypto =
     userInfo?.enableWithdrawCrypto !== undefined
       ? userInfo.enableWithdrawCrypto
-      : false;
+      : true;
   const enableWithdrawBank =
     userInfo?.enableWithdrawBank !== undefined
       ? userInfo.enableWithdrawBank
-      : true;
+      : false; // [LOCKED] Bank withdrawal disabled
 
   // Set default withdrawal type based on enabled gateways
   const getDefaultWithdrawalType = (): 'CRYPTO' | 'BANK' => {
@@ -107,9 +107,9 @@ export default function WithdrawModal({
   const calculateCryptoAmount = () => {
     if (!amount) return { amount: 0, tax: 0, fee: 0, received: 0 };
     const amountUsdt = parseFloat(amount) || 0;
-    // Tính thuế: Ấn Độ (IN) = 0%, các nhánh khác = 10%
-    const taxRate = userInfo?.city === 'IN' ? 0 : 0.1;
-    const tax = amountUsdt * taxRate; // Tax
+    // Thuế rút USDT qua CRYPTO: 0% (không trừ thuế)
+    const taxRate = 0;
+    const tax = amountUsdt * taxRate; // Tax = 0
     const fee = 1; // Transaction fee 1 USDT
     const received = amountUsdt - tax - fee;
     return {
@@ -128,9 +128,9 @@ export default function WithdrawModal({
       received:
         received > 0
           ? received.toLocaleString('en-US', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
           : '0.00',
       amountValue: amountUsdt,
       taxValue: tax,
@@ -243,11 +243,10 @@ export default function WithdrawModal({
                   <button
                     type="button"
                     onClick={() => setWithdrawalType('CRYPTO')}
-                    className={`flex-1 px-4 py-2 rounded-lg border transition ${
-                      withdrawalType === 'CRYPTO'
-                        ? 'bg-green-600 border-green-500 text-white'
-                        : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'
-                    }`}
+                    className={`flex-1 px-4 py-2 rounded-lg border transition ${withdrawalType === 'CRYPTO'
+                      ? 'bg-green-600 border-green-500 text-white'
+                      : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'
+                      }`}
                   >
                     {t('withdrawModal.cryptoWallet')}
                   </button>
@@ -256,11 +255,10 @@ export default function WithdrawModal({
                   <button
                     type="button"
                     onClick={() => setWithdrawalType('BANK')}
-                    className={`flex-1 px-4 py-2 rounded-lg border transition ${
-                      withdrawalType === 'BANK'
-                        ? 'bg-green-600 border-green-500 text-white'
-                        : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'
-                    }`}
+                    className={`flex-1 px-4 py-2 rounded-lg border transition ${withdrawalType === 'BANK'
+                      ? 'bg-green-600 border-green-500 text-white'
+                      : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'
+                      }`}
                   >
                     {t('withdrawModal.bankTransfer')}
                   </button>
@@ -337,18 +335,7 @@ export default function WithdrawModal({
                   {cryptoAmount.amount} USDT
                 </span>
               </div>
-              {userInfo?.city !== 'IN' && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">
-                    {t('withdrawModal.tax')}{' '}
-                    {userInfo?.city === 'IN' ? '' : '(10%)'} :
-                  </span>
-                  <span className="text-red-400">
-                    -{cryptoAmount.tax}
-                    USDT
-                  </span>
-                </div>
-              )}
+              {/* Tax: 0% - hidden since no tax for crypto withdrawal */}
               <div className="flex justify-between text-sm">
                 <span className="text-gray-400">
                   {t('withdrawModal.transactionFee')}:

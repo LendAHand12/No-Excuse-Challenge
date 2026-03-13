@@ -111,28 +111,28 @@ const registerUser = asyncHandler(async (req, res) => {
   });
   const userExistsWalletAddress = walletAddress
     ? await User.findOne({
-        $and: [{ walletAddress: { $ne: "" } }, { walletAddress }],
-        status: { $ne: "DELETED" },
-      })
+      $and: [{ walletAddress: { $ne: "" } }, { walletAddress }],
+      status: { $ne: "DELETED" },
+    })
     : null;
   // Only check for duplicate account number if accountNumber is provided
   const userExistsAccountNumber = accountNumber
     ? await User.findOne({
-        accountNumber,
-        status: { $ne: "DELETED" },
-      })
+      accountNumber,
+      status: { $ne: "DELETED" },
+    })
     : null;
 
   // Check duplicate bank account (bankCode + accountNumber) - only if both are provided
   const userExistsBankAccount =
     bankCode && accountNumber
       ? await User.findOne({
-          $and: [
-            { bankCode: bankCode },
-            { accountNumber: accountNumber },
-            { status: { $ne: "DELETED" } },
-          ],
-        })
+        $and: [
+          { bankCode: bankCode },
+          { accountNumber: accountNumber },
+          { status: { $ne: "DELETED" } },
+        ],
+      })
       : null;
 
   if (userExistsUserId) {
@@ -227,27 +227,27 @@ const registerUser = asyncHandler(async (req, res) => {
       }
 
       // Set payment and withdrawal defaults based on country
-      // If user is NOT in Vietnam: crypto only (enable crypto, disable bank)
-      // If user is in Vietnam: both enabled by default (current behavior)
+      // [LOCKED] Bank payment disabled for all users - only USDT allowed
+      // To re-enable: change enablePaymentBank back to "isUserInVietnam ? true : false"
       const enablePaymentCrypto = isUserInVietnam ? false : true; // Always enable crypto
-      const enablePaymentBank = isUserInVietnam ? true : false; // Only enable bank for Vietnam users
+      const enablePaymentBank = false; // [LOCKED] Bank payment disabled for all users
       const enableWithdrawCrypto = isUserInVietnam ? false : true; // Always enable crypto withdrawal
-      const enableWithdrawBank = isUserInVietnam ? true : false; // Only enable bank withdrawal for Vietnam users
+      const enableWithdrawBank = false; // [LOCKED] Bank withdrawal disabled for all users - set to "isUserInVietnam ? true : false" when re-enabling
 
       // Only save bank information if user is in Vietnam, otherwise leave empty
       const bankInfo = isUserInVietnam
         ? {
-            accountName: accountName || "",
-            accountNumber: accountNumber || "",
-            bankName: bankName || "",
-            bankCode: bankCode || "",
-          }
+          accountName: accountName || "",
+          accountNumber: accountNumber || "",
+          bankName: bankName || "",
+          bankCode: bankCode || "",
+        }
         : {
-            accountName: "",
-            accountNumber: "",
-            bankName: "",
-            bankCode: "",
-          };
+          accountName: "",
+          accountNumber: "",
+          bankName: "",
+          bankCode: "",
+        };
 
       const user = await User.create({
         userId,

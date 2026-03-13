@@ -61,8 +61,8 @@ export default function UserAssetsPage() {
     bankName: '',
     city: '',
     // Withdrawal gateway settings
-    enableWithdrawCrypto: false,
-    enableWithdrawBank: true,
+    enableWithdrawCrypto: true,
+    enableWithdrawBank: false, // [LOCKED] Bank withdrawal disabled
   });
   const [limitAmountHewe, setLimitAmountHewe] = useState(0);
 
@@ -125,11 +125,11 @@ export default function UserAssetsPage() {
           enableWithdrawCrypto:
             response.data.enableWithdrawCrypto !== undefined
               ? response.data.enableWithdrawCrypto
-              : false,
+              : true,
           enableWithdrawBank:
             response.data.enableWithdrawBank !== undefined
               ? response.data.enableWithdrawBank
-              : true,
+              : false, // [LOCKED] Bank withdrawal disabled
         });
       }
     } catch (error: any) {

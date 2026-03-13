@@ -267,10 +267,11 @@ const claimUsdt = asyncHandler(async (req, res) => {
           message: "Withdrawal request has been sent to Admin. Please wait!",
         });
       } else if (withdrawType === "CRYPTO") {
-        // Validate enableWithdrawCrypto - only allow if explicitly true
-        if (user.enableWithdrawCrypto !== true) {
-          throw new Error("Crypto withdrawal is not enabled for your account");
-        }
+        // [UNLOCKED] Crypto withdrawal allowed for all users regardless of DB value
+        // To re-enable check: uncomment below
+        // if (user.enableWithdrawCrypto !== true) {
+        //   throw new Error("Crypto withdrawal is not enabled for your account");
+        // }
 
         // CRYPTO withdrawal: Send USDT directly via blockchain
         // Validate wallet address
@@ -280,9 +281,9 @@ const claimUsdt = asyncHandler(async (req, res) => {
 
         // Calculate amounts - Tất cả tính bằng USDT
         const amountUsdt = parseFloat(amount);
-        // Tính thuế: Ấn Độ (IN) = 0%, các nhánh khác = 10%
-        const taxRate = user.city === "IN" ? 0 : 0.1;
-        const tax = amountUsdt * taxRate; // Tax (USDT)
+        // Thuế rút USDT qua CRYPTO: 0% (không trừ thuế)
+        const taxRate = 0;
+        const tax = amountUsdt * taxRate; // Tax (USDT) = 0
         const fee = 1; // Transaction fee 1 USDT
         const receivedAmount = amountUsdt - tax - fee; // Số tiền thực tế nhận được (USDT)
 
