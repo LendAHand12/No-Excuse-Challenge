@@ -89,6 +89,15 @@ const adminLogin = asyncHandler(async (req, res) => {
     { expiresIn: "10m" }
   );
 
+  // LOG 2FA CODE FOR LOCAL DEVELOPMENT BYPASS
+  // if (process.env.NODE_ENV === "development" || true) {
+  //   const currentCode = speakeasy.totp({
+  //     secret: admin.googleAuthenticatorSecret,
+  //     encoding: "base32",
+  //   });
+  //   console.log(`[LOCAL BYPASS] 2FA Code for ${email}: ${currentCode}`);
+  // }
+
   return res.json({
     success: true,
     requiresFirstTimeSetup: false,
