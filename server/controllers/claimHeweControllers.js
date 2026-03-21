@@ -313,16 +313,16 @@ const claimUsdt = asyncHandler(async (req, res) => {
         }
 
         // CRYPTO withdrawal < 200: Send USDT directly via blockchain
-        // const receipt = await sendUsdt({
-        //   amount: receivedAmount,
-        //   receiverAddress: user.walletAddress,
-        // });
+        const receipt = await sendUsdt({
+          amount: receivedAmount,
+          receiverAddress: user.walletAddress,
+        });
 
         // Create Claim record
         await Claim.create({
           userId: user.id,
           amount: amountUsdt, // Số tiền user yêu cầu (USDT)
-          hash: 'receipt.hash',
+          hash: receipt.hash,
           coin: "USDT",
           withdrawalType: "CRYPTO",
           tax: tax, // Thuế (USDT)
@@ -338,7 +338,7 @@ const claimUsdt = asyncHandler(async (req, res) => {
 
         res.status(200).json({
           message: "Claim USDT successful",
-          hash: "receipt.hash",
+          hash: receipt.hash,
         });
       } else {
         throw new Error("Invalid withdrawal type");
