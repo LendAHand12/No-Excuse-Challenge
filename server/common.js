@@ -1758,8 +1758,8 @@ export const recalculateDieTimeDaily = async () => {
             } else {
               // Nếu dieTime = null
               if (!hasTwoAliveRefId) {
-                // Không đủ → dieTime = ngày hiện tại + 30 ngày
-                const newDieTime = todayStart.clone().add(30, "days").toDate();
+                // Không đủ → dieTime = ngày hiện tại + 45 ngày
+                const newDieTime = todayStart.clone().add(45, "days").toDate();
                 treeTier1.dieTime = newDieTime;
                 await treeTier1.save();
                 tier1Updated++;

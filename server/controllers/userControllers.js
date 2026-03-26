@@ -294,7 +294,7 @@ const getUserById = asyncHandler(async (req, res) => {
             isBlue = true;
           } else {
             // Nếu còn 10 ngày nữa đến hạn (tier 1) → isYellow = true
-            if (refedUser.tier === 1 && diffDays <= 10) {
+            if (refedUser.tier === 1 && diffDays <= 15) {
               isYellow = true;
             } else if (refedUser.tier === 2 && diffDays <= 5) {
               // Nếu còn 5 ngày nữa đến hạn (tier 2) → isYellow = true
@@ -626,7 +626,7 @@ const getUserById = asyncHandler(async (req, res) => {
               isBlue = true;
             } else {
               // Nếu còn 10 ngày nữa đến hạn (tier 1) hoặc 5 ngày (tier 2+) → isYellow = true
-              const warningDays = tier === 1 ? 10 : 5;
+              const warningDays = tier === 1 ? 15 : 5;
               if (diffDays <= warningDays) {
                 isYellow = true;
               }
@@ -778,7 +778,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
             isBlue = true;
           } else {
             // Nếu còn 10 ngày nữa đến hạn (tier 1) → isYellow = true
-            if (refedUser.tier === 1 && diffDays <= 10) {
+            if (refedUser.tier === 1 && diffDays <= 15) {
               isYellow = true;
             } else if (refedUser.tier === 2 && diffDays <= 5) {
               // Nếu còn 5 ngày nữa đến hạn (tier 2) → isYellow = true
@@ -1141,7 +1141,7 @@ const getUserInfo = asyncHandler(async (req, res) => {
               isBlue = true;
             } else {
               // Nếu còn 10 ngày nữa đến hạn (tier 1) hoặc 5 ngày (tier 2+) → isYellow = true
-              const warningDays = tier === 1 ? 10 : 5;
+              const warningDays = tier === 1 ? 15 : 5;
               if (diffDays <= warningDays) {
                 isYellow = true;
               }
@@ -2113,7 +2113,7 @@ const getChildsOfUserForTree = asyncHandler(async (req, res) => {
           isBlue = true;
         } else {
           // Nếu còn 10 ngày nữa đến hạn (tier 1) hoặc 5 ngày nữa đến hạn (tier 2) → isYellow = true
-          if (currentTier === 1 && diffDays <= 10) {
+          if (currentTier === 1 && diffDays <= 15) {
             isYellow = true;
           } else if (currentTier === 2 && diffDays <= 5) {
             isYellow = true;
