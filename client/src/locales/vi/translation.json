@@ -1550,7 +1550,15 @@
     "downloadSuccess": "Tải xuống hợp đồng thành công",
     "download": "Tải hợp đồng"
   },
-  "noData": "Không có dữ liệu"
+  "noData": "Không có dữ liệu",
+  "insufficient_level_msg": "Cấp độ hiện tại của bạn không đủ để nâng cấp lên tier tiếp theo",
+  "payment_success_tier_upgrade": "Bạn đã nâng cấp thành công. Vui lòng chọn một người cấp dưới để gán Sub ID của bạn.",
+  "next_tier_not_available": "Cấp độ tiếp theo hiện chưa sẵn sàng.",
+  "payment_success_upgrade_msg": "Thanh toán thành công. Bạn đã được nâng lên Tier tiếp theo!",
+  "sub_id_created_msg": "Tạo Sub ID thành công",
+  "select_subordinate_msg": "Vui lòng chọn một người cấp dưới để gán Sub ID",
+  "skip_sub_id_desc": "Hoặc bạn có thể bỏ qua bước này và tiếp tục kiểm tra điều kiện cho cấp độ tiếp theo.",
+  "skip_sub_id_btn": "Bỏ qua thanh toán cho Sub ID"
 }
 
 

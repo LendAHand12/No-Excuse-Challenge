@@ -45,13 +45,13 @@ const PaymentNextTierPage = () => {
     formState: { errors },
   } = useForm();
 
-  const onGetPaymentInfo = async (childId) => {
+  const onGetPaymentInfo = async (childId, checkNextTier = false) => {
     if (childId) {
       setLoadingListPayment(true);
     } else {
       setLoadingPaymentInfo(true);
     }
-    await Payment.getPaymentNextTierInfo(childId)
+    await Payment.getPaymentNextTierInfo(childId, checkNextTier)
       .then((response) => {
         const {
           status,
@@ -151,9 +151,19 @@ const PaymentNextTierPage = () => {
       })
         .then((response) => {
           toast.success(t(response.data.message));
-          if (response.data.message === 'Payment successful') {
+          if (
+            response.data.message ===
+            'payment_success_upgrade_msg'
+          ) {
+            // Sau khi nâng cấp Tier (GĐ A), gọi lại info để hiển thị bước chọn Sub ID
+            onGetPaymentInfo('');
+          } else if (
+            response.data.message === 'sub_id_created_msg' ||
+            response.data.message === 'Payment successful'
+          ) {
+            // Sau khi hoàn tất Sub ID (GĐ B) hoặc các bước cuối cùng, hiển thị màn hình hoàn tất
             setResStatus('DONE');
-            setStep(step + 1);
+            setStep(0);
           }
         })
         .catch((error) => {
@@ -256,13 +266,13 @@ const PaymentNextTierPage = () => {
                           onClick={() => navigate('/user/profile')}
                           className="flex items-center gap-2 px-6 py-2 bg-red-600 text-white rounded-md hover:opacity-70"
                         >
-                          No
+                          {t('no')}
                         </button>
                         <button
                           onClick={() => setShowCommit(false)}
                           className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:opacity-70"
                         >
-                          Yes
+                          {t('yes')}
                         </button>
                       </div>
                     </div>
@@ -275,7 +285,7 @@ const PaymentNextTierPage = () => {
                 className="bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded relative mb-5"
                 role="alert"
               >
-                <span className="block sm:inline">{resMessage}</span>
+                <span className="block sm:inline">{t(resMessage)}</span>
               </div>
             )}
             {resStatus === 'OK' && (
@@ -284,7 +294,7 @@ const PaymentNextTierPage = () => {
                   className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-5"
                   role="alert"
                 >
-                  <span className="block sm:inline">{resMessage}</span>
+                  <span className="block sm:inline">{t(resMessage)}</span>
                 </div>
                 <div className="w-full max-w-203 mx-auto rounded-lg bg-white p-10 text-gray-700 mt-4">
                   <div className="mb-10">
@@ -293,25 +303,39 @@ const PaymentNextTierPage = () => {
                     </h1>
                   </div>
                   {step !== 0 && (
-                    <div className="space-y-2  mb-10">
-                      <h1 className="text-lg font-semibold">
-                        Please select the subordinate to assign a sub ID :
-                      </h1>
-                      <Select
-                        options={listChild.map((ele) => ({
-                          value: ele.id,
-                          label: ele.userName,
-                        }))}
-                        onChange={(e) => {
-                          setChildId(e.value);
-                        }}
-                        className="w-full mb-1 border text-black border-black rounded-md focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
-                      />
-                      {errSubId && (
-                        <p className="text-red-500 mt-1 text-sm">
-                          Please select a subordinate
-                        </p>
-                      )}
+                    <div className="space-y-4 mb-10">
+                      <div>
+                        <h1 className="text-lg font-semibold mb-2">
+                          Please select the subordinate to assign a sub ID :
+                        </h1>
+                        <Select
+                          options={listChild.map((ele) => ({
+                            value: ele.id,
+                            label: ele.userName,
+                          }))}
+                          onChange={(e) => {
+                            setChildId(e.value);
+                          }}
+                          className="w-full mb-1 border text-black border-black rounded-md focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
+                        />
+                        {errSubId && (
+                          <p className="text-red-500 mt-1 text-sm">
+                            Please select a subordinate
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="text-sm text-gray-500 text-center">
+                          {t('skip_sub_id_desc')}
+                        </div>
+                        <button
+                          onClick={() => onGetPaymentInfo('', true)}
+                          className="text-blue-600 hover:underline font-medium"
+                        >
+                          {t('skip_sub_id_btn')}
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -429,9 +453,9 @@ const PaymentNextTierPage = () => {
                   </svg>
 
                   <p className="text-md lg:text-2xl font-bold">
-                    Contribution Completed
+                    {t('Contribution Completed')}
                   </p>
-                  <p className="text-md lg:text-2xl font-bold">Thank You </p>
+                  <p className="text-md lg:text-2xl font-bold">{t('Thank You')} </p>
                 </div>
               </div>
             )}

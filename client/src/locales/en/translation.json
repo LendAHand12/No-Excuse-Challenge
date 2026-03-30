@@ -1458,7 +1458,15 @@
     "downloadSuccess": "Contract downloaded successfully",
     "download": "Download contract"
   },
-  "noData": "No data"
+  "noData": "No data",
+  "insufficient_level_msg": "Your current level is insufficient to upgrade to the next tier",
+  "payment_success_tier_upgrade": "You have successfully upgraded. Please select a subordinate to assign your Sub ID.",
+  "next_tier_not_available": "Next tier is not available yet.",
+  "payment_success_upgrade_msg": "Payment successful. You have upgraded to the next Tier!",
+  "sub_id_created_msg": "Sub ID created successful",
+  "select_subordinate_msg": "Please select a subordinate to assign your Sub ID",
+  "skip_sub_id_desc": "Or you can skip this step and proceed to the next level eligibility check.",
+  "skip_sub_id_btn": "Skip Sub ID Assignment for now"
 }
 
 

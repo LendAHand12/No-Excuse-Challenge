@@ -11,8 +11,10 @@ const Payment = {
   checkOrderStatus: (orderId) => {
     return API.get(`${URL_API_PAYMENT}/checkOrder/${orderId}`);
   },
-  getPaymentNextTierInfo: (childId) => {
-    return API.get(`${URL_API_PAYMENT}/infoNextTier?childId=${childId}`);
+  getPaymentNextTierInfo: (childId, checkNextTier = false) => {
+    return API.get(
+      `${URL_API_PAYMENT}/infoNextTier?childId=${childId}&checkNextTier=${checkNextTier}`,
+    );
   },
   addPayment: (body) => {
     return API.post(`${URL_API_PAYMENT}`, body);

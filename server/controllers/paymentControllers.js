@@ -449,20 +449,23 @@ const checkOrderStatus = asyncHandler(async (req, res) => {
 
 const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
   const { user } = req;
-  const { childId } = req.query;
+  const { childId, checkNextTier } = req.query;
 
-  if (user.paymentStep > 0 && childId === "") {
+  // Nếu user đang nợ Step 1 (Sub ID) nhưng muốn skip để xem điều kiện lên Tier tiếp theo
+  const isCheckingNextTier = checkNextTier === "true";
+
+  if (user.paymentStep > 0 && childId === "" && !isCheckingNextTier) {
     res.json({
       status: "OK",
-      message: `You're all set for the Tier ${user.tier + 1}. Let's move up!`,
+      message: `payment_success_tier_upgrade`,
       payments: [],
       paymentIds: [],
       userStepPayment: user.paymentStep,
     });
-  } else if (user.currentLayer.slice(-1) < 3) {
+  } else if (user.currentLayer.slice(-1) < 3 && (isCheckingNextTier || user.paymentStep === 0)) {
     res.status(200).json({
       status: "PENDING",
-      message: `Your current level is insufficient to upgrade to the tier ${user.tier + 1}`,
+      message: `insufficient_level_msg`,
     });
   } else {
     let goNextTier = false;
@@ -480,7 +483,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
       } else {
         res.status(200).json({
           status: "PENDING",
-          message: `Your current level is insufficient to upgrade to the tier ${user.tier + 1}`,
+          message: `insufficient_level_msg`,
         });
       }
     } else {
@@ -507,7 +510,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           userCountPay: user.countPay,
           userId_to: admin._id,
           username_to: "Fine Fee",
-          tier: user.tier + 1,
+          tier: isCheckingNextTier || user.paymentStep === 0 ? user.tier + 1 : user.tier,
           buyPackage: user.buyPackage,
           hash: "",
           type: "FINE",
@@ -525,20 +528,24 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
         });
       } else {
         let haveRefNotPayEnough = false;
+        // Nếu đang check Tier tiếp theo hoặc đang ở Step 0 thì tính phí Tier + 1
+        // Nếu đang trả nợ Step 1 thì tính phí Tier hiện tại (vì tier đã tăng ở Step 0)
+        const targetTierForFee = isCheckingNextTier || user.paymentStep === 0 ? user.tier + 1 : user.tier;
+        
         let registerFee = parseInt(
-          process.env[`REGISTER_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
+          process.env[`REGISTER_AMOUNT_TIER${targetTierForFee}`]
         );
         let pigFee = parseInt(
-          process.env[`DREAMPOOL_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
+          process.env[`DREAMPOOL_AMOUNT_TIER${targetTierForFee}`]
         );
         let companyFee = parseInt(
-          process.env[`HEWE_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
+          process.env[`HEWE_AMOUNT_TIER${targetTierForFee}`]
         );
         let directCommissionFee = parseInt(
-          process.env[`DIRECT_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
+          process.env[`DIRECT_AMOUNT_TIER${targetTierForFee}`]
         );
         let referralCommissionFee = parseInt(
-          process.env[`CONTRIBUTE_AMOUNT_TIER${user.tier + 1 - user.paymentStep}`]
+          process.env[`CONTRIBUTE_AMOUNT_TIER${targetTierForFee}`]
         );
         // giao dich dang ky
         payments.push({
@@ -551,7 +558,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           userCountPay: user.countPay,
           userId_to: admin._id,
           username_to: "Registration Fee",
-          tier: user.tier + 1 - user.paymentStep,
+          tier: targetTierForFee,
           buyPackage: user.buyPackage,
           hash: "",
           type: "REGISTER",
@@ -616,27 +623,26 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
         let directCommissionUser;
         let treeOfRefUser;
         const nextTierUserId = await findNextUser(user.tier + 1);
-        if (user.paymentStep === 0) {
+        if (isCheckingNextTier || user.paymentStep === 0) {
           refUser = await User.findById(nextTierUserId);
           treeOfRefUser = await Tree.findOne({
             userId: nextTierUserId,
             tier: user.tier + 1,
           });
           directCommissionUser = refUser;
-        } else if (user.paymentStep === 1 && user.tier === 1) {
-          const treeUserTier1 = await Tree.findOne({
-            userId: user._id,
-            tier: 1,
-          });
-          const treeOfUserRefTier1 = await Tree.findById(treeUserTier1.refId);
-          directCommissionUser = await User.findById(treeOfUserRefTier1.userId);
-
-          treeOfRefUser = await Tree.findById(childId);
-          refUser = await User.findById(treeOfRefUser.userId);
-        } else {
+        } else if (user.paymentStep === 1) {
+          // Trường hợp trả nợ Step 1 (Sub ID cho Tier hiện tại - 1)
+          // Lúc này refUser là chính childId đã chọn
           treeOfRefUser = await Tree.findById(childId);
           refUser = await User.findById(treeOfRefUser.userId);
           directCommissionUser = refUser;
+        }
+
+        if (!treeOfRefUser) {
+          return res.status(200).json({
+            status: "PENDING",
+            message: `next_tier_not_available`,
+          });
         }
 
         // console.log({
@@ -653,9 +659,9 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
         } else {
           if (
             refUser.status === "LOCKED" ||
-            refUser.tier < user.tier ||
+            refUser.tier < targetTierForFee - 1 ||
             isRefUserExpired ||
-            (refUser.tier === user.tier && refUser.countPay < 13)
+            (refUser.tier === targetTierForFee - 1 && refUser.countPay < 13)
           ) {
             haveRefNotPayEnough = true;
           } else {
@@ -663,14 +669,14 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           }
         }
 
-        if (user.paymentStep === 0 && treeOfRefUser.disable) {
+        if ((isCheckingNextTier || user.paymentStep === 0) && treeOfRefUser.disable) {
           haveRefNotPayEnough = true;
         }
 
         let payOutForPool = false;
         let rePaymentForPool = 0;
         if (
-          user.paymentStep === 0 &&
+          (isCheckingNextTier || user.paymentStep === 0) &&
           directCommissionUser.shortfallAmount > 0 &&
           directCommissionUser.shortfallAmount >= directCommissionFee
         ) {
@@ -684,7 +690,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           userCountPay: user.countPay,
           userId_to: directCommissionUser._id,
           username_to: treeOfRefUser.userName,
-          tier: user.tier + 1 - user.paymentStep,
+          tier: targetTierForFee,
           buyPackage: user.buyPackage,
           hash: "",
           type: payOutForPool ? "POOLREPAYMENT" : haveRefNotPayEnough ? "DIRECTHOLD" : "DIRECT",
@@ -712,7 +718,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           treeOfRefUser._id,
           // user.paymentStep === 1 && user.tier === 1 ? 9 : 10,
           9,
-          user.tier + 1 - user.paymentStep
+          targetTierForFee
         );
 
         // if (user.paymentStep === 1 && user.tier === 1) {
@@ -743,7 +749,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
             if (
               receiveUser.status === "LOCKED" ||
               isReceiveUserExpired ||
-              receiveUser.tier < user.tier
+              receiveUser.tier < targetTierForFee - 1
             ) {
               haveParentNotPayEnough = true;
             } else {
@@ -752,18 +758,18 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
           }
           if (receiveUser.hold !== "no" && receiveUser.holdLevel !== "no") {
             if (
-              receiveUser.hold.toString() === user.tier.toString() &&
+              receiveUser.hold.toString() === (targetTierForFee - 1).toString() &&
               parseInt(receiveUser.holdLevel) <= parseInt(user.countPay)
             ) {
               haveParentNotPayEnough = true;
             }
           }
-          if (user.paymentStep === 0 && p.disable) {
+          if ((isCheckingNextTier || user.paymentStep === 0) && p.disable) {
             haveParentNotPayEnough = true;
           }
           let rePayForPoolRef = false;
           if (
-            user.paymentStep === 0 &&
+            (isCheckingNextTier || user.paymentStep === 0) &&
             receiveUser.shortfallAmount > 0 &&
             receiveUser.shortfallAmount >= referralCommissionFee + rePaymentForPool
           ) {
@@ -780,7 +786,7 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
             userCountPay: countPayUser,
             userId_to: receiveUser._id,
             username_to: p.userName,
-            tier: user.tier + 1 - user.paymentStep,
+            tier: targetTierForFee,
             buyPackage: user.buyPackage,
             hash: "",
             type: rePayForPoolRef
@@ -805,10 +811,12 @@ const getPaymentNextTierInfo = asyncHandler(async (req, res) => {
 
       res.json({
         status: "OK",
-        message: `You're all set for the Tier ${user.tier + 1}. Let's move up!`,
+        message: isCheckingNextTier || user.paymentStep === 0
+          ? `You're all set for the Tier ${user.tier + 1}. Let's move up!`
+          : `You are paying for your Sub ID assignment`,
         payments,
         paymentIds,
-        userStepPayment: user.paymentStep,
+        userStepPayment: isCheckingNextTier ? 0 : user.paymentStep,
         holdForNotEnoughLevel,
         notEnoughtChild: holdForNotEnoughLevel
           ? await getTotalLevel1ToLevel10OfUser(treeOfUser, false)
@@ -997,78 +1005,91 @@ const onDoneNextTierPayment = asyncHandler(async (req, res) => {
           userReceive.availableUsdt = userReceive.availableUsdt + trans.amount;
           await userReceive.save();
         }
+        
+        // Lưu lại thông tin transaction để kiểm tra logic nâng cấp bên dưới
+        transIdsList[transIdsList.findIndex(t => t.id === transId.id)].tier = trans.tier;
       }
 
       let message = "";
-      if (user.paymentStep < user.tier) {
-        user.paymentStep = user.paymentStep + 1;
-        message = "Please pay next step";
+      // Nếu đang nợ Step 1 nhưng trả phí cho Tier >= hiện tại thì có nghĩa là đang cố ý nâng cấp tiếp hoặc bắt đầu quy trình Tier mới
+      const isPayingForUpgrade = transIdsList.some(t => t.tier > user.tier);
+
+      if (isPayingForUpgrade) {
+          // GIAI ĐOẠN A: Nâng cấp Tier ngay lập tức
+          let responseHewe = await getPriceHewe();
+          const hewePrice = responseHewe?.data?.ticker?.latest || 0.0005287;
+          const totalHewe = Math.round(
+            (parseInt(process.env[`HEWE_AMOUNT_TIER${user.tier + 1}`]) + 25) / hewePrice
+          );
+  
+          user.availableHewe = user.availableHewe + totalHewe;
+          user.totalHeweTier2 = totalHewe;
+          user.countPay = 13;
+          user.currentLayer = [...user.currentLayer, 0];
+          user[`tier${user.tier + 1}Time`] = new Date();
+          user.adminChangeTier = true;
+  
+          const newParentId = await findNextUser(user.tier + 1);
+          const newParent = await Tree.findOne({
+            userId: newParentId,
+            tier: user.tier + 1,
+          });
+  
+          const highestIndexOfLevel = await findHighestIndexOfLevel(user.tier + 1);
+          const nextTier = user.tier + 1;
+          const mainTreeTier1 = await Tree.findOne({ tier: 1, userId: user._id, isSubId: false });
+          const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(mainTreeTier1, false);
+          const initialDieTimeTier2 =
+            countChild1 + countChild2 >= 60 && countChild1 >= 19 && countChild2 >= 19
+              ? null
+              : moment().add(45, "days").toDate();
+  
+          const treeOfUserTier2 = await Tree.create({
+            userName: user.userId,
+            userId: user._id,
+            parentId: newParent._id,
+            refId: newParent._id,
+            tier: nextTier,
+            children: [],
+            indexOnLevel: highestIndexOfLevel + 1,
+            dieTime: initialDieTimeTier2,
+          });
+  
+          let childs = [...newParent.children];
+          newParent.children = [...childs, treeOfUserTier2._id];
+          await newParent.save();
+  
+          user.tier = user.tier + 1;
+          user.paymentStep = 1; // Luôn đặt là 1 để đánh dấu việc nợ Sub ID
+  
+          message = "payment_success_upgrade_msg";
       } else {
-        let responseHewe = await getPriceHewe();
-        const hewePrice = responseHewe?.data?.ticker?.latest || 0.0005287;
-        const totalHewe = Math.round(
-          (parseInt(process.env[`HEWE_AMOUNT_TIER${user.tier + 1}`]) + 25) / hewePrice
-        );
-
-        user.availableHewe = user.availableHewe + totalHewe;
-        user.totalHeweTier2 = totalHewe;
-        user.countPay = 13;
-        user.currentLayer = [...user.currentLayer, 0];
-        user[`tier${user.tier + 1}Time`] = new Date();
-        user.adminChangeTier = true;
-
-        const newChildParent = await Tree.findById(childId);
-        const mainTree = await Tree.findOne({ tier: 1, userId: user._id, isSubId: false });
-        let childsOfChild = [...newChildParent.children];
-
-        const newTreeTier1 = await Tree.create({
-          userName: user.userId + "1-1",
-          userId: user._id,
-          parentId: childId,
-          refId: mainTree.refId,
-          tier: user.tier,
-          buyPackage: "A",
-          children: [],
-          isSubId: true,
-        });
-
-        newChildParent.children = [...childsOfChild, newTreeTier1._id];
-        await newChildParent.save();
-
-        const newParentId = await findNextUser(user.tier + 1);
-        const newParent = await Tree.findOne({
-          userId: newParentId,
-          tier: user.tier + 1,
-        });
-
-        const highestIndexOfLevel = await findHighestIndexOfLevel(user.tier + 1);
-        // Tính dieTime ban đầu: tier 1 = +30 ngày, tier 2 = +45 ngày
-        const nextTier = user.tier + 1;
-        const { countChild1, countChild2 } = await getTotalLevel1ToLevel10OfUser(mainTree, false);
-        const initialDieTimeTier2 =
-          countChild1 + countChild2 >= 60 && countChild1 >= 19 && countChild2 >= 19
-            ? null
-            : moment().add(45, "days").toDate();
-
-        const treeOfUserTier2 = await Tree.create({
-          userName: user.userId,
-          userId: user._id,
-          parentId: newParent._id,
-          refId: newParent._id,
-          tier: nextTier,
-          children: [],
-          indexOnLevel: highestIndexOfLevel + 1,
-          dieTime: initialDieTimeTier2,
-        });
-
-        let childs = [...newParent.children];
-        newParent.children = [...childs, treeOfUserTier2._id];
-        await newParent.save();
-
-        user.tier = user.tier + 1;
-        user.paymentStep = 0;
-
-        message = "Payment successful";
+          // GIAI ĐOẠN B: Tạo Sub ID (Optional)
+          if (!childId || childId === "") {
+              throw new Error("select_subordinate_msg");
+          }
+          const newChildParent = await Tree.findById(childId);
+          const mainTree = await Tree.findOne({ tier: 1, userId: user._id, isSubId: false });
+          let childsOfChild = [...newChildParent.children];
+  
+          const newTreeTier1 = await Tree.create({
+            userName: user.userId + "1-1",
+            userId: user._id,
+            parentId: childId,
+            refId: mainTree.refId,
+            tier: 1, // Luôn tạo Sub ID ở Tier 1
+            buyPackage: "A",
+            children: [],
+            isSubId: true,
+          });
+  
+          newChildParent.children = [...childsOfChild, newTreeTier1._id];
+          await newChildParent.save();
+  
+          // user.paymentStep = 0; // Tùy chọn: Bạn có thể đặt về 0 hoặc giữ 1 tùy theo muốn cho phép nợ tiếp không. 
+          // Ở đây theo logic yêu cầu là "B có thể thanh toán sau", nên nếu thanh toán B xong thì reset về 0.
+          user.paymentStep = 0;
+          message = "sub_id_created_msg";
       }
 
       const updatedUser = await user.save();
