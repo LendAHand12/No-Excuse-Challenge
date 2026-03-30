@@ -80,11 +80,11 @@ const PaymentPage = () => {
     }
 
     // Step 3: Signature
-    if (userInfo?.countPay === 0 && !userInfo?.signatureImage) {
-      toast.error('Vui lòng ký xác nhận hợp đồng trước khi thanh toán');
-      window.location.href = '/user/profile';
-      return;
-    }
+    // if (userInfo?.countPay === 0 && !userInfo?.signatureImage) {
+    //   toast.error('Vui lòng ký xác nhận hợp đồng trước khi thanh toán');
+    //   window.location.href = '/user/profile';
+    //   return;
+    // }
 
     onGetPaymentInfo();
     setShowPayment(true);

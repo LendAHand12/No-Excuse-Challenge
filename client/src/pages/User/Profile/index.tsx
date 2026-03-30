@@ -117,76 +117,76 @@ const Profile = () => {
   // Terms and Signature states
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [showSignatureModal, setShowSignatureModal] = useState(false);
+  // const [showSignatureModal, setShowSignatureModal] = useState(false);
   const [uploadingSignature, setUploadingSignature] = useState(false);
   const [contractContent, setContractContent] = useState<string>('');
   const [contractCSS, setContractCSS] = useState<string>('');
   const [loadingContract, setLoadingContract] = useState(false);
 
   // Fetch contract content when component mounts
-  useEffect(() => {
-    const fetchContractContent = async () => {
-      if (!userInfo?.id) {
-        return;
-      }
+  // useEffect(() => {
+  //   const fetchContractContent = async () => {
+  //     if (!userInfo?.id) {
+  //       return;
+  //     }
 
-      // Only fetch contract if user has complete information
-      const hasCompleteInfo = userInfo.fullName && userInfo.phone && userInfo.currentAddress;
-      if (!hasCompleteInfo) {
-        setContractContent('<p style="text-align: center; color: #666;">Vui lòng hoàn thiện thông tin cá nhân để xem hợp đồng.</p>');
-        return;
-      }
+  //     // Only fetch contract if user has complete information
+  //     const hasCompleteInfo = userInfo.fullName && userInfo.phone && userInfo.currentAddress;
+  //     if (!hasCompleteInfo) {
+  //       setContractContent('<p style="text-align: center; color: #666;">Vui lòng hoàn thiện thông tin cá nhân để xem hợp đồng.</p>');
+  //       return;
+  //     }
 
-      try {
-        setLoadingContract(true);
+  //     try {
+  //       setLoadingContract(true);
 
-        const response = await Contract.getContractContent(userInfo.id);
+  //       const response = await Contract.getContractContent(userInfo.id);
 
-        if (response.data.success) {
-          setContractContent(response.data.content);
-          setContractCSS(response.data.css || '');
-        } else {
-          // console.error('❌ API returned success: false');
-          setContractContent('<p style="color: red;">Không thể tải nội dung hợp đồng.</p>');
-        }
-      } catch (error: any) {
-        console.error('❌ Error fetching contract:', error);
-        setContractContent('<p style="color: red;">Lỗi: ' + (error?.message || 'Không thể tải hợp đồng') + '</p>');
-      } finally {
-        setLoadingContract(false);
-      }
-    };
+  //       if (response.data.success) {
+  //         setContractContent(response.data.content);
+  //         setContractCSS(response.data.css || '');
+  //       } else {
+  //         // console.error('❌ API returned success: false');
+  //         setContractContent('<p style="color: red;">Không thể tải nội dung hợp đồng.</p>');
+  //       }
+  //     } catch (error: any) {
+  //       console.error('❌ Error fetching contract:', error);
+  //       setContractContent('<p style="color: red;">Lỗi: ' + (error?.message || 'Không thể tải hợp đồng') + '</p>');
+  //     } finally {
+  //       setLoadingContract(false);
+  //     }
+  //   };
 
-    fetchContractContent();
-  }, [userInfo?.id, userInfo?.fullName, userInfo?.phone, userInfo?.currentAddress]);
+  //   fetchContractContent();
+  // }, [userInfo?.id, userInfo?.fullName, userInfo?.phone, userInfo?.currentAddress]);
 
   // Inject contract CSS into document head
-  useEffect(() => {
-    if (!contractCSS) return;
+  // useEffect(() => {
+  //   if (!contractCSS) return;
 
-    console.log('💅 Injecting contract CSS into document head');
-    const styleId = 'contract-preview-styles';
+  //   console.log('💅 Injecting contract CSS into document head');
+  //   const styleId = 'contract-preview-styles';
 
-    // Remove existing style tag if any
-    const existingStyle = document.getElementById(styleId);
-    if (existingStyle) {
-      existingStyle.remove();
-    }
+  //   // Remove existing style tag if any
+  //   const existingStyle = document.getElementById(styleId);
+  //   if (existingStyle) {
+  //     existingStyle.remove();
+  //   }
 
-    // Create and inject new style tag
-    const styleTag = document.createElement('style');
-    styleTag.id = styleId;
-    styleTag.textContent = contractCSS;
-    document.head.appendChild(styleTag);
+  //   // Create and inject new style tag
+  //   const styleTag = document.createElement('style');
+  //   styleTag.id = styleId;
+  //   styleTag.textContent = contractCSS;
+  //   document.head.appendChild(styleTag);
 
-    // Cleanup on unmount
-    return () => {
-      const style = document.getElementById(styleId);
-      if (style) {
-        style.remove();
-      }
-    };
-  }, [contractCSS]);
+  //   // Cleanup on unmount
+  //   return () => {
+  //     const style = document.getElementById(styleId);
+  //     if (style) {
+  //       style.remove();
+  //     }
+  //   };
+  // }, [contractCSS]);
 
   const {
     register,
@@ -285,27 +285,29 @@ const Profile = () => {
           if (response.data.errLahCode === "OVER45") {
             setShowProfilePopup(false);
             setShowTermsModal(false);
-            setShowSignatureModal(false);
+            // setShowSignatureModal(false);
           } else
             // Priority 1: Check if Face ID needs setup
             if (response.data.lockKyc === false && response.data.facetecTid === '' && response.data.city === "VN") {
               setShowFaceId(true);
               setShowProfilePopup(false);
               setShowTermsModal(false);
-              setShowSignatureModal(false);
+              // setShowSignatureModal(false);
             }
             // Priority 2: Check if profile is incomplete
             else if (response.data.isProfileComplete === false && response.data.city === "VN") {
               setShowProfilePopup(true);
               setShowFaceId(false);
               setShowTermsModal(false);
-              setShowSignatureModal(false);
+              // setShowSignatureModal(false);
             }
             // Priority 3: Check if signature is missing for Tier 1
-            else if (response.data.countPay === 0 && !response.data.signatureImage && response.data.city === "VN") {
+            else if (response.data.countPay === 0 
+              // && !response.data.signatureImage 
+              && response.data.city === "VN") {
               setShowTermsModal(true);
               setShowFaceId(false);
-              setShowProfilePopup(false);
+              // setShowProfilePopup(false);
             }
 
           // if (response.data.preTier2Status === 'PASSED') {
@@ -420,40 +422,40 @@ const Profile = () => {
       setShowTermsModal(false);
       // For tier 1 (countPay === 0), show signature modal if signature doesn't exist
       if (userInfo?.countPay === 0 && !userInfo?.signatureImage) {
-        setShowSignatureModal(true);
+        // setShowSignatureModal(true);
       }
     }
   };
 
-  const handleSaveSignature = async (signatureDataUrl: string) => {
-    setUploadingSignature(true);
-    try {
-      const fetchResponse = await fetch(signatureDataUrl);
-      const blob = await fetchResponse.blob();
-      const formData = new FormData();
-      formData.append('signature', blob, 'signature.png');
+  // const handleSaveSignature = async (signatureDataUrl: string) => {
+  //   setUploadingSignature(true);
+  //   try {
+  //     const fetchResponse = await fetch(signatureDataUrl);
+  //     const blob = await fetchResponse.blob();
+  //     const formData = new FormData();
+  //     formData.append('signature', blob, 'signature.png');
 
-      await User.uploadSignature(formData);
+  //     await User.uploadSignature(formData);
 
-      const userInfoResponse = await User.getUserInfo(1);
-      if (userInfoResponse?.data) {
-        dispatch(UPDATE_USER_INFO(userInfoResponse.data));
-        setShowSignatureModal(false);
-        toast.success(t('Signature saved successfully'));
-      }
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message;
-      toast.error(t(message || 'Failed to save signature'));
-    } finally {
-      setUploadingSignature(false);
-    }
-  };
+  //     const userInfoResponse = await User.getUserInfo(1);
+  //     if (userInfoResponse?.data) {
+  //       dispatch(UPDATE_USER_INFO(userInfoResponse.data));
+  //       setShowSignatureModal(false);
+  //       toast.success(t('Signature saved successfully'));
+  //     }
+  //   } catch (error: any) {
+  //     const message = error.response?.data?.message || error.message;
+  //     toast.error(t(message || 'Failed to save signature'));
+  //   } finally {
+  //     setUploadingSignature(false);
+  //   }
+  // };
 
-  const handleCancelSignature = () => {
-    toast.warning(
-      t('Signature is required for Tier 1. Please provide your signature.'),
-    );
-  };
+  // const handleCancelSignature = () => {
+  //   toast.warning(
+  //     t('Signature is required for Tier 1. Please provide your signature.'),
+  //   );
+  // };
 
   const handleMoveSystem = useCallback(async () => {
     if (valueCheckAgrree === 'on') {
@@ -2327,7 +2329,7 @@ const Profile = () => {
           </div>
         )} */}
         {/* Terms and Commitment Modal */}
-        <Modal
+        {/* <Modal
           isOpen={showTermsModal}
           onRequestClose={() => {
             // Prevent closing without accepting
@@ -2360,12 +2362,9 @@ const Profile = () => {
           contentLabel="Terms and Commitment"
         >
           <div className="flex flex-col h-full">
-            {/* Header */}
             <div className="flex-shrink-0 p-4 border-b border-gray-200">
               <h2 className="text-xl text-blue-800">{t('paymentTerms.title')}</h2>
             </div>
-
-            {/* Content - scrollable area */}
             <div className="flex-1 overflow-y-auto p-6" style={{ paddingBottom: '140px' }}>
               <div className="prose max-w-none text-gray-700 text-sm">
                 {loadingContract ? (
@@ -2386,8 +2385,6 @@ const Profile = () => {
                 )}
               </div>
             </div>
-
-            {/* Footer - Fixed at bottom using sticky */}
             <div
               className="flex-shrink-0 p-6 border-t border-gray-200 bg-white"
               style={{
@@ -2423,10 +2420,10 @@ const Profile = () => {
               </div>
             </div>
           </div>
-        </Modal>
+        </Modal> */}
 
         {/* Signature Modal for Tier 1 */}
-        <Modal
+        {/* <Modal
           isOpen={showSignatureModal}
           onRequestClose={() => {
             toast.warning(
@@ -2457,7 +2454,6 @@ const Profile = () => {
           contentLabel="Signature"
         >
           <div className="flex flex-col h-full">
-            {/* Header */}
             <div className="flex-shrink-0 mb-6">
               <h2 className="text-xl text-blue-800 font-bold">
                 {t('Please provide your signature')}
@@ -2467,7 +2463,6 @@ const Profile = () => {
               </p>
             </div>
 
-            {/* Signature Pad */}
             <div className="flex-1">
               {uploadingSignature ? (
                 <div className="flex justify-center items-center py-10">
@@ -2481,7 +2476,7 @@ const Profile = () => {
               )}
             </div>
           </div>
-        </Modal>
+        </Modal> */}
       </div>
     </DefaultLayout >
   );
