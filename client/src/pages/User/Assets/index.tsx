@@ -29,6 +29,8 @@ type ClaimHistoryItem = {
   exchangeRate?: number;
   receivedAmount?: number;
   createdAt: string;
+  status?: string;
+  reason?: string;
 };
 
 export default function UserAssetsPage() {
@@ -501,9 +503,23 @@ export default function UserAssetsPage() {
                                 )}
                               </td>
                               <td className="py-3 pr-4">
-                                <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
-                                  SUCCESS
-                                </span>
+                                <div className="flex flex-col gap-1">
+                                  <span
+                                    className={`px-2 py-0.5 rounded text-xs w-fit ${item.status === 'SUCCESS'
+                                        ? 'bg-green-100 text-green-700'
+                                        : item.status === 'PENDING'
+                                          ? 'bg-yellow-100 text-yellow-700'
+                                          : 'bg-red-100 text-red-700'
+                                      }`}
+                                  >
+                                    {item.status}
+                                  </span>
+                                  {item.status === 'CANCEL' && item.reason && (
+                                    <span className="text-[10px] text-red-500 italic max-w-[150px]">
+                                      {item.reason}
+                                    </span>
+                                  )}
+                                </div>
                               </td>
                               <td className="py-3 pr-4">
                                 {item.hash ? (

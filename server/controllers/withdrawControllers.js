@@ -6,6 +6,7 @@ import Notification from "../models/notificationModel.js";
 import { removeAccents } from "../utils/methods.js";
 import mongoose from "mongoose";
 import moment from "moment";
+import sendHewe from "../services/sendHewe.js";
 
 const getAllWithdraws = asyncHandler(async (req, res) => {
   let { pageNumber, status, keyword } = req.query;
@@ -62,6 +63,7 @@ const getAllWithdraws = asyncHandler(async (req, res) => {
         receivedAmount: 1,
         tax: 1,
         fee: 1,
+        coin: 1,
         transferContent: 1,
         processedBy: 1,
         processedAt: 1,
@@ -132,6 +134,7 @@ const getAllWithdrawsForExport = asyncHandler(async (req, res) => {
       user: withdraw.userInfo?.userId,
       email: withdraw.userInfo?.email,
       amount: withdraw.amount,
+      coin: withdraw.coin,
       status: withdraw.status,
       hash: withdraw.hash,
       createdAt: withdraw.createdAt,
@@ -234,18 +237,39 @@ const updateWithdraw = asyncHandler(async (req, res) => {
           throw new Error("Claim already exists for this withdrawal");
         }
 
-        // Create claim record for crypto withdrawal
-        await Claim.create({
-          userId: withdraw.userId,
-          amount: withdraw.amount,
-          coin: "USDT",
-          hash: claimHash,
-          withdrawalType: "CRYPTO",
-          availableUsdtAfter: user.availableUsdt, // Lưu số dư còn lại
-          tax: tax, // Thuế (USDT)
-          fee: fee, // Phí giao dịch (USDT)
-          receivedAmount: receivedAmount, // Số tiền thực tế nhận được (USDT)
-        });
+        if (withdraw.coin === "HEWE") {
+          // Send HEWE token via blockchain
+          const receipt = await sendHewe({
+            amount: withdraw.amount,
+            receiverAddress: user.walletAddress,
+          });
+
+          // Create claim record for HEWE
+          await Claim.create({
+            userId: withdraw.userId,
+            amount: withdraw.amount,
+            coin: "HEWE",
+            hash: receipt.hash,
+          });
+
+          user.claimedHewe = (user.claimedHewe || 0) + withdraw.amount;
+          // Update withdraw hash with blockchain hash
+          withdraw.hash = receipt.hash;
+          await withdraw.save();
+        } else {
+          // Create claim record for crypto withdrawal (USDT)
+          await Claim.create({
+            userId: withdraw.userId,
+            amount: withdraw.amount,
+            coin: "USDT",
+            hash: claimHash,
+            withdrawalType: "CRYPTO",
+            availableUsdtAfter: user.availableUsdt, // Lưu số dư còn lại
+            tax: tax, // Thuế (USDT)
+            fee: fee, // Phí giao dịch (USDT)
+            receivedAmount: receivedAmount, // Số tiền thực tế nhận được (USDT)
+          });
+        }
 
         await user.save();
       }
@@ -269,7 +293,7 @@ const updateWithdraw = asyncHandler(async (req, res) => {
             : `${receivedAmountUsdt.toLocaleString("vi-VN")} USDT`;
       } else {
         const receivedAmount = (withdraw.amount || 0) - (withdraw.tax || 0) - (withdraw.fee || 0);
-        amountText = `${receivedAmount.toLocaleString("vi-VN")} USDT`;
+        amountText = `${receivedAmount.toLocaleString("vi-VN")} ${withdraw.coin || "USDT"}`;
       }
 
       await Notification.create({
@@ -286,7 +310,7 @@ const updateWithdraw = asyncHandler(async (req, res) => {
         {
           $set: {
             status: "CANCEL",
-            cancelReason: cancelReason || "Không có lý do cụ thể",
+            reason: cancelReason || "Không có lý do cụ thể",
           },
         },
         { new: true }
@@ -303,13 +327,17 @@ const updateWithdraw = asyncHandler(async (req, res) => {
         throw new Error("User not found");
       }
 
-      // Refund USDT to user's available balance
-      user.availableUsdt = user.availableUsdt + withdraw.amount;
+      // Refund balance to user
+      if (withdraw.coin === "HEWE") {
+        user.availableHewe = user.availableHewe + withdraw.amount;
+      } else {
+        user.availableUsdt = user.availableUsdt + withdraw.amount;
+      }
       await user.save();
 
       // Create notification for cancelled withdrawal
       const reason = cancelReason || "Không có lý do cụ thể";
-      const amountText = `${withdraw.amount.toLocaleString("vi-VN")} USDT`;
+      const amountText = `${withdraw.amount.toLocaleString("vi-VN")} ${withdraw.coin || "USDT"}`;
       await Notification.create({
         userId: withdraw.userId,
         title: "Rút tiền thất bại",
@@ -349,6 +377,7 @@ const getWithdrawsOfUser = asyncHandler(async (req, res) => {
         _id: 1,
         status: 1,
         amount: 1,
+        coin: 1,
         hash: 1,
         createdAt: 1,
         userInfo: {

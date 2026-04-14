@@ -189,12 +189,12 @@ const verifyLogin = asyncHandler(async (req, res) => {
     typeof twoFactorCode === "string" ? parseInt(twoFactorCode, 10) : twoFactorCode;
 
   // Log for debugging
-  // console.log("2FA Verification:", {
-  //   adminId: admin._id,
-  //   token: tokenNumber,
-  //   secretLength: admin.googleAuthenticatorSecret?.length,
-  //   serverTime: new Date().toISOString(),
-  // });
+  console.log("2FA Verification:", {
+    adminId: admin._id,
+    token: tokenNumber,
+    secretLength: admin.googleAuthenticatorSecret?.length,
+    serverTime: new Date().toISOString(),
+  });
 
   const verified = speakeasy.totp.verify({
     secret: admin.googleAuthenticatorSecret,
@@ -205,15 +205,15 @@ const verifyLogin = asyncHandler(async (req, res) => {
 
   if (!verified) {
     // Additional debug: try to generate current code for comparison
-    // const currentCode = speakeasy.totp({
-    //   secret: admin.googleAuthenticatorSecret,
-    //   encoding: "base32",
-    // });
-    // console.log("2FA Verification Failed:", {
-    //   providedToken: tokenNumber,
-    //   currentCode: currentCode,
-    //   serverTime: new Date().toISOString(),
-    // });
+    const currentCode = speakeasy.totp({
+      secret: admin.googleAuthenticatorSecret,
+      encoding: "base32",
+    });
+    console.log("2FA Verification Failed:", {
+      providedToken: tokenNumber,
+      currentCode: currentCode,
+      serverTime: new Date().toISOString(),
+    });
 
     res.status(401);
     throw new Error("Invalid 2FA code");

@@ -117,7 +117,10 @@ const AdminWithdrawPages = () => {
   const handleApprove = async (request) => {
     // For CRYPTO withdrawal, check paymentMethod from userInfo
     // For BANK withdrawal, always show payment info modal
-    if (request.withdrawalType === 'BANK') {
+    if (request.coin === 'HEWE') {
+      // HEWE withdrawal (auto-send via backend) - simple confirmation
+      setShowModal(true);
+    } else if (request.withdrawalType === 'BANK') {
       setShowPaymentInfo(true);
       setTransferContent('');
     } else if (
@@ -427,7 +430,9 @@ const AdminWithdrawPages = () => {
                 <button
                   onClick={
                     currentRequestStatus === 'approve'
-                      ? paymentMetamask
+                      ? currentApproveRequest?.coin === 'HEWE'
+                        ? () => donePayment('')
+                        : paymentMetamask
                       : cancelWithdraw
                   }
                   className="flex items-center py-2 px-3 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900"
@@ -1150,6 +1155,9 @@ const AdminWithdrawPages = () => {
                 Amount
               </th>
               <th scope="col" className="px-6 py-3">
+                Coin
+              </th>
+              <th scope="col" className="px-6 py-3">
                 Method
               </th>
               <th scope="col" className="px-6 py-3">
@@ -1188,7 +1196,16 @@ const AdminWithdrawPages = () => {
                     {shortenWalletAddress(ele.userInfo.walletAddress, 12)}
                   </td>
                   <td className="px-6 py-4">
-                    <b>{ele.amount}</b> USDT
+                    <b>{ele.amount}</b>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`font-bold ${
+                        ele.coin === 'HEWE' ? 'text-orange-500' : 'text-blue-600'
+                      }`}
+                    >
+                      {ele.coin || 'USDT'}
+                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <div>

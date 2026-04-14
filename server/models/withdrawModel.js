@@ -16,6 +16,11 @@ const withdrawSchema = mongoose.Schema(
       enum: ["CRYPTO", "BANK"],
       default: "CRYPTO",
     },
+    coin: {
+      type: String,
+      enum: ["USDT", "HEWE"],
+      default: "USDT",
+    },
     hash: {
       type: String,
     },
@@ -56,6 +61,9 @@ const withdrawSchema = mongoose.Schema(
     },
     transferContent: {
       type: String, // Transfer content created by admin
+    },
+    reason: {
+      type: String,
     },
     processedBy: {
       type: String,

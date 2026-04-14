@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import DoubleKyc from "../models/doubleKycModel.js";
 import getFaceTecData from "../services/getFaceTecData.js";
 import Transaction from "../models/transactionModel.js";
+import Withdraw from "../models/withdrawModel.js";
 
 const startKYC = expressAsyncHandler(async (req, res) => {
   const { user } = req;
@@ -45,6 +46,72 @@ const claimKYC = expressAsyncHandler(async (req, res) => {
 const claimHeweKYC = expressAsyncHandler(async (req, res) => {
   const { user } = req;
 
+  // Bước 1: Kiểm tra xem user đã dăng ký khuôn mặt chưa
+  if (!user.facetecTid || user.facetecTid === "") {
+    // Nếu chưa có khuôn mặt -> Tạo yêu cầu rút HEWE chờ admin duyệt
+
+    // Dùng findOneAndUpdate để set isClaiming = true
+    const lockedUser = await User.findOneAndUpdate(
+      { _id: user._id, isClaiming: false },
+      { $set: { isClaiming: true } },
+      { new: true }
+    );
+
+    if (!lockedUser) {
+      return res.status(400).json({
+        error: "Your HEWE claim is already being processed. Please wait!",
+      });
+    }
+
+    try {
+      // Kiểm tra giới hạn rút HEWE từ config
+      const limitConfig = await Config.findOne({ label: "LIMIT_AMOUNT_HEWE" });
+      const limitAmount = limitConfig ? Number(limitConfig.value) : 0;
+
+      if (limitAmount > 0 && lockedUser.availableHewe < limitAmount) {
+        throw new Error(
+          `Minimum withdrawal amount is ${limitAmount} HEWE. Your available balance is ${lockedUser.availableHewe} HEWE.`
+        );
+      }
+
+      const MAX_WITHDRAWAL_AMOUNT = 700000;
+      if (lockedUser.availableHewe > MAX_WITHDRAWAL_AMOUNT) {
+        throw new Error(
+          `Maximum withdrawal amount is ${MAX_WITHDRAWAL_AMOUNT} HEWE. Your available balance is ${lockedUser.availableHewe} HEWE.`
+        );
+      }
+
+      if (lockedUser.availableHewe > 0) {
+        // Tạo yêu cầu Withdraw chờ Admin duyệt
+        await Withdraw.create({
+          userId: lockedUser.id,
+          amount: lockedUser.availableHewe,
+          coin: "HEWE",
+          status: "PENDING",
+        });
+
+        const amountClaimed = lockedUser.availableHewe;
+        lockedUser.availableHewe = 0;
+        // Tạm thời cộng vào claimedHewe (hoặc tạo field pendingHewe nếu muốn tách bạch hơn)
+        // Hiện tại code cũ set về 0 luôn
+        await lockedUser.save();
+
+        return res.status(200).json({
+          message: "Withdrawal request has been sent to Admin. Please wait!",
+        });
+      } else {
+        throw new Error("Insufficient balance in account");
+      }
+    } catch (err) {
+      return res.status(400).json({
+        error: err.message ? err.message.split(",")[0] : "Internal Error",
+      });
+    } finally {
+      await User.findByIdAndUpdate(user._id, { isClaiming: false });
+    }
+  }
+
+  // Nếu đã có khuôn mặt -> Tiếp tục flow quét mặt FaceTec
   const token = createCallbackToken(user._id);
   const callbackUrl = `${process.env.FRONTEND_BASE_URL}/user/claim-hewe?token=${token}`;
 

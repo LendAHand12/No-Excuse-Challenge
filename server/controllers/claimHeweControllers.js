@@ -631,69 +631,49 @@ const getAllClaimsOfUser = asyncHandler(async (req, res) => {
   const page = Number(pageNumber) || 1;
   const pageSize = 10;
 
-  const matchStage = {};
-
-  // ✅ Ép kiểu ObjectId
-  if (!mongoose.Types.ObjectId.isValid(user.id)) {
-    return res.status(400).json({ message: "Invalid user ID" });
-  }
-
-  matchStage.userId = new mongoose.Types.ObjectId(user.id);
+  const matchStage = {
+    userId: new mongoose.Types.ObjectId(user.id),
+  };
 
   if (coin === "HEWE" || coin === "USDT") {
     matchStage.coin = coin;
   }
 
-  const aggregationPipeline = [
-    { $match: matchStage },
-    {
-      $lookup: {
-        from: "users",
-        localField: "userId",
-        foreignField: "_id",
-        as: "userInfo",
-      },
-    },
-    { $unwind: "$userInfo" },
-  ];
+  // Lấy cả Claim (thành công) và Withdraw (đang chờ/đã hủy)
+  const claimsPromise = Claim.find(matchStage).lean();
+  const withdrawsPromise = Withdraw.find(matchStage).lean();
 
-  // Đếm số bản ghi sau khi lọc
-  const countAggregation = await Claim.aggregate([...aggregationPipeline, { $count: "total" }]);
-  const count = countAggregation[0]?.total || 0;
+  const [claims, withdraws] = await Promise.all([claimsPromise, withdrawsPromise]);
 
-  // Thêm phân trang và sắp xếp
-  aggregationPipeline.push(
-    { $sort: { createdAt: -1 } },
-    { $skip: pageSize * (page - 1) },
-    { $limit: pageSize },
-    {
-      $project: {
-        _id: 1,
-        coin: 1,
-        amount: 1,
-        hash: 1,
-        withdrawalType: 1,
-        availableUsdtAfter: 1,
-        tax: 1,
-        fee: 1,
-        exchangeRate: 1,
-        receivedAmount: 1,
-        createdAt: 1,
-        userInfo: {
-          _id: 1,
-          userId: 1,
-          email: 1,
-          walletAddress: 1,
-        },
-      },
-    }
-  );
+  // Chuẩn hóa dữ liệu để merge
+  const normalizedClaims = claims.map((c) => ({
+    ...c,
+    status: "SUCCESS",
+  }));
 
-  const claims = await Claim.aggregate(aggregationPipeline);
+  const normalizedWithdraws = withdraws.map((w) => ({
+    ...w,
+    status: w.status === "PENDING" ? "PENDING" : w.status === "CANCEL" ? "CANCEL" : "SUCCESS",
+  }));
+
+  // Lọc bỏ những Withdraw đã được APPROVE vì chúng đã có bản ghi ở Claim (tùy logic hệ thống)
+  // Nhưng với HEWE mới thì Withdraw APPROVED sẽ có Claim tương ứng.
+  // Thực tế, Withdraw APPROVED thường tạo ra Claim. Để tránh trùng lặp:
+  const filteredWithdraws = normalizedWithdraws.filter((w) => w.status !== "APPROVED" && w.status !== "SUCCESS");
+
+  let allHistory = [...normalizedClaims, ...filteredWithdraws];
+
+  // Sắp xếp theo thời gian giảm dần
+  allHistory.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  // Phân trang bằng code (vì merge từ 2 collection khác nhau)
+  const totalCount = allHistory.length;
+  const startIndex = (page - 1) * pageSize;
+  const paginatedHistory = allHistory.slice(startIndex, startIndex + pageSize);
 
   res.json({
-    claims,
-    pages: Math.ceil(count / pageSize),
+    claims: paginatedHistory,
+    pages: Math.ceil(totalCount / pageSize),
   });
 });
 
