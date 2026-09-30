@@ -115,6 +115,11 @@ const claimHewe = asyncHandler(async (req, res) => {
       throw new Error("Please verify your account");
     }
 
+    // Validation wallet address
+    if (!user.walletAddress || user.walletAddress.trim() === "") {
+      throw new Error("Please update your wallet address in Profile");
+    }
+
     // Kiểm tra giới hạn rút HEWE từ config
     const limitConfig = await Config.findOne({ label: "LIMIT_AMOUNT_HEWE" });
     const limitAmount = limitConfig ? Number(limitConfig.value) : 0;
