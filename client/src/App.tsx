@@ -792,15 +792,17 @@ function App() {
             </>
           }
         />
-        <Route
-          path="/user/tickets/create"
-          element={
-            <>
-              <PageTitle title="Create Support Ticket | NoExcuseChallenge" />
-              <CreateTicketPage />
-            </>
-          }
-        />
+        {userInfo?.status !== 'LOCKED' && (
+          <Route
+            path="/user/tickets/create"
+            element={
+              <>
+                <PageTitle title="Create Support Ticket | NoExcuseChallenge" />
+                <CreateTicketPage />
+              </>
+            }
+          />
+        )}
         <Route
           path="/user/tickets/:id"
           element={
@@ -810,7 +812,7 @@ function App() {
             </>
           }
         />
-        {userInfo?.errLahCode !== 'OVER45' && (
+        {userInfo?.errLahCode !== 'OVER45' && userInfo?.status !== 'LOCKED' && (
           <>
             <Route
               path="/user/payment"

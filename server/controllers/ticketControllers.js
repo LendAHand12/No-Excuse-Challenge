@@ -41,6 +41,11 @@ const createTicket = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 
+  if (userInfo.status === "LOCKED") {
+    res.status(403);
+    throw new Error("Your account is locked. You cannot create new tickets.");
+  }
+
   // Create ticket
   const ticket = await Ticket.create({
     userId: user.id,

@@ -252,6 +252,7 @@ export default function UserAssetsPage() {
   // Check if can withdraw HEWE
   // Nếu có config giới hạn, chỉ cho phép rút khi availableHewe >= limitAmountHewe
   const canWithdrawHewe =
+    assets.status === 'APPROVED' &&
     assets.availableHewe > 0 &&
     (limitAmountHewe === 0 || assets.availableHewe >= limitAmountHewe);
 

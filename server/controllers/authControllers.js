@@ -359,7 +359,7 @@ const authUser = asyncHandler(async (req, res) => {
     $and: [
       { $or: [{ email: code }, { userId: code }] },
       { isConfirmed: true },
-      { status: { $nin: ["LOCKED", "DELETED"] } },
+      { status: { $nin: ["DELETED"] } },
     ],
   });
 

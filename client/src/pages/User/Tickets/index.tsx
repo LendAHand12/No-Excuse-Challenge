@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import DefaultLayout from '@/layout/DefaultLayout';
 import Ticket from '@/api/Ticket';
 import Loading from '@/components/Loading';
@@ -30,6 +31,7 @@ type TicketItem = {
 
 export default function UserTicketsPage() {
   const { t } = useTranslation();
+  const { userInfo } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(true);
   const [tickets, setTickets] = useState<TicketItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -107,12 +109,14 @@ export default function UserTicketsPage() {
                   <SelectItem value="CLOSED">{t('ticket.status.closed')}</SelectItem>
                 </SelectContent>
               </Select>
-              <Link
-                to="/user/tickets/create"
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-              >
-                {t('ticket.createTicket')}
-              </Link>
+              {userInfo?.status !== 'LOCKED' && (
+                <Link
+                  to="/user/tickets/create"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                >
+                  {t('ticket.createTicket')}
+                </Link>
+              )}
             </div>
           </div>
 

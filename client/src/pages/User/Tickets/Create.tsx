@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import DefaultLayout from '@/layout/DefaultLayout';
 import Ticket from '@/api/Ticket';
 import Loading from '@/components/Loading';
@@ -9,12 +10,19 @@ import { ToastContainer, toast } from 'react-toastify';
 export default function CreateTicketPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { userInfo } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (userInfo?.status === 'LOCKED') {
+      navigate('/user/tickets');
+    }
+  }, [userInfo?.status]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
