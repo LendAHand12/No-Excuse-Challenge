@@ -7,7 +7,7 @@ import Mechanism from './pages/Mechanism';
 import PolicyPage from './pages/Policy';
 import ContactPage from './pages/Contact';
 import { PrivateRoute, PublicRoute } from './helpers/router';
-import SignInPage from './pages/SignIn';
+// import SignInPage from './pages/SignIn';
 import AdminLoginPage from './pages/Admin/Login';
 import FaceEnrollCallbackPage from './pages/Admin/FaceEnrollCallback';
 import FaceVerifyCallbackPage from './pages/Admin/FaceVerifyCallback';
@@ -188,7 +188,9 @@ function App() {
             </>
           }
         />
-        <Route path="/signin" element={<SignInPage />} />
+        {/* User login disabled: hide the sign-in page */}
+        {/* <Route path="/signin" element={<SignInPage />} /> */}
+        <Route path="/signin" element={<Navigate to="/home" replace />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin/face-enroll-callback" element={<FaceEnrollCallbackPage />} />
         <Route path="/admin/face-verify-callback" element={<FaceVerifyCallbackPage />} />

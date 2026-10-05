@@ -40,14 +40,9 @@ const Header = (props: {
             </span> */}
           </div>
 
+          {/* User login disabled: hide Login button
           {!userInfo && (
             <div className="font-medium hidden lg:flex text-black">
-              {/* <Link
-                to="/signup"
-                className="border rounded-3xl px-4 py-2 pr-10 bg-white"
-              >
-                Sign Up
-              </Link> */}
               <Link
                 to="/signin"
                 className="border rounded-3xl border-black px-4 py-2 text-white bg-black"
@@ -55,7 +50,7 @@ const Header = (props: {
                 Login
               </Link>
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="flex items-center gap-3 2xsm:gap-6">

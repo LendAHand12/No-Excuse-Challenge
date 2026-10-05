@@ -202,11 +202,12 @@ const AdminLoginPage: React.FC = () => {
               </svg>
               {t('signin.backToHomepage')}
             </Link>
+            {/* User login disabled
             <div className="text-center text-sm text-gray-500 mt-2">
               <Link to="/signin" className="hover:underline">
                 {t('User Login')}
               </Link>
-            </div>
+            </div> */}
           </form>
           <div className="lg:hidden w-full bg-black text-NoExcuseChallenge text-center py-2">
             © 2024, made with by <span className="font-bold">NoExcuseChallenge.</span>
