@@ -14,10 +14,16 @@ import { protectAdminRoute } from "../controllers/adminControllers.js";
 
 const router = express.Router();
 
-router.route("/hewe").post(claimHewe); // Token-based auth after face scan
+// User withdrawals disabled. Restore the commented routes to re-enable.
+const withdrawDisabled = (req, res) =>
+  res.status(403).json({ error: "Withdrawals are currently disabled" });
+router.route("/hewe").post(withdrawDisabled);
+router.route("/amc").post(withdrawDisabled);
+router.route("/usdt").post(withdrawDisabled);
+// router.route("/hewe").post(claimHewe); // Token-based auth after face scan
 // OLD: router.route("/hewe").post(protectRoute, claimHewe); // Direct withdrawal
-router.route("/amc").post(protectRoute, claimAmc);
-router.route("/usdt").post(claimUsdt);
+// router.route("/amc").post(protectRoute, claimAmc);
+// router.route("/usdt").post(claimUsdt);
 // router.route("/usdt").post(protectRoute, claimUsdt);
 router.route("/list").get(protectAdminRoute, getAllClaims);
 router.route("/export").post(protectAdminRoute, getAllClaimsForExport);

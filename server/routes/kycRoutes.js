@@ -8,8 +8,13 @@ const router = express.Router();
 
 router.route("/start").get(protectRoute, startKYC);
 router.route("/register").post(register);
-router.route("/claim").post(protectRoute, claimKYC);
-router.route("/claim-hewe").post(protectRoute, claimHeweKYC);
+// User withdrawals disabled. Restore the commented routes to re-enable.
+const withdrawDisabled = (req, res) =>
+  res.status(403).json({ error: "Withdrawals are currently disabled" });
+router.route("/claim").post(withdrawDisabled);
+router.route("/claim-hewe").post(withdrawDisabled);
+// router.route("/claim").post(protectRoute, claimKYC);
+// router.route("/claim-hewe").post(protectRoute, claimHeweKYC);
 router.route("/double").get(protectAdminRoute, getAllDoubleKyc);
 router.route("/checkKyc").post(protectAdminRoute, checkUserCompleteKyc);
 router.route("/move-system").post(protectRoute, moveSystemKyc);
