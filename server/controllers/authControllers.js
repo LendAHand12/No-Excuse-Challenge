@@ -353,6 +353,10 @@ const mailForPasswordReset = asyncHandler(async (req, res) => {
 });
 
 const authUser = asyncHandler(async (req, res) => {
+  // User login is temporarily disabled (admin login uses adminControllers).
+  // Remove this early return to re-enable user login.
+  return res.status(403).json({ error: "User login is currently disabled" });
+
   const { code, password } = req.body;
 
   let user = await User.findOne({
